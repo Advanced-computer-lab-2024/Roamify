@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 
-const Wallet_Schema=new mongoose.Schema({
+const walletSchema=new mongoose.Schema({
     availableBalance:{
         type:Number,
         Default:0
@@ -18,7 +18,7 @@ const Wallet_Schema=new mongoose.Schema({
 
 })
 
-const Tourist_Schema = new mongoose.Schema({
+const touristSchema = new mongoose.Schema({
     firstName:{
         type:String,
         required:true
@@ -65,14 +65,14 @@ const Tourist_Schema = new mongoose.Schema({
         default:'pending'
     },
     wallet:{
-        type:WalletSchema,
+        type:walletSchema,
         required:true
     }
 
 },{timestamps:true})
 
 
-const Wallet = mongoose.model('Wallet', WalletSchema);
-const Tourist = mongoose.model('Tourist', TouristSchema);
+const Wallet = mongoose.model('Wallet', walletSchema);
+const Tourist = mongoose.model('Tourist', touristSchema);
 module.exports = Wallet;
 module.exports = Tourist;

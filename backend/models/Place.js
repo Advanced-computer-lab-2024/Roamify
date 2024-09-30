@@ -2,22 +2,22 @@ const mongoose = require('mongoose')
 
 
 
-const Place=new mongoose.Schema({
-    Type:{
+const placeSchema=new mongoose.Schema({
+    type:{
         type:String,
         enum:['museum','historical_site']
     },
-    Name:{
+    name:{
         type:String,
         required:True
     },
-    Description:{
+    description:{
         type:String
     },
-    Pictures:{
+    pictures:{
         type:[String]
     },
-    Location:{
+    location:{
         latiude:{
             type:Number,
             //required:true

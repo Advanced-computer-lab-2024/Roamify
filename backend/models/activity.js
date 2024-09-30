@@ -1,19 +1,19 @@
 const mongoose = require('mongoose')
 
-const activity_Schema = new mongoose.Schema({
-    Name:{
+const activitySchema = new mongoose.Schema({
+    name:{
         type:String,
         required:true
     },
-    Date:{
+    date:{
         type:Date,
         required:true
     },
-    Time:{
+    time:{
         type:String,
         required:true
     },
-    Location:{
+    location:{
         latiude:{
             type:Number,
             //required:true
@@ -23,15 +23,15 @@ const activity_Schema = new mongoose.Schema({
             //required:true
         }
     },
-    Price:{
+    price:{
         type:Number,
         required:true
     },
-    Category:{
+    category:{
         type:String,
         required:true
     },
-    Tags:{
+    tags:{
         type:[String]
     },
     advertiserId:{

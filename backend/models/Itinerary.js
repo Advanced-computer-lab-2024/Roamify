@@ -1,20 +1,19 @@
 const mongoose = require('mongoose')
 
-
-const Itinerary_Schema = new mongoose.Schema({
+const itinerarySchema = new mongoose.Schema({
     tourGuideID:{
         type:String
     },
-    Activities:{
+    activities:{
         type:[string],
     },
-    Locations:{
+    locations:{
         type:[string]
     },
-    Language:{
+    language:{
         type:String
     },
-    Price:{
+    price:{
         type:Number,
         required:true
     },
