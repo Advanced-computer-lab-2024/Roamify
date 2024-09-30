@@ -12,12 +12,14 @@ const sellerSchema = new mongoose.schema({
     
     email:{
         type:String,
-        required:true
+        required:true,
+        unique: true,
 
     },
     userName:{
         type:String,
-        required:true
+        required:true,
+        unique: true,
 
     },
     password:{
@@ -27,6 +29,11 @@ const sellerSchema = new mongoose.schema({
     description:{
         type:String ,
         required:true
+    },
+    role:{
+        type:String,
+        enum: ['active', 'deactivated', 'pending'], 
+    default: 'pending'  
     }
 
 

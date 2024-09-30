@@ -12,12 +12,14 @@ const advertiserSchema = new mongoose.schema({
     
     email:{
         type:String,
-        required:true
+        required:true,
+        unique: true
 
     },
     userName:{
         type:String,
-        required:true
+        required:true,
+        unique: true,
 
     },
     password:{
@@ -35,6 +37,11 @@ const advertiserSchema = new mongoose.schema({
     companyProfile:{
         type:String,
         required:true
+    },
+    role:{
+        type:String,
+        enum: ['active', 'deactivated', 'pending'], 
+    default: 'pending'  
     }
 
 

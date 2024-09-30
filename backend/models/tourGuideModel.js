@@ -12,17 +12,19 @@ const tourGuideSchema = new mongoose.schema({
     
     email:{
         type:String,
-        required:true
+        required:true,
+        unique: true
 
     },
     userName:{
         type:String,
-        required:true
+        required:true,
+        unique: true,
 
     },
     password:{
         type:String,
-        required: true
+        required: true,
     },
     mobileNumber:{
         type:Number,
@@ -35,6 +37,11 @@ const tourGuideSchema = new mongoose.schema({
     previousWork:{
         type:String,
         required:true
+    },
+    role:{
+        type:String,
+        enum: ['active', 'deactivated', 'pending'], 
+    default: 'pending'  
     }
 
 
