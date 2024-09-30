@@ -1,7 +1,7 @@
 const express = require("express");
 const {
   addTourismGovernor,
-} = require("../controllers/tourismGovernorController");
+} = require("../controllers/adminController");
 const router = express.Router();
 
 router.post("/add-governor", addTourismGovernor);

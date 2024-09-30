@@ -1,7 +1,7 @@
 const express = require("express");
-const dotenv = require("dotenv");
+const dotenv = require("dotenv");  
 const connectDB = require("./config/db");
-const tourismGovernorRoutes = require("./routes/tourismGovernorRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 // Load environment variables
 dotenv.config();
@@ -15,7 +15,7 @@ const app = express();
 app.use(express.json()); // For parsing JSON bodies
 
 // Routes
-app.use("/api/tourism-governor", tourismGovernorRoutes);
+app.use("/api/tourism-governor", adminRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;
