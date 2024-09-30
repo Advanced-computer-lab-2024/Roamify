@@ -62,7 +62,7 @@ const touristSchema = new mongoose.Schema({
     status:{
         type:String,
         enum:['active', 'deleted'],
-        default:'pending'
+        default:'active'
     },
     wallet:{
         type:walletSchema,

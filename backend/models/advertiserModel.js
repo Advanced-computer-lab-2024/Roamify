@@ -42,14 +42,7 @@ const advertiserSchema = new mongoose.schema({
         type:String,
         enum: ['active', 'deactivated', 'pending'], 
     default: 'pending'  
-    },
-    role:{
-        type:String,
-        enum: ['advertiser', 'seller', 'tour guide'],   
-}
-
-
-
+    }
 });
 const advertiserModel = mongoose.model('advertiser', advertiserSchema);
 module.export = advertiserModel;

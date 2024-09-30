@@ -1,8 +1,7 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const connectDB = require('./config/db');
-//const userRoutes = require('./routes/etc');
-//const cors = require('cors');    //  --> For if the Backend and the Frontend are hosted on different domains.
+const express = require("express");
+const dotenv = require("dotenv");
+const connectDB = require("./config/db");
+const tourismGovernorRoutes = require("./routes/tourismGovernorRoutes");
 
 // Load environment variables
 dotenv.config();
@@ -13,14 +12,13 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(express.json());  // For parsing JSON bodies
-//app.use(cors());          // Enable CORS
+app.use(express.json()); // For parsing JSON bodies
 
 // Routes
-//app.use('/api/users', userRoutes);
+app.use("/api/tourism-governor", tourismGovernorRoutes);
 
 // Start the server
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

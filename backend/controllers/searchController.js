@@ -1,6 +1,6 @@
-const place=require('./models/Place');
-const activity =require('./models/activity');
-const itinerary=require('./models/itinerary');
+const place=require('../models/placeModel');
+const activity =require('../models/activityModel');
+const itinerary=require('../models/ItineraryModel');
 
 
 
