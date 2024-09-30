@@ -9,11 +9,7 @@ const Itinerary_Schema = new mongoose.Schema({
 })
 
 
-AudioParamMap(drop_downmenu:
-//seller
-//tour_guide
-//advrtiser 
 
 
 
-)
+
