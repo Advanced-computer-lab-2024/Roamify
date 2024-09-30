@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const tourGuideSchema = new mongoose.schema({
+const tourGuideSchema = new mongoose.Schema({
     firstName:{
         type: String,
         required:true
@@ -52,5 +52,5 @@ const tourGuideSchema = new mongoose.schema({
 
 
 });
-const tourGuideModel = mongoose.model('tourGuide', tourGuideSchema);
-module.export = tourGuideModel;
+const tourGuideModel = mongoose.Model('tourGuide', tourGuideSchema);
+module.exports = tourGuideModel;

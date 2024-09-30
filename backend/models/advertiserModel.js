@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const advertiserSchema = new mongoose.schema({
+const advertiserSchema = new mongoose.Schema({
     firstName:{
         type: String,
         required:true
@@ -51,5 +51,5 @@ const advertiserSchema = new mongoose.schema({
 
 
 });
-const advertiserModel = mongoose.model('advertiser', advertiserSchema);
-module.export = advertiserModel;
+const advertiserModel = mongoose.Model('advertiser', advertiserSchema);
+module.exports = advertiserModel;

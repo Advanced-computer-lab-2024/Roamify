@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const sellerSchema = new mongoose.schema({
+const sellerSchema = new mongoose.Schema({
     firstName:{
         type: String,
         required:true
@@ -43,5 +43,5 @@ const sellerSchema = new mongoose.schema({
 
 
 });
-const sellerModel = mongoose.model('seller', sellerSchema);
-module.export = sellerModel;
+const sellerModel = mongoose.Model('seller', sellerSchema);
+module.exports = sellerModel;
