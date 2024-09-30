@@ -1,28 +1,55 @@
 const mongoose = require('mongoose')
 
 const itinerarySchema = new mongoose.Schema({
-    tourGuideID:{
-        type:String
+    activities: {
+        type: [String],
     },
-    activities:{
-        type:[string],
+    locations: {
+        type: [String]
     },
-    locations:{
-        type:[string]
+    timeline: {
+        type: String
     },
-    language:{
-        type:String
+    duration: {
+        type: Number,
+        required: true,
+        validate: {
+            validator: function (v) {
+                // Validate time in "HH:MM" format using regex
+                return v>=0.5;
+            },
+            message: props => `${props.value} is not a valid time format! (Expected: HH:MM)`
+        },
     },
-    price:{
-        type:Number,
-        required:true
+    language: {
+        type: String,
+        required: true
     },
-    availableDates:{
-        type:[Date]
-    }
-    
-
-},{timestamps:true});
+    price: {
+        type: Number,
+        required: true
+    },
+    availableDates: {
+        type: [Date]
+    },
+    accessibility: {
+        type: String,
+        enum: ['WheelChair','None'],
+        required: true,
+        default: 'None'
+    },
+    pickUp: {
+        //google maps api
+    },
+    dropOff: {
+        //google maps api
+    },
+    tourGuide: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'tourGuide',
+        required: true
+    },
+}, { timestamps: true });
 
 const itinearyModel = mongoose.Model('itineary', itinerarySchema);
 module.exports = itinearyModel;

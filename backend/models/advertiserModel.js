@@ -1,55 +1,47 @@
 const mongoose = require('mongoose');
 
 const advertiserSchema = new mongoose.Schema({
-    firstName:{
+    email: {
         type: String,
-        required:true
-    },
-    lastName:{
-        type: String,
-        required: true
-    },
-    
-    email:{
-        type:String,
-        required:true,
+        required: true,
         unique: true
 
     },
-    userName:{
-        type:String,
-        required:true,
+    username: {
+        type: String,
+        required: true,
         unique: true,
 
     },
-    password:{
-        type:String,
+    password: {
+        type: String,
         required: true
     },
-    websiteLink:{
-        type:String,
-        required:true
+    firstName: {
+        type: String,
+        required: true
     },
-    hotline:{
-        type:Number,
-        required:true
+    lastName: {
+        type: String,
+        required: true
     },
-    companyProfile:{
-        type:String,
-        required:true
+    websiteLink: {
+        type: String,
+        required: true
     },
-    status:{
-        type:String,
-        enum: ['active', 'deactivated', 'pending'], 
-    default: 'pending'  
+    hotline: {
+        type: Number,
+        required: true
     },
-    role:{
-        type:String,
-        enum: ['advertiser', 'seller', 'tour guide'],   
-}
-
-
-
+    companyProfile: {
+        type: String,
+        required: true
+    },
+    status: {
+        type: String,
+        enum: ['active', 'deactivated', 'pending'],
+        default: 'pending'
+    },
 });
 const advertiserModel = mongoose.Model('advertiser', advertiserSchema);
 module.exports = advertiserModel;

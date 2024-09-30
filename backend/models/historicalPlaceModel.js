@@ -18,7 +18,7 @@ const historicalPlaceSchema = new mongoose.Schema({
         validate: {
             validator: function (v) {
                 // Validate time in "HH:MM" format using regex
-                return (/^([01]\d|2[0-3]):([0-5]\d)$/.test(v)) && (Array.isArray(v) && v.length ===2);
+                return (/^([01]\d|2[0-3]):([0-5]\d)$/.test(v)) && (Array.isArray(v) && v.length === 2);
             },
             message: props => `${props.value} is not a valid time format! (Expected: HH:MM)`
         },
@@ -28,13 +28,13 @@ const historicalPlaceSchema = new mongoose.Schema({
         type: [Number],
         validate: {
             validator: function (v) {
-                return Array.isArray(v) && v.length ===3;
+                return Array.isArray(v) && v.length === 3;
             },
             message: props => `${props.value} is not a valid price! It should be 3 prices for Foreigner, Native or Student.`
         },
         required: true
     },
-    tags : {
+    tags: {
         type: [String],
         required: false
     },

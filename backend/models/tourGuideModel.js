@@ -1,56 +1,47 @@
 const mongoose = require('mongoose');
 
 const tourGuideSchema = new mongoose.Schema({
-    firstName:{
+    email: {
         type: String,
-        required:true
-    },
-    lastName:{
-        type: String,
-        required: true
-    },
-    
-    email:{
-        type:String,
-        required:true,
+        required: true,
         unique: true
 
     },
-    userName:{
-        type:String,
-        required:true,
+    username: {
+        type: String,
+        required: true,
         unique: true,
 
     },
-    password:{
-        type:String,
+    password: {
+        type: String,
         required: true,
     },
-    mobileNumber:{
-        type:Number,
-        required:true
+    firstName: {
+        type: String,
+        required: true
     },
-    yearsOfExperience:{
-        type:Number,
-        required:true
+    lastName: {
+        type: String,
+        required: true
     },
-    previousWork:{
-        type:String,
-        required:true
+    mobileNumber: {
+        type: Number,
+        required: true
     },
-    status:{
-        type:String,
-        enum: ['active', 'deactivated', 'pending'], 
-    default: 'pending'  
+    yearsOfExperience: {
+        type: Number,
+        required: true
     },
-    role:{
-        type:String,
-        enum: ['advertiser', 'seller', 'tour guide'],   
-}
-
-
-
-
+    previousWork: {
+        type: String,
+        required: true
+    },
+    status: {
+        type: String,
+        enum: ['active', 'deactivated', 'pending'],
+        default: 'pending'
+    },
 });
 const tourGuideModel = mongoose.Model('tourGuide', tourGuideSchema);
 module.exports = tourGuideModel;

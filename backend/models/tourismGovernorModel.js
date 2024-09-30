@@ -15,5 +15,5 @@ const tourismGovernorSchema = new mongoose.Schema({
   timestamps: true  // Automatically adds createdAt and updatedAt fields
 });
 
-const tourismGovernorModel = mongoose.Model('tourismGovernor',tourismGovernorSchema);
+const tourismGovernorModel = mongoose.Model('tourismGovernor', tourismGovernorSchema);
 module.exports = tourismGovernorModel;

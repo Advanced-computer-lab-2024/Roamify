@@ -15,7 +15,6 @@ const activitySchema = new mongoose.Schema({
             },
             message: props => `${props.value} is not a valid time format! (Expected: HH:MM)`
         },
-        required: true
     },
     location: {
         //google maps api
@@ -30,23 +29,23 @@ const activitySchema = new mongoose.Schema({
         },
         required: true
     },
-    category : {
-        type : String,
-        enum : ['Concert','Sports','Tour','Theater', 'Workshop'] , //add more if you see fit
+    category: {
+        type: String,
+        enum: ['Concert', 'Sports', 'Tour', 'Theater', 'Workshop'], //add more if you see fit
         required: true
     },
-    tags : {
+    tags: {
         type: [String],
         required: false
     },
-    discounts : {
+    discounts: {
         type: {
             percentage: { type: Number, min: 0, max: 100 },
             amount: { type: Number, min: 0 }
         },
         required: false
     },
-    bookingAvailable : {
+    bookingAvailable: {
         type: Boolean,
         required: true,
         default: true
