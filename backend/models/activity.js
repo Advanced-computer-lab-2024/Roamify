@@ -1,0 +1,40 @@
+const mongoose = require('mongoose')
+
+const activity_Schema = new mongoose.Schema({
+    Name:{
+        type:String,
+        required:true
+    },
+    Date:{
+        type:Date,
+        required:true
+    },
+    Time:{
+        type:String,
+        required:true
+    },
+    Location:{
+        latiude:{
+            type:Number,
+            //required:true
+        },
+        longitude:{
+            type:Number,
+            //required:true
+        }
+    },
+    Price:{
+        type:Number,
+        required:true
+    },
+    Category:{
+        type:String,
+        required:true
+    },
+    Tags:{
+        type:[String]
+    },
+    advertiserId:{
+        type:String
+    }
+},{timestamps:true})

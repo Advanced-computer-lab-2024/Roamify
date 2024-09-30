@@ -3,12 +3,12 @@ const mongoose = require('mongoose')
 
 const Wallet_Schema=new mongoose.Schema({
     availableBalance:{
-        type:float,
+        type:Number,
         Default:0
         //required:true
     },
     totalSpent:{
-        type:float,
+        type:Number,
         Default:0
         //required:true
     },
@@ -29,11 +29,13 @@ const Tourist_Schema = new mongoose.Schema({
     },
     email :{
         type:String,
-        required:true
+        required:true,
+        unique: true
     },
     userName:{
         type:String,
-        required:true
+        required:true,
+        unique: true
     },
     password:{
         type:String,

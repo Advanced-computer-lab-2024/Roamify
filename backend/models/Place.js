@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 
 
-const Historical_Place=new mongoose.Schema({
+const Place=new mongoose.Schema({
     Type:{
         type:String,
         enum:['museum','historical_site']
@@ -15,35 +15,36 @@ const Historical_Place=new mongoose.Schema({
         type:String
     },
     Pictures:{
-        type:String
+        type:[String]
     },
     Location:{
         latiude:{
-            type:float,
-            required:true
+            type:Number,
+            //required:true
         },
         longitude:{
-            type:float,
-            required:true
+            type:Number,
+            //required:true
         }
     },
     ticketPrice:{
         Native:{
-            type:float
+            type:Number
         },
         foreigner:{
-            type:float
+            type:Number
         },
         student:{
-            type:float
+            type:Number
 
         }
     },
     governorId:{
+
         tag:{
-            type:String
+            type:[String]
         }
     }
 
 
-})
+},{timestamps:true})
