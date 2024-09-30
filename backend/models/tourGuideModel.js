@@ -38,7 +38,7 @@ const tourGuideSchema = new mongoose.schema({
         type:String,
         required:true
     },
-    role:{
+    status:{
         type:String,
         enum: ['active', 'deactivated', 'pending'], 
     default: 'pending'  
