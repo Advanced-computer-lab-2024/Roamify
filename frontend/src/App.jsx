@@ -1,18 +1,29 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import TourismGovernerPage from '../pages/TourismGovernerPage';
 
+import React from 'react';
+import ProductCard from './components/Cards/ProductCard.jsx';
 
-function App() {
-  const [count, setCount] = useState(0)
+const products = [
+    {
+        name: "Product 1",
+        description: "Museum souvenir..",
+        price: 29.99,
+        seller: "John Doe",
+        rating: 4.5,
+        imageUrl: "path-to-image",
+        reviews: [
+            { reviewer: "Jane", comment: "Amazing product!" },
+            { reviewer: "Alex", comment: "Pretty good for the price." }
+        ]
+    }
+];
 
-  return (
-    <div className="App">
-      <TourismGovernerPage />
-    </div>
-  );
-}
+const App = () => {
+    return (
+        <div>
+            <h1>Product List</h1>
+            <ProductCard product={products[0]} /> {/* Pass in product data here */}
+        </div>
+    );
+};
 
-export default App
+export default App;

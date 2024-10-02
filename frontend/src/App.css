@@ -1,8 +1,17 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #dbdad5; /* Replace with your preferred color */
+}
+
 #root {
   max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  margin: 0 ;
+  padding: 0;
   text-align: center;
+  background-color: #ffffff; 
+  height:100%
 }
 
 .logo {
