@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './AdvertiserProfile.css';
 
 const AdvertisorProfile = () => {
     // State to manage profile information
@@ -32,9 +33,9 @@ const AdvertisorProfile = () => {
 
     return (
         <div className="advertisor-profile">
-            <h1>Advertiser Company Profile</h1>
             {isEditing ? (
                 <div className="profile-form">
+                    <h1>Advertiser Company Profile</h1>
                     <label>
                         Company Name:
                         <input
