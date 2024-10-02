@@ -1,29 +1,16 @@
+import { useState } from 'react'
+import './App.css'
+import TourGuideProfile from './pages/TourGuideProfile.jsx';
 
-import React from 'react';
-import ProductCard from './components/Cards/ProductCard.jsx';
 
-const products = [
-    {
-        name: "Product 1",
-        description: "Museum souvenir..",
-        price: 29.99,
-        seller: "John Doe",
-        rating: 4.5,
-        imageUrl: "path-to-image",
-        reviews: [
-            { reviewer: "Jane", comment: "Amazing product!" },
-            { reviewer: "Alex", comment: "Pretty good for the price." }
-        ]
-    }
-];
+function App() {
+  const [count, setCount] = useState(0)
 
-const App = () => {
-    return (
-        <div>
-            <h1>Product List</h1>
-            <ProductCard product={products[0]} /> {/* Pass in product data here */}
-        </div>
-    );
-};
+  return (
+    <div className="App">
+      <TourGuideProfile />
+    </div>
+  );
+}
 
-export default App;
+export default App

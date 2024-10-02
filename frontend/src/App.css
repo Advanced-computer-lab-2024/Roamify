@@ -1,16 +1,18 @@
 html, body {
   height: 100%;
+  width:100%;
   margin: 0;
   padding: 0;
   background-color: #dbdad5; /* Replace with your preferred color */
 }
 
 #root {
-  max-width: 1280px;
+  width: 100%;
+  height: 100%;
   margin: 0 ;
   padding: 0;
   text-align: center;
-  background-color: #ffffff; 
+  background-color: #dbdad5; 
   height:100%
 }
 

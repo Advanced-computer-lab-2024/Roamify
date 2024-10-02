@@ -1,0 +1,89 @@
+/* Page styling */
+.tourism-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 100vh; /* Full height of the viewport */
+    background-color: #dbdad5; /* Make sure the background color is transparent */
+    padding: 20px;
+  }
+  
+  /* Form styling */
+  .form {
+    background-color: #dbdad5;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  .form input,
+  .form textarea {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #dbdad5;
+    color : black;
+  }
+  
+  .form textarea {
+    resize: vertical;
+  }
+  
+  .form .prices input {
+    width: calc(33.33% - 10px);
+    margin-right: 10px;
+  }
+  
+  .form .tag {
+    background-color: #4c6665;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 10px;
+    margin-right: 5px;
+  }
+  
+  .form button {
+    padding: 10px 20px;
+    background-color: #dbdad5;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .form button:hover {
+    background-color: #3b5250;
+  }
+  
+  /* Places list styling */
+  .places ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .places li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+  }
+  
+  .places button {
+    margin-right: 10px;
+    padding: 5px 10px;
+    background-color: #a25d5d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .places button:hover {
+    background-color: #783a3a;
+  }
+  
+  
