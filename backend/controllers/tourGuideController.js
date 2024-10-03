@@ -1,15 +1,17 @@
 
-const businessUserModel = require('../models/businessUserModel');
+const userModel = require('../models/userModel');
 const tourGuideModel = require('../models/tourGuideModel');
 
 const createProfile = async (req, res) => {
   //to be coded
   try{
     const userId = req.params.id;
-    const {mobileNumber,yearsOfExperience,previousWork} = req.body;
-    await businessUserModel.findByIdAndUpdate(userId,{status:'active'});
+    const {fName,lName,mobileNumber,yearsOfExperience,previousWork} = req.body;
+    await userModel.findByIdAndUpdate(userId,{status:'active'});
     const newTourGuide = new tourGuideModel({
         user:userId,
+        fName,
+        lName,
         mobileNumber,
         yearsOfExperience,
         previousWork
@@ -58,11 +60,11 @@ const updateProfile = async (req, res) => {
   
   const businessUserId = tourGuide.user._id;
   
-  if (fName) userUpdates.fName = fName; 
-  if (lName) userUpdates.lName = lName; 
+  if (fName) tourGuideUpdates.fName = fName; 
+  if (lName) tourGuideUpdates.lName = lName; 
   
   if (userName) {
-    const result = await businessUserModel.findOne({ userName: userName });
+    const result = await userModel.findOne({ userName: userName });
     if (result&&userName!=tourGuide.user.userName) {
       return res.status(400).json({ error: 'userName already exists' });
     } else {
@@ -71,7 +73,7 @@ const updateProfile = async (req, res) => {
   }
 
   if (email) {
-    const result = await businessUserModel.findOne({ email: email });
+    const result = await userModel.findOne({ email: email });
     if (result&&email!=tourGuide.user.email) {
         return res.status(400).json({ error: 'email already exists' });
       
@@ -88,7 +90,7 @@ const updateProfile = async (req, res) => {
   if (previousWork) tourGuideUpdates.previousWork = previousWork;
 
   try {
-    const updatedUser = await businessUserModel.findByIdAndUpdate(businessUserId, userUpdates, { new: true });
+    const updatedUser = await userModel.findByIdAndUpdate(businessUserId, userUpdates, { new: true });
     const updatedTourGuide = await tourGuideModel.findByIdAndUpdate(tourGuideId, tourGuideUpdates, { new: true });
 
     if (updatedUser || updatedTourGuide) {

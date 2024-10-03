@@ -1,10 +1,11 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
-const businessUserRoutes = require('./routes/businessUserRoutes');
+const userRoutes = require('./routes/userRoutes');
 const advertiserRoutes = require('./routes/advertiserRoutes');
 const tourGuideRoutes = require('./routes/tourGuideRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
+const touristRoutes = require('./routes/touristRoutes');
 //const userRoutes = require('./routes/etc');
 //const cors = require('cors');    //  --> For if the Backend and the Frontend are hosted on different domains.
 
@@ -27,10 +28,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 //app.use('/api/users', userRoutes);
-app.use( '/businessuser',businessUserRoutes);
+app.use( '/user',userRoutes);
 app.use('/advertiser',advertiserRoutes);
 app.use('/tourguide',tourGuideRoutes);
 app.use('/seller',sellerRoutes);
+app.use('/tourist',touristRoutes);
 
 // Start the servercreateBusinessUser
 const PORT = 3000;

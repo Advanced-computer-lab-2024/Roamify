@@ -1,11 +1,18 @@
 const mongoose = require('mongoose');
-const businessUser = require('./businessUserModel');
 
 const tourGuideSchema = new mongoose.Schema({
     user:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'businessUser',
+        ref:'user',
         unique:true
+      },
+      fName:{
+        type:String,
+        required:true
+      },
+      lName:{
+        type:String,
+        required:true
       },
     mobileNumber: {
         type: Number,

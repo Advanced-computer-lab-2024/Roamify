@@ -1,15 +1,7 @@
 const mongoose = require('mongoose');
 
-const bUserSchema = new mongoose.Schema({
-    fName:{
-        type:String,
-        required:true
-    },
-    lName:{
-        type:String,
-        required:true
+const userSchema = new mongoose.Schema({
 
-    },
     userName:{
         type:String,
         required:true,
@@ -32,11 +24,11 @@ const bUserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['seller', 'advertiser', 'tourGuide'],
+        enum: ['seller', 'advertiser', 'tourGuide','tourismGovernor','tourist'],
         default: 'pending'
     }
 
 },{timestamps:true});
 
-const bUSerModel = mongoose.model('businessUser',bUserSchema);
-module.exports = bUSerModel;
+const userModel = mongoose.model('user',userSchema);
+module.exports = userModel;

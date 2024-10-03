@@ -1,15 +1,17 @@
 const advertiserModel = require('../models/advertiserModel');
-const businessUserModel = require('../models/businessUserModel');
+const userModel = require('../models/userModel');
 const Activity = require('../models/activityModel');
 
 const createProfile = async (req, res) => {
   try{
     const userId = req.params.id;
    
-    const { websiteLink,hotline,companyProfile } = req.body;
-    await businessUserModel.findByIdAndUpdate(userId, { status: 'active' });
+    const { fName,lName,websiteLink,hotline,companyProfile } = req.body;
+    await userModel.findByIdAndUpdate(userId, { status: 'active' });
     const newAdvertiser = new advertiserModel({
         user: userId,
+        fName,
+        lName,
         websiteLink,
         hotline,
         companyProfile
@@ -58,11 +60,11 @@ const updateProfile = async (req, res) => {
   
   const businessUserId = advertiser.user._id;
   
-  if (fName) userUpdates.fName = fName; 
-  if (lName) userUpdates.lName = lName; 
+  if (fName) advertiserUpdates.fName = fName; 
+  if (lName) advertiserUpdates.lName = lName; 
   
   if (userName) {
-    const result = await businessUserModel.findOne({ userName: userName });
+    const result = await userModel.findOne({ userName: userName });
     if (result&&userName!=advertiser.user.userName) {
       return res.status(400).json({ error: 'userName already exists' });
     } else {
@@ -71,7 +73,7 @@ const updateProfile = async (req, res) => {
   }
 
   if (email) {
-    const result = await businessUserModel.findOne({ email: email });
+    const result = await userModel.findOne({ email: email });
     if (result&&email!=advertiser.user.email) {
         return res.status(400).json({ error: 'email already exists' });
       
@@ -88,7 +90,7 @@ const updateProfile = async (req, res) => {
   if (companyProfile) advertiserUpdates.companyProfile = companyProfile;
 
   try {
-    const updatedUser = await businessUserModel.findByIdAndUpdate(businessUserId, userUpdates, { new: true });
+    const updatedUser = await userModel.findByIdAndUpdate(businessUserId, userUpdates, { new: true });
     const updatedAdvertiser = await advertiserModel.findByIdAndUpdate(advertiserId, advertiserUpdates, { new: true });
 
     if (updatedUser || updatedAdvertiser) {

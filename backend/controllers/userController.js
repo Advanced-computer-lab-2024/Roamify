@@ -1,15 +1,15 @@
-const businessUserModel = require('../models/businessUserModel');
-
-const createBusinessUser = async (req, res) => {
+const userModel = require('../models/userModel');
+const createProfile = async (req, res) => {
     try {
-        const { fName, lName, userName, email, password, role } = req.body;
-        const newBUser = new BusinessUser({
-            fName,
-            lName,
+        const {   userName, email, password, role } = req.body;
+        const status = (role === 'tourist' || role === 'tourismGovernor') ? 'active' : 'pending';
+        const newBUser = new userModel({
+           
             userName,
             email,
             password,
-            role,
+            status,
+            role
         });
         await newBUser.save();
         
@@ -18,13 +18,13 @@ const createBusinessUser = async (req, res) => {
 
         res.status(201).json({ message: 'success', user: newBUser });
     } catch (e) {
-        res.status(404).json({ message: 'failed',error:e});
+        console.log(e);
     }
 };
 const getProfile = async (req,res)=>{
     try{
         const id = req.params.id;
-        const details = await businessUserModel.findById(id);
+        const details = await userModel.findById(id);
         if(details)
             res.status(200).json(details);
 
@@ -35,4 +35,4 @@ const getProfile = async (req,res)=>{
         res.status(400).json({message:'failed',error:e});
     }
 }
-module.exports = { createBusinessUser,getProfile }; 
+module.exports = { createProfile,getProfile }; 

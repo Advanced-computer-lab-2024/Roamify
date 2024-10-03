@@ -1,11 +1,19 @@
 const mongoose = require('mongoose');
-const businessUser = require('../models/businessUserModel');
+
 
 const advertiserSchema = new mongoose.Schema({
     user:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'businessUser',
+        ref:'user',
         unique:true
+      },
+      fName:{
+        type:String,
+        required:true
+      },
+      lName:{
+        type:String,
+        required:true
       },
     websiteLink: {
         type: String,
