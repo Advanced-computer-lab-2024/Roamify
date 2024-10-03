@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import "./TourismGovernerPage.css";
+import DeleteButton from '../components/Buttons/DeleteButton';
+import EditButton from '../components/Buttons/EditButton';
+import AddActivityButton from '../components/Buttons/AddActivityButton';
+import UpdateButton from '../components/Buttons/UpdateButton';
 
 const TourismGovernorPage = () => {
     const [places, setPlaces] = useState([]);
@@ -89,8 +93,8 @@ const TourismGovernorPage = () => {
 
     return (
         <div className="tourism-page">
-            <h1>Museums and Historical Places</h1>
             <div className="form">
+            <h1>Museums and Historical Places</h1>
                 <input type="text" name="name" placeholder="Name" value={currentPlace.name} onChange={handleInputChange} />
                 <textarea name="description" placeholder="Description" value={currentPlace.description} onChange={handleInputChange} />
                 <input type="file" accept="image/*" onChange={handleFileChange} />
@@ -120,14 +124,14 @@ const TourismGovernorPage = () => {
                 </div>
 
                 {isEditing ? (
-                    <button onClick={handleUpdatePlace}>Update Place</button>
+                    <UpdateButton onClick={handleUpdatePlace}></UpdateButton>
                 ) : (
-                    <button onClick={handleAddPlace}>Add Place</button>
+                    <AddActivityButton onClick={handleAddPlace}></AddActivityButton>
                 )}
             </div>
 
             <div className="places">
-                <h2>Places List</h2>
+                <h2>Places </h2>
                 {places.length === 0 ? <p>No places added yet.</p> : (
                     <ul>
                         {places.map((place, index) => (
@@ -140,8 +144,8 @@ const TourismGovernorPage = () => {
                                 <p>Prices: Foreigner: {place.prices.foreigner}, Native: {place.prices.native}, Student: {place.prices.student}</p>
                                 <p>Types: {place.types.join(', ')}</p>
                                 <p>Tags: {place.tags.join(', ')}</p>
-                                <button onClick={() => handleEditPlace(index)}>Edit</button>
-                                <button onClick={() => handleDeletePlace(index)}>Delete</button>
+                                <EditButton onClick={() => handleEditPlace(index)}></EditButton>
+                                <DeleteButton onClick={() => handleDeletePlace(index)}>Delete</DeleteButton>
                             </li>
                         ))}
                     </ul>
