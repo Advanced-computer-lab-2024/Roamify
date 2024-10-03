@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import "./AdvertiserPage.css";
 import DeleteButton from '../components/Buttons/DeleteButton';
 import EditButton from '../components/Buttons/EditButton';
+import AddActivityButton from '../components/Buttons/AddActivityButton';
+import UpdateButton from '../components/Buttons/UpdateButton';
 const AdvertisorPage = () => {
     // State to manage the list of activities
     const [activities, setActivities] = useState([]);
@@ -73,8 +75,8 @@ const AdvertisorPage = () => {
 
     return (
         <div className="advertisor-activities">
-            <h1>Manage Activities</h1>
             <div className="activity-form">
+               <h1>Manage Activities</h1>
                 <label>
                     Date:
                     <input
@@ -146,9 +148,9 @@ const AdvertisorPage = () => {
                 </label>
                 <br />
                 {isEditing ? (
-                    <button onClick={handleUpdateActivity}>Update Activity</button>
+                    <UpdateButton onClick={handleUpdateActivity}>Update Activity</UpdateButton>
                 ) : (
-                    <button onClick={handleAddActivity}>Add Activity</button>
+                    <AddActivityButton onClick={handleAddActivity}></AddActivityButton>
                 )}
             </div>
             <div className="activity-list">
@@ -166,8 +168,8 @@ const AdvertisorPage = () => {
                                 <p><strong>Category:</strong> {activity.category}</p>
                                 <p><strong>Tags:</strong> {activity.tags}</p>
                                 <p><strong>Special Discounts:</strong> {activity.specialDiscounts}</p>
-                                <EditButton onClick={() => handleEditActivity(index)}>Edit</EditButton>
-                                <DeleteButton onClick={() => handleDeleteActivity(index)}>Delete</DeleteButton>
+                                <EditButton onClick={() => handleEditActivity(index)}></EditButton>
+                                <DeleteButton onClick={() => handleDeleteActivity(index)}></DeleteButton>
                                 <hr />
                             </li>
                         ))}
