@@ -1,30 +1,12 @@
 const mongoose = require('mongoose');
+const businessUser = require('./businessUserModel');
 
 const tourGuideSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        required: true,
-        unique: true
-
-    },
-    username: {
-        type: String,
-        required: true,
-        unique: true,
-
-    },
-    password: {
-        type: String,
-        required: true,
-    },
-    firstName: {
-        type: String,
-        required: true
-    },
-    lastName: {
-        type: String,
-        required: true
-    },
+    user:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'businessUser',
+        unique:true
+      },
     mobileNumber: {
         type: Number,
         required: true
@@ -36,12 +18,8 @@ const tourGuideSchema = new mongoose.Schema({
     previousWork: {
         type: String,
         required: true
-    },
-    status: {
-        type: String,
-        enum: ['active', 'deactivated', 'pending'],
-        default: 'pending'
-    },
-});
-const tourGuideModel = mongoose.Model('tourGuide', tourGuideSchema);
+    }
+    
+},{timestamps:true});
+const tourGuideModel = mongoose.model('tourguide', tourGuideSchema);
 module.exports = tourGuideModel;

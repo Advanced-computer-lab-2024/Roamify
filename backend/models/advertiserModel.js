@@ -1,30 +1,12 @@
 const mongoose = require('mongoose');
+const businessUser = require('../models/businessUserModel');
 
 const advertiserSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        required: true,
-        unique: true
-
-    },
-    username: {
-        type: String,
-        required: true,
-        unique: true,
-
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    firstName: {
-        type: String,
-        required: true
-    },
-    lastName: {
-        type: String,
-        required: true
-    },
+    user:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'businessUser',
+        unique:true
+      },
     websiteLink: {
         type: String,
         required: true
@@ -36,12 +18,8 @@ const advertiserSchema = new mongoose.Schema({
     companyProfile: {
         type: String,
         required: true
-    },
-    status: {
-        type: String,
-        enum: ['active', 'deactivated', 'pending'],
-        default: 'pending'
-    },
-});
-const advertiserModel = mongoose.Model('advertiser', advertiserSchema);
+    }
+   
+},{timestamps:true});
+const advertiserModel = mongoose.model('advertiser', advertiserSchema);
 module.exports = advertiserModel;
