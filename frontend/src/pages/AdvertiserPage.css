@@ -1,0 +1,102 @@
+/* Main container for the activities management page */
+.advertisor-activities {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #dbdad5; /* Light neutral background */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for the main container */
+  }
+  
+  /* Heading styling */
+  h1 {
+    text-align: center;
+    color: #4c6665; /* Dark greenish color */
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+  
+  /* Activity form styling */
+  .activity-form {
+    background-color: #ffffff; /* White background for the form */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); /* Slight shadow for the form */
+    margin-bottom: 30px; /* Space below the form */
+  }
+  
+  /* Label styling */
+  .activity-form label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #4c6665; /* Dark greenish color for labels */
+  }
+  
+  /* Input and textarea styling */
+  .activity-form input[type="text"], .activity-form input[type="date"], .activity-form input[type="time"] {
+    width: 100%; /* Full width for input fields */
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #4c6665; /* Dark greenish border */
+    border-radius: 5px;
+    font-size: 1rem;
+    background-color: #dbdad5; /* Light neutral background for inputs */
+    color: #4c6665; /* Dark greenish text color */
+  }
+  
+  /* Button styling */
+  button {
+    background-color: #4c6665; /* Dark greenish button color */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-right: 10px; /* Space between buttons */
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #a26d5d; /* Dark red hover color */
+  }
+  
+  /* Activities list styling */
+  .activity-list {
+    background-color: #ffffff; /* White background for the list */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for the list */
+  }
+  
+  .activity-list h2 {
+    color: #4c6665; /* Dark greenish color */
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+  
+  .activity-list p {
+    margin: 10px 0;
+    font-size: 1.1rem;
+    color: #4c6665; /* Dark greenish color for text */
+  }
+  
+  /* Styling for the Google Maps location link */
+  .activity-list a {
+    color: #4c6665; /* Dark greenish color for links */
+    text-decoration: underline;
+  }
+  
+  .activity-list a:hover {
+    color: #a26d5d; /* Dark red hover effect */
+  }
+  
+  /* Line separator for activities */
+  hr {
+    border: 0;
+    height: 1px;
+    background-color: #dbdad5; /* Light neutral color for separator */
+    margin: 20px 0;
+  }
+  

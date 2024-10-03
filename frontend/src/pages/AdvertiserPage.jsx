@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-
+import "./AdvertiserPage.css";
+import DeleteButton from '../components/Buttons/DeleteButton';
+import EditButton from '../components/Buttons/EditButton';
 const AdvertisorPage = () => {
     // State to manage the list of activities
     const [activities, setActivities] = useState([]);
@@ -164,8 +166,8 @@ const AdvertisorPage = () => {
                                 <p><strong>Category:</strong> {activity.category}</p>
                                 <p><strong>Tags:</strong> {activity.tags}</p>
                                 <p><strong>Special Discounts:</strong> {activity.specialDiscounts}</p>
-                                <button onClick={() => handleEditActivity(index)}>Edit</button>
-                                <button onClick={() => handleDeleteActivity(index)}>Delete</button>
+                                <EditButton onClick={() => handleEditActivity(index)}>Edit</EditButton>
+                                <DeleteButton onClick={() => handleDeleteActivity(index)}>Delete</DeleteButton>
                                 <hr />
                             </li>
                         ))}

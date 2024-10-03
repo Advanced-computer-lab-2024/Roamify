@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import AdvertiserProfile from './pages/AdvertiserProfile.jsx';
+import AdvertiserPage from './pages/AdvertiserPage.jsx';
 
 
 function App() {
@@ -8,7 +8,7 @@ function App() {
 
   return (
     <div className="App">
-      <AdvertiserProfile />
+      <AdvertiserPage />
     </div>
   );
 }
