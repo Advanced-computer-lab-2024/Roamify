@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['seller', 'advertiser', 'tourGuide','tourismGovernor','tourist'],
+        enum: ['seller', 'advertiser', 'tourGuide','tourismGovernor','tourist','admin'],
         default: 'pending'
     }
 
