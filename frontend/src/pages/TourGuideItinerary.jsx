@@ -4,6 +4,7 @@ import AddButton from '../components/Buttons/AddButton';
 import UpdateButton from '../components/Buttons/UpdateButton';
 import EditButton from '../components/Buttons/EditButton';
 import DeleteButton from '../components/Buttons/DeleteButton';
+import axios from 'axios';
 const TourGuideItinerary = () => {
     // State to manage the list of itineraries
     const [itineraries, setItineraries] = useState([]);
@@ -21,12 +22,24 @@ const TourGuideItinerary = () => {
         pickupDropoff: '',
     });
 
-    // State to track bookings
-    const [bookings, setBookings] = useState({}); // { itineraryIndex: number of bookings }
-
     // State to track whether we are editing an existing itinerary
     const [isEditing, setIsEditing] = useState(false);
     const [editIndex, setEditIndex] = useState(null);
+
+    // Fetch itineraries from backend on component mount
+    useEffect(() => {
+        fetchItineraries();
+    }, []);
+
+    // Fetch all itineraries
+    const fetchItineraries = async () => {
+        try {
+            const response = await axios.get('/api/itineraries'); // Replace with your API endpoint
+            setItineraries(response.data);
+        } catch (error) {
+            console.error('Error fetching itineraries:', error);
+        }
+    };
 
     // Handle input changes
     const handleInputChange = (e) => {
@@ -35,29 +48,14 @@ const TourGuideItinerary = () => {
     };
 
     // Handle add itinerary
-    const handleAddItinerary = () => {
-        setItineraries([...itineraries, currentItinerary]);
-        setCurrentItinerary({
-            activities: '',
-            locations: '',
-            timeline: '',
-            duration: '',
-            language: '',
-            price: '',
-            availableDates: '',
-            accessibility: '',
-            pickupDropoff: '',
-        });
-    };
-
-    // Handle delete itinerary
-    const handleDeleteItinerary = (index) => {
-        if (bookings[index]) {
-            alert("Cannot delete this itinerary because bookings are already made.");
-            return;
+    const handleAddItinerary = async () => {
+        try {
+            const response = await axios.post('/api/itineraries', currentItinerary); // Replace with your API endpoint
+            setItineraries([...itineraries, response.data]);
+            resetItineraryForm();
+        } catch (error) {
+            console.error('Error adding itinerary:', error);
         }
-        const updatedItineraries = itineraries.filter((_, i) => i !== index);
-        setItineraries(updatedItineraries);
     };
 
     // Handle edit itinerary
@@ -68,11 +66,34 @@ const TourGuideItinerary = () => {
     };
 
     // Handle update itinerary
-    const handleUpdateItinerary = () => {
-        const updatedItineraries = [...itineraries];
-        updatedItineraries[editIndex] = currentItinerary;
-        setItineraries(updatedItineraries);
-        setIsEditing(false);
+    const handleUpdateItinerary = async () => {
+        try {
+            const itineraryId = itineraries[editIndex]._id; // Assuming itineraries have a unique _id
+            const response = await axios.put(`/api/itineraries/${itineraryId}`, currentItinerary); // Replace with your API endpoint
+            const updatedItineraries = [...itineraries];
+            updatedItineraries[editIndex] = response.data;
+            setItineraries(updatedItineraries);
+            resetItineraryForm();
+            setIsEditing(false);
+        } catch (error) {
+            console.error('Error updating itinerary:', error);
+        }
+    };
+
+    // Handle delete itinerary
+    const handleDeleteItinerary = async (index) => {
+        try {
+            const itineraryId = itineraries[index]._id; // Assuming itineraries have a unique _id
+            await axios.delete(`/api/itineraries/${itineraryId}`); // Replace with your API endpoint
+            const updatedItineraries = itineraries.filter((_, i) => i !== index);
+            setItineraries(updatedItineraries);
+        } catch (error) {
+            console.error('Error deleting itinerary:', error);
+        }
+    };
+
+    // Reset the itinerary form
+    const resetItineraryForm = () => {
         setCurrentItinerary({
             activities: '',
             locations: '',
