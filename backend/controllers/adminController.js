@@ -13,13 +13,11 @@ const addTourismGovernor = async (req, res) => {
       username,
     });
     const governorExistsByEmail = await TourismGovernor.findOne({ email });
-    if (governorExistsByEmail)
-    {
+    if (governorExistsByEmail) {
       return res.status(400).json({ message: "Email already exists" });
     }
-    if (governorExistsByUsername)
-    {
-       return res.status(400).json({ message: "Username already Exists" });
+    if (governorExistsByUsername) {
+      return res.status(400).json({ message: "Username already Exists" });
     }
     const newGovernor = new TourismGovernor({
       username,
@@ -74,34 +72,29 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-const User = require("../models/userModel");
+;
 
 const addAdmin = async (req, res) => {
-  const { userName, password } = req.body;
+  const { userName, password ,email} = req.body;
 
   try {
     const userExists = await User.findOne({ userName });
     if (userExists) {
-      return res.status(400).json({ message: "Username already exists" });
+      return res.status(400).json({ message: "Admin already exists" });
     }
 
     const newAdmin = new User({
       userName,
-      password,
       email,
-      role: "admin",
+      password,
       status: "active",
+      role: "admin",
     });
 
     await newAdmin.save();
 
     res.status(201).json({
       message: "New admin created successfully",
-      admin: {
-        id: newAdmin._id,
-        userName: newAdmin.userName,
-        role: newAdmin.role,
-      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

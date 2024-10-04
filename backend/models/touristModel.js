@@ -1,48 +1,26 @@
 const mongoose = require('mongoose')
 
 
-const walletSchema=new mongoose.Schema({
-    availableBalance:{
-        type:Number,
-        Default:0
-        //required:true
-    },
-    totalSpent:{
-        type:Number,
-        Default:0
-        //required:true
-    },
-    cardNumber:{
-        type:String
-    }
 
-})
 
 const touristSchema = new mongoose.Schema({
-    firstName:{
+ 
+    user:{
+        type:mongoose.Types.ObjectId,
+        ref:'user',
+        unique:true
+
+    },
+    fName:{
         type:String,
         required:true
     },
-    lastName:{
-        type:String,
-        required:true
-    },
-    email :{
-        type:String,
-        required:true,
-        unique: true
-    },
-    userName:{
-        type:String,
-        required:true,
-        unique: true
-    },
-    password:{
+    lName:{
         type:String,
         required:true
     },
     mobileNumber:{
-        type:String,
+        type:Number,
         required:true
 
     },
@@ -59,20 +37,15 @@ const touristSchema = new mongoose.Schema({
         enum: ['Student', 'Employee'],
         required: true
     },
-    status:{
-        type:String,
-        enum:['active', 'deleted'],
-        default:'active'
-    },
+   
     wallet:{
-        type:walletSchema,
-        required:true
+        type:mongoose.Types.ObjectId,
+        ref:'wallet'
     }
 
 },{timestamps:true})
 
 
-const Wallet = mongoose.model('Wallet', walletSchema);
-const Tourist = mongoose.model('Tourist', touristSchema);
-module.exports = Wallet;
-module.exports = Tourist;
+const touristModel = mongoose.model('Tourist', touristSchema);
+module.exports =
+    touristModel;

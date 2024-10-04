@@ -7,6 +7,6 @@ const {
 const router = express.Router();
 
 router.post("/add-governor", addTourismGovernor);
-router.post("/delete-account/:id", deleteUser);
-router.post("/create-admin", addAdmin);
+router.delete("/delete-account/:id", deleteUser);
+router.post("/add-admin", addAdmin);
 module.exports = router;

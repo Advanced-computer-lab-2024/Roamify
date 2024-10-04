@@ -1,24 +1,21 @@
 const express = require("express");
-const dotenv = require("dotenv");  
+const dotenv = require("dotenv");
 const connectDB = require("./config/db");
-const adminRoutes = require("./routes/adminRoutes");
+const adminRoutes = require("./routes/userRoutes");
+const userRoutes = require("./routes/adminRoutes");
+const productRoutes = require("./routes/productRoutes");
 
-// Load environment variables
 dotenv.config();
-
-// Connect to MongoDB
 connectDB();
-
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Middleware
-app.use(express.json()); // For parsing JSON bodies
+app.use("/admin", adminRoutes);
+app.use("/user", userRoutes);
+app.use("/product", productRoutes);
 
-// Routes
-app.use("/api/tourism-governor", adminRoutes);
-
-// Start the server
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
