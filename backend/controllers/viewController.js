@@ -11,7 +11,7 @@ const viewUpcoming=async(req,res) =>{
         const upcomingItineraries = await itinerary.find({
             availableDates: { $elemMatch: { $gte: today } }
           });
-        const upcomingPlaces=await place.find({ date: { $gte: today } }); //ana msh moktn3
+        const upcomingPlaces=await place.find({ date: { $gte: today } }); 
         const results={
             upcomingActivites,
             upcomingItineraries,

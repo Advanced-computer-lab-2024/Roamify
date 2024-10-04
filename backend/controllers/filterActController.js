@@ -19,26 +19,30 @@ const filterUpcomingActivites = async (req, res) => {
                 filter.date = { $gte: startOfDay, $lte: endOfDay };
             }
         } else {
-            
             filter.date = { $gte: today };
         }
 
-        
-        if (budget) {
-            filter.price = { $lte: Number(budget) };
-        }
-
        
-        if (category) {
-            filter.category = category;  
+        if (budget) {
+            const budgetValue = Number(budget);
+            if (!isNaN(budgetValue)) {
+                filter.price = { $lte: budgetValue };  
+            }
         }
+
+        if (category) {
+            filter.category = category;
+        }
+        if (rating) {
+            const ratingValue = Number(rating);
+            if (!isNaN(ratingValue)) {
+                filter.rating = { $gte: ratingValue };
+            }
+        }
+
+        console.log(filter);  
 
         
-        if (rating) {
-            filter.rating = { $gte: Number(rating) };  
-        }
-        console.log(filter);
-
         const upcomingActivites = await activity.find(filter);
 
         return res.status(200).json(upcomingActivites);

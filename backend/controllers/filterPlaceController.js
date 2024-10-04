@@ -8,10 +8,9 @@ const filterPlacesByTag = async (req, res) => {
         
         if (tag) {
             const tagsArray = tag.split(',').map(t => t.trim()); 
-            filter.Tag = { $in: tagsArray }; 
+            filter.tagPlace = { $in: tagsArray };  // Filter by 'tagPlace' field
         }
 
-        
         const places = await Place.find(filter);
         console.log(filter);
         console.log(places);
@@ -21,5 +20,6 @@ const filterPlacesByTag = async (req, res) => {
         return res.status(500).json({ message: 'Error occurred', error: error.message });
     }
 };
+
 
 module.exports = { filterPlacesByTag };
