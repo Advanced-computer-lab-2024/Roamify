@@ -1,3 +1,4 @@
+ const mongoose = require('mongoose');
 const walletSchema=new mongoose.Schema({
     availableBalance:{
         type:Number,
@@ -11,7 +12,11 @@ const walletSchema=new mongoose.Schema({
     },
     cardNumber:{
         type:String,
-        required:true
+        
+    },
+    cardValidUntil:{
+        type:Date,
+        
     }
 
 })
