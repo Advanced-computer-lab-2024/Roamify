@@ -4,6 +4,9 @@ import DeleteButton from '../components/Buttons/DeleteButton';
 import EditButton from '../components/Buttons/EditButton';
 import AddActivityButton from '../components/Buttons/AddActivityButton';
 import UpdateButton from '../components/Buttons/UpdateButton';
+
+const API_URL = "https://your-backend-api.com/activities"; // Replace with your actual API URL
+
 const AdvertisorPage = () => {
     // State to manage the list of activities
     const [activities, setActivities] = useState([]);
@@ -23,30 +26,58 @@ const AdvertisorPage = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editIndex, setEditIndex] = useState(null);
 
+    // Fetch activities from the API on component mount
+    useEffect(() => {
+        fetchActivities();
+    }, []);
+
+    // Fetch all activities from the backend API
+    const fetchActivities = async () => {
+        try {
+            const response = await fetch(`${API_URL}`);
+            const data = await response.json();
+            setActivities(data);
+        } catch (error) {
+            console.error('Error fetching activities:', error);
+        }
+    };
+
     // Handle input changes
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setCurrentActivity({ ...currentActivity, [name]: value });
     };
 
-    // Handle add activity
-    const handleAddActivity = () => {
-        setActivities([...activities, currentActivity]);
-        setCurrentActivity({
-            date: '',
-            time: '',
-            location: '',
-            price: '',
-            category: '',
-            tags: '',
-            specialDiscounts: '',
-        });
+    // Handle add activity (POST request to the backend)
+    const handleAddActivity = async () => {
+        try {
+            const response = await fetch(`${API_URL}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(currentActivity),
+            });
+            const newActivity = await response.json();
+            setActivities([...activities, newActivity]);
+            resetActivityForm();
+        } catch (error) {
+            console.error('Error adding activity:', error);
+        }
     };
 
-    // Handle delete activity
-    const handleDeleteActivity = (index) => {
-        const updatedActivities = activities.filter((_, i) => i !== index);
-        setActivities(updatedActivities);
+    // Handle delete activity (DELETE request to the backend)
+    const handleDeleteActivity = async (index) => {
+        const activityToDelete = activities[index];
+        try {
+            await fetch(`${API_URL}/${activityToDelete.id}`, {
+                method: 'DELETE',
+            });
+            const updatedActivities = activities.filter((_, i) => i !== index);
+            setActivities(updatedActivities);
+        } catch (error) {
+            console.error('Error deleting activity:', error);
+        }
     };
 
     // Handle edit activity
@@ -56,12 +87,29 @@ const AdvertisorPage = () => {
         setCurrentActivity(activities[index]);
     };
 
-    // Handle update activity
-    const handleUpdateActivity = () => {
-        const updatedActivities = [...activities];
-        updatedActivities[editIndex] = currentActivity;
-        setActivities(updatedActivities);
-        setIsEditing(false);
+    // Handle update activity (PUT request to the backend)
+    const handleUpdateActivity = async () => {
+        const activityToUpdate = activities[editIndex];
+        try {
+            const response = await fetch(`${API_URL}/${activityToUpdate.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(currentActivity),
+            });
+            const updatedActivity = await response.json();
+            const updatedActivities = [...activities];
+            updatedActivities[editIndex] = updatedActivity;
+            setActivities(updatedActivities);
+            resetActivityForm();
+        } catch (error) {
+            console.error('Error updating activity:', error);
+        }
+    };
+
+    // Reset the form after adding or updating
+    const resetActivityForm = () => {
         setCurrentActivity({
             date: '',
             time: '',
@@ -71,6 +119,8 @@ const AdvertisorPage = () => {
             tags: '',
             specialDiscounts: '',
         });
+        setIsEditing(false);
+        setEditIndex(null);
     };
 
     return (

@@ -1,0 +1,127 @@
+/* Main container for the itinerary management page */
+.tour-guide-itinerary {
+    display: flex; /* Align the form and itineraries list side by side */
+    justify-content: space-between;
+    gap: 20px; /* Space between form and itineraries list */
+    max-width: 1300px; /* Set a max width for the container */
+    margin: 0 auto; /* Center the entire container */
+    padding: 20px;
+    background-color: #dbdad5; /* Light neutral background */
+    box-sizing: border-box;
+    height: 100vh; /* Full height to match the viewport */
+  }
+  
+  /* Heading styling */
+  .tour-guide-itinerary h1 {
+    color: #4c6665; /* Dark greenish color */
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-align: center;
+    width: 100%;
+  }
+  
+  /* Itinerary form styling */
+  .itinerary-form {
+    background-color: #dbdad5; /* Same background color to blend with the page */
+    padding: 20px;
+    width: 45%; /* Adjust the width to make space for the itineraries list */
+    border-radius: 8px;
+    box-shadow: none; /* Remove shadow if not needed */
+    text-align: left;
+    border: 1px solid #4c6665; /* Border for form */
+    box-sizing: border-box;
+  }
+  
+  /* Input field and label styling */
+  .itinerary-form label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #4c6665; /* Dark greenish color for labels */
+  }
+  
+  .itinerary-form input[type="text"] {
+    width: 100%; /* Full width for input fields */
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #4c6665; /* Dark greenish border */
+    border-radius: 5px;
+    font-size: 1rem;
+    background-color: #ffffff; /* White background for input fields */
+    color: #4c6665; /* Dark greenish text color */
+  }
+  
+  /* Button styling */
+  button {
+    background-color: #4c6665; /* Dark greenish button color */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-right: 10px; /* Space between buttons */
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #a26d5d; /* Dark red hover color */
+  }
+  
+  /* Itinerary list styling */
+  .itinerary-list {
+    background-color: #dbdad5; /* Same background color as the page */
+    padding: 20px;
+    width: 50%; /* Adjust the width to align next to the form */
+    border-radius: 8px;
+    box-shadow: none; /* Remove shadow if not needed */
+    border: 1px solid #4c6665; /* Border for the itinerary list */
+  }
+  
+  /* Itinerary list headings */
+  .itinerary-list h2 {
+    color: #4c6665; /* Dark greenish color */
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  /* Itinerary list items */
+  .itinerary-list ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .itinerary-list li {
+    background-color: #ffffff; /* Light background for each itinerary */
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #4c6665; /* Border around each itinerary */
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+  }
+  
+  /* Strong text inside list items */
+  .itinerary-list li strong {
+    font-size: 1.2rem;
+    color: #4c6665; /* Dark greenish color */
+  }
+  
+  /* Place buttons */
+  .itinerary-list button {
+    margin-top: 10px;
+    background-color: #a26d5d;
+  }
+  
+  .itinerary-list button:hover {
+    background-color: #4c6665; /* Dark greenish hover */
+  }
+  
+  /* Horizontal line between itineraries */
+  .itinerary-list hr {
+    border: 0;
+    height: 1px;
+    background-color: #dbdad5; /* Light neutral color for separator */
+    margin: 20px 0;
+  }
+  

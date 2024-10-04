@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './TourGuideItinerary.css';
 
 const TourGuideItinerary = () => {
     // State to manage the list of itineraries
@@ -84,9 +85,9 @@ const TourGuideItinerary = () => {
 
     return (
         <div className="tour-guide-itinerary">
-            <h1>Manage Itineraries</h1>
             <div className="itinerary-form">
                 <label>
+                <h1>Manage Itineraries</h1>
                     Activities:
                     <input
                         type="text"

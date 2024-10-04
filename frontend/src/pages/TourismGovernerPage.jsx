@@ -5,6 +5,8 @@ import EditButton from '../components/Buttons/EditButton';
 import AddActivityButton from '../components/Buttons/AddActivityButton';
 import UpdateButton from '../components/Buttons/UpdateButton';
 
+const API_URL = "https://your-backend-api.com/places"; // Replace with your actual API URL
+
 const TourismGovernorPage = () => {
     const [places, setPlaces] = useState([]);
     const [currentPlace, setCurrentPlace] = useState({
@@ -23,6 +25,25 @@ const TourismGovernorPage = () => {
 
     const placeTypes = ['Monuments', 'Museums', 'Religious Sites', 'Palaces/Castles'];
 
+    // Fetch places when component mounts
+    useEffect(() => {
+        fetchPlaces();
+    }, []);
+
+    // Fetch existing places from the backend
+    const fetchPlaces = async () => {
+        try {
+            const response = await fetch(`${API_URL}`);
+            const data = await response.json();
+            if (data) {
+                setPlaces(data); // Load places from backend
+            }
+        } catch (error) {
+            console.error('Error fetching places:', error);
+        }
+    };
+
+    // Handle input changes
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         if (['foreigner', 'native', 'student'].includes(name)) {
@@ -35,10 +56,12 @@ const TourismGovernorPage = () => {
         }
     };
 
+    // Handle file change for image upload
     const handleFileChange = (e) => {
         setCurrentPlace({ ...currentPlace, picture: e.target.files[0] });
     };
 
+    // Handle place type changes
     const handleTypeChange = (type) => {
         setCurrentPlace({
             ...currentPlace,
@@ -48,6 +71,7 @@ const TourismGovernorPage = () => {
         });
     };
 
+    // Handle tag addition
     const handleTagAdd = (e) => {
         if (e.key === 'Enter' && e.target.value.trim() !== '') {
             setCurrentPlace({ ...currentPlace, tags: [...currentPlace.tags, e.target.value.trim()] });
@@ -55,29 +79,85 @@ const TourismGovernorPage = () => {
         }
     };
 
-    const handleAddPlace = () => {
-        setPlaces([...places, currentPlace]);
-        resetPlaceForm();
+    // Add a new place to the backend
+    const handleAddPlace = async () => {
+        try {
+            const formData = new FormData();
+            formData.append('name', currentPlace.name);
+            formData.append('description', currentPlace.description);
+            formData.append('picture', currentPlace.picture);
+            formData.append('location', currentPlace.location);
+            formData.append('hours', currentPlace.hours);
+            formData.append('prices', JSON.stringify(currentPlace.prices));
+            formData.append('types', currentPlace.types.join(','));
+            formData.append('tags', currentPlace.tags.join(','));
+
+            const response = await fetch(`${API_URL}`, {
+                method: 'POST',
+                body: formData,
+            });
+            if (response.ok) {
+                const newPlace = await response.json();
+                setPlaces([...places, newPlace]); // Add new place to the list
+                resetPlaceForm();
+            }
+        } catch (error) {
+            console.error('Error adding place:', error);
+        }
     };
 
+    // Edit an existing place
     const handleEditPlace = (index) => {
         setIsEditing(true);
         setEditIndex(index);
         setCurrentPlace(places[index]);
     };
 
-    const handleUpdatePlace = () => {
-        const updatedPlaces = [...places];
-        updatedPlaces[editIndex] = currentPlace;
-        setPlaces(updatedPlaces);
-        setIsEditing(false);
-        resetPlaceForm();
+    // Update a place in the backend
+    const handleUpdatePlace = async () => {
+        try {
+            const formData = new FormData();
+            formData.append('name', currentPlace.name);
+            formData.append('description', currentPlace.description);
+            formData.append('picture', currentPlace.picture);
+            formData.append('location', currentPlace.location);
+            formData.append('hours', currentPlace.hours);
+            formData.append('prices', JSON.stringify(currentPlace.prices));
+            formData.append('types', currentPlace.types.join(','));
+            formData.append('tags', currentPlace.tags.join(','));
+
+            const response = await fetch(`${API_URL}/${places[editIndex].id}`, {
+                method: 'PUT',
+                body: formData,
+            });
+            if (response.ok) {
+                const updatedPlace = await response.json();
+                const updatedPlaces = [...places];
+                updatedPlaces[editIndex] = updatedPlace; // Update place in state
+                setPlaces(updatedPlaces);
+                setIsEditing(false);
+                resetPlaceForm();
+            }
+        } catch (error) {
+            console.error('Error updating place:', error);
+        }
     };
 
-    const handleDeletePlace = (index) => {
-        setPlaces(places.filter((_, i) => i !== index));
+    // Delete a place from the backend
+    const handleDeletePlace = async (index) => {
+        try {
+            const response = await fetch(`${API_URL}/${places[index].id}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                setPlaces(places.filter((_, i) => i !== index)); // Remove place from list
+            }
+        } catch (error) {
+            console.error('Error deleting place:', error);
+        }
     };
 
+    // Reset the place form
     const resetPlaceForm = () => {
         setCurrentPlace({
             name: '',

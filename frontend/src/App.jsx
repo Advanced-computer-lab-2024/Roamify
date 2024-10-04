@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import TourismGovernerPage from './pages/TourismGovernerPage.jsx';
+import TourGuideItinerary from './pages/TourGuideItinerary.jsx';
 
 
 function App() {
@@ -8,7 +8,7 @@ function App() {
 
   return (
     <div className="App">
-      <TourismGovernerPage />
+      <TourGuideItinerary />
     </div>
   );
 }
