@@ -208,7 +208,7 @@ const TourGuideItinerary = () => {
                 )}
             </div>
             <div className="itinerary-list">
-                <h2>Itineraries </h2>
+                <h2>Itineraries List</h2>
                 {itineraries.length === 0 ? (
                     <p>No itineraries added yet.</p>
                 ) : (
