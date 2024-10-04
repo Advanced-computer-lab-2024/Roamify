@@ -16,7 +16,6 @@ const createProfile = async (req, res) => {
     const { fName, lName, mobileNumber, yearsOfExperience, previousWork } = req.body;
     await userModel.findByIdAndUpdate(userId, { status: 'active' });
     const newTourGuide = new tourGuideModel({
-      user: userId,
       fName,
       lName,
       mobileNumber,

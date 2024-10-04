@@ -17,7 +17,6 @@ const createProfile = async (req, res) => {
     const { fName, lName, websiteLink, hotline, companyProfile } = req.body;
     await userModel.findByIdAndUpdate(userId, { status: 'active' });
     const newAdvertiser = new advertiserModel({
-      user: userId,
       fName,
       lName,
       websiteLink,

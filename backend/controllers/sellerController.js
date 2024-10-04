@@ -15,7 +15,6 @@ const createProfile = async (req, res) => {
         const { fName, lName, description } = req.body;
         await userModel.findByIdAndUpdate(userId, { status: 'active' });
         const newSeller = new sellerModel({
-            user: userId,
             fName,
             lName,
             description
