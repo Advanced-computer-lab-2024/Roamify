@@ -1,0 +1,32 @@
+/* styles.css */
+.product-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.product-card {
+    border: 1px solid #ddd;
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.product-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.reviews {
+    margin-top: 10px;
+}
+
+.review {
+    background: #a26d5d;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 5px;
+}

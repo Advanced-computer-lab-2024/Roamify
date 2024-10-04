@@ -1,0 +1,137 @@
+button {
+    background-color: #4c6665;
+    color: white;
+    border: none;
+    cursor: pointer;
+    height: 45px;
+    width: 100px;
+    align-items: center;
+    display: inline-flex;
+    justify-content: center;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    outline: none;
+    font-size: 20px;
+}
+
+.button:hover {
+    background-color: #4c6665;
+}
+
+button:focus {
+    outline: none;
+}
+
+.image-button {
+    background-color: #ffffff;
+    border: 1px solid #989898;
+    color: white;
+}
+
+.image-button:hover {
+    background-color: #D1D1D1; /* Darker green */
+}
+
+.backImg{
+    width: 30px; /* Adjust the width and height of the image as needed */
+}
+
+
+.loginButton , .signupButton  {
+    background-color: #a25d5d; /* Default background color */
+    color: white; /* Default text color */
+    height: 30px;
+    border-radius: 15px;
+    font-size: 16px;
+    margin: 10px;
+    border: none; /* Optional: Remove the default border */
+    cursor: pointer; /* Change cursor to pointer */
+}
+.loginButton:hover {
+    background-color: #a25d5d; 
+}
+
+
+.accept, .reject {
+    height: 30px;
+    border-radius: 15px;
+    font-size: 16px;
+    margin: 5px;
+    background-color: #a26d5d; /* Default background color */
+    color: white; /* Default text color */
+    border: none; /* Remove default border */
+    cursor: pointer; /* Change cursor to pointer */
+}
+
+/* Hover effect for the .accept button */
+.accept:hover {
+    background-color: #a26d5d; /* Darker background color on hover */
+}
+
+.signupButton{
+    font-Size: 15px;
+    background-Color: #a26d5d;
+    border: 2 px saddlebrown;
+}
+
+.signupButton:hover {
+    background-color: #4c6665;
+}
+
+.delete-button {
+    background-color: transparent;
+    background-color: #a26d5d;
+    border: 2px ;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    height: 30px;
+    border-radius: 15px;
+    font-size: 16px;
+    margin: 5px;
+}
+
+.delete-button:hover {
+    background-color: #a26d5d;
+    color: white;
+}
+/* Styling for the View Button */
+.view-button {
+    background-color: #4c6665; /* Default background color */
+    color: white; /* Default text color */
+    border: none; /* Remove default border */
+    height: 40px;
+    border-radius: 15px; /* Rounded corners */
+    font-size: 16px; /* Font size */
+    margin: 10px; /* Margin around the button */
+    padding: 10px 20px; /* Padding inside the button */
+    cursor: pointer; /* Change cursor to pointer on hover */
+    display: inline-flex; /* Align items horizontally */
+    align-items: center; /* Center the content vertically */
+    gap: 10px; /* Space between text and image */
+    transition: background-color 0.3s ease; /* Smooth transition for background */
+}
+
+.view-button:hover {
+    background-color: #3b5250; /* Darker color on hover */
+}
+
+/* Styling for the arrow inside the button */
+.arrow-in-button {
+    width: 20px; /* Set the size of the arrow image */
+    height: 20px;
+}
+.edit {
+    height: 30px;
+    border-radius: 15px;
+    font-size: 16px;
+    margin: 5px;
+    background-color: #a26d5d; /* Default background color */
+    color: white; /* Default text color */
+    border: none; /* Remove default border */
+    cursor: pointer; /* Change cursor to pointer */
+}
+
+/* Hover effect for the .accept button */
+.edit:hover {
+    background-color: #a26d5d; /* Darker background color on hover */
+}
