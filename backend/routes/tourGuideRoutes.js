@@ -3,9 +3,9 @@ const tourGuideController = require('../controllers/tourGuideController');
 
 const router = express.Router();
 
-router.post('/createprofile/:id',tourGuideController.createProfile)
-router.get('/getprofile/:id', tourGuideController.getProfile);
- router.put('/updateprofile/:id', tourGuideController.updateProfile);
+router.post('/create-profile/:id',tourGuideController.createProfile)
+router.get('/get-profile/:id', tourGuideController.getProfile);
+ router.put('/update-profile/:id', tourGuideController.updateProfile);
 // router.post('/create/itineary', tourGuideController.createItineary);
 // router.get('/:id', tourGuideController.getItineary);
 // router.put('/update/:id', tourGuideController.updateItineary);

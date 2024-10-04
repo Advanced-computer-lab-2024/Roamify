@@ -1,12 +1,9 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
-const userRoutes = require("./routes/userRoutes");
-const advertiserRoutes = require("./routes/advertiserRoutes");
-const tourGuideRoutes = require("./routes/tourGuideRoutes");
-const sellerRoutes = require("./routes/sellerRoutes");
-const touristRoutes = require("./routes/touristRoutes");
-const adminRoutes = require("./routes/adminRoutes");
+const adminRoutes = require("./routes/userRoutes");
+const userRoutes = require("./routes/adminRoutes");
+const productRoutes = require("./routes/productRoutes");
 
 dotenv.config();
 connectDB();
@@ -15,6 +12,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/admin", adminRoutes);
+app.use("/user", userRoutes);
+app.use("/product", productRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => {

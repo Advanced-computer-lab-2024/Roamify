@@ -1,5 +1,5 @@
 const userModel = require("../models/userModel");
-const createProfile = async (req, res) => {
+const createUser = async (req, res) => {
   try {
     const { userName, email, password, role } = req.body;
     const status =
@@ -27,4 +27,4 @@ const getProfile = async (req, res) => {
     res.status(400).json({ message: "failed", error: e });
   }
 };
-module.exports = { createProfile, getProfile };
+module.exports = { createUser, getProfile };

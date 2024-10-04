@@ -95,11 +95,6 @@ const addAdmin = async (req, res) => {
 
     res.status(201).json({
       message: "New admin created successfully",
-      admin: {
-        id: newAdmin._id,
-        userName: newAdmin.userName,
-        role: newAdmin.role,
-      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

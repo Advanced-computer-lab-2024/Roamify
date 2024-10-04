@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
-MONGO_URI = 'mongodb+srv://netninja:test1234@nodetuts.pd4zq.mongodb.net/roamify'
-
+MONGO_URI = "mongodb+srv://mohamedelquesni:O12NZAtmcCAnCzgN@roamifycluster.ysomb.mongodb.net/testingDB?retryWrites=true&w=majority&appName=RoamifyCluster";
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(MONGO_URI);

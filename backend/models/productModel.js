@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
+  picture: {
+    type: String,
+  },
   sellerId: {
     type: String,
   },
@@ -27,3 +30,6 @@ const productSchema = new mongoose.Schema({
     type: Number,
   },
 });
+
+const productModel = mongoose.model("product", productSchema);
+module.exports = productModel;
