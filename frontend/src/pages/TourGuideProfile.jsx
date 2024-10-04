@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './TourGuideProfile.css';
 
+const API_URL = "https://your-backend-api.com/tour-guide-profile"; // Replace with your actual API URL
+
 const TourGuideProfile = () => {
   // State to manage tour guide's profile information
   const [profile, setProfile] = useState({
@@ -14,21 +16,23 @@ const TourGuideProfile = () => {
   // State to manage edit mode
   const [isEditing, setIsEditing] = useState(false);
 
-  // Simulate fetching profile data from an API
+  // Fetch profile data from the backend when the component mounts
   useEffect(() => {
-    // Fetch existing profile data from backend (you would use an actual API call here)
-    const fetchProfile = async () => {
-      const mockProfile = {
-        name: 'John Doe',
-        mobile: '123-456-7890',
-        yearsOfExperience: '5',
-        previousWork: 'Worked at XYZ Tours',
-        bio: 'I am an experienced tour guide with a passion for history.',
-      };
-      setProfile(mockProfile);
-    };
     fetchProfile();
   }, []);
+
+  // Fetch the tour guide profile from the backend
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch(`${API_URL}/1`); // Replace '1' with the actual tour guide's ID or use auth token
+      const data = await response.json();
+      if (data) {
+        setProfile(data); // Update profile state with fetched data
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -36,12 +40,27 @@ const TourGuideProfile = () => {
     setProfile({ ...profile, [name]: value });
   };
 
-  // Handle profile update
-  const handleUpdateProfile = () => {
+  // Handle profile update and send it to the backend
+  const handleUpdateProfile = async () => {
     setIsEditing(false);
-    // You would send the updated profile to the backend here (via API call)
-    console.log('Updated profile:', profile);
+    try {
+      const response = await fetch(`${API_URL}/1`, {  // Replace '1' with the actual tour guide's ID or use auth token
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profile),
+      });
+      if (response.ok) {
+        const updatedProfile = await response.json();
+        setProfile(updatedProfile); // Update the profile in state with the response from the backend
+        console.log('Profile updated:', updatedProfile);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
   };
+
 
   return (
     <div className="profile-page">
