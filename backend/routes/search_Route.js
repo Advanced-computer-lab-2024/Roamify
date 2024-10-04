@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { search } = require('./controllers/Search_Controller');
-router.get('/search', search);
+const { searchPlaceActivityItinerary } = require('../controllers/searchController.js');
+router.get('/search', searchPlaceActivityItinerary);
 
 module.exports = router;

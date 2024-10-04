@@ -1,42 +1,48 @@
-const place=require('./models/Place');
-const activity =require('./models/activity');
-const itinerary=require('./models/itinerary');
+const place = require('../models/placeModel.js');
+const itinerary = require('../models/ItineraryModel.js');
+const activity =require('../models/activityModel.js');
 
 
-
-const search = async (req, res) => {
-    try {
+const searchPlaceActivityItinerary = async (req, res) => {
+  try {
       const { query, type } = req.query;
-  
-      
-      const searchFilter = {
-        $or: [
-          { name: new RegExp(query, 'i') },       // Case-insensitive name search
-          { category: new RegExp(query, 'i') },   // Case-insensitive category search
-          { tags: new RegExp(query, 'i') }        // Case-insensitive tag search
-        ]
-      };
-      let results;
-      switch(type){
-        case 'place':
-            results=await place.find(searchFilter);
-        break;
-        case 'activity':
-        results=await activity.find(searchFilter);
-        break;
-        case 'itinerary':
-        results=await itinerary.find(searchFilter);
-        break;
-        default:
-            return res.status(400).json({message:'Invalid type '});
 
+
+      if (!query || !type) {
+          return res.status(400).json({ message: 'Query and type are required' });
       }
+
+      const typeNormalized = type.trim().toLowerCase();
+
+      const searchFilter = {
+          $or: [
+              { name: new RegExp(query, 'i') },
+              { category: new RegExp(query, 'i') },
+              { tags: new RegExp(query, 'i') }
+          ]
+      };
+
+      let results;
+      switch (typeNormalized) {
+          case 'place':
+              results = await place.find(searchFilter);
+              break;
+          case 'activity':
+              results = await activity.find(searchFilter);
+              break;
+          case 'itinerary':
+              results = await itinerary.find(searchFilter);
+              break;
+          default:
+              return res.status(400).json({ message: 'Invalid type' });
+      }
+
       return res.status(200).json(results);
-    }catch(error){
-        return res.status(500).json({message:'Error Occured',error});
-    }
+  } catch (error) {
+      console.error('Error during search:', error);
+      return res.status(500).json({ message: 'Error occurred', error });
+  }
+};
 
 
-    };
-
-module.exports={search};
+module.exports={searchPlaceActivityItinerary};

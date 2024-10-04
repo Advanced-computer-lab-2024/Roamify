@@ -1,40 +1,46 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const activitySchema = new mongoose.Schema({
-    name:{
-        type:String,
-        required:true
+    name: {
+        type: String,
+        required: true
     },
-    date:{
-        type:Date,
-        required:true
+    date: {
+        type: Date,
+        required: true
     },
-    time:{
-        type:String,
-        required:true
+    time: {
+        type: String,
+        required: true
     },
-    location:{
-        latiude:{
-            type:Number,
-            //required:true
+    location: {
+        latitude: {  // Correct the typo here
+            type: Number,
+            required: true
         },
-        longitude:{
-            type:Number,
-            //required:true
+        longitude: {
+            type: Number,
+            required: true
         }
     },
-    price:{
-        type:Number,
-        required:true
+    price: {
+        type: Number,
+        required: true
     },
-    category:{
-        type:String,
-        required:true
+    category: {
+        type: String,
+        required: true
     },
-    tags:{
-        type:[String]
+    tagPlace: {
+        type: String // Ensure this field is present
     },
-    advertiserId:{
-        type:String
+    advertiserId: {
+        type: String
+    },
+    rating: {
+        type: Number
     }
-},{timestamps:true})
+}, { timestamps: true });
+
+const Activity = mongoose.model('Activity', activitySchema);
+module.exports = Activity;

@@ -5,10 +5,10 @@ const itinerarySchema = new mongoose.Schema({
         type:String
     },
     activities:{
-        type:[string],
+        type:[String],
     },
     locations:{
-        type:[string]
+        type:[String]
     },
     language:{
         type:String
@@ -19,11 +19,23 @@ const itinerarySchema = new mongoose.Schema({
     },
     availableDates:{
         type:[Date]
+    },
+    preference:{
+        type:String,
+        enum:['historic areas','beaches','family-friendly','shopping']
+
+    },
+    tagPlace: {
+        type: String // Ensure this field is present
+    },
+    rating:{
+        type:Number
     }
     
 
 },{timestamps:true})
-
+const Itinerary = mongoose.model('Itinerary', itinerarySchema);
+module.exports= Itinerary;
 
 
 

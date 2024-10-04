@@ -24,6 +24,9 @@ const productSchema = new mongoose.Schema({
     status:{
         type:String,
         enum:['active','archived']
+    },
+    rating:{
+        type:Number
     }
 
 })
