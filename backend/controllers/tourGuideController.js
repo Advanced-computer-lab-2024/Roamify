@@ -1,28 +1,35 @@
-
 const userModel = require('../models/userModel');
 const tourGuideModel = require('../models/tourGuideModel');
+const itinearyModel = require('../models/itinearyModel');
 
 const createProfile = async (req, res) => {
-  //to be coded
-  try{
+  try {
     const userId = req.params.id;
-    const {fName,lName,mobileNumber,yearsOfExperience,previousWork} = req.body;
-    await userModel.findByIdAndUpdate(userId,{status:'active'});
+
+    if (userId) {
+      const result = await tourGuideModel.findOne({ user: userId });
+      if ((result) && userId) {
+        return res.status(400).json({ error: 'profile already created' });
+      }
+    } //check for existence of profile for this user
+
+    const { fName, lName, mobileNumber, yearsOfExperience, previousWork } = req.body;
+    await userModel.findByIdAndUpdate(userId, { status: 'active' });
     const newTourGuide = new tourGuideModel({
-        user:userId,
-        fName,
-        lName,
-        mobileNumber,
-        yearsOfExperience,
-        previousWork
+      user: userId,
+      fName,
+      lName,
+      mobileNumber,
+      yearsOfExperience,
+      previousWork
     });
     await newTourGuide.save();
-    res.status(200).json({message:'success',acceptedTourGuide:newTourGuide});
+    res.status(200).json({ message: 'success', acceptedTourGuide: newTourGuide });
 
 
   }
-  catch(e){
-    res.status(404).json({message:'failed',error:e});
+  catch (e) {
+    res.status(404).json({ message: 'failed', error: e });
 
   }
 };
@@ -31,16 +38,19 @@ const getProfile = async (req, res) => {
   try {
     const id = req.params.id;
     const details = await tourGuideModel.findById(id).populate('user');
-    if(details)
+    if (details)
       res.status(200).json(details);
+    else {
+      res.status(400).json({ message: "this profile does not exist" });
+    }
   } catch (err) {
-    res.status(500).json({ message:"failed",error:e});
+    res.status(500).json({ message: "failed", error: e });
   }
 };
 
 const updateProfile = async (req, res) => {
   const tourGuideId = req.params.id;
-  
+
   const {
     fName,
     lName,
@@ -54,36 +64,40 @@ const updateProfile = async (req, res) => {
 
   const userUpdates = {};
   const tourGuideUpdates = {};
-  
-  const tourGuide = await tourGuideModel.findById(tourGuideId).populate('user'); 
 
-  
+  const tourGuide = await tourGuideModel.findById(tourGuideId).populate('user');
+  if (!tourGuide) {
+    res.status(400).json({ message: "cannot find this profile" });
+  }
+
   const businessUserId = tourGuide.user._id;
-  
-  if (fName) tourGuideUpdates.fName = fName; 
-  if (lName) tourGuideUpdates.lName = lName; 
-  
+
+  if (fName) tourGuideUpdates.fName = fName;
+  if (lName) tourGuideUpdates.lName = lName;
+
   if (userName) {
     const result = await userModel.findOne({ userName: userName });
-    if (result&&userName!=tourGuide.user.userName) {
-      return res.status(400).json({ error: 'userName already exists' });
+    if ((result) && result.userName != tourGuide.user.userName) {
+      return res.status(400).json({ error: 'username already exists' });
     } else {
       userUpdates.userName = userName;
     }
-  }
+  } // corrected logic of username existence validation
 
   if (email) {
+    const emailRegex = /.+@.+\..+/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address' });
+    }
     const result = await userModel.findOne({ email: email });
-    if (result&&email!=tourGuide.user.email) {
-        return res.status(400).json({ error: 'email already exists' });
-      
-
+    if ((result) && result.email != tourGuide.user.email) {
+      return res.status(400).json({ error: 'email already exists' });
     } else {
       userUpdates.email = email;
     }
-  }
+  } // corrected logic of email existence validation
 
-  
+
   if (password) userUpdates.password = password;
   if (mobileNumber) tourGuideUpdates.mobileNumber = mobileNumber;
   if (yearsOfExperience) tourGuideUpdates.yearsOfExperience = yearsOfExperience;
@@ -92,7 +106,6 @@ const updateProfile = async (req, res) => {
   try {
     const updatedUser = await userModel.findByIdAndUpdate(businessUserId, userUpdates, { new: true });
     const updatedTourGuide = await tourGuideModel.findByIdAndUpdate(tourGuideId, tourGuideUpdates, { new: true });
-
     if (updatedUser || updatedTourGuide) {
       return res.status(200).json({ message: 'updated', updatedTourGuide: updatedTourGuide });
     } else {
@@ -104,28 +117,51 @@ const updateProfile = async (req, res) => {
 };
 
 
-// const createItineary = async (req, res) => {
-//   try {
-//     const itineary = new Itineary({
-//       ...req.body,
-//       tourGuide: tourGuide._id // Associate the activity with the logged-in advertiser
-//     });
-//     const savedItineary = await Itineary.save();
-//     res.status(201).json(savedItineary);
-//   } catch (err) {
-//     res.status(400).json({ message: err.message });
-//   }
-// };
+const createItineary = async (req, res) => {
+  try {
+    const userId = req.params.id;
 
-// const getItineary = async (req, res) => {
-//   try {
-//     const itineary = await Itineary.findOne({ _id: req.params.id, tourGuider: tourGuide._id });
-//     if (!itineary) return res.status(404).json({ message: 'Activity not found or not authorized' });
-//     res.json(itineary);
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// };
+    if (userId) {
+      const result = await tourGuideModel.findById(userId);
+      if (!((result) && userId)) {
+        return res.status(400).json({ error: 'tour guide does not exist' });
+      }
+    } //check for existence of profile for this user
+
+    const { activities, locations, timeline, duration, language, price, availableDates, accessibility, pickUp, dropOff } = req.body;
+    const newItineary = new itinearyModel({
+      activities: activities,
+      locations: locations,
+      timeline: timeline,
+      duration: duration,
+      language: language,
+      price: price,
+      availableDates: availableDates,
+      accessibility: accessibility,
+      pickUp: pickUp,
+      dropOff: dropOff,
+      user: userId
+
+    });
+    await newItineary.save();
+    res.status(200).json({ message: 'success', acceptedItineary: newItineary });
+
+  }
+  catch (e) {
+    res.status(404).json({ message: 'failed', error: e });
+    console.log(e);
+  }
+};
+
+const getItineary = async (req, res) => {
+  try {
+    const itineary = await itinearyModel.findOne({ _id: req.params.id });
+    if (!itineary) return res.status(404).json({ message: 'Itineary not found' });
+    res.status(200).json({ itineary: itineary });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 // const updateItineary = async (req, res) => {
 //   try {
@@ -143,32 +179,33 @@ const updateProfile = async (req, res) => {
 //   }
 // };
 
-// const deleteItineary = async (req, res) => {
-//   try {
-//     const itineary = await Itineary.findOneAndDelete({ _id: req.params.id, tourGuide: tourGuide._id }); // Find and delete activity by ID
-//     if (!itineary) return res.status(404).json({ message: 'Activity not found' });
-//     res.json({ message: 'Activity deleted successfully' }); // Respond with success message
-//   } catch (err) {
-//     res.status(500).json({ message: err.message }); // Handle errors
-//   }
-// };
+const deleteItineary = async (req, res) => {
+  try {
+    const itineary = await itinearyModel.findOneAndDelete({ _id: req.params.id }); // Find and delete itineary by ID
+    //We neet to validate that this tourguide owns it
+    if (!itineary) return res.status(404).json({ message: 'Itineary not found' });
+    res.status(200).json({ message: 'Itineary deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
-// const getMyItinearies = async (req, res) => {
-//   try {
-//     const itinearies = await Itineary.find({ tourGuide: tourGuide._id });
-//     res.json(itinearies);
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// };
+const getMyItinearies = async (req, res) => {
+  try {
+    const itinearies = await itinearyModel.find({ user: req.params.id });
+    res.status(200).json(itinearies);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 module.exports = {
-createProfile,
-   getProfile,
-updateProfile
-//   createItineary,
-//   getItineary,
-//   updateItineary,
-//   deleteItineary,
-//   getMyItinearies
- };
+  createProfile,
+  getProfile,
+  updateProfile,
+  createItineary,
+  getItineary,
+  //   updateItineary,
+  deleteItineary,
+  getMyItinearies
+};
