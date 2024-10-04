@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import './TourGuideItinerary.css';
-
+import AddButton from '../components/Buttons/AddButton';
+import UpdateButton from '../components/Buttons/UpdateButton';
+import EditButton from '../components/Buttons/EditButton';
+import DeleteButton from '../components/Buttons/DeleteButton';
 const TourGuideItinerary = () => {
     // State to manage the list of itineraries
     const [itineraries, setItineraries] = useState([]);
@@ -178,13 +181,13 @@ const TourGuideItinerary = () => {
                 </label>
                 <br />
                 {isEditing ? (
-                    <button onClick={handleUpdateItinerary}>Update Itinerary</button>
+                    <UpdateButton onClick={handleUpdateItinerary}></UpdateButton>
                 ) : (
-                    <button onClick={handleAddItinerary}>Add Itinerary</button>
+                    <AddButton onClick={handleAddItinerary}></AddButton>
                 )}
             </div>
             <div className="itinerary-list">
-                <h2>Itineraries List</h2>
+                <h2>Itineraries </h2>
                 {itineraries.length === 0 ? (
                     <p>No itineraries added yet.</p>
                 ) : (
@@ -200,8 +203,8 @@ const TourGuideItinerary = () => {
                                 <p><strong>Available Dates:</strong> {itinerary.availableDates}</p>
                                 <p><strong>Accessibility:</strong> {itinerary.accessibility}</p>
                                 <p><strong>Pick-up/Drop-off Location:</strong> {itinerary.pickupDropoff}</p>
-                                <button onClick={() => handleEditItinerary(index)}>Edit</button>
-                                <button onClick={() => handleDeleteItinerary(index)}>Delete</button>
+                                <EditButton onClick={() => handleEditItinerary(index)}></EditButton>
+                                <DeleteButton onClick={() => handleDeleteItinerary(index)}></DeleteButton>
                                 <hr />
                             </li>
                         ))}

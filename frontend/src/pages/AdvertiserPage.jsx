@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import "./AdvertiserPage.css";
 import DeleteButton from '../components/Buttons/DeleteButton';
 import EditButton from '../components/Buttons/EditButton';
-import AddActivityButton from '../components/Buttons/AddActivityButton';
+import AddButton from '../components/Buttons/AddButton';
 import UpdateButton from '../components/Buttons/UpdateButton';
 
 const API_URL = "https://your-backend-api.com/activities"; // Replace with your actual API URL
@@ -10,7 +10,6 @@ const API_URL = "https://your-backend-api.com/activities"; // Replace with your 
 const AdvertisorPage = () => {
     // State to manage the list of activities
     const [activities, setActivities] = useState([]);
-
     // State to manage the current activity being added or edited
     const [currentActivity, setCurrentActivity] = useState({
         date: '',
@@ -200,7 +199,7 @@ const AdvertisorPage = () => {
                 {isEditing ? (
                     <UpdateButton onClick={handleUpdateActivity}>Update Activity</UpdateButton>
                 ) : (
-                    <AddActivityButton onClick={handleAddActivity}></AddActivityButton>
+                    <AddButton onClick={handleAddActivity}></AddButton>
                 )}
             </div>
             <div className="activity-list">

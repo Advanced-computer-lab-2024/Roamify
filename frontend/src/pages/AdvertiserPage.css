@@ -59,22 +59,6 @@
   box-sizing: border-box;
 }
 
-/* Button styling */
-button {
-  background-color: #4c6665; /* Dark greenish button color */
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-right: 10px; /* Space between buttons */
-  transition: background-color 0.3s ease;
-}
-
-button:hover {
-  background-color: #a26d5d; /* Dark red hover color */
-}
 
 /* Activity list styling */
 .activity-list {

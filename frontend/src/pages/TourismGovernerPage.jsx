@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import "./TourismGovernerPage.css";
 import DeleteButton from '../components/Buttons/DeleteButton';
 import EditButton from '../components/Buttons/EditButton';
-import AddActivityButton from '../components/Buttons/AddActivityButton';
+import AddButton from '../components/Buttons/AddButton';
 import UpdateButton from '../components/Buttons/UpdateButton';
 
 const API_URL = "https://your-backend-api.com/places"; // Replace with your actual API URL
@@ -206,7 +206,7 @@ const TourismGovernorPage = () => {
                 {isEditing ? (
                     <UpdateButton onClick={handleUpdatePlace}></UpdateButton>
                 ) : (
-                    <AddActivityButton onClick={handleAddPlace}></AddActivityButton>
+                    <AddButton onClick={handleAddPlace}></AddButton>
                 )}
             </div>
 
@@ -225,7 +225,7 @@ const TourismGovernorPage = () => {
                                 <p>Types: {place.types.join(', ')}</p>
                                 <p>Tags: {place.tags.join(', ')}</p>
                                 <EditButton onClick={() => handleEditPlace(index)}></EditButton>
-                                <DeleteButton onClick={() => handleDeletePlace(index)}>Delete</DeleteButton>
+                                <DeleteButton onClick={() => handleDeletePlace(index)}></DeleteButton>
                             </li>
                         ))}
                     </ul>
