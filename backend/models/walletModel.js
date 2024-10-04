@@ -1,8 +1,8 @@
-const walletSchema = new mongoose.Schema({
-
-    availableBalance: {
-        type: Number,
-        Default: 0
+ const mongoose = require('mongoose');
+const walletSchema=new mongoose.Schema({
+    availableBalance:{
+        type:Number,
+        Default:0
         //required:true
     },
     totalSpent: {
@@ -10,9 +10,13 @@ const walletSchema = new mongoose.Schema({
         Default: 0
         //required:true
     },
-    cardNumber: {
-        type: String,
-        required: true
+    cardNumber:{
+        type:String,
+        
+    },
+    cardValidUntil:{
+        type:Date,
+        
     }
 
 })

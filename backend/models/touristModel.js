@@ -18,9 +18,10 @@ const touristSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    mobileNumber: {
-        type: String,
-        required: true
+    mobileNumber:{
+        type:Number,
+        required:true
+
     },
     nationality: {
         type: Number,
