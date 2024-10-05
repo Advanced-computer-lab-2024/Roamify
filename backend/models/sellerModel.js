@@ -19,6 +19,11 @@ const sellerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    sellerType: {
+      type: String,
+      enum: ["VTP", "External"], 
+      required: true,
+    },
   },
   { timestamps: true }
 );
