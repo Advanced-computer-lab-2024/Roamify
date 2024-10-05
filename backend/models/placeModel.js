@@ -13,18 +13,28 @@ const placeSchema = new mongoose.Schema({
         type: String
     },
     tagPlace: {
-        type: String // Ensure this field is present
+        
     },
     pictures: {
         type: [String]
     },
     location: {
-        latitude: {  
-            type: Number,  // Ensure latitude is a number type
+        type: {
+            type: String,          
+            default: 'Point',     
+            required: true         
         },
-        longitude: {
-            type: Number,
-            required: true
+        coordinates: {
+            type: [Number],        
+            required: true,        
+            validate: {            
+                validator: function (v) {
+                    if (!Array.isArray(v) || v.length !== 2) return false;
+                    const [lng, lat] = v;
+                    return lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90;
+                },
+                message: props => `${props.value} is not a valid GeoJSON coordinates array!`
+            }
         }
     },
     ticketPrice: {

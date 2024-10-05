@@ -27,6 +27,9 @@ app.use(express.json());  // For parsing JSON bodies
 
 
 
+// Insert dummy data into the database
+
+
 // Function to insert places
 
 
@@ -48,7 +51,6 @@ const filterItin_Route = require('./routes/filterRoute');
 app.use('/api', filterItin_Route);
 const filter_placeRoute=require('./routes/filterPlaceRoute.js');
 app.use('/api',filter_placeRoute);
-
 const searchAct_Route=require('./routes/showactivityRoute.js');
 app.use('/api',searchAct_Route);
 const searchitin_Route=require('./routes/showitineraryRoute.js');
