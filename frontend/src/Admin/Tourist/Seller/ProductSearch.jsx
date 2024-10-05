@@ -12,7 +12,7 @@ const ProductSearch = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get('/api/products'); // Fetch all products initially
+                const response = await axios.get('/api/products'); // Fetch all products 
                 setProducts(response.data);
                 setLoading(false);
             } catch (error) {
