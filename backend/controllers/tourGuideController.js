@@ -1,6 +1,6 @@
 const userModel = require('../models/userModel');
 const tourGuideModel = require('../models/tourGuideModel');
-const itinearyModel = require('../models/itinearyModel');
+//const itinearyModel = require('../models/itinearyModel');
 
 const createProfile = async (req, res) => {
   try {
@@ -116,36 +116,36 @@ const updateProfile = async (req, res) => {
   }
 };
 
-const createItineary = async (req, res) => {
-  try {
-    const tourGuideId = req.params.id;
+// const createItineary = async (req, res) => {
+//   try {
+//     const tourGuideId = req.params.id;
 
   
 
-    const { activities, locations, timeline, duration, language, price, availableDates, accessibility, pickUp, dropOff } = req.body;
-    const newItineary = new itinearyModel({
-      activities: activities,
-      locations: locations,
-      timeline: timeline,
-      duration: duration,
-      language: language,
-      price: price,
-      availableDates: availableDates,
-      accessibility: accessibility,
-      pickUp: pickUp,
-      dropOff: dropOff,
-      user: tourGuideId
+//     const { activities, locations, timeline, duration, language, price, availableDates, accessibility, pickUp, dropOff } = req.body;
+//     const newItineary = new itinearyModel({
+//       activities: activities,
+//       locations: locations,
+//       timeline: timeline,
+//       duration: duration,
+//       language: language,
+//       price: price,
+//       availableDates: availableDates,
+//       accessibility: accessibility,
+//       pickUp: pickUp,
+//       dropOff: dropOff,
+//       user: tourGuideId
 
-    });
-    await newItineary.save();
-    res.status(200).json({ message: 'success', acceptedItineary: newItineary });
+//     });
+//     await newItineary.save();
+//     res.status(200).json({ message: 'success', acceptedItineary: newItineary });
 
-  }
-  catch (e) {
-    res.status(404).json({ message: 'failed', error: e });
-    console.log(e);
-  }
-};
+//   }
+//   catch (e) {
+//     res.status(404).json({ message: 'failed', error: e });
+//     console.log(e);
+//   }
+// };
 
 //similar to get activity logic i just need the new sche,ma
 // const getItineary = async (req, res) => {
@@ -174,35 +174,35 @@ const createItineary = async (req, res) => {
 //   }
 // };
 
-const deleteItineary = async (req, res) => {
-  try {
-    const itenaryId = req.params.id;
-    const itineary = await itinearyModel.findByIdAndDelete(itenaryId); // Find and delete itineary by ID
-    //We neet to validate that this tourguide owns it
+// const deleteItineary = async (req, res) => {
+//   try {
+//     const itenaryId = req.params.id;
+//     const itineary = await itinearyModel.findByIdAndDelete(itenaryId); // Find and delete itineary by ID
+//     //We neet to validate that this tourguide owns it
    
-    res.status(200).json({ message: 'Itineary deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+//     res.status(200).json({ message: 'Itineary deleted successfully' });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
 
-const getMyItinearies = async (req, res) => {
-  try {
-    const tourGuideId = req.params.id;
-    const itinearies = await itinearyModel.findById({ user:tourGuideId});
-    res.status(200).json(itinearies);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+// const getMyItinearies = async (req, res) => {
+//   try {
+//     const tourGuideId = req.params.id;
+//     const itinearies = await itinearyModel.findById({ user:tourGuideId});
+//     res.status(200).json(itinearies);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
 
 module.exports = {
   createProfile,
   getProfile,
-  updateProfile,
-  createItineary,
+  updateProfile
+  // createItineary,
   //getItineary,
   //   updateItineary,
-  deleteItineary,
-  getMyItinearies
+  // deleteItineary,
+  // getMyItinearies
 };

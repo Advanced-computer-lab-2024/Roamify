@@ -1,6 +1,6 @@
 const advertiserModel = require('../models/advertiserModel');
 const userModel = require('../models/userModel');
-const activityModel = require('../models/activityModel');
+//const activityModel = require('../models/activityModel');
 
 const createProfile = async (req, res) => {
   try {
@@ -117,120 +117,120 @@ const updateProfile = async (req, res) => {
   }
 };
 
-const createActivity = async (req, res) => {
-  try {
-    const advertiserId = req.params.id;
+// const createActivity = async (req, res) => {
+//   try {
+//     const advertiserId = req.params.id;
 
-    // this will never happen since the advertiser is the one sending the request so no need to verify
+//     // this will never happen since the advertiser is the one sending the request so no need to verify
 
-    // if (userId) {
-    //   const result = await advertiserModel.findById(userId);
-    //   if (!((result) && userId)) {
-    //     return res.status(400).json({ error: 'advertiser does not exist' });
-    //   }
-    // } //check for existence of profile for this user
+//     // if (userId) {
+//     //   const result = await advertiserModel.findById(userId);
+//     //   if (!((result) && userId)) {
+//     //     return res.status(400).json({ error: 'advertiser does not exist' });
+//     //   }
+//     // } //check for existence of profile for this user
 
-    const { date, time, location, price, category, tags, discounts, bookingAvailable } = req.body;
-    const newActivity = new activityModel({
-      date: date,
-      time: time,
-      location: location,
-      price: price,
-      category: category,
-      tags: tags,
-      discounts: discounts,
-      bookingAvailable: bookingAvailable,
-      advertiserId
+//     const { date, time, location, price, category, tags, discounts, bookingAvailable } = req.body;
+//     const newActivity = new activityModel({
+//       date: date,
+//       time: time,
+//       location: location,
+//       price: price,
+//       category: category,
+//       tags: tags,
+//       discounts: discounts,
+//       bookingAvailable: bookingAvailable,
+//       advertiserId
 
-    });
-    await newActivity.save();
-    res.status(200).json({ message: 'success', acceptedActivity: newActivity });
+//     });
+//     await newActivity.save();
+//     res.status(200).json({ message: 'success', acceptedActivity: newActivity });
 
-  }
-  catch (e) {
-    res.status(404).json({ message: 'failed', error: e });
-    console.log(e);
-  }
-};
+//   }
+//   catch (e) {
+//     res.status(404).json({ message: 'failed', error: e });
+//     console.log(e);
+//   }
+// };
 
-// i get my activity based on some query
-const getActivity = async (req, res) => {
- try{
-  const advertiserId = req.params.id;
-  const query = {advertiser:advertiserId}
-
-
-  const { date, time, location, price, category, tags, discounts } = req.body;
-  if (date) query.date = date;
-  if (time) query.time = time;
-  if (location) query.location = location;
-  if (price) query.price = price;
-  if (category) query.category = category;
-  if (tags) query.tags = { $in: tags }; // Assuming tags is an array
-  if (discounts) query.discounts = discounts;
-  const activities = await activityModel.find(query);
-  return res.status(200).json(activities);
-  } catch (e) {
-    return res.status(500).json({ message: "failed",error:e });
-  }
+// // i get my activity based on some query
+// const getActivity = async (req, res) => {
+//  try{
+//   const advertiserId = req.params.id;
+//   const query = {advertiser:advertiserId}
 
 
-};
+//   const { date, time, location, price, category, tags, discounts } = req.body;
+//   if (date) query.date = date;
+//   if (time) query.time = time;
+//   if (location) query.location = location;
+//   if (price) query.price = price;
+//   if (category) query.category = category;
+//   if (tags) query.tags = { $in: tags }; // Assuming tags is an array
+//   if (discounts) query.discounts = discounts;
+//   const activities = await activityModel.find(query);
+//   return res.status(200).json(activities);
+//   } catch (e) {
+//     return res.status(500).json({ message: "failed",error:e });
+//   }
 
 
-const updateActivity = async (req, res) => {
-  try{
-   const activityId = req.params.id;
-   const query = {}
+// };
+
+
+// const updateActivity = async (req, res) => {
+//   try{
+//    const activityId = req.params.id;
+//    const query = {}
  
  
-   const { date, time, location, price, category, tags, discounts } = req.body;
-   if (date) query.date = date;
-   if (time) query.time = time;
-   if (location) query.location = location;
-   if (price) query.price = price;
-   if (category) query.category = category;
-   if (tags) query.tags = { $in: tags }; // Assuming tags is an array
-   if (discounts) query.discounts = discounts;
-   const activities = await activityModel.findByIdAndUpdate(activityId,query,{new:true});
-   return res.status(200).json({message:'successfully updated',activities});
-   } catch (e) {
-     return res.status(500).json({ message: "failed",error:e });
-   }
+//    const { date, time, location, price, category, tags, discounts } = req.body;
+//    if (date) query.date = date;
+//    if (time) query.time = time;
+//    if (location) query.location = location;
+//    if (price) query.price = price;
+//    if (category) query.category = category;
+//    if (tags) query.tags = { $in: tags }; // Assuming tags is an array
+//    if (discounts) query.discounts = discounts;
+//    const activities = await activityModel.findByIdAndUpdate(activityId,query,{new:true});
+//    return res.status(200).json({message:'successfully updated',activities});
+//    } catch (e) {
+//      return res.status(500).json({ message: "failed",error:e });
+//    }
  
  
- };
+//  };
  
 
-const deleteActivity = async (req, res) => {
-  try {
+// const deleteActivity = async (req, res) => {
+//   try {
 
-    // we send here the activity id in the parameter
-    const activityId = req.params.id;
-    const activity = await activityModel.findByIdAndDelete(activityId); 
-    res.status(200).json({ message: 'Activity deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ message:'activity doesnt exist' });
-  }
-};
+//     // we send here the activity id in the parameter
+//     const activityId = req.params.id;
+//     const activity = await activityModel.findByIdAndDelete(activityId); 
+//     res.status(200).json({ message: 'Activity deleted successfully' });
+//   } catch (err) {
+//     res.status(500).json({ message:'activity doesnt exist' });
+//   }
+// };
 
-const getMyActivities = async (req, res) => {
-  try {
-    const advertiserId = req.params.id;
-    const activities = await activityModel.find({ advertiser:advertiserId });
-    res.status(200).json(activities);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+// const getMyActivities = async (req, res) => {
+//   try {
+//     const advertiserId = req.params.id;
+//     const activities = await activityModel.find({ advertiser:advertiserId });
+//     res.status(200).json(activities);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
 
 module.exports = {
   createProfile,
   getProfile,
-  updateProfile,
-  createActivity,
-  getActivity,
-     updateActivity,
-  deleteActivity,
-  getMyActivities
+  updateProfile
+  // createActivity,
+  // getActivity,
+  //    updateActivity,
+  // deleteActivity,
+  // getMyActivities
 };
