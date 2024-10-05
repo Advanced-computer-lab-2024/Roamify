@@ -15,7 +15,6 @@ const filterUpcomingActivites = async (req, res) => {
                 const startOfDay = new Date(requestedDate);
                 const endOfDay = new Date(requestedDate);
                 endOfDay.setHours(23, 59, 59, 999);
-                
                 filter.date = { $gte: startOfDay, $lte: endOfDay };
             }
         } else {
@@ -35,6 +34,8 @@ const filterUpcomingActivites = async (req, res) => {
         }
         if (rating) {
             const ratingValue = Number(rating);
+            console.log("Rating filter value:", ratingValue); 
+            
             if (!isNaN(ratingValue)) {
                 filter.rating = { $gte: ratingValue };
             }

@@ -8,7 +8,7 @@ const filterPlacesByTag = async (req, res) => {
         
         if (tag) {
             const tagsArray = tag.split(',').map(t => t.trim()); 
-            filter.tagPlace = { $in: tagsArray };  // Filter by 'tagPlace' field
+            filter.tagPlace = { $in: tagsArray }; 
         }
 
         const places = await Place.find(filter);

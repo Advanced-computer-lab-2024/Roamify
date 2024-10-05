@@ -38,12 +38,26 @@ app.use(express.json());  // For parsing JSON bodies
 //app.use('/api',filterRoute);
 const searchRoute=require('./routes/search_Route.js');
 app.use('/api',searchRoute);
-const filter_placeRoute=require('./routes/filterPlaceRoute.js');
-app.use('/api',filter_placeRoute);
 const viewRoutes = require('./routes/view_Route'); 
 app.use('/api', viewRoutes);
 const filterAct_Route = require('./routes/filterActRoute'); 
 app.use('/api', filterAct_Route);
+const sort_Route = require('./routes/sortRoute'); 
+app.use('/api', sort_Route);
+const filterItin_Route = require('./routes/filterRoute'); 
+app.use('/api', filterItin_Route);
+const filter_placeRoute=require('./routes/filterPlaceRoute.js');
+app.use('/api',filter_placeRoute);
+
+const searchAct_Route=require('./routes/showactivityRoute.js');
+app.use('/api',searchAct_Route);
+const searchitin_Route=require('./routes/showitineraryRoute.js');
+app.use('/api',searchitin_Route);
+const searchplace_Route=require('./routes/showplacesRoute.js');
+app.use('/api',searchplace_Route);
+
+
+
 
 
 

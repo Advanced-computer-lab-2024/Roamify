@@ -1,5 +1,4 @@
 const Itinerary = require('../models/ItineraryModel.js');
-const activity =require('../models/activityModel.js');
 
 const filterUpcomingItineraries = async (req, res) => {
     try {
@@ -8,19 +7,27 @@ const filterUpcomingItineraries = async (req, res) => {
         const today = new Date();
         const filter = {
             price: { $lte: budget ? Number(budget) : Infinity }, 
-            availableDates: { $elemMatch: { $gte: today } }
         };
+
+       
         if (preference) {
             filter.preference = preference; 
         }
+
         if (language) {
             filter.language = language; 
         }
+
+        
         if (date) {
             const requestedDate = new Date(date);
-            if (!isNaN(requestedDate)) {
-                filter.availableDates = { $elemMatch: { $gte: requestedDate } }; 
-            }
+            requestedDate.setHours(0, 0, 0, 0); 
+            const nextDay = new Date(requestedDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            filter.availableDates = { $elemMatch: { $gte: requestedDate, $lt: nextDay } }; 
+        } else {
+            filter.availableDates = { $elemMatch: { $gte: today } }; 
         }
 
         const upcomingItineraries = await Itinerary.find(filter);
@@ -31,12 +38,4 @@ const filterUpcomingItineraries = async (req, res) => {
     }
 };
 
-
-
-
-
-
-
-
 module.exports = { filterUpcomingItineraries };
-

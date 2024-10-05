@@ -18,7 +18,7 @@ const searchPlaceActivityItinerary = async (req, res) => {
           $or: [
               { name: new RegExp(query, 'i') },
               { category: new RegExp(query, 'i') },
-              { tags: new RegExp(query, 'i') }
+              { tagPlace: new RegExp(query, 'i') }
           ]
       };
 
