@@ -57,6 +57,8 @@ const searchitin_Route=require('./routes/showitineraryRoute.js');
 app.use('/api',searchitin_Route);
 const searchplace_Route=require('./routes/showplacesRoute.js');
 app.use('/api',searchplace_Route);
+const historicalRoute = require('./routes/historicalTagRoute.js'); 
+app.use('/api', historicalRoute);
 
 
 
