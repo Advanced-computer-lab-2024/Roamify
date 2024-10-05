@@ -15,6 +15,7 @@ const createProfile = async (req, res) => {
         const { fName, lName, description } = req.body;
         await userModel.findByIdAndUpdate(userId, { status: 'active' });
         const newSeller = new sellerModel({
+            
             fName,
             lName,
             description
@@ -79,6 +80,9 @@ const updateProfile = async (req, res) => {
     }
   
     if (email) {
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Please enter a valid email address' });
+      }
       const result = await userModel.findOne({ email: email });
       if (result&&email!=seller.user.email) {
           return res.status(400).json({ error: 'email already exists' });

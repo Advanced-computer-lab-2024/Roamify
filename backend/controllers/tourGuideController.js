@@ -16,6 +16,7 @@ const createProfile = async (req, res) => {
     const { fName, lName, mobileNumber, yearsOfExperience, previousWork } = req.body;
     await userModel.findByIdAndUpdate(userId, { status: 'active' });
     const newTourGuide = new tourGuideModel({
+      
       fName,
       lName,
       mobileNumber,
@@ -115,17 +116,11 @@ const updateProfile = async (req, res) => {
   }
 };
 
-
 const createItineary = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const tourGuideId = req.params.id;
 
-    if (userId) {
-      const result = await tourGuideModel.findById(userId);
-      if (!((result) && userId)) {
-        return res.status(400).json({ error: 'tour guide does not exist' });
-      }
-    } //check for existence of profile for this user
+  
 
     const { activities, locations, timeline, duration, language, price, availableDates, accessibility, pickUp, dropOff } = req.body;
     const newItineary = new itinearyModel({
@@ -139,7 +134,7 @@ const createItineary = async (req, res) => {
       accessibility: accessibility,
       pickUp: pickUp,
       dropOff: dropOff,
-      user: userId
+      user: tourGuideId
 
     });
     await newItineary.save();
@@ -152,15 +147,16 @@ const createItineary = async (req, res) => {
   }
 };
 
-const getItineary = async (req, res) => {
-  try {
-    const itineary = await itinearyModel.findOne({ _id: req.params.id });
-    if (!itineary) return res.status(404).json({ message: 'Itineary not found' });
-    res.status(200).json({ itineary: itineary });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+//similar to get activity logic i just need the new sche,ma
+// const getItineary = async (req, res) => {
+//   try {
+//     const itineary = await itinearyModel.findOne({ _id: req.params.id });
+//     if (!itineary) return res.status(404).json({ message: 'Itineary not found' });
+//     res.status(200).json({ itineary: itineary });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
 
 // const updateItineary = async (req, res) => {
 //   try {
@@ -180,9 +176,10 @@ const getItineary = async (req, res) => {
 
 const deleteItineary = async (req, res) => {
   try {
-    const itineary = await itinearyModel.findOneAndDelete({ _id: req.params.id }); // Find and delete itineary by ID
+    const itenaryId = req.params.id;
+    const itineary = await itinearyModel.findByIdAndDelete(itenaryId); // Find and delete itineary by ID
     //We neet to validate that this tourguide owns it
-    if (!itineary) return res.status(404).json({ message: 'Itineary not found' });
+   
     res.status(200).json({ message: 'Itineary deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -191,7 +188,8 @@ const deleteItineary = async (req, res) => {
 
 const getMyItinearies = async (req, res) => {
   try {
-    const itinearies = await itinearyModel.find({ user: req.params.id });
+    const tourGuideId = req.params.id;
+    const itinearies = await itinearyModel.findById({ user:tourGuideId});
     res.status(200).json(itinearies);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -203,7 +201,7 @@ module.exports = {
   getProfile,
   updateProfile,
   createItineary,
-  getItineary,
+  //getItineary,
   //   updateItineary,
   deleteItineary,
   getMyItinearies
