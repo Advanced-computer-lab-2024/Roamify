@@ -1,92 +1,126 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import './TourGuideProfile.css';
+
+const API_URL = "https://your-backend-api.com/tour-guide-profile"; // Replace with your actual API URL
 
 const TourGuideProfile = () => {
-    // State to manage profile information
-    const [profile, setProfile] = useState({
-        name: '',
-        mobileNumber: '',
-        yearsOfExperience: '',
-        previousWork: '',
-    });
+  // State to manage tour guide's profile information
+  const [profile, setProfile] = useState({
+    name: '',
+    mobile: '',
+    yearsOfExperience: '',
+    previousWork: '',
+    bio: '',
+  });
 
-    // State to track if the profile is being edited
-    const [isEditing, setIsEditing] = useState(true); // Initially true for creating a profile
+  // State to manage edit mode
+  const [isEditing, setIsEditing] = useState(false);
 
-    // Handle input changes
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setProfile({ ...profile, [name]: value });
-    };
+  // Fetch profile data from the backend when the component mounts
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
-    // Save profile (for both create and update)
-    const handleSaveProfile = () => {
-        setIsEditing(false);
-        // In a real application, here you would send the data to the server
-        console.log('Profile saved:', profile);
-    };
+  // Fetch the tour guide profile from the backend
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch(`${API_URL}/1`); // Replace '1' with the actual tour guide's ID or use auth token
+      const data = await response.json();
+      if (data) {
+        setProfile(data); // Update profile state with fetched data
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
 
-    // Enable editing the profile
-    const handleEditProfile = () => {
-        setIsEditing(true);
-    };
+  // Handle input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setProfile({ ...profile, [name]: value });
+  };
 
-    return (
-        <div className="tour-guide-profile">
-            <h1>Tour Guide Profile</h1>
-            {isEditing ? (
-                <div className="profile-form">
-                    <label>
-                        Name:
-                        <input
-                            type="text"
-                            name="name"
-                            value={profile.name}
-                            onChange={handleInputChange}
-                        />
-                    </label>
-                    <br />
-                    <label>
-                        Mobile Number:
-                        <input
-                            type="text"
-                            name="mobileNumber"
-                            value={profile.mobileNumber}
-                            onChange={handleInputChange}
-                        />
-                    </label>
-                    <br />
-                    <label>
-                        Years of Experience:
-                        <input
-                            type="number"
-                            name="yearsOfExperience"
-                            value={profile.yearsOfExperience}
-                            onChange={handleInputChange}
-                        />
-                    </label>
-                    <br />
-                    <label>
-                        Previous Work:
-                        <textarea
-                            name="previousWork"
-                            value={profile.previousWork}
-                            onChange={handleInputChange}
-                        />
-                    </label>
-                    <br />
-                    <button onClick={handleSaveProfile}>Save Profile</button>
-                </div>
-            ) : (
-                <div className="profile-details">
-                    <p><strong>Name:</strong> {profile.name}</p>
-                    <p><strong>Mobile Number:</strong> {profile.mobileNumber}</p>
-                    <p><strong>Years of Experience:</strong> {profile.yearsOfExperience}</p>
-                    <p><strong>Previous Work:</strong> {profile.previousWork}</p>
-                    <button onClick={handleEditProfile}>Edit Profile</button>
-                </div>
-            )}
+  // Handle profile update and send it to the backend
+  const handleUpdateProfile = async () => {
+    setIsEditing(false);
+    try {
+      const response = await fetch(`${API_URL}/1`, {  // Replace '1' with the actual tour guide's ID or use auth token
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profile),
+      });
+      if (response.ok) {
+        const updatedProfile = await response.json();
+        setProfile(updatedProfile); // Update the profile in state with the response from the backend
+        console.log('Profile updated:', updatedProfile);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
+
+
+  return (
+    <div className="profile-page">
+
+      {isEditing ? (
+        <div className="profile-form">
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            value={profile.name}
+            onChange={handleInputChange}
+          />
+          <input
+            type="text"
+            name="mobile"
+            placeholder="Mobile Number"
+            value={profile.mobile}
+            onChange={handleInputChange}
+          />
+          <input
+            type="text"
+            name="yearsOfExperience"
+            placeholder="Years of Experience"
+            value={profile.yearsOfExperience}
+            onChange={handleInputChange}
+          />
+          <input
+            type="text"
+            name="previousWork"
+            placeholder="Previous Work"
+            value={profile.previousWork}
+            onChange={handleInputChange}
+          />
+          <textarea
+            name="bio"
+            placeholder="Bio"
+            value={profile.bio}
+            onChange={handleInputChange}
+          ></textarea>
+          <button className="save-button" onClick={handleUpdateProfile}>
+            Save Profile
+          </button>
         </div>
-    );
+      ) : (
+        <div className="profile-details">
+          <h1>Tour Guide Profile</h1>
+          <p><strong>Name:</strong> {profile.name}</p>
+          <p><strong>Mobile:</strong> {profile.mobile}</p>
+          <p><strong>Years of Experience:</strong> {profile.yearsOfExperience}</p>
+          <p><strong>Previous Work:</strong> {profile.previousWork || 'N/A'}</p>
+          <p><strong>Bio:</strong> {profile.bio}</p>
+          <button className="edit-button" onClick={() => setIsEditing(true)}>
+            Edit Profile
+          </button>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default TourGuideProfile;
+

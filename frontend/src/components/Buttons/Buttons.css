@@ -120,3 +120,18 @@ button:focus {
     width: 20px; /* Set the size of the arrow image */
     height: 20px;
 }
+.edit {
+    height: 30px;
+    border-radius: 15px;
+    font-size: 16px;
+    margin: 5px;
+    background-color: #a26d5d; /* Default background color */
+    color: white; /* Default text color */
+    border: none; /* Remove default border */
+    cursor: pointer; /* Change cursor to pointer */
+}
+
+/* Hover effect for the .accept button */
+.edit:hover {
+    background-color: #a26d5d; /* Darker background color on hover */
+}

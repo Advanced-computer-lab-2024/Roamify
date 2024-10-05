@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import './AdvertiserProfile.css';
+
+const API_URL = "https://your-backend-api.com/profiles"; // Replace with your actual API URL
 
 const AdvertisorProfile = () => {
     // State to manage profile information
@@ -10,7 +13,26 @@ const AdvertisorProfile = () => {
     });
 
     // State to track if the profile is being edited
-    const [isEditing, setIsEditing] = useState(true); // Initially true for creating a profile
+    const [isEditing, setIsEditing] = useState(true); // Initially true for creating or editing profile
+
+    // Fetch profile from the API on component mount
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    // Fetch the profile from the API
+    const fetchProfile = async () => {
+        try {
+            const response = await fetch(`${API_URL}/1`); // Replace '1' with dynamic user ID or token
+            const data = await response.json();
+            if (data) {
+                setProfile(data);
+                setIsEditing(false); // Assume we fetched an existing profile, so no need for editing initially
+            }
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+        }
+    };
 
     // Handle input changes
     const handleInputChange = (e) => {
@@ -19,10 +41,38 @@ const AdvertisorProfile = () => {
     };
 
     // Save profile (for both create and update)
-    const handleSaveProfile = () => {
-        setIsEditing(false);
-        // In a real application, here you would send the data to the server
-        console.log('Profile saved:', profile);
+    const handleSaveProfile = async () => {
+        try {
+            if (isEditing) {
+                // Update profile if it's already created (PUT request)
+                const response = await fetch(`${API_URL}/1`, {  // Replace '1' with dynamic user ID
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(profile),
+                });
+                if (response.ok) {
+                    const updatedProfile = await response.json();
+                    setProfile(updatedProfile);
+                    setIsEditing(false);
+                    console.log('Profile updated:', updatedProfile);
+                }
+            } else {
+                // Create profile if not already created (POST request)
+                const response = await fetch(`${API_URL}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(profile),
+                });
+                if (response.ok) {
+                    const newProfile = await response.json();
+                    setProfile(newProfile);
+                    setIsEditing(false);
+                    console.log('Profile created:', newProfile);
+                }
+            }
+        } catch (error) {
+            console.error('Error saving profile:', error);
+        }
     };
 
     // Enable editing the profile
@@ -32,9 +82,9 @@ const AdvertisorProfile = () => {
 
     return (
         <div className="advertisor-profile">
-            <h1>Advertiser Company Profile</h1>
             {isEditing ? (
                 <div className="profile-form">
+                    <h1>Advertiser Company Profile</h1>
                     <label>
                         Company Name:
                         <input
