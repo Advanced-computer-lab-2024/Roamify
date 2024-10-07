@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import UsersTable from "./UsersTable";
+import UsersTable from "./UsersTable.jsx";
 import SearchBar from "../../SearchBar.jsx";
 import axios from "axios";
 import { toCamelCase } from "../../functions/functions.js";

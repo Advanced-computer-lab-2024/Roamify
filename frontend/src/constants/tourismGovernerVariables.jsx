@@ -7,8 +7,8 @@ export const tourismGovernerNavBarItems = [
         name: "Historical-Places",
         children: [
             { name: "Create" },
-            { name: "Edit" },
-            { name: "View" },
+            { name: "My Places" },
+            { name: "All Places" }
 
         ],
     },

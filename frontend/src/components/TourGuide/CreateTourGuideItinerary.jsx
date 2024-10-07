@@ -1,43 +1,67 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // Import axios for making HTTP requests
 import SubmitButton from '../Buttons/SubmitButton'; // Import the SubmitButton component
 import InputField from '../Modals/InputField'; // Import the InputField component
 import './TourGuideItinerary.css'; // Import main CSS for styling
+const profileId = localStorage.getItem('profileId');
+
 
 const CreateTourGuideItinerary = () => {
     const [itinerary, setItinerary] = useState({
-        activities: '',
-        locations: '',
-        timeline: '',
-        duration: '',
+        activities: '', // Should be an array of activity IDs
+        locations: '', // Should be an array of strings (locations)
         language: '',
         price: '',
-        availableDates: '',
-        accessibility: '',
-        pickupDropoff: '',
+        availableDates: '', // Should be an array of dates
+        preferenceTags: '', // Should be an array of preference tag IDs
+        pickUpLocation: '',
+        dropOffLocation: '',
+        accessibility: false,
     });
 
     // Handle input changes
-    const handleInputChange = (name, value) => {
-        setItinerary({ ...itinerary, [name]: value });
+    const handleInputChange = (e) => {
+        const { name, value, type, checked } = e.target;
+
+        // Handle boolean and array fields
+        if (name === 'accessibility') {
+            setItinerary((prev) => ({
+                ...prev,
+                [name]: checked,
+            }));
+        } else if (['availableDates', 'locations', 'preferenceTags', 'activities'].includes(name)) {
+            setItinerary((prev) => ({
+                ...prev,
+                [name]: value.split(',').map((item) => item.trim()),
+            }));
+        } else {
+            setItinerary((prev) => ({
+                ...prev,
+                [name]: value,
+            }));
+        }
     };
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Here you can add the code to submit the itinerary to the backend
-        console.log('Tour Guide Itinerary Created:', itinerary);
-        // Reset the form
-        setItinerary({
-            activities: '',
-            locations: '',
-            timeline: '',
-            duration: '',
-            language: '',
-            price: '',
-            availableDates: '',
-            accessibility: '',
-            pickupDropoff: '',
-        });
+        try {
+            // Make POST request to create a new itinerary
+            const response = await axios.post(`http://localhost:3000/tour-guide/create-itineary/${profileId}`, itinerary);
+            console.log('Itinerary Created:', response.data);
+            // Reset the form after successful submission
+            setItinerary({
+                activities: '',
+                language: '',
+                price: '',
+                availableDates: '',
+                pickUpLocation: '',
+                dropOffLocation: '',
+                accessibility: false,
+            });
+        } catch (error) {
+            console.error('Error creating itinerary:', error.response?.data?.message || error.message);
+        }
     };
 
     return (
@@ -57,35 +81,6 @@ const CreateTourGuideItinerary = () => {
                     required
                 />
 
-                {/* Locations to be Visited */}
-                <InputField
-                    label="Locations to be Visited"
-                    type="text"
-                    name="locations"
-                    value={itinerary.locations}
-                    onChange={handleInputChange}
-                    required
-                />
-
-                {/* Timeline */}
-                <InputField
-                    label="Timeline"
-                    type="text"
-                    name="timeline"
-                    value={itinerary.timeline}
-                    onChange={handleInputChange}
-                    required
-                />
-
-                {/* Duration of Each Activity */}
-                <InputField
-                    label="Duration of Each Activity"
-                    type="text"
-                    name="duration"
-                    value={itinerary.duration}
-                    onChange={handleInputChange}
-                    required
-                />
 
                 {/* Language of Tour */}
                 <InputField
@@ -100,16 +95,16 @@ const CreateTourGuideItinerary = () => {
                 {/* Price of Tour */}
                 <InputField
                     label="Price of Tour"
-                    type="text"
+                    type="number"
                     name="price"
                     value={itinerary.price}
                     onChange={handleInputChange}
                     required
                 />
 
-                {/* Available Dates and Times */}
+                {/* Available Dates */}
                 <InputField
-                    label="Available Dates and Times"
+                    label="Available Dates (comma-separated YYYY-MM-DD)"
                     type="text"
                     name="availableDates"
                     value={itinerary.availableDates}
@@ -117,24 +112,36 @@ const CreateTourGuideItinerary = () => {
                     required
                 />
 
-                {/* Accessibility */}
+                {/* Pick-up Location */}
                 <InputField
-                    label="Accessibility"
+                    label="Pick-up Location"
                     type="text"
-                    name="accessibility"
-                    value={itinerary.accessibility}
-                    onChange={handleInputChange}
-                />
-
-                {/* Pick-up/Drop-off Location */}
-                <InputField
-                    label="Pick-up/Drop-off Location"
-                    type="text"
-                    name="pickupDropoff"
-                    value={itinerary.pickupDropoff}
+                    name="pickUpLocation"
+                    value={itinerary.pickUpLocation}
                     onChange={handleInputChange}
                     required
                 />
+
+                {/* Drop-off Location */}
+                <InputField
+                    label="Drop-off Location"
+                    type="text"
+                    name="dropOffLocation"
+                    value={itinerary.dropOffLocation}
+                    onChange={handleInputChange}
+                    required
+                />
+
+                {/* Accessibility */}
+                <label className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        name="accessibility"
+                        checked={itinerary.accessibility}
+                        onChange={handleInputChange}
+                    />
+                    <span>Accessible</span>
+                </label>
 
                 {/* Submit Button */}
                 <SubmitButton type="submit">Create Itinerary</SubmitButton>

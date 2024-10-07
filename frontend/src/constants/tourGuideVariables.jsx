@@ -13,23 +13,12 @@ export const tourGuideNavBarItems = [
 
     {
         icon: <ProfileIcon />,
-        name: " Itineraries",
+        name: "Itineraries",
         children: [
             { name: "Create" },
-            { name: "Edit" },
-            { name: "View" },
-            { name: "All" },
+            { name: "My Itineraries" },
+            { name: "All Itineraries" },
 
-
-        ],
-    },
-
-    {
-        icon: <ProfileIcon />,
-        name: " Tourist-Itineraries",
-        children: [
-            { name: "Create" },
-            { name: "Edit" },
         ],
     },
 

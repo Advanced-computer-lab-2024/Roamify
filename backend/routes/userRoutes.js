@@ -1,8 +1,8 @@
-const express = require("express");
-const userController = require("../controllers/userController");
-const { UNSAFE_ErrorResponseImpl } = require("react-router-dom");
+const express = require('express');
 
-const router = express.Router();
+const userController = require("../controllers/userController");
+
+
 
 router.post("/create-user", userController.createUser);
 router.get("/get-profile/:id", userController.getUser);

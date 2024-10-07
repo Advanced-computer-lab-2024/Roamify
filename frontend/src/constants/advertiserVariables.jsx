@@ -16,8 +16,9 @@ export const advertiserNavBarItems = [
         name: "Activities",
         children: [
             { name: "Create" },
-            { name: "Edit" },
-            { name: "View" },
+            { name: "My Activities" },
+            { name: "All Activities" }
+
         ],
     },
 ];
