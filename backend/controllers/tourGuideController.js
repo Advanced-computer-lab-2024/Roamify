@@ -13,13 +13,12 @@ const createProfile = async (req, res) => {
       if (result && userId) {
         return res.status(400).json({ error: "profile already created" });
       }
-    } //check for existence of profile for this user
+    }
+    console.log("Here!");
 
-    const { mobileNumber, yearsOfExperience, previousWork } =
-      req.body;
+    const { mobileNumber, yearsOfExperience, previousWork } = req.body;
     await userModel.findByIdAndUpdate(userId, { status: "active" });
     const newTourGuide = new tourGuideModel({
-      
       mobileNumber,
       yearsOfExperience,
       previousWork,
@@ -50,12 +49,7 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   const tourGuideId = req.params.id;
 
-  const {
-   
-    mobileNumber,
-    yearsOfExperience,
-    previousWork,
-  } = req.body;
+  const { mobileNumber, yearsOfExperience, previousWork } = req.body;
 
   const userUpdates = {};
   const tourGuideUpdates = {};
@@ -265,7 +259,10 @@ const deleteItineary = async (req, res) => {
     const itineary = await itinearyModel
       .findById(itinearyId)
       .populate("tourGuideId");
-    if(itineary.booked) return res.status(401).json({messages:'you cant delete a booked itinerary'})
+    if (itineary.booked)
+      return res
+        .status(401)
+        .json({ messages: "you cant delete a booked itinerary" });
 
     if (itineary.tourGuideId._id.toString() === tourGuideID) {
       await itinearyModel.findByIdAndDelete(itinearyId);

@@ -24,16 +24,16 @@ const createUser = async (req, res) => {
 
     const status =
       role === "tourist" || role === "tourismGovernor" ? "active" : "pending";
-    const newBUser = new userModel({
+    const newUser = new userModel({
       username,
       email,
       password,
       status,
       role,
     });
-    await newBUser.save();
+    await newUser.save();
 
-    res.status(201).json({ message: "success", user: newBUser });
+    res.status(201).json({ message: "success", user: newUser });
   } catch (e) {
     if ((e.name = "ValidationError")) {
       res.status(400).json({ message: "invalid email" }); //testing for validity of email format
