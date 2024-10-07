@@ -1,78 +1,44 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
-
-const walletSchema=new mongoose.Schema({
-    availableBalance:{
-        type:Number,
-        Default:0
-        //required:true
+const touristSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Types.ObjectId,
+      ref: "user",
+      unique: true,
     },
-    totalSpent:{
-        type:Number,
-        Default:0
-        //required:true
+    fName: {
+      type: String,
+      required: true,
     },
-    cardNumber:{
-        type:String
-    }
-
-})
-
-const touristSchema = new mongoose.Schema({
-    firstName:{
-        type:String,
-        required:true
+    lName: {
+      type: String,
+      required: true,
     },
-    lastName:{
-        type:String,
-        required:true
+    mobileNumber: {
+      type: Number,
+      required: true,
     },
-    email :{
-        type:String,
-        required:true,
-        unique: true
+    nationality: {
+      type: String,
+      required: true,
     },
-    userName:{
-        type:String,
-        required:true,
-        unique: true
-    },
-    password:{
-        type:String,
-        required:true
-    },
-    mobileNumber:{
-        type:String,
-        required:true
-
-    },
-    nationality:{
-        type:String,
-        required:true
-    },
-    dateofBirth:{
-        type:String,
-        required:true
+    dateofBirth: {
+      type: Date, //changed to Date instead of String
+      required: true,
     },
     occupation: {
-        type: String,
-        enum: ['Student', 'Employee'],
-        required: true
+      type: String,
+      enum: ["student", "employee"],
+      required: true,
     },
-    status:{
-        type:String,
-        enum:['active', 'deleted'],
-        default:'active'
+    wallet: {
+      type: mongoose.Types.ObjectId,
+      ref: "wallet",
     },
-    wallet:{
-        type:walletSchema,
-        required:true
-    }
+  },
+  { timestamps: true }
+);
 
-},{timestamps:true})
-
-
-const Wallet = mongoose.model('Wallet', walletSchema);
-const Tourist = mongoose.model('Tourist', touristSchema);
-module.exports = Wallet;
-module.exports = Tourist;
+const touristModel = mongoose.model("Tourist", touristSchema);
+module.exports = touristModel;

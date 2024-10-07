@@ -1,0 +1,158 @@
+/* Main container for the whole page */
+.tourism-page {
+  display: flex; /* Align the form and places list side by side */
+  justify-content: space-between;
+  gap: 20px; /* Space between form and places list */
+  max-width: 1300px; /* Set a max width for the container */
+  margin: 0 auto; /* Center the entire container */
+  padding: 5px;
+  background-color: #dbdad5; /* Same background color as the root */
+  box-sizing: border-box;
+  height: 100vh; /* Full height to match the viewport */
+  margin-top: 0px;
+}
+
+/* Heading styling */
+.tourism-page h1 {
+  color: #4c6665; /* Dark greenish color */
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  text-align: center;
+  width: 100%;
+  margin-top: 0px;
+}
+
+/* Form styling */
+.form {
+  background-color: #dbdad5; /* Same background color to blend with the page */
+  padding: 20px;
+  width: 45%;
+  border-radius: 8px;
+  box-shadow: none; /* Remove shadow if not needed */
+  text-align: left;
+}
+.form img {
+  width: 45px; /* Set a fixed width for the image */
+  height: auto; /* Ensure the height adjusts to maintain aspect ratio */
+  border-radius: 5px;
+  margin-top: 5px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); /* Optional: add subtle shadow */
+}
+
+/* Input and textarea styling */
+.form input[type="text"],
+.form input[type="file"],
+.form textarea {
+  width: 100%; /* Full width for input fields */
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #4c6665; /* Dark greenish border */
+  border-radius: 5px;
+  font-size: 1rem;
+  background-color: #dbdad5; /* White background for input fields */
+  color: #4c6665; /* Dark greenish text color */
+}
+
+/* Prices container */
+.prices input[type="text"] {
+  width: 30%; /* Adjust the width of price fields */
+  display: inline-block; /* Display price fields inline */
+  margin-right: 10px; /* Add space between price fields */
+}
+
+/* Types section */
+.types-container {
+  background-color: #dbdad5; /* Ensure background blends with the rest of the page */
+  padding: 10px;
+  margin-bottom: 20px;
+}
+.form h3 {
+  color: #4c6665;
+  margin-top: 0px;
+  margin-bottom: 10px;
+}
+
+.form label {
+  margin-right: 15px;
+  color: #4c6665; /* Dark greenish color for labels */
+}
+
+.form input[type="checkbox"] {
+  margin-right: 5px;
+  margin-top: 0px;
+  margin-bottom: 10px;
+}
+
+/* Tags styling */
+.tags {
+  margin-top: 0px;
+}
+
+.tag {
+  display: inline-block;
+  background-color: #4c6665; /* Dark greenish background */
+  color: white;
+  padding: 5px 10px;
+  margin-right: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+
+
+/* Places list styling */
+.places {
+  background-color: #dbdad5; /* Same background color as the page */
+  padding: 20px;
+  width: 50%;
+  border-radius: 8px;
+  box-shadow: none; /* Remove shadow if not needed */
+}
+
+.places h2 {
+  color: #4c6665; /* Dark greenish color */
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  margin-top: -10px;
+}
+
+.places ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.places li {
+  background-color: #dbdad5; /* Light background for each place */
+  padding: 15px;
+  color: #4c6665;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+}
+
+.places li strong {
+  font-size: 1.2rem;
+  color: #4c6665; /* Dark greenish color */
+}
+
+/* Places image */
+.places img {
+  margin-top: 0px;
+  border-radius: 0px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Place buttons */
+.places button {
+  margin-top: 10px;
+  background-color: #a26d5d;
+}
+
+.places button:hover {
+  background-color: #4c6665; /* Dark greenish hover */
+}
+
+
+
+  
+  

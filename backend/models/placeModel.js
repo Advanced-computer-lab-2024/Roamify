@@ -1,50 +1,63 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const historicalTag = require('./historicalTagModel');
 
-
-
-const placeSchema=new mongoose.Schema({
-    type:{
-        type:String,
-        enum:['museum','historical_site']
+const placeSchema = new mongoose.Schema({
+    type: {
+        type: String,
+        enum: ['museum', 'historical_site'],
+        required: true
     },
-    name:{
-        type:String,
-        required:True
+    name: {
+        type: String,
+        required: true
     },
-    description:{
-        type:String
+    description: {
+        type: String,
+        required: true
     },
-    pictures:{
-        type:[String]
+    tags: {
+        type: [mongoose.Types.ObjectId],
+        ref: 'historicalTag',
     },
-    location:{
-        latiude:{
-            type:Number,
-            //required:true
+    pictures: {
+        type: [String]
+    },
+    location: {
+        type: {
+            type: String,          
+            default: 'Point',     
+            required: true         
         },
-        longitude:{
-            type:Number,
-            //required:true
+        coordinates: {
+            type: [Number],        
+            required: true,        
+            validate: {            
+                validator: function (v) {
+                    if (!Array.isArray(v) || v.length !== 2) return false;
+                    const [lng, lat] = v;
+                    return lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90;
+                },
+                message: props => `${props.value} is not a valid GeoJSON coordinates array!`
+            }
         }
     },
-    ticketPrice:{
-        Native:{
-            type:Number
+    ticketPrice: {
+        Native: {
+            type: Number
         },
-        foreigner:{
-            type:Number
+        foreigner: {
+            type: Number
         },
-        student:{
-            type:Number
-
+        student: {
+            type: Number
         }
     },
-    governorId:{
+    tourismGovernorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user"
+      }
+}, { timestamps: true });
 
-        tag:{
-            type:[String]
-        }
-    }
+const Place = mongoose.model('Place', placeSchema);
 
-
-},{timestamps:true})
+module.exports = Place;

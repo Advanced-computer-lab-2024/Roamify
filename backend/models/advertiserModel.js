@@ -1,48 +1,31 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const advertiserSchema = new mongoose.schema({
-    firstName:{
-        type: String,
-        required:true
+const advertiserSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      unique: true,
     },
-    lastName:{
-        type: String,
-        required: true
+    companyName: {
+      type: String,
+      required: true,
     },
-    
-    email:{
-        type:String,
-        required:true,
-        unique: true
+    websiteLink: {
+      type: String,
+      required: true,
+    },
+    hotline: {
+      type: Number,
+      required: true,
+    },
+    companyProfile: {
+      type: String,
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
 
-    },
-    userName:{
-        type:String,
-        required:true,
-        unique: true,
-
-    },
-    password:{
-        type:String,
-        required: true
-    },
-    websiteLink:{
-        type:String,
-        required:true
-    },
-    hotline:{
-        type:Number,
-        required:true
-    },
-    companyProfile:{
-        type:String,
-        required:true
-    },
-    status:{
-        type:String,
-        enum: ['active', 'deactivated', 'pending'], 
-    default: 'pending'  
-    }
-});
-const advertiserModel = mongoose.model('advertiser', advertiserSchema);
-module.export = advertiserModel;
+const advertiserModel = mongoose.model("advertiser", advertiserSchema);
+module.exports = advertiserModel;

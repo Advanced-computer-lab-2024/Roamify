@@ -1,40 +1,26 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const sellerSchema = new mongoose.schema({
-    firstName:{
-        type: String,
-        required:true
+const sellerSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      unique: true,
     },
-    lastName:{
-        type: String,
-        required: true
+    fName: {
+      type: String,
+      required: true,
     },
-    
-    email:{
-        type:String,
-        required:true,
-        unique: true,
-
+    lName: {
+      type: String,
+      required: true,
     },
-    userName:{
-        type:String,
-        required:true,
-        unique: true,
-
-    },
-    password:{
-        type:String,
-        required: true
-    },
-    description:{
-        type:String ,
-        required:true
-    },
-    status:{
-        type:String,
-        enum: ['active', 'deactivated', 'pending'], 
-    default: 'pending'  
-    }   
-});
-const sellerModel = mongoose.model('seller', sellerSchema);
-module.export = sellerModel;
+    description: {
+      type: String,
+      required: true,
+    }
+  },
+  { timestamps: true }
+);
+const sellerModel = mongoose.model("seller", sellerSchema);
+module.exports = sellerModel;
