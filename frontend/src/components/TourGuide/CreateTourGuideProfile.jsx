@@ -6,7 +6,7 @@ import axios from 'axios'; // Import axios for API calls
 import './TourGuideProfile.css'; // Import main CSS for styling
 
 const CreateTourGuideProfile = () => {
-    const { id: userId } = useParams(); // Extract userId from URL parameters
+    const { id: userId } = useParams(); 
 
     const [profile, setProfile] = useState({
         mobileNumber: '',

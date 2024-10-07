@@ -15,7 +15,7 @@ const LoginPage = () => {
       .then((result) => {
         // const userId = result.data.user.user.user._id;
         // const profileId = result.user._id;
-        console.log(result.data.user.user.role);
+        console.log(result.data.user.role);
         if (
           result.data.user.role === "admin" ||
           result.data.user.role === "tourismGovernor"
@@ -34,10 +34,10 @@ const LoginPage = () => {
         // localStorage.setItem("profileId", profileId);
         // localStorage.setItem("parentId", result.user._id);
         // localStorage.setItem("childId", result.user.user._id);
-        switch (result.data.user.user.role) {
+        switch (result.data.user.role) {
           case "tourist":
             navigate("/tourist");
-            break;
+            break;  
           case "tourGuide":
             navigate("/tour-guide");
             break;

@@ -96,7 +96,7 @@ const loginUser = async (req, res) => {
         return res.status(200).json({ user });
       }
     }
-
+    console.log(role);
     return res.status(200).json({ message: "Login successful", user });
   } catch (error) {
     console.error("Login error:", error);
