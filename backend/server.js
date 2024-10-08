@@ -9,6 +9,7 @@ const productRoutes = require("./routes/productRoutes");
 const tourGuideRoutes = require("./routes/tourGuideRoutes");
 const advertiserRoutes = require("./routes/advertiserRoutes");
 const sellerRoutes = require("./routes/sellerRoutes");
+const tourismGovernerRoutes = require("./routes/tourismGovernorRoutes");
 dotenv.config();
 connectDB();
 const app = express();
@@ -28,6 +29,8 @@ app.use("/product", productRoutes);
 app.use("/tourguide", tourGuideRoutes);
 app.use("/advertiser", advertiserRoutes);
 app.use("/seller", sellerRoutes);
+app.use("/tourismgoverner", tourismGovernerRoutes);
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

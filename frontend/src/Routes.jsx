@@ -31,8 +31,7 @@ const MainRoutes = () => {
         <Route path="/seller/*" element={<SellerPage />} />
         <Route path="/advertiser/*" element={<AdvertiserPage />} />
         <Route path="/tour-guide/*" element={<TourGuidePage />} />
-        <Route path="/tourism-governor/*" element={<TourismGovernerPage />} />
-
+        <Route path="/tourism-governer/*" element={<TourismGovernerPage />} />
       </Routes>
     </Router>
   );
