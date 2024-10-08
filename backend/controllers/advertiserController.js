@@ -15,10 +15,10 @@ const createProfile = async (req, res) => {
       }
     } //check for existence of profile for this user
 
-    const {companyName, websiteLink, hotline, companyProfile } = req.body;
+    const { companyName, websiteLink, hotline, companyProfile } = req.body;
     await userModel.findByIdAndUpdate(userId, { status: "active" });
     const newAdvertiser = new advertiserModel({
-     companyName,
+      companyName,
       websiteLink,
       hotline,
       companyProfile,
@@ -48,8 +48,7 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   const advertiserId = req.params.id;
 
-  const { companyName, websiteLink, hotline, companyProfile } =
-    req.body;
+  const { companyName, websiteLink, hotline, companyProfile } = req.body;
 
   const userUpdates = {};
   const advertiserUpdates = {};
@@ -62,7 +61,7 @@ const updateProfile = async (req, res) => {
   }
 
   const businessUserId = advertiser.user._id;
-if(companyName) advertiserUpdates.companyName = companyName;
+  if (companyName) advertiserUpdates.companyName = companyName;
   if (websiteLink) advertiserUpdates.websiteLink = websiteLink;
   if (hotline) advertiserUpdates.hotline = hotline;
   if (companyProfile) advertiserUpdates.companyProfile = companyProfile;
@@ -151,39 +150,14 @@ const createActivity = async (req, res) => {
 
 const getActivities = async (req, res) => {
   try {
-    const advertiserId = req.params.id;
-    const query = { advertiser: advertiserId };
-
-    const { name, date, time, location, price, category, discounts, tag } =
-      req.body;
-
-    if (date) query.date = date;
-    if (time) query.time = time;
-    if (location) query.location = location;
-    if (name) query.name = name;
-    if (price) query.price = price;
-
-    if (category) {
-      const c = await categoryModel.findOne({ name: category }).select("_id");
-      query.category = c ? c._id : null;
-    }
-
-    if (discounts) query.discounts = discounts;
-
-    if (tag) {
-      const tagIds = await tagModel.find({ name: { $in: tag } }).select("_id");
-      if (tagIds.length > 0) {
-        query.tag = { $in: tagIds.map((t) => t._id) }; // Change to $in operator for matching any tag
-      }
-    }
-
     const activities = await activityModel
-      .find(query)
+      .find()
       .populate("advertiser")
       .populate("tag")
       .populate("category");
-
-    return res.status(200).json(activities);
+    if (!activities)
+      res.status(401).json({ message: "there are no activities" });
+    else res.status(200).json(activities);
   } catch (e) {
     return res.status(500).json({ message: "failed", error: e });
   }
@@ -191,39 +165,77 @@ const getActivities = async (req, res) => {
 
 const updateActivity = async (req, res) => {
   try {
-    const activityId = req.params.id;
+    const activityId = req.params.activityId; // Fixed typo
+    const advertiserId = req.params.advertiserId;
+
+    // Find the historical place and populate tourismGovernorId
+    const activity = await activityModel
+      .findById(activityId)
+      .populate("advertiser");
+
+    // Check if the place exists
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+
+    // Correctly check if the current user is authorized to edit the place
+    if (activity.advertiser._id.toString() !== advertiserId) {
+      return res
+        .status(403)
+        .json({ message: "You are not allowed to edit others' activities" });
+    }
+
+    // Extract fields from request body
+    const {
+      name,
+      date,
+      time,
+      location,
+      price,
+      category,
+      tag,
+      discounts,
+      bookingAvailable,
+      rating,
+    } = req.body;
     const query = {};
 
-    const { name, date, time, location, price, category, tagPlace, discounts } =
-      req.body;
-    if (date) query.date = date;
-    if (time) query.time = time;
-    if (location)
-      query.location = {
-        type: "Point",
-        coordinates: location.coordinates,
-      };
-    if (price) query.price = price;
-    if (category) {
-      const c = await categoryModel.findOne({ name: category }).select("_id");
-      query.category = c ? c._id : null;
+    if (tag) {
+      const tags = await activityModel
+        .find({ Type: { $in: tag } })
+        .select("_id");
+      const tagIds = tags.map((tag) => tag._id);
+      query.tag = tagIds;
     }
-    if (tagPlace) {
-      const tagIds = await tagModel.find({ name: { $in: tag } }).select("_id");
-      query.tag = tagIds.map((t) => t._id);
-    }
+
+    // Build the update query
     if (name) query.name = name;
+    if (date) query.date = date;
+    if (location) query.location = location;
+    if (price) query.price = price;
+    if (time) query.time = time;
+    if (category) query.category = category;
     if (discounts) query.discounts = discounts;
-    const activities = await activityModel
+    if (rating) query.rating = rating;
+    if (bookingAvailable) query.bookingAvailable = bookingAvailable;
+
+    // Update the historical place
+    const updatedActivity = await activityModel
       .findByIdAndUpdate(activityId, query, { new: true })
-      .populate("category")
+      .populate("advertiser")
       .populate("tag")
-      .populate("advertiser");
-    return res
-      .status(200)
-      .json({ message: "successfully updated", activities });
+      .populate("category");
+
+    // Send response
+    res.status(200).json({
+      message: "activity updated successfully",
+      activity: updatedActivity,
+    });
   } catch (e) {
-    console.log(e);
+    console.error(e); // Log the error for debugging
+    res
+      .status(500)
+      .json({ error: e.message, message: "Could not update activity" }); // Use 500 for server errors
   }
 };
 
