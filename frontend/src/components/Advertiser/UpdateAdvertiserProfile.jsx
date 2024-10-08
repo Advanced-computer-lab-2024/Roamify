@@ -1,61 +1,58 @@
-
-import React, { useState, useEffect } from 'react';
-import UpdateButton from '../Buttons/UpdateButton'; // Import the UpdateButton component
-import EditButton from '../Buttons/EditButton'; // Import the EditButton component
-import InputField from '../Modals/InputField'; // Import the InputField component
-import './AdvertiserProfile.css'; // Import main CSS for styling
+import React, { useState, useEffect } from "react";
+import UpdateButton from "../Buttons/UpdateButton"; // Import the UpdateButton component
+import EditButton from "../Buttons/EditButton"; // Import the EditButton component
+import InputField from "../Modals/InputField"; // Import the InputField component
+import "./AdvertiserProfile.css"; // Import main CSS for styling
 import axios from "axios";
 
 const UpdateAdvertiserProfile = () => {
-    const profileId = localStorage.getItem('profileId');
-    const [profile, setProfile] = useState({ 
-        companyName: '',
-        website: '',
-        hotline: '',
-        companyProfile: '',
-
-    });
+  const profileId = localStorage.getItem("profileId");
+  const [profile, setProfile] = useState({
+    companyName: "",
+    website: "",
+    hotline: "",
+    companyProfile: "",
+  });
 
   const [isEditing, setIsEditing] = useState(false);
 
   // Fetch the existing profile when the component mounts
   useEffect(() => {
     const fetchProfile = async () => {
-        if (!profileId) {
-            console.error('Profile ID is missing from localStorage');
-            return;
-        }
+      if (!profileId) {
+        console.error("Profile ID is missing from localStorage");
+        return;
+      }
 
-        try {
-            const result = await axios.get(`http://localhost:3000/advertiser/get-profile/${profileId}`);
-            console.log('Fetched data:', result.data); // Correctly log the fetched data
+      try {
+        const result = await axios.get(
+          `http://localhost:3000/advertiser/get-profile/${profileId}`
+        );
+        console.log("Fetched data:", result.data); // Correctly log the fetched data
 
-            const fetchedProfile = {
-                companyName: result.data.name || '',
-                website: result.data.websiteLink || '',
-                hotline: result.data.hotline || '',
-                companyProfile: result.data.companyProfile || ''
-                
-            };
-            setProfile(fetchedProfile);
-        } catch (error) {
-            if (error.response) {
-                // Server responded with a status other than 2xx
-                console.error('Error response:', error.response.data);
-            } else if (error.request) {
-                // Request was made but no response received
-                console.error('No response received:', error.request);
-            } else {
-                // Something else happened
-                console.error('Error setting up request:', error.message);
-            }
+        const fetchedProfile = {
+          companyName: result.data.companyName || "",
+          website: result.data.websiteLink || "",
+          hotline: result.data.hotline || "",
+          companyProfile: result.data.companyProfile || "",
+        };
+        setProfile(fetchedProfile);
+      } catch (error) {
+        if (error.response) {
+          // Server responded with a status other than 2xx
+          console.error("Error response:", error.response.data);
+        } else if (error.request) {
+          // Request was made but no response received
+          console.error("No response received:", error.request);
+        } else {
+          // Something else happened
+          console.error("Error setting up request:", error.message);
         }
+      }
     };
 
     fetchProfile();
-}, [profileId]);
-
-
+  }, [profileId]);
 
   // Handle input changes
   const handleInputChange = (name, value) => {
@@ -69,17 +66,16 @@ const UpdateAdvertiserProfile = () => {
       const request = await axios.put(
         `http://localhost:3000/advertiser/update-profile/${profileId}`,
         {
-            companyName:profile.companyName,
-            companyProfile:profile.companyProfile,
-            hotline:profile.hotline,
-            websiteLink:profile.website
+          companyName: profile.companyName,
+          companyProfile: profile.companyProfile,
+          hotline: profile.hotline,
+          websiteLink: profile.website,
         }
-
       );
       console.log("Profile updated:", request);
       setIsEditing(false);
     } catch (e) {
-        console.log(e);
+      console.log(e);
     }
   };
 
@@ -107,7 +103,6 @@ const UpdateAdvertiserProfile = () => {
           onChange={handleInputChange}
           required
           disabled={!isEditing}
-
         />
 
         {/* Previous Work */}
@@ -123,13 +118,13 @@ const UpdateAdvertiserProfile = () => {
 
         {/* Languages */}
         <InputField
-        label="Company Profile"
-        type="textarea"
-        name="companyProfile"
-        value={profile.companyProfile}
-        onChange={handleInputChange}
-        required
-        disabled={!isEditing}
+          label="Company Profile"
+          type="textarea"
+          name="companyProfile"
+          value={profile.companyProfile}
+          onChange={handleInputChange}
+          required
+          disabled={!isEditing}
         />
 
         {/* Specialization */}
