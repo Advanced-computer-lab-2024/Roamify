@@ -12,6 +12,7 @@ import TourGuidePage from "./pages/TourGuidePage.jsx";
 import TourGuidePageBody from "./components/TourGuide/TourGuidePageBody.jsx";
 import TourismGovernerPage from "./pages/TourismGovernerPage.jsx";
 import TourismGovernerPageBody from "./components/TourismGoverner/TourismGovernerPageBody.jsx";
+import TouristHomePage from "./pages/TouristHomePage.jsx";
 
 import HomePage from "./pages/HomePage/HomePage.jsx";
 import SignUpPage from "./pages/SignupPage.jsx";
@@ -27,7 +28,7 @@ const MainRoutes = () => {
         {/* <Route path="/" element={<SignUpPage />} /> */}
 
         <Route path="/admin/*" element={<AdminPage />} />
-        <Route path="/tourist/*" element={<AdminPage />} />
+        <Route path="/tourist/*" element={<TouristHomePage />} />
         <Route path="/seller/*" element={<SellerPage />} />
         <Route path="/advertiser/*" element={<AdvertiserPage />} />
         <Route path="/tour-guide/*" element={<TourGuidePage />} />

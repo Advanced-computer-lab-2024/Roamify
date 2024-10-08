@@ -5,18 +5,18 @@ import TouristActivities from "./TouristActivtiy.jsx";
 import TouristPlace from "./TouristPlaces.jsx";
 import Upcoming from "./UpcomingPage.jsx";
 import TouristProducts from "./touristProducts/TouristProducts.jsx";
+import AdminProducts from "../components/Admin/AdminProducts/AdminProducts.jsx";
 
 const TouristHomePageBody = () => {
   return (
     <div className="flex-1 p-5">
       <Routes>
-       {/* <Route path="/tourist/profile" element={<TouristProfile />} /> */}
-        <Route path="activities" element={<TouristActivities />}/>
-        
+        {/* <Route path="/tourist/profile" element={<TouristProfile />} /> */}
+        <Route path="activities" element={<TouristActivities />} />
+
         <Route path="place" element={<TouristPlace />} />
         <Route path="upcoming" element={<Upcoming />} />
-        <Route path="products" element={<TouristProducts />} />
-        
+        <Route path="products" element={<AdminProducts />} />
       </Routes>
     </div>
   );

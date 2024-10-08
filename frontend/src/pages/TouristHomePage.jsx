@@ -1,7 +1,7 @@
 import React from "react";
 import NavBar from "../components/TouristNavBar/TNavBar.jsx";
 import { touristNavBarItems } from "../components/touristNavBar.jsx";
-import TouristHomePageBody from "./TouristHomePageBody.jsx"
+import TouristHomePageBody from "./TouristHomePageBody.jsx";
 
 const TouristHomePage = () => {
   return (
