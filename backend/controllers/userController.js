@@ -145,10 +145,9 @@ const getUsersByRole = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const id = req.params.id;
-
     await userModel.findByIdAndDelete(id);
   } catch (e) {
-    console.log(e);
+    console.log(e.toString());
   }
 };
 module.exports = { createUser, getUser, loginUser, getUsersByRole, deleteUser };

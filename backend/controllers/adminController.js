@@ -77,7 +77,13 @@ const deleteUser = async (req, res) => {
         .status(200)
         .json({ message: "Tour Guide deleted successfully" });
     }
+    if (role === "tourismGovernor") {
+      await userModel.findByIdAndDelete(userId);
 
+      return res
+        .status(200)
+        .json({ message: "Tourism Governor deleted successfully" });
+    }
     console.log(user.role);
     return res
       .status(400)
