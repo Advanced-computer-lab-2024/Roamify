@@ -99,5 +99,5 @@ const activitySchema = new mongoose.Schema(
 // Geospatial index
 activitySchema.index({ location: "2dsphere" });
 
-const activityModel = mongoose.model("Activity", activitySchema);
+const activityModel = mongoose.model("activity", activitySchema);
 module.exports = activityModel;

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios"; // Import axios for making HTTP requests
 import SubmitButton from "../Buttons/SubmitButton"; // Import the SubmitButton component
-import InputField from "../Modals/InputField"; // Import the InputField component
+import InputField from "../Modals/InputFieldTourGuide"; // Import the InputField component
 import "./TourGuideItinerary.css"; // Import main CSS for styling
 const profileId = localStorage.getItem("profileId");
 
@@ -20,28 +20,33 @@ const CreateTourGuideItinerary = () => {
 
   // Handle input changes
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    if (e && e.target) {
+      const { name, value, type, checked } = e.target;
 
-    // Handle boolean and array fields
-    if (name === "accessibility") {
-      setItinerary((prev) => ({
-        ...prev,
-        [name]: checked,
-      }));
-    } else if (
-      ["availableDates", "locations", "preferenceTags", "activities"].includes(
-        name
-      )
-    ) {
-      setItinerary((prev) => ({
-        ...prev,
-        [name]: value.split(",").map((item) => item.trim()),
-      }));
-    } else {
-      setItinerary((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      // Handle boolean and array fields
+      if (type === "checkbox") {
+        setItinerary((prev) => ({
+          ...prev,
+          [name]: checked,
+        }));
+      } else if (
+        [
+          "availableDates",
+          "locations",
+          "preferenceTags",
+          "activities",
+        ].includes(name)
+      ) {
+        setItinerary((prev) => ({
+          ...prev,
+          [name]: value.split(",").map((item) => item.trim()),
+        }));
+      } else {
+        setItinerary((prev) => ({
+          ...prev,
+          [name]: value,
+        }));
+      }
     }
   };
 
@@ -51,7 +56,7 @@ const CreateTourGuideItinerary = () => {
     try {
       // Make POST request to create a new itinerary
       const response = await axios.post(
-        `http://localhost:3000/tour-guide/create-itineary/${profileId}`,
+        `http://localhost:3000/tourguide/create-itineary/${profileId}`,
         itinerary
       );
       console.log("Itinerary Created:", response.data);
