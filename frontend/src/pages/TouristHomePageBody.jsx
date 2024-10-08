@@ -6,12 +6,13 @@ import TouristPlace from "./TouristPlaces.jsx";
 import Upcoming from "./UpcomingPage.jsx";
 import TouristProducts from "./touristProducts/TouristProducts.jsx";
 import AdminProducts from "../components/Admin/AdminProducts/AdminProducts.jsx";
+import UpdateTouristProfile from "./updateTouristProfile.jsx";
 
 const TouristHomePageBody = () => {
   return (
     <div className="flex-1 p-5">
       <Routes>
-        {/* <Route path="/tourist/profile" element={<TouristProfile />} /> */}
+        <Route path="profile" element={<UpdateTouristProfile />} />
         <Route path="activities" element={<TouristActivities />} />
 
         <Route path="place" element={<TouristPlace />} />

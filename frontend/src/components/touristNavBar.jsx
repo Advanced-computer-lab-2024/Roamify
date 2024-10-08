@@ -1,12 +1,11 @@
-
 import { Link } from "react-router-dom";
 export const touristNavBarItems = [
- // {
- //   icon: null,
-   // name: "Profile",
-    //children: null,
-    //route: "/tourist/profile", //write the route
-  //},
+  {
+    icon: null,
+    name: "Profile",
+    children: null,
+    route: "/tourist/profile",
+  },
   {
     icon: null,
     name: "Activities",

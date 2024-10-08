@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from "react";
-import UpdateButton from "../components/Buttons/UpdateButton"; // Import the UpdateButton component
-import EditButton from "../components/Buttons/EditButton"; // Import the EditButton component
-import InputField from "../components/Modals/InputField"; // Import the InputField component
+import UpdateButton from ".././components/Buttons/UpdateButton"; // Import the UpdateButton component
+import EditButton from ".././components/Buttons/EditButton"; // Import the EditButton component
+import InputField from ".././components/Modals/InputField"; // Import the InputField component
 import "../components/TourGuide/TourGuideProfile.css"; // Import main CSS for styling
 import axios from "axios";
 
 const UpdateTouristProfile = () => {
-  const profileId = localStorage.getItem('profileId');
+  const profileId = localStorage.getItem("profileId");
   const [profile, setProfile] = useState({
-    firstName: '',
-    lastName: '',
-    mobileNumber: '',
-    nationality: '',
-    dateOfBirth: '',
-    occupation: '',
-    wallet: '',
-    cardNumber: '',            // Add cardNumber field
-    availableBalance: '',       // Add availableBalance field
-    validUntil: ''              // Add validUntil field
+    firstName: "",
+    lastName: "",
+    mobileNumber: "",
+    nationality: "",
+    dateOfBirth: "",
+    occupation: "",
+    wallet: "",
+    cardNumber: "", // Add cardNumber field
+    availableBalance: "", // Add availableBalance field
+    validUntil: "", // Add validUntil field
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -26,29 +26,34 @@ const UpdateTouristProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!profileId) {
-        console.error('Profile ID is missing from localStorage');
+        console.error("Profile ID is missing from localStorage");
         return;
       }
 
       try {
-        const result = await axios.get(http://localhost:3000/tourist/get-profile/${profileId});
-        console.log('Fetched data:', result.data);
-        
+        const result = await axios.get(
+          `http://localhost:3000/tourist/get-profile/${profileId}`
+        );
+        console.log("Fetched data:", result.data);
 
         const fetchedProfile = {
-          firstName: result.data.fName || '',
-          lastName: result.data.lName || '',
-          mobileNumber: result.data.mobileNumber || '',
-          nationality: result.data.nationality || '',
-          dateOfBirth: result.data.dateofBirth ? new Date(result.data.dateofBirth).toISOString().split('T')[0] : '',
-          occupation: result.data.occupation || '',
-          cardNumber: result.data.cardNumber || '',              // Fetch cardNumber
-          availableBalance: result.data.availableBalance || '',  // Fetch availableBalance
-          cardValidUntil: result.data.cardValidUntil ? new Date(result.data.validUntil).toISOString().split('T')[0] : '' // Fetch validUntil and format the date
+          firstName: result.data.fName || "",
+          lastName: result.data.lName || "",
+          mobileNumber: result.data.mobileNumber || "",
+          nationality: result.data.nationality || "",
+          dateOfBirth: result.data.dateofBirth
+            ? new Date(result.data.dateofBirth).toISOString().split("T")[0]
+            : "",
+          occupation: result.data.occupation || "",
+          cardNumber: result.data.cardNumber || "", // Fetch cardNumber
+          availableBalance: result.data.availableBalance || "", // Fetch availableBalance
+          cardValidUntil: result.data.cardValidUntil
+            ? new Date(result.data.validUntil).toISOString().split("T")[0]
+            : "", // Fetch validUntil and format the date
         };
         setProfile(fetchedProfile);
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error("Error fetching profile:", error);
       }
     };
 
@@ -64,7 +69,7 @@ const UpdateTouristProfile = () => {
   const handleUpdate = async () => {
     try {
       const request = await axios.put(
-        http://localhost:3000/tourist/update-profile/${profileId},
+        `http://localhost:3000/tourist/update-profile/${profileId}`,
         {
           fName: profile.firstName,
           lName: profile.lastName,
@@ -73,8 +78,8 @@ const UpdateTouristProfile = () => {
           dateofBirth: profile.dateOfBirth,
           occupation: profile.occupation,
           wallet: profile.wallet,
-          cardNumber: profile.cardNumber,                // Add cardNumber to the request    // Add availableBalance to the request
-          cardValidUntil: profile.validUntil                 // Add validUntil to the request
+          cardNumber: profile.cardNumber, // Add cardNumber to the request    // Add availableBalance to the request
+          cardValidUntil: profile.validUntil, // Add validUntil to the request
         }
       );
       console.log("Profile updated:", request);
@@ -149,7 +154,6 @@ const UpdateTouristProfile = () => {
         />
 
         {/* Wallet */}
-      
 
         {/* Card Number */}
         <InputField
@@ -168,7 +172,7 @@ const UpdateTouristProfile = () => {
           name="availableBalance"
           value={profile.availableBalance}
           onChange={handleInputChange}
-          disabled='true'
+          disabled="true"
           min="0"
         />
 
@@ -187,7 +191,9 @@ const UpdateTouristProfile = () => {
           {isEditing ? (
             <UpdateButton onClick={handleUpdate}>Update Profile</UpdateButton>
           ) : (
-            <EditButton onClick={() => setIsEditing(true)}>Edit Profile</EditButton>
+            <EditButton onClick={() => setIsEditing(true)}>
+              Edit Profile
+            </EditButton>
           )}
         </div>
       </div>

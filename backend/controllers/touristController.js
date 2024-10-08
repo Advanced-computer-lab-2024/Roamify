@@ -1,29 +1,20 @@
-const touristModel = require('../models/touristModel');
-const userModel = require('../models/userModel');
-const tourGuideModel = require('../models/tourGuideModel');
-const walletModel = require('../models/walletModel');
+const touristModel = require("../models/touristModel");
+const userModel = require("../models/userModel");
+const tourGuideModel = require("../models/tourGuideModel");
+const walletModel = require("../models/walletModel");
 
 const createProfile = async (req, res) => {
-
   const id = req.params.id;
-
 
   if (id) {
     const result = await touristModel.findOne({ user: id });
-    if ((result) && id) {
-      return res.status(400).json({ error: 'profile already created' });
+    if (result && id) {
+      return res.status(400).json({ error: "profile already created" });
     }
   } //check for existence of profile for this user
 
-  const {
-    fName,
-    lName,
-    mobileNumber,
-    nationality,
-    dateofBirth,
-    occupation,
-
-  } = req.body;
+  const { fName, lName, mobileNumber, nationality, dateofBirth, occupation } =
+    req.body;
   try {
     const newWallet = new walletModel({});
     await newWallet.save();
@@ -36,28 +27,23 @@ const createProfile = async (req, res) => {
       dateofBirth,
       occupation,
       wallet: newWallet._id,
-
-
-
     });
     await tourist.save();
-    const newTourist = await touristModel.findById(tourist).populate('user');
-    res.status(201).json({ tourist: newTourist })
-
-  }
-  catch (e) {
+    const newTourist = await touristModel.findById(tourist).populate("user");
+    res.status(201).json({ tourist: newTourist });
+  } catch (e) {
     res.status(401).json({ error: e });
     console.log(e);
-
   }
-
-}
+};
 const getProfile = async (req, res) => {
   try {
     const id = req.params.id;
-    const details = await touristModel.findById(id).populate('user').populate('wallet');
-    if (details)
-      res.status(200).json(details);
+    const details = await touristModel
+      .findById(id)
+      .populate("user")
+      .populate("wallet");
+    if (details) res.status(200).json(details);
   } catch (err) {
     res.status(500).json({ message: "failed", error: e });
   }
@@ -76,9 +62,8 @@ const updateProfile = async (req, res) => {
     nationality,
     occupation,
     cardNumber,
-    cardValidUntil
+    cardValidUntil,
   } = req.body;
-
 
   const userUpdates = {};
   const touristUpdates = {};
@@ -86,33 +71,24 @@ const updateProfile = async (req, res) => {
 
   const tourist = await touristModel
     .findById(touristId)
-    .populate('user')
-    .populate('wallet');
-
-
-
+    .populate("user")
+    .populate("wallet");
 
   const userId = tourist.user._id;
 
-  const walletId = tourist.wallet._id;
+  // const walletId = tourist.wallet._id;
 
   if (fName) touristUpdates.fName = fName;
   if (lName) touristUpdates.lName = lName;
 
-
   if (email) {
     const result = await userModel.findOne({ email: email });
     if (result && email != tourist.user.email) {
-      return res.status(400).json({ error: 'email already exists' });
-
-
+      return res.status(400).json({ error: "email already exists" });
     } else {
       userUpdates.email = email;
     }
   }
-
-
-
 
   if (password) userUpdates.password = password;
   if (mobileNumber) touristUpdates.mobileNumber = mobileNumber;
@@ -129,24 +105,34 @@ const updateProfile = async (req, res) => {
     if (cardValidUntilDate > today) {
       walletUpdates.cardValidUntil = cardValidUntilDate; // Store as a Date object
     } else {
-      return res.status(401).json({ message: 'Please enter a card that has not expired yet' });
+      return res
+        .status(401)
+        .json({ message: "Please enter a card that has not expired yet" });
     }
   }
 
-
-
   try {
-    const updatedUser = await userModel.findByIdAndUpdate(userId, userUpdates, { new: true });
-    const updatedTourist = await touristModel.findByIdAndUpdate(touristId, touristUpdates, { new: true });
-    const updatedWallet = await walletModel.findByIdAndUpdate(walletId, walletUpdates, { new: true });
+    const updatedUser = await userModel.findByIdAndUpdate(userId, userUpdates, {
+      new: true,
+    });
+    const updatedTourist = await touristModel.findByIdAndUpdate(
+      touristId,
+      touristUpdates,
+      { new: true }
+    );
+    // const updatedWallet = await walletModel.findByIdAndUpdate(walletId, walletUpdates, { new: true });
 
-    if (updatedUser || updatedTourist || updatedWallet) {
-      return res.status(200).json({ message: 'updated', updatedTourist: updatedTourist, wallet: updatedWallet, user: updatedUser });
+    if (updatedUser || updatedTourist) {
+      return res.status(200).json({
+        message: "updated",
+        updatedTourist: updatedTourist,
+        user: updatedUser,
+      });
     } else {
-      return res.status(404).json({ message: 'No updates made' });
+      return res.status(404).json({ message: "No updates made" });
     }
   } catch (e) {
-    return res.status(400).json({ message: 'failed', error: e });
+    return res.status(400).json({ message: "failed", error: e });
   }
 };
 module.exports = { createProfile, getProfile, updateProfile };
