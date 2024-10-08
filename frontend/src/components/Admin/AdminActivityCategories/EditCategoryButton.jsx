@@ -11,7 +11,7 @@ const EditCategoryButton = ({ categoryId, name, description, type }) => {
     };
 
     axios
-      .put(`http://localhost:3000/${type}/update-${type}/${categoryId}`, data)
+      .put(`http://localhost:3000/admin/update-${type}/${categoryId}`, data)
       .then((result) => {
         // Pass the created user data back
         handleCloseModal();

@@ -9,7 +9,7 @@ const DeleteCategoryButton = ({ categoryId, type }) => {
     try {
       // Make a DELETE request to the backend API
       const response = await axios.delete(
-        `http://localhost:3000/${type}/delete-${type}/${categoryId}`
+        `http://localhost:3000/admin/delete-${type}/${categoryId}`
       );
 
       console.log("Category deleted successfully:", response.data);

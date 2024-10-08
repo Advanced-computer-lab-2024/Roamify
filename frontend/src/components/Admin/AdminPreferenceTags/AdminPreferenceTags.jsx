@@ -9,7 +9,7 @@ const AdminPreferenceTags = () => {
   // Fetch users by role
   useEffect(() => {
     axios
-      .get(`http://localhost:3000/preference-tags/get-all-preference-tags`)
+      .get(`http://localhost:3000/admin/get-all-preference-tags`)
       .then((result) => {
         setTags(result.data.tags);
       })

@@ -12,7 +12,7 @@ const AdminActivities = () => {
   // Fetch users by role
   useEffect(() => {
     axios
-      .get(`http://localhost:3000/category/get-categories`)
+      .get(`http://localhost:3000/admin/get-categories`)
       .then((result) => {
         setCategories(result.data.categories);
       })

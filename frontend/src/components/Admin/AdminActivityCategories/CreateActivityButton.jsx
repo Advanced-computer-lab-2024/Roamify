@@ -12,7 +12,7 @@ const CreateActivityButton = ({ type }) => {
     };
 
     axios
-      .post(`http://localhost:3000/${type}/create-${type}`, data)
+      .post(`http://localhost:3000/admin/create-${type}`, data)
       .then((result) => {
         // Pass the created user data back
         handleCloseModal();
