@@ -10,10 +10,10 @@ const tourGuideRoutes = require("./routes/tourGuideRoutes");
 const advertiserRoutes = require("./routes/advertiserRoutes");
 const sellerRoutes = require("./routes/sellerRoutes");
 const tourismGovernerRoutes = require("./routes/tourismGovernorRoutes");
+const historicalTagRoutes = require("./routes/historicalTagRoutes");
 dotenv.config();
 connectDB();
 const app = express();
-
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -21,6 +21,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use("/user", userRoutes);
 app.use("/tourist", touristRoutes);
@@ -30,6 +31,7 @@ app.use("/tourguide", tourGuideRoutes);
 app.use("/advertiser", advertiserRoutes);
 app.use("/seller", sellerRoutes);
 app.use("/tourismgoverner", tourismGovernerRoutes);
+app.use("/historical-tag", historicalTagRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => {

@@ -3,10 +3,10 @@ const HistoricalTag = require("../models/historicalTagModel");
 
 const createHistoricalTag = async (req, res) => {
   try {
-    const { Type, Period } = req.body;
+    const { name, description } = req.body;
     const newTag = new HistoricalTag({
-      Type: Type,
-      Period: Period,
+      name: name,
+      description: description,
     });
 
     await newTag.save();

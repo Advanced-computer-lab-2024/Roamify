@@ -10,35 +10,36 @@ const createPlace = async (req, res) => {
       description,
       pictures,
       location,
-      tagPlace,
+      tagPlace, // This should contain tag names (not IDs)
       ticketPrice,
     } = req.body;
 
-    // Find tags based on the provided tagPlace array
+    // Find tags based on their names in the provided tagPlace array
     const tags = await historicalTagModel
-      .find({ Type: { $in: tagPlace } })
+      .find({ name: { $in: tagPlace } }) // Searching for tags by their names
       .select("_id");
-    const tagIds = tags.map((tag) => tag._id);
+    const tagIds = tags.map((tag) => tag._id); // Extract the _id of each tag
 
     // Create the new place with the relevant details
     const newHistoricalPlace = new placeModel({
       type,
       name,
       description,
-      tags: tagIds,
+      tags: tagIds, // Save the tag IDs here
       pictures,
       location,
       ticketPrice,
       tourismGovernorId,
     });
 
+    // Save the new historical place to the database
     await newHistoricalPlace.save();
 
     // Populate fields to return additional info in the response
     const historicalPlace = await placeModel
       .findById(newHistoricalPlace._id)
-      .populate("tourismGovernorId")
-      .populate("tags");
+      .populate("tourismGovernorId") // Populate the governor
+      .populate("tags", "name"); // Populate tags but only return their names
 
     res
       .status(200)
@@ -120,12 +121,10 @@ const updatePlace = async (req, res) => {
       .populate("tags");
 
     // Send response
-    res
-      .status(200)
-      .json({
-        message: "Place updated successfully",
-        place: updatedHistoricalPlace,
-      });
+    res.status(200).json({
+      message: "Place updated successfully",
+      place: updatedHistoricalPlace,
+    });
   } catch (e) {
     console.error(e); // Log the error for debugging
     res

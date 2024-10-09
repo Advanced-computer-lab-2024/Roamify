@@ -1,7 +1,9 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { createHistoricalTag } = require('../controllers/historicalTagController'); 
+const {
+  createHistoricalTag,
+} = require("../controllers/historicalTagController");
 
-router.post('/createhistoricalTag', createHistoricalTag);
+router.post("/create-historical-tag", createHistoricalTag);
 
 module.exports = router;

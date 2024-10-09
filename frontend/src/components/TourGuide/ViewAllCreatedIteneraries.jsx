@@ -30,6 +30,7 @@ const ViewAllCreatedItineraries = () => {
     fetchItineraries();
   }, []); // Correct placement of dependency array
 
+  console.log(itineraries);
   return (
     <div className="itinerary-list-page flex flex-col items-center p-5 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-semibold mb-5">All Created Itineraries</h1>

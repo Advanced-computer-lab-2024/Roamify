@@ -2,6 +2,9 @@ const express = require("express");
 const adminController = require("../controllers/adminController");
 const categoryController = require("../controllers/categoryController");
 const preferenceTagController = require("../controllers/preferenceTagController");
+const {
+  createHistoricalTag,
+} = require("../controllers/historicalTagController");
 const router = express.Router();
 
 router.post("/add-tourism-governor", adminController.addTourismGovernor);
@@ -12,7 +15,6 @@ router.get("/get-categories", categoryController.getAllCategories);
 router.get("/get-category/:id", categoryController.getCategoryById);
 router.put("/update-category/:id", categoryController.updateCategory);
 router.delete("/delete-category/:id", categoryController.deleteCategory);
-
 
 router.post(
   "/create-preference-tags",
@@ -31,5 +33,6 @@ router.delete(
   "/delete-preference-tags/:id",
   preferenceTagController.deletePreferenceTag
 );
+router.post("/create-historical-tag", createHistoricalTag);
 
 module.exports = router;

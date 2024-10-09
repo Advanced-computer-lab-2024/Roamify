@@ -55,7 +55,6 @@ const updateProfile = async (req, res) => {
   const {
     fName,
     lName,
-
     email,
     password,
     mobileNumber,

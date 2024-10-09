@@ -187,7 +187,7 @@ const EditPlaceModal = ({ museum, onChange, onClose, onUpdate }) => {
             label="Tags (comma separated)"
             type="text"
             name="tags"
-            value={Array.isArray(museum.tags) ? museum.tags.join(", ") : ""} // Convert array to comma-separated string
+            value={Array.isArray(museum.tags) ? museum.tags.join(",") : ""} // Convert array to comma-separated string
             onChange={(e) => {
               const { value } = e.target;
               onChange({
@@ -201,7 +201,7 @@ const EditPlaceModal = ({ museum, onChange, onClose, onUpdate }) => {
 
           {/* Action Buttons */}
           <div className="mt-6 flex justify-between">
-            <UpdateButton type="submit">Update Historical Place</UpdateButton>
+            <button type="submit">Update Historical Place</button>
             <button
               type="button"
               onClick={onClose}

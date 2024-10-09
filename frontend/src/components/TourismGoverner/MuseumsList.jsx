@@ -4,19 +4,19 @@ import DeleteButton from "../Buttons/DeleteButton"; // Import the DeleteButton c
 import EditPlaceModal from "../Modals/EditPlaceModal"; // Import the EditPlaceModal component
 import "./TourismGovernerPage.css"; // Import main CSS for styling
 import axios from "axios";
-const profileId = localStorage.getItem("profileId");
 
 const MuseumsList = () => {
   const [museums, setMuseums] = useState([]);
   const [selectedMuseum, setSelectedMuseum] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
+  const userId = localStorage.getItem("userId");
   // Fetch the list of museums when the component mounts
   useEffect(() => {
     const fetchMuseums = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/tourismgoverner/get-my-places/${profileId}`
+          `http://localhost:3000/tourismgoverner/get-my-places/${userId}`
         );
         console.log("API Response:", response.data); // Log response for debugging
         setMuseums(response.data);
@@ -32,7 +32,7 @@ const MuseumsList = () => {
   const handleDelete = async (museumId) => {
     try {
       await axios.delete(
-        `http://localhost:3000/tourismgoverner/delete-place/${profileId}/${museumId}`
+        `http://localhost:3000/tourismgoverner/delete-place/${userId}/${museumId}`
       );
       setMuseums((prev) => prev.filter((museum) => museum._id !== museumId));
       console.log("Museum deleted:", museumId);
@@ -53,14 +53,14 @@ const MuseumsList = () => {
     try {
       if (selectedMuseum) {
         await axios.put(
-          `http://localhost:3000/tourismgoverner/update-place/${profileId}/${selectedMuseum._id}`,
+          `http://localhost:3000/tourismgoverner/update-place/${userId}/${selectedMuseum._id}`,
           selectedMuseum
         );
         console.log("Updated Place:", selectedMuseum);
         setIsEditing(false);
         // Refresh the museums list
         const response = await axios.get(
-          `http://localhost:3000/tourismgoverner/get-my-places/${profileId}`
+          `http://localhost:3000/tourismgoverner/get-my-places/${userId}`
         );
         setMuseums(response.data);
       }

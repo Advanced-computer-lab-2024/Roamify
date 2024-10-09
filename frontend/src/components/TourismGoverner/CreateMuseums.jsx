@@ -10,7 +10,7 @@ const CreateMuseums = () => {
     type: "museum", // Default type
     name: "",
     description: "",
-    tags: "", // Comma-separated tags
+    tagPlace: "", // Comma-separated tags
     pictures: "", // Comma-separated picture URLs
     location: {
       type: "Point",
@@ -22,6 +22,8 @@ const CreateMuseums = () => {
       student: "",
     },
   });
+
+  const userId = localStorage.getItem("userId");
 
   // Handle input changes
   const handleChange = (e) => {
@@ -73,14 +75,15 @@ const CreateMuseums = () => {
     // Convert comma-separated tags and pictures to arrays
     const formattedMuseum = {
       ...museum,
-      tags: museum.tags.split(",").map((tag) => tag.trim()), // Convert tags to array
+      tagPlace: museum.tags.split(",").map((tag) => tag.trim()), // Convert tags to array
       pictures: museum.pictures.split(",").map((pic) => pic.trim()), // Convert pictures to array
     };
 
     try {
+      // console.log(formattedMuseum.t)
       // Make POST request to create a new place
       const response = await axios.post(
-        `http://localhost:3000/tourismgoverner/create-place/${profileId}`,
+        `http://localhost:3000/tourismgoverner/create-place/${userId}`,
         formattedMuseum
       );
       console.log("Place Created:", response.data);
@@ -89,7 +92,7 @@ const CreateMuseums = () => {
         type: "museum",
         name: "",
         description: "",
-        tags: "",
+        tagPlace: "",
         pictures: "",
         location: {
           type: "Point",

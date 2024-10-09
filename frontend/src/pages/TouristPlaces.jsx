@@ -30,38 +30,25 @@ const TouristPlacesPage = () => {
     fetchAllPlaces(); // Fetch all places when the page loads
   }, []);
 
-  // Filter places based on the search term and search type
+  // Filter places based on the search term, search type, and tag
   const filteredPlaces = places.filter((place) => {
     const term = searchTerm.toLowerCase();
-    if (searchType === "name") {
-      return place.name.toLowerCase().includes(term);
-    } else if (searchType === "category") {
-      return place.category?.toLowerCase().includes(term);
-    } else if (searchType === "tag") {
-      return place.tags?.some((tag) => tag.name.toLowerCase().includes(term));
-    }
-    return true;
-  });
+    const isTagMatch =
+      tag === "" ||
+      (place.tags &&
+        place.tags.some((t) =>
+          t.name.toLowerCase().includes(tag.toLowerCase())
+        ));
 
-  // Fetch filtered places based on tag
-  const fetchFilteredPlaces = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/places/filter`,
-        {
-          params: { tag },
-        }
-      );
-      setPlaces(response.data); // Set filtered places
-    } catch (error) {
-      setError(
-        error.response?.data?.message || "Failed to fetch filtered places"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    const isSearchMatch =
+      searchType === "name"
+        ? place.name.toLowerCase().includes(term)
+        : searchType === "category"
+        ? place.category?.toLowerCase().includes(term)
+        : place.tags?.some((t) => t.name.toLowerCase().includes(term));
+
+    return isTagMatch && isSearchMatch;
+  });
 
   // Handle tag input change
   const handleTagChange = (e) => {
@@ -76,11 +63,6 @@ const TouristPlacesPage = () => {
   // Handle search type change
   const handleSearchTypeChange = (e) => {
     setSearchType(e.target.value); // Update the search type state when the dropdown changes
-  };
-
-  // Handle search button click
-  const handleSearchClick = () => {
-    fetchFilteredPlaces(); // Fetch filtered places based on the tag
   };
 
   return (
@@ -107,13 +89,6 @@ const TouristPlacesPage = () => {
           <option value="category">Category</option>
           <option value="tag">Tag</option>
         </select>
-        {/* Search button */}
-        <button
-          onClick={handleSearchClick}
-          className="bg-blue-500 text-white rounded p-2"
-        >
-          Search
-        </button>
 
         {/* Tag filter input */}
         <input
@@ -123,12 +98,6 @@ const TouristPlacesPage = () => {
           onChange={handleTagChange}
           className="border rounded p-2"
         />
-        <button
-          onClick={handleSearchClick}
-          className="bg-blue-500 text-white rounded p-2"
-        >
-          Filter by Tag
-        </button>
       </div>
 
       {/* Loading message and place details rendering */}
