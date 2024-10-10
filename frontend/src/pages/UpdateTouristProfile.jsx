@@ -45,11 +45,14 @@ const UpdateTouristProfile = () => {
             ? new Date(result.data.dateofBirth).toISOString().split("T")[0]
             : "",
           occupation: result.data.occupation || "",
-          cardNumber: result.data.cardNumber || "", // Fetch cardNumber
-          availableBalance: result.data.availableBalance || "", // Fetch availableBalance
-          cardValidUntil: result.data.cardValidUntil
-            ? new Date(result.data.validUntil).toISOString().split("T")[0]
-            : "", // Fetch validUntil and format the date
+          email: result.data.email || "", // Email from user
+          cardNumber: result.data.wallet?.cardNumber || "", // Wallet info
+          availableBalance: result.data.wallet?.availableBalance || 0,
+          validUntil: result.data.wallet?.cardValidUntil
+            ? new Date(result.data.wallet.cardValidUntil)
+                .toISOString()
+                .split("T")[0]
+            : "",
         };
         setProfile(fetchedProfile);
       } catch (error) {
