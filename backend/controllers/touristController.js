@@ -179,8 +179,8 @@ const updateProfile = async (req, res) => {
     const updatedUser = await userModel.findByIdAndUpdate(id, userUpdates, {
       new: true,
     });
-    const updatedTourist = await touristModel.findOneAndUpdate(
-      {user:id},
+    const updatedTourist = await touristModel.findByIdAndUpdate(
+      tourist._id,
       touristUpdates,
       { new: true }
     );
