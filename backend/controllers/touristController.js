@@ -2,6 +2,8 @@ const touristModel = require("../models/touristModel");
 const userModel = require("../models/userModel");
 const tourGuideModel = require("../models/tourGuideModel");
 const walletModel = require("../models/walletModel");
+const bcrypt = require('bcrypt');
+const validator = require('validator');
 
 function isAdult(dateOfBirth) {
   const today = new Date();
@@ -69,7 +71,7 @@ const createProfile = async (req, res) => {
     });
     await tourist.save();
     const newTourist = await touristModel.findById(tourist);
-    res.status(201).json({ tourist: newTourist });
+    res.status(201).json({message:'created tourist successfully'});
   } catch (e) {
     res.status(401).json({ error: e });
     console.log(e);
@@ -79,17 +81,43 @@ const getProfile = async (req, res) => {
   try {
     const id = req.params.id;
     const details = await touristModel
-      .findOne({user:id})
-      .populate("user") // Specify fields to populate
-      .populate("wallet"); // Populate the wallet details
-      return res.status(200).json({tourist:details});
+      .findOne({ user: id })
+      .populate({
+        path: 'user',
+        select: 'username email role password status' // Only return these fields from the user
+      })
+      .populate({
+        path: 'wallet',
+        select: 'cardNumber cardValidUntil' // Only return specific wallet fields
+      })
+      .select('-__v'); // Exclude the version key
+
+    // Return only the specific properties
+    return res.status(200).json({
+      
+        username: details.user.username,
+        email: details.user.email,
+        role: details.user.role,
+        password: details.user.password,
+      
+      
+        firstName: details.firstName,
+        lastName: details.lastName,
+        mobileNumber: details.mobileNumber,
+        nationality: details.nationality,
+        dateOfBirth: details.dateOfBirth,
+        occupation: details.occupation,
+        adult: details.adult,
+        cardNumber : details.wallet.cardNumber?details.wallet.cardNumber:"",
+        cardValidUntil : details.wallet.cardValidUntil?details.wallet.cardValidUntil:""
+      
+    });
 
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Failed to fetch profile", error: err });
+    return res.status(500).json({ message: "Failed to fetch profile", error: err });
   }
 };
+
 
 const updateProfile = async (req, res) => {
   const id = req.params.id;
@@ -98,7 +126,8 @@ const updateProfile = async (req, res) => {
     firstName,
     lastName,
     email,
-    password,
+    oldPassword,
+    newPassword,
     mobileNumber,
     nationality,
     occupation
@@ -110,10 +139,7 @@ const updateProfile = async (req, res) => {
   try {
     const tourist = await touristModel
       .findOne({user:id})
-      .populate("user")
-      .populate("wallet");
-
-    const userId = tourist.user._id;
+      .populate("user");
 
     // Tourist updates
     if (firstName) touristUpdates.firstName = firstName;
@@ -128,35 +154,48 @@ const updateProfile = async (req, res) => {
       if (existingUser && email !== tourist.user.email) {
         return res.status(400).json({ error: "Email already exists" });
       }
+      if(!validator.isEmail(email)){
+        throw Error('Email is not valid');
+      }
       userUpdates.email = email;
     }
-    if (password) userUpdates.password = password;
+   
+    
+    if (oldPassword){
+      const match = await  bcrypt.compare(oldPassword,tourist.user.password);
+      if(!match)
+        throw Error('password does not match old password');
+      if(!validator.isStrongPassword(newPassword)){
+        throw Error('password doesn\'t meet minimum requirements');
+      }
+      const salt = await bcrypt.genSalt(10);
+  const hash = await bcrypt.hash(newPassword,salt);
+  userUpdates.password = hash;
+
+    }
 
 
     // Perform the updates
-    const updatedUser = await userModel.findByIdAndUpdate(userId, userUpdates, {
+    const updatedUser = await userModel.findByIdAndUpdate(id, userUpdates, {
       new: true,
     });
-    const updatedTourist = await touristModel.findByIdAndUpdate(
-      touristId,
+    const updatedTourist = await touristModel.findOneAndUpdate(
+      {user:id},
       touristUpdates,
       { new: true }
     );
 
     if (updatedUser || updatedTourist) {
       return res.status(200).json({
-        message: "Profile updated",
-        updatedTourist,
-        updatedUser
+        message: "Profile updated successfully"
       });
     } else {
       return res.status(400).json({ message: "No updates made" });
     }
   } catch (e) {
-    console.log(e);
     return res
       .status(400)
-      .json({ message: "Failed to update profile", error: e });
+      .json({ message: "Failed to update profile", error: e.message });
   }
 };
 

@@ -103,6 +103,7 @@ const loginUser = async (req, res) => {
   }
 };
 
+
 const getUsersByRole = async (req, res) => {
   try {
     const role = req.params.role;
@@ -145,6 +146,7 @@ const deleteUser = async (req, res) => {
   try {
     const id = req.params.id;
     await userModel.findByIdAndDelete(id);
+    return res.status(200).json({message:'deleted successfully'});
   } catch (e) {
     console.log(e.toString());
   }
