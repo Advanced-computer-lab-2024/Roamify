@@ -67,7 +67,7 @@ const createProfile = async (req, res) => {
       dateOfBirth,
       occupation,
       adult,
-      wallet: newWallet._id,
+      wallet: newWallet?newWallet._id:null
     });
     await tourist.save();
     const newTourist = await touristModel.findById(tourist);
@@ -198,5 +198,47 @@ const updateProfile = async (req, res) => {
       .json({ message: "Failed to update profile", error: e.message });
   }
 };
+const addWallet = async (req,res)=>{
+try{
+  const id = req.params.id;
+  const {cardNumber,cardValidUntil} = req.body;
+  const tourist = await touristModel.findOne({user:id});
+  if(!tourist.adult)
+    throw Error('Tourist must be an adult to proceed with this operation.')
+  console.log(tourist.wallet);
+  if(tourist.wallet)
+    throw Error('there already exists a card remove it first');
+  if(!cardNumber||!cardValidUntil)
+    throw Error('please fill the fields');
+  
+  
+    const currentDate = new Date();
+    const cardValidUntilDate = new Date(cardValidUntil);
+    console.log("Current Date:", currentDate);
+    console.log("Card Valid Until Date:", cardValidUntilDate);
+     console.log("Is card expired?", cardValidUntilDate < currentDate);
+    if(cardValidUntilDate<currentDate)
+      throw Error('please enter a valid card');
+    if(cardNumber.length!=14)
+      throw Error('please enter a valid card');
 
-module.exports = { createProfile, getProfile, updateProfile };
+
+  
+  
+
+  const wallet = new walletModel({
+    cardNumber,
+    cardValidUntil
+  });
+
+ const newWallet =  await wallet.save();
+  await touristModel.findByIdAndUpdate(tourist._id,{wallet:newWallet});
+  return res.status(201).json({message:'card added successfully'});
+
+}
+catch(e){
+  return res.status(401).json({message:e.message});
+}
+}
+
+module.exports = { createProfile, getProfile, updateProfile ,addWallet};
