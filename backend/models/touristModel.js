@@ -7,11 +7,11 @@ const touristSchema = new mongoose.Schema(
       ref: "user",
       unique: true,
     },
-    fName: {
+    firstName: {
       type: String,
       required: true,
     },
-    lName: {
+    lastName: {
       type: String,
       required: true,
     },
@@ -23,19 +23,25 @@ const touristSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    dateofBirth: {
+    dateOfBirth: {
       type: Date, //changed to Date instead of String
       required: true,
     },
     occupation: {
       type: String,
-      enum: ["student", "employee"],
+      enum: ["student", "employee","Student","Employee"],
       required: true,
+    },
+
+    adult:{
+      type:Boolean,
+      required:true
     },
     wallet: {
       type: mongoose.Types.ObjectId,
       ref: "wallet",
-    },
+    }
+
   },
   { timestamps: true }
 );

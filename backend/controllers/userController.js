@@ -3,43 +3,35 @@ const touristModel = require("../models/touristModel");
 const advertiserModel = require("../models/advertiserModel");
 const tourGuideModel = require("../models/tourGuideModel");
 const sellerModel = require("../models/sellerModel");
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
+const createToken = (_id,role) =>{
+  return jwt.sign({_id,role}, process.env.SECRET,{expiresIn : '3d'});
+
+}
 
 const createUser = async (req, res) => {
-  try {
-    const { username, email, password, role } = req.body;
+    try{
+      const { username, email, password, role } = req.body;
 
-    if (username) {
-      const result = await userModel.findOne({ username: username });
-      if (result && username) {
-        return res.status(400).json({ error: "username already exists" });
-      }
-    } //validation of username existence
 
-    if (email) {
-      const result = await userModel.findOne({ email: email });
-      if (result && email) {
-        return res.status(400).json({ error: "email already exists" });
-      }
-    } //validation of email existence
+      //creating my user
+      const user = await userModel.signUp(username,email,password,role);
 
-    const status =
-      role === "tourist" || role === "tourismGovernor" ? "active" : "pending";
-    const newUser = new userModel({
-      username,
-      email,
-      password,
-      status,
-      role,
-    });
-    await newUser.save();
+      //create a token 
+      const token = createToken(user._id,user.role);
 
-    res.status(201).json({ message: "success", user: newUser });
-  } catch (e) {
-    if ((e.name = "ValidationError")) {
-      res.status(400).json({ message: "invalid email" }); //testing for validity of email format
+      res.status(201).json({
+        email:user.email,
+        username:user.username
+      ,token});
     }
-    console.log(e);
-  }
+    catch(error){
+      res.status(401).json({error:error.message});
+      console.log(error);
+       
+    }
 };
 const getUser = async (req, res) => {
   try {
@@ -60,15 +52,18 @@ const loginUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (password !== user.password) {
+    const match =  await bcrypt.compare(password,user.password);
+    if (!match) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
     const role = user.role;
     const status = user.status;
     if (role === "tourist") {
-      user = await touristModel.findOne({ user: user._id }).populate("user");
-      return res.status(200).json({ user });
+      user = await touristModel.findOne({ user: user._id }).populate('user');
+      const token = createToken(user._id,user.role);
+      return res.status(200).json({ email:user.user.email,username:user.user.username,token});
+
     }
 
     if (
@@ -81,26 +76,30 @@ const loginUser = async (req, res) => {
         user = await advertiserModel
           .findOne({ user: user._id })
           .populate("user");
-        return res.status(200).json({ user });
+          const token = createToken(user.user._id,user.user.role);
+          return res.status(200).json({ email:user.user.email,username:user.user.username,token});
       }
 
       if (role === "seller") {
-        user = await sellerModel.findOne({ user: user._id }).populate("user");
-        return res.status(200).json({ user });
+        user = await sellerModel.findOne({ user: user._id });
+        const token = createToken(user.user._id,user.user.role);
+        return res.status(200).json({ email:user.user.email,username:user.user.username,token});
       }
 
       if (role === "tourGuide") {
         user = await tourGuideModel
           .findOne({ user: user._id })
           .populate("user");
-        return res.status(200).json({ user });
+          const token = createToken(user.user._id,user.user.role);
+          return res.status(200).json({ email:user.user.email,username:user.user.username,token});
       }
     }
     console.log(role);
-    return res.status(200).json({ message: "Login successful", user });
+
+     const token = createToken(user.user._id,user.user.role);
+          return res.status(200).json({ username:user.user.username,token});
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "error.message" });
   }
 };
 

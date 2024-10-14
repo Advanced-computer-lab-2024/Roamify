@@ -3,6 +3,22 @@ const userModel = require("../models/userModel");
 const tourGuideModel = require("../models/tourGuideModel");
 const walletModel = require("../models/walletModel");
 
+function isAdult(dateOfBirth) {
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+
+  // Calculate the difference in years
+  let age = today.getFullYear() - birthDate.getFullYear();
+
+  // Adjust age if the birthday hasn't happened yet this year
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  return age >= 18;
+}
+
 const createProfile = async (req, res) => {
   const id = req.params.id;
 
@@ -13,23 +29,46 @@ const createProfile = async (req, res) => {
     }
   } //check for existence of profile for this user
 
-  const { fName, lName, mobileNumber, nationality, dateofBirth, occupation } =
+  const { firstName, lastName, mobileNumber, nationality, dateOfBirth, occupation ,cardNumber,cardValidUntil} =
     req.body;
   try {
-    const newWallet = new walletModel({});
-    await newWallet.save();
+    let newWallet = null;
+    if(cardNumber){
+      const currentDate = new Date();
+      const cardValidUntilDate = new Date(cardValidUntil);
+      console.log("Current Date:", currentDate);
+            console.log("Card Valid Until Date:", cardValidUntilDate);
+            console.log("Is card expired?", cardValidUntilDate < currentDate);
+      if(cardValidUntilDate<currentDate)
+        return res.status(401).json({message:'please enter a valid card'});
+      if(cardNumber.length!=14)
+        return res.status(401).json({message:'please enter a valid card'});
+
+       newWallet = new walletModel({
+        cardNumber,
+        cardValidUntil
+  
+      });
+       await newWallet.save();
+
+  
+    }
+    const adult = isAdult(dateOfBirth);
+
+   
     const tourist = new touristModel({
       user: id,
-      fName,
-      lName,
+      firstName,
+      lastName,
       mobileNumber,
       nationality,
-      dateofBirth,
+      dateOfBirth,
       occupation,
+      adult,
       wallet: newWallet._id,
     });
     await tourist.save();
-    const newTourist = await touristModel.findById(tourist).populate("user");
+    const newTourist = await touristModel.findById(tourist);
     res.status(201).json({ tourist: newTourist });
   } catch (e) {
     res.status(401).json({ error: e });
@@ -40,30 +79,11 @@ const getProfile = async (req, res) => {
   try {
     const id = req.params.id;
     const details = await touristModel
-      .findById(id)
-      .populate("user", "email") // Specify fields to populate
+      .findOne({user:id})
+      .populate("user") // Specify fields to populate
       .populate("wallet"); // Populate the wallet details
+      return res.status(200).json({tourist:details});
 
-    if (details) {
-      return res.status(200).json({
-        fName: details.fName,
-        lName: details.lName,
-        mobileNumber: details.mobileNumber,
-        nationality: details.nationality,
-        dateofBirth: details.dateofBirth,
-        occupation: details.occupation,
-        email: details.user ? details.user.email : null, // Populate user email
-        wallet: details.wallet
-          ? {
-              cardNumber: details.wallet.cardNumber,
-              availableBalance: details.wallet.availableBalance,
-              cardValidUntil: details.wallet.cardValidUntil,
-            }
-          : null, // Populate wallet details
-      });
-    } else {
-      return res.status(404).json({ message: "Profile not found" });
-    }
   } catch (err) {
     return res
       .status(500)
@@ -72,40 +92,32 @@ const getProfile = async (req, res) => {
 };
 
 const updateProfile = async (req, res) => {
-  const touristId = req.params.id;
+  const id = req.params.id;
 
   const {
-    fName,
-    lName,
+    firstName,
+    lastName,
     email,
     password,
     mobileNumber,
     nationality,
-    occupation,
-    cardNumber,
-    cardValidUntil,
+    occupation
   } = req.body;
 
   const userUpdates = {};
   const touristUpdates = {};
-  const walletUpdates = {};
 
   try {
     const tourist = await touristModel
-      .findById(touristId)
+      .findOne({user:id})
       .populate("user")
       .populate("wallet");
 
-    if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
-    }
-
     const userId = tourist.user._id;
-    const walletId = tourist.wallet._id;
 
     // Tourist updates
-    if (fName) touristUpdates.fName = fName;
-    if (lName) touristUpdates.lName = lName;
+    if (firstName) touristUpdates.firstName = firstName;
+    if (lastName) touristUpdates.lastName = lastName;
     if (mobileNumber) touristUpdates.mobileNumber = mobileNumber;
     if (nationality) touristUpdates.nationality = nationality;
     if (occupation) touristUpdates.occupation = occupation;
@@ -120,19 +132,6 @@ const updateProfile = async (req, res) => {
     }
     if (password) userUpdates.password = password;
 
-    // Wallet updates
-    if (cardNumber) walletUpdates.cardNumber = cardNumber;
-    if (cardValidUntil) {
-      const today = new Date();
-      const cardValidUntilDate = new Date(cardValidUntil);
-      if (cardValidUntilDate > today) {
-        walletUpdates.cardValidUntil = cardValidUntilDate;
-      } else {
-        return res
-          .status(401)
-          .json({ message: "Please enter a card that has not expired yet" });
-      }
-    }
 
     // Perform the updates
     const updatedUser = await userModel.findByIdAndUpdate(userId, userUpdates, {
@@ -143,21 +142,15 @@ const updateProfile = async (req, res) => {
       touristUpdates,
       { new: true }
     );
-    const updatedWallet = await walletModel.findByIdAndUpdate(
-      walletId,
-      walletUpdates,
-      { new: true }
-    );
 
-    if (updatedUser || updatedTourist || updatedWallet) {
+    if (updatedUser || updatedTourist) {
       return res.status(200).json({
         message: "Profile updated",
         updatedTourist,
-        updatedUser,
-        updatedWallet,
+        updatedUser
       });
     } else {
-      return res.status(404).json({ message: "No updates made" });
+      return res.status(400).json({ message: "No updates made" });
     }
   } catch (e) {
     console.log(e);
@@ -166,4 +159,5 @@ const updateProfile = async (req, res) => {
       .json({ message: "Failed to update profile", error: e });
   }
 };
+
 module.exports = { createProfile, getProfile, updateProfile };

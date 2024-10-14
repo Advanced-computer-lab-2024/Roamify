@@ -23,8 +23,8 @@ app.use(
 );
 
 app.use(express.json());
-app.use("/user", userRoutes);
-app.use("/tourist", touristRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/tourist", touristRoutes);
 app.use("/admin", adminRoutes);
 app.use("/product", productRoutes);
 app.use("/tourguide", tourGuideRoutes);
