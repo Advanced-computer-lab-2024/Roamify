@@ -3,10 +3,12 @@ const userModel = require("../models/userModel");
 const activityModel = require("../models/activityModel");
 const tagModel = require("../models/preferenceTagModel");
 const categoryModel = require("../models/categoryModel");
+const bcrypt = require('bcrypt');
+const validator = require('validator');
 
 const createProfile = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const userId = req.user._id;
 
     if (userId) {
       const result = await advertiserModel.findOne({ user: userId });
@@ -16,6 +18,8 @@ const createProfile = async (req, res) => {
     } //check for existence of profile for this user
 
     const { companyName, websiteLink, hotline, companyProfile } = req.body;
+    if(!companyName||!websiteLink||!hotline||!companyProfile)
+      throw Error('please fill all fields');
     await userModel.findByIdAndUpdate(userId, { status: "active" });
     const newAdvertiser = new advertiserModel({
       companyName,
@@ -25,7 +29,7 @@ const createProfile = async (req, res) => {
       user: userId,
     });
     await newAdvertiser.save();
-    res.status(200).json({ message: "success", acceptedUser: newAdvertiser });
+    res.status(201).json({ message: "Created advertiser successfully" });
   } catch (e) {
     res.status(404).json({ message: "failed", error: e });
     console.log(e);
@@ -34,77 +38,102 @@ const createProfile = async (req, res) => {
 
 const getProfile = async (req, res) => {
   try {
-    const id = req.params.id;
-    const details = await advertiserModel.findById(id).populate("user");
-    if (details) res.status(200).json(details);
-    else {
-      res.status(400).json({ message: "this profile does not exist" });
-    }
+    const id = req.user._id;
+    const details = await advertiserModel.findOne({user:id}) .populate({
+      path: 'user',
+      select: 'username email role password status' // Only return these fields from the user
+    });
+    return res.status(200).json({username:details.user.username,email:details.user.email,role:details.user.role,companyName:details.companyName,companyProfile:details.companyProfile,websiteLink:details.websiteLink,hotline:details.hotline});
+   
   } catch (err) {
-    res.status(500).json({ message: "failed", error: e });
+    res.status(401).json({ message: "failed", error: err.message });
   }
 };
 
 const updateProfile = async (req, res) => {
-  const advertiserId = req.params.id;
+  try{
+  const id = req.user._id;
 
-  const { companyName, websiteLink, hotline, companyProfile } = req.body;
+  const { companyName, websiteLink, hotline, companyProfile , oldPassword,newPassword ,email} = req.body;
 
   const userUpdates = {};
   const advertiserUpdates = {};
 
   const advertiser = await advertiserModel
-    .findById(advertiserId)
+    .findOne({user:id})
     .populate("user");
   if (!advertiser) {
     res.status(400).json({ message: "cannot find this profile" });
   }
 
-  const businessUserId = advertiser.user._id;
   if (companyName) advertiserUpdates.companyName = companyName;
   if (websiteLink) advertiserUpdates.websiteLink = websiteLink;
   if (hotline) advertiserUpdates.hotline = hotline;
   if (companyProfile) advertiserUpdates.companyProfile = companyProfile;
 
-  try {
-    const updatedUser = await userModel.findByIdAndUpdate(
-      businessUserId,
-      userUpdates,
-      { new: true }
-    );
-    const updatedAdvertiser = await advertiserModel.findByIdAndUpdate(
-      advertiserId,
-      advertiserUpdates,
-      { new: true }
-    );
+  if (oldPassword){
+    const match = await  bcrypt.compare(oldPassword,advertiser.user.password);
+    if(!match)
+      throw Error('password does not match old password');
+    if(!validator.isStrongPassword(newPassword)){
+      throw Error('password doesn\'t meet minimum requirements');
+    }
+    const salt = await bcrypt.genSalt(10);
+const hash = await bcrypt.hash(newPassword,salt);
+userUpdates.password = hash;
 
-    if (updatedUser || updatedAdvertiser) {
+  }
+  if (email) {
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser && email !== advertiser.user.email) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
+    if(!validator.isEmail(email)){
+      throw Error('Email is not valid');
+    }
+    userUpdates.email = email;
+  }
+  
+    const updatedAdvertiser = await advertiserModel.findByIdAndUpdate(
+      advertiser._id,
+      advertiserUpdates
+    );
+    const updatedUser = await userModel.findByIdAndUpdate(id,userUpdates);
+
+    if ( updatedAdvertiser || updatedUser) {
       return res
         .status(200)
-        .json({ message: "updated", updatedAdvertiser: updatedAdvertiser });
+        .json({ message: "updated advertiser successfully" });
     } else {
       return res.status(404).json({ message: "No updates made" });
     }
   } catch (e) {
-    return res.status(400).json({ message: "failed", error: e });
+    return res.status(400).json({ message: "failed to update advertiser", error: e.message });
   }
 };
 
 const createActivity = async (req, res) => {
   try {
-    const advertiserId = req.params.id;
+    const id = req.user._id;
 
-    const { name, date, time, location, price, category, tagPlace, discounts } =
+    const { name, date, time, location, price, category, tags, discounts } =
       req.body;
 
-    const tags = await tagModel.find({ name: { $in: tagPlace } }).select("_id");
+    const insertedTags = await tagModel.find({ name: { $in: tags } }).select("_id");
+    console.log(tags);
+    console.log(insertedTags);
     const categoryId = await categoryModel
       .findOne({ name: category })
       .select("_id");
-    const categoryIdFinal = categoryId.id;
+    const categoryIdFinal = categoryId._id;
+
+    const currentDate = new Date();
+    const insertedDate = new Date(date);
+    if(insertedDate<currentDate)
+      throw Error('please enter a valid date');
 
     // Extract the ObjectId values from the result
-    const tagIds = tags.map((tag) => tag._id);
+    const tagIds = insertedTags.map((tag) => tag._id);
 
     const newActivity = new activityModel({
       name,
@@ -117,56 +146,61 @@ const createActivity = async (req, res) => {
       },
       price,
       category: categoryIdFinal,
-      tag: tagIds,
+      tags: tagIds,
       discounts,
-      advertiser: advertiserId,
+      advertiser: id,
     });
 
     await newActivity.save();
-    const populatedActivity = await activityModel
-      .findById(newActivity._id)
-      .populate("category")
-      .populate("tag")
-      .populate("advertiser");
+   
 
-    res
+    return res
       .status(200)
-      .json({ message: "success", acceptedActivity: populatedActivity });
+      .json({ message: "Created activity successfully"});
   } catch (e) {
-    if (e.code === 11000) {
-      // Duplicate key error
-      res.status(400).json({
-        message:
-          "Duplicate activity name detected. Please use a different name.",
-      });
-    } else {
+    
       res
-        .status(500)
+        .status(401)
         .json({ message: "Failed to create activity", error: e.message });
       console.log(e);
-    }
+    
   }
 };
-
 const getActivities = async (req, res) => {
   try {
     const activities = await activityModel
       .find()
-      .populate("advertiser")
-      .populate("tag")
-      .populate("category");
-    if (!activities)
-      res.status(401).json({ message: "there are no activities" });
-    else res.status(200).json(activities);
+      .populate({
+        path: "advertiser",
+        select: "username email status role -_id" // Exclude '_id' for advertiser
+      })
+      .populate({
+        path: "tags",
+        select: "name description -_id" // Exclude '_id' for tags
+      })
+      .populate({
+        path: "category",
+        select: "name description -_id" // Exclude '_id' for category
+      })
+      .select("name date time location price discounts bookingAvailable rating -_id") // Select only these fields and exclude '_id'
+      .sort({ createdAt: 1 }); // Sort by creation date in ascending order
+
+    if (!activities || activities.length === 0) {
+      return res.status(404).json({ message: "There are no activities" });
+    } else {
+      return res.status(200).json(activities);
+    }
   } catch (e) {
-    return res.status(500).json({ message: "failed", error: e });
+    return res.status(500).json({ message: "Failed to get activities", error: e.message });
   }
 };
 
+
+//missing this
 const updateActivity = async (req, res) => {
   try {
     const activityId = req.params.activityId; // Fixed typo
-    const advertiserId = req.params.advertiserId;
+    const advertiserId = req.user._id;
 
     // Find the historical place and populate tourismGovernorId
     const activity = await activityModel
@@ -193,63 +227,76 @@ const updateActivity = async (req, res) => {
       location,
       price,
       category,
-      tag,
+       tags,
       discounts,
       bookingAvailable,
       rating,
     } = req.body;
     const query = {};
 
-    if (tag) {
-      const tags = await activityModel
-        .find({ Type: { $in: tag } })
+    if (tags) {
+      const insertedTags = await tagModel
+        .find({ name: { $in: tags } })
         .select("_id");
-      const tagIds = tags.map((tag) => tag._id);
-      query.tag = tagIds;
+        console.log(insertedTags);
+        if(insertedTags.length==0)
+          throw Error('please choose vald tags');
+      const tagIds = insertedTags.map((tag) => tag._id);
+      query.tags = tagIds;
     }
 
     // Build the update query
     if (name) query.name = name;
-    if (date) query.date = date;
+    if (date) {
+      const currentDate = new Date();
+      const insertedDate = new Date(date);
+      if(insertedDate<currentDate)
+        throw Error('please enter a valid date');
+      query.date = date;
+    }
     if (location) query.location = location;
     if (price) query.price = price;
     if (time) query.time = time;
-    if (category) query.category = category;
+    if (category) {
+
+      const categoryId = await categoryModel.findOne({name:category});
+      if(!categoryId)
+        throw Error('choose a category from the existing ones');
+      query.category = categoryId;
+
+    }
     if (discounts) query.discounts = discounts;
     if (rating) query.rating = rating;
     if (bookingAvailable) query.bookingAvailable = bookingAvailable;
 
     // Update the historical place
     const updatedActivity = await activityModel
-      .findByIdAndUpdate(activityId, query, { new: true })
-      .populate("advertiser")
-      .populate("tag")
-      .populate("category");
+      .findByIdAndUpdate(activityId, query);
+      
 
     // Send response
     res.status(200).json({
-      message: "activity updated successfully",
-      activity: updatedActivity,
+      message: "activity updated successfully"
     });
   } catch (e) {
     console.error(e); // Log the error for debugging
     res
-      .status(500)
-      .json({ error: e.message, message: "Could not update activity" }); // Use 500 for server errors
+      .status(401)
+      .json({ message: e.message}); // Use 500 for server errors
   }
 };
 
 const deleteActivity = async (req, res) => {
   try {
     const activityId = req.params.activityid;
-    const advertiserId = req.params.advertiserid;
+    const id = req.user._id;
 
     const activity = await activityModel
       .findById(activityId)
       .populate("advertiser");
 
     // Check if the advertiserId matches the one in the activity
-    if (activity.advertiser._id.toString() === advertiserId) {
+    if (activity.advertiser._id.toString() === id) {
       await activityModel.findByIdAndDelete(activityId);
       res.status(200).json({ message: "Activity deleted successfully" });
     } else {
@@ -264,18 +311,34 @@ const deleteActivity = async (req, res) => {
 
 const getMyActivities = async (req, res) => {
   try {
-    const advertiserId = req.params.id;
+    const advertiserId = req.user._id;
     const activities = await activityModel
       .find({ advertiser: advertiserId })
-      .populate("category")
-      .populate("tag")
-      .populate("advertiser");
+      .populate({
+        path: "category",
+        select: "name description -_id" // Select only the necessary fields and exclude '_id'
+      })
+      .populate({
+        path: "tags",
+        select: "name description -_id" // Select only the necessary fields and exclude '_id'
+      })
+      .populate({
+        path: "advertiser",
+        select: "username email status role -_id" // Select only the necessary fields and exclude '_id'
+      })
+      .select("name date time location price discounts bookingAvailable rating -_id") // Select the necessary fields for activities and exclude '_id'
+      .sort({ createdAt: 1 }); // Sort by creation date in ascending order
 
-    res.status(200).json(activities);
+    if (activities.length === 0) {
+      return res.status(404).json({ message: "No activities found for this advertiser" });
+    } else {
+      return res.status(200).json(activities);
+    }
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "Failed to get activities", error: err.message });
   }
 };
+
 
 module.exports = {
   createProfile,

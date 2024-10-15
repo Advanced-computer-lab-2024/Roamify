@@ -22,7 +22,7 @@ function isAdult(dateOfBirth) {
 }
 
 const createProfile = async (req, res) => {
-  const id = req.params.id;
+  const id = req.user._id;
 
   if (id) {
     const result = await touristModel.findOne({ user: id });
@@ -31,30 +31,12 @@ const createProfile = async (req, res) => {
     }
   } //check for existence of profile for this user
 
-  const { firstName, lastName, mobileNumber, nationality, dateOfBirth, occupation ,cardNumber,cardValidUntil} =
+  const { firstName, lastName, mobileNumber, nationality, dateOfBirth, occupation} =
     req.body;
   try {
-    let newWallet = null;
-    if(cardNumber){
-      const currentDate = new Date();
-      const cardValidUntilDate = new Date(cardValidUntil);
-      console.log("Current Date:", currentDate);
-            console.log("Card Valid Until Date:", cardValidUntilDate);
-            console.log("Is card expired?", cardValidUntilDate < currentDate);
-      if(cardValidUntilDate<currentDate)
-        return res.status(401).json({message:'please enter a valid card'});
-      if(cardNumber.length!=14)
-        return res.status(401).json({message:'please enter a valid card'});
-
-       newWallet = new walletModel({
-        cardNumber,
-        cardValidUntil
-  
-      });
-       await newWallet.save();
+   
 
   
-    }
     const adult = isAdult(dateOfBirth);
 
    
@@ -79,7 +61,7 @@ const createProfile = async (req, res) => {
 };
 const getProfile = async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = req.user._id;
     const details = await touristModel
       .findOne({ user: id })
       .populate({
@@ -98,7 +80,6 @@ const getProfile = async (req, res) => {
         username: details.user.username,
         email: details.user.email,
         role: details.user.role,
-        password: details.user.password,
       
       
         firstName: details.firstName,
@@ -120,7 +101,7 @@ const getProfile = async (req, res) => {
 
 
 const updateProfile = async (req, res) => {
-  const id = req.params.id;
+  const id = req.user._id;
 
   const {
     firstName,
@@ -200,7 +181,7 @@ const updateProfile = async (req, res) => {
 };
 const addWallet = async (req,res)=>{
 try{
-  const id = req.params.id;
+  const id = req.user._id;
   const {cardNumber,cardValidUntil} = req.body;
   const tourist = await touristModel.findOne({user:id});
   if(!tourist.adult)

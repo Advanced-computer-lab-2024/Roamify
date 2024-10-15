@@ -11,6 +11,9 @@ const advertiserRoutes = require("./routes/advertiserRoutes");
 const sellerRoutes = require("./routes/sellerRoutes");
 const tourismGovernerRoutes = require("./routes/tourismGovernorRoutes");
 const historicalTagRoutes = require("./routes/historicalTagRoutes");
+const authenticateMiddleWare = require("./middleware/authMiddleware");
+const cookieParser = require('cookie-parser');
+
 dotenv.config();
 connectDB();
 const app = express();
@@ -21,14 +24,15 @@ app.use(
     credentials: true,
   })
 );
+app.use(cookieParser());
 
 app.use(express.json());
 app.use("/api/user", userRoutes);
-app.use("/api/tourist", touristRoutes);
+app.use("/api/tourist", authenticateMiddleWare.authenticateTourist,touristRoutes);
 app.use("/admin", adminRoutes);
 app.use("/product", productRoutes);
 app.use("/tourguide", tourGuideRoutes);
-app.use("/advertiser", advertiserRoutes);
+app.use("/api/advertiser",authenticateMiddleWare.authenticateAdvertiser, advertiserRoutes);
 app.use("/seller", sellerRoutes);
 app.use("/tourismgoverner", tourismGovernerRoutes);
 app.use("/historical-tag", historicalTagRoutes);

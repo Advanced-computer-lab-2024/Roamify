@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active","pending"],
+      enum: ["active","pending","pendingCreation"],
       default: "pending",
     },
     role: {
@@ -63,7 +63,7 @@ userSchema.statics.signUp = async function (username,email,password,role){
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(password,salt);
   const status =
-      role === "tourist" || role === "tourismGovernor" ? "active" : "pending";
+      role === "tourist" || role === "tourismGovernor" || role==="admin" ? "active" : "pending";
 
   const user = await this.create({username,email,password: hash,status,role});
 

@@ -6,104 +6,130 @@ const sellerModel = require("../models/sellerModel");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const createToken = (_id,role) =>{
-  return jwt.sign({_id,role}, process.env.SECRET,{expiresIn : '3d'});
-
+// Create JWT Token
+const createToken = (_id, role) => {
+  return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: '3d' });
 }
-
-const createUser = async (req, res) => {
-    try{
-      const { username, email, password, role } = req.body;
-
-
-      //creating my user
-      const user = await userModel.signUp(username,email,password,role);
-
-      //create a token 
-      const token = createToken(user._id,user.role);
-
-      res.status(201).json({
-        email:user.email,
-        username:user.username
-      ,token});
-    }
-    catch(error){
-      res.status(401).json({error:error.message});
-      console.log(error);
-       
-    }
+const setTokenCookie = (res, token) => {
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // Only secure cookies in production
+    sameSite: "strict",
+    maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days expiration
+  });
 };
-const getUser = async (req, res) => {
+
+// Adjusted Create User Function
+const createUser = async (req, res) => {
   try {
-    const id = req.params.id;
-    const details = await userModel.findById(id);
-    if (details) res.status(200).json(details);
-  } catch (e) {
-    res.status(400).json({ message: "failed", error: e });
+    const { username, email, password, role } = req.body;
+
+    // Creating the user
+    const user = await userModel.signUp(username, email, password, role);
+
+    // Create a token
+    const token = createToken(user._id, user.role);
+
+    // Set the token in an HttpOnly cookie
+    setTokenCookie(res, token);
+
+    // Return user info without the token in the response
+    res.status(201).json({
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    });
+  } catch (error) {
+    res.status(401).json({ error: error.message });
+    console.log(error);
   }
 };
 
+// Adjusted Login Function
 const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    // Find user by username
     let user = await userModel.findOne({ username });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const match =  await bcrypt.compare(password,user.password);
+    // Check password
+    const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const role = user.role;
-    const status = user.status;
+    const { role, status, _id } = user;
+
+    // Handle tourist login
     if (role === "tourist") {
-      user = await touristModel.findOne({ user: user._id }).populate('user');
-      const token = createToken(user._id,user.role);
-      return res.status(200).json({ email:user.user.email,username:user.user.username,token});
+      const tourist = await touristModel.findOne({ user: _id }).populate("user");
+      if (!tourist) return res.status(404).json({ message: "Tourist profile not found" });
 
+      const token = createToken(tourist.user._id, tourist.user.role);
+      setTokenCookie(res, token);
+
+      return res.status(200).json({
+        email: tourist.user.email,
+        username: tourist.user.username,
+        role: tourist.user.role,
+      });
     }
 
-    if (
-      status === "active" &&
-      role !== "tourismGovernor" &&
-      role !== "admin" &&
-      role !== "tourist"
-    ) {
-      if (role === "advertiser") {
-        user = await advertiserModel
-          .findOne({ user: user._id })
-          .populate("user");
-          const token = createToken(user.user._id,user.user.role);
-          return res.status(200).json({ email:user.user.email,username:user.user.username,token});
-      }
+    // Handle advertiser, seller, tour guide login based on role and active status
+    if (status === "active" && ["advertiser", "seller", "tourGuide"].includes(role)) {
+      let model, entity;
+      if (role === "advertiser") model = advertiserModel;
+      if (role === "seller") model = sellerModel;
+      if (role === "tourGuide") model = tourGuideModel;
 
-      if (role === "seller") {
-        user = await sellerModel.findOne({ user: user._id });
-        const token = createToken(user.user._id,user.user.role);
-        return res.status(200).json({ email:user.user.email,username:user.user.username,token});
-      }
+      entity = await model.findOne({ user: _id }).populate("user");
+      if (!entity) return res.status(404).json({ message: `${role} profile not found` });
 
-      if (role === "tourGuide") {
-        user = await tourGuideModel
-          .findOne({ user: user._id })
-          .populate("user");
-          const token = createToken(user.user._id,user.user.role);
-          return res.status(200).json({ email:user.user.email,username:user.user.username,token});
-      }
+      const token = createToken(entity.user._id, entity.user.role);
+      setTokenCookie(res, token);
+
+      return res.status(200).json({
+        email: entity.user.email,
+        username: entity.user.username,
+        role: entity.user.role,
+      });
     }
-    console.log(role);
+    if((status === "pending") && ["advertiser", "seller", "tourGuide"].includes(role))
+      throw Error('admin have not yet accepted your request');
+      
+    if((status === "pendingCreation") && ["advertiser", "seller", "tourGuide"].includes(role))
+      throw Error('please check your mail and activate your account');
+      
 
-     const token = createToken(user.user._id,user.user.role);
-          return res.status(200).json({ username:user.user.username,token});
+    // General token for other users (tourismGovernor, admin, etc.)
+    const token = createToken(_id, role);
+    setTokenCookie(res, token);
+
+    return res.status(200).json({
+      username: user.username,
+      role: user.role,
+    });
   } catch (error) {
-    res.status(500).json({ message: "error.message" });
+    res.status(500).json({ message: error.message });
   }
 };
 
+// Adjusted Logout Function (clear token cookie)
+const logoutUser = (req, res) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 1, // Immediately expire
+  });
+  return res.status(200).json({ message: "Successfully logged out" });
+};
 
+// Get users by role
 const getUsersByRole = async (req, res) => {
   try {
     const role = req.params.role;
@@ -124,14 +150,12 @@ const getUsersByRole = async (req, res) => {
     // Fetch users based on the role
     const users = await userModel.find({ role });
 
-    // If no users are found
     if (users.length === 0) {
       return res
         .status(404)
         .json({ message: `No users found with role ${role}` });
     }
 
-    // Return the list of users
     res.status(200).json({
       message: `Users with role ${role} retrieved successfully`,
       users,
@@ -142,13 +166,21 @@ const getUsersByRole = async (req, res) => {
   }
 };
 
+// Delete user
 const deleteUser = async (req, res) => {
   try {
     const id = req.params.id;
     await userModel.findByIdAndDelete(id);
-    return res.status(200).json({message:'deleted successfully'});
+    return res.status(200).json({ message: 'deleted successfully' });
   } catch (e) {
     console.log(e.toString());
   }
 };
-module.exports = { createUser, getUser, loginUser, getUsersByRole, deleteUser };
+
+module.exports = {
+  createUser,
+  loginUser,
+  logoutUser,
+  getUsersByRole,
+  deleteUser,
+};

@@ -45,5 +45,5 @@ const touristSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const touristModel = mongoose.model("Tourist", touristSchema);
+const touristModel = mongoose.model("tourist", touristSchema);
 module.exports = touristModel;

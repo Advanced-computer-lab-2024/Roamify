@@ -46,19 +46,7 @@ const activitySchema = new mongoose.Schema(
       },
     },
     price: {
-      type: mongoose.Schema.Types.Mixed,
-      validate: {
-        validator: function (v) {
-          return (
-            typeof v === "number" ||
-            (Array.isArray(v) &&
-              v.length === 2 &&
-              v.every((num) => typeof num === "number"))
-          );
-        },
-        message: (props) =>
-          `${props.value} is not a valid price! It should be a single number or an array of two numbers (min, max).`,
-      },
+      type: Number,
       required: true,
     },
     category: {
@@ -66,7 +54,7 @@ const activitySchema = new mongoose.Schema(
       ref: "Category",
       required: true,
     },
-    tag: {
+    tags: {
       type: [mongoose.Types.ObjectId],
       ref: "PreferenceTag",
       required: true,
@@ -84,12 +72,12 @@ const activitySchema = new mongoose.Schema(
     rating: {
       type: Number,
       min: 0,
-      max: 10,
+      max: 5,
       default: 0,
     },
     advertiser: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "advertiser",
+      ref: "user",
       required: true,
     },
   },
