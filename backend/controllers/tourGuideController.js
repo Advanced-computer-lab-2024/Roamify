@@ -3,18 +3,19 @@ const tourGuideModel = require("../models/tourGuideModel");
 const activityModel = require("../models/activityModel");
 const PreferenceTag = require("../models/preferenceTagModel");
 const itinearyModel = require("../models/itinearyModel");
+const bcrypt = require('bcrypt');
+const validator = require('validator');
 
 const createProfile = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const userId = req.user._id;
 
     if (userId) {
       const result = await tourGuideModel.findOne({ user: userId });
-      if (result && userId) {
+      if (result) {
         return res.status(400).json({ error: "profile already created" });
       }
     }
-    console.log("Here!");
 
     const { mobileNumber, yearsOfExperience, previousWork } = req.body;
     await userModel.findByIdAndUpdate(userId, { status: "active" });
@@ -27,95 +28,100 @@ const createProfile = async (req, res) => {
     await newTourGuide.save();
     res
       .status(200)
-      .json({ message: "success", acceptedTourGuide: newTourGuide });
+      .json({ message: "Created Tourguide successfully."});
   } catch (e) {
-    res.status(404).json({ message: "failed" });
+    res.status(401).json({ message: "failed to create tour guide",error:e.message });
   }
 };
 
 const getProfile = async (req, res) => {
   try {
-    const id = req.params.id;
-    const details = await tourGuideModel.findById(id).populate("user");
-    if (details) res.status(200).json(details);
+    const id = req.user._id;
+    console.log(id);
+    const details = await tourGuideModel.findOne({user:id})
+    .select('-_id,-__v,-createdAt,-updatedAt')  // Excludes the id field from the tourguide model
+    .populate({
+      path: "user",
+      select: "-_id -password -__v -createdAt -updatedAt"  // Excludes id, password, and Mongoose-generated fields
+    });
+  
+    if (details) res.status(200).json({username:details.user.username,email:details.user.email,role:details.user.role,mobileNumber:details.mobileNumber,yearsOfExperience:details.yearsOfExperience,previousWork:details.previousWork});
     else {
-      res.status(400).json({ message: "this profile does not exist" });
+      res.status(404).json({ message: "this profile does not exist" });
     }
   } catch (err) {
-    res.status(500).json({ message: "failed", error: e });
+    res.status(404).json({ message: "failed to get profile", error: err.message });
   }
 };
 
 const updateProfile = async (req, res) => {
-  const tourGuideId = req.params.id;
+  try{
+  const userId = req.user_id;
 
-  const { mobileNumber, yearsOfExperience, previousWork } = req.body;
+  const { mobileNumber, yearsOfExperience, previousWork, oldPassword,newPassword ,email } = req.body;
 
   const userUpdates = {};
   const tourGuideUpdates = {};
 
-  const tourGuide = await tourGuideModel.findById(tourGuideId).populate("user");
+  const tourGuide = await tourGuideModel.findOne(userId).populate("user");
+
   if (!tourGuide) {
     res.status(400).json({ message: "cannot find this profile" });
   }
 
-  const businessUserId = tourGuide.user._id;
+  const tourGuideId = tourGuide._id;
 
-  // if (userName) {
-  //   const result = await userModel.findOne({ userName: userName });
-  //   if (result && result.userName != tourGuide.user.userName) {
-  //     return res.status(400).json({ error: "username already exists" });
-  //   } else {
-  //     userUpdates.userName = userName;
-  //   }
-  // } // corrected logic of username existence validation
+  if (oldPassword){
+    const match = await  bcrypt.compare(oldPassword,tourGuide.user.password);
+    if(!match)
+      throw Error('password does not match old password');
+    if(!validator.isStrongPassword(newPassword)){
+      throw Error('password doesn\'t meet minimum requirements');
+    }
+    const salt = await bcrypt.genSalt(10);
+const hash = await bcrypt.hash(newPassword,salt);
+userUpdates.password = hash;
 
-  // if (email) {
-  //   const emailRegex = /.+@.+\..+/;
-  //   if (!emailRegex.test(email)) {
-  //     return res
-  //       .status(400)
-  //       .json({ error: "Please enter a valid email address" });
-  //   }
-  //   const result = await userModel.findOne({ email: email });
-  //   if (result && result.email != tourGuide.user.email) {
-  //     return res.status(400).json({ error: "email already exists" });
-  //   } else {
-  //     userUpdates.email = email;
-  //   }
-  // } // corrected logic of email existence validation
+  }
+  if (email) {
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser && email !== tourGuide.user.email) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
+    if(!validator.isEmail(email)){
+      throw Error('Email is not valid');
+    }
+    userUpdates.email = email;
+  }
 
-  // if (password) userUpdates.password = password;
   if (mobileNumber) tourGuideUpdates.mobileNumber = mobileNumber;
   if (yearsOfExperience) tourGuideUpdates.yearsOfExperience = yearsOfExperience;
   if (previousWork) tourGuideUpdates.previousWork = previousWork;
 
-  try {
+  
     const updatedUser = await userModel.findByIdAndUpdate(
-      businessUserId,
-      userUpdates,
-      { new: true }
+      userId,
+      userUpdates
     );
     const updatedTourGuide = await tourGuideModel.findByIdAndUpdate(
       tourGuideId,
-      tourGuideUpdates,
-      { new: true }
+      tourGuideUpdates
     );
     if (updatedUser || updatedTourGuide) {
       return res
         .status(200)
-        .json({ message: "updated", updatedTourGuide: updatedTourGuide });
+        .json({ message: "updated Tourguide successfully" });
     } else {
       return res.status(404).json({ message: "No updates made" });
     }
   } catch (e) {
-    return res.status(400).json({ message: "failed", error: e });
+    return res.status(400).json({ message: "failed", error: e.message });
   }
 };
 
-const createItineary = async (req, res) => {
+const createItinerary = async (req, res) => {
   try {
-    const tourGuideId = req.params.id;
+    const userId = req.user._id;
 
     const {
       activities,
@@ -127,24 +133,34 @@ const createItineary = async (req, res) => {
       accessibility,
     } = req.body;
 
+    if(!activities || !language || !price || !availableDates || !pickUpLocation || !dropOffLocation || !dropOffLocation || !accessibility)
+      throw Error("please fill all required fields");
     if (!activities)
       res.status(401).json({ error: "please select activities" });
     let locations = [];
     let prefTags = [];
     const activityIds = await Promise.all(
-      activities.map(async (name) => {
-        const activity = await activityModel.findOne({ name });
-        locations.push(activity.location.name);
-        prefTags.push(activity.tag);
+      activities.map(async (id) => {
+      
+        const activity = await activityModel.findById(id);
         if (!activity) {
-          res.status(401).json({ error: "this activity doesnt exist" });
+          throw Error("some activities doesnt exist please make sure that all activities are available");
         }
+        if(!activity.bookingAvailable)
+          throw Error(`sorry this activity is not available for booking ${activity.name}`)
+        locations.push(activity.location.name);
+        
+        const tag = activity.tags.forEach((t)=>{
+          prefTags.push(t);
+          console.log("tags "+t);
+        })
+       
+      
         return activity._id;
       })
     );
-    console.log(tourGuideId);
-    const newItineary = new itinearyModel({
-      tourGuideId: tourGuideId,
+    const itinerary = new itinearyModel({
+      tourGuideId: userId,
       activities: activityIds,
       language: language,
       price: price,
@@ -152,44 +168,51 @@ const createItineary = async (req, res) => {
       pickUpLocation: pickUpLocation,
       dropOffLocation: dropOffLocation,
       accessibility: accessibility,
-      preferenceTag: prefTags,
+      preferenceTags: prefTags,
       locations: locations,
     });
-    await newItineary.save();
-    const itineary = await itinearyModel
-      .findById(newItineary)
-      .populate("tourGuideId")
-      .populate("activities")
-      .populate("preferenceTags");
-    res.status(200).json({ message: "success", acceptedItineary: itineary });
+    await itinerary.save();
+    res.status(200).json({ message: "Created itinerary successfully"});
   } catch (e) {
-    res.status(404).json({ message: "failed", error: e });
+    res.status(401).json({ message: "Failed to create itinerary", error: e.message });
     console.log(e);
   }
 };
 
-const getItinearies = async (req, res) => {
+const getItineraries = async (req, res) => {
   try {
-    const itinearies = await itinearyModel
-      .find()
-      .populate("tourGuideId")
-      .populate("preferenceTags");
-    if (!itinearies)
-      res.status(401).json({ message: "there are no itinearies" });
-    else res.status(200).json(itinearies);
+    const itineraries = await itinearyModel
+  .find()
+  .select('-__v -createdAt -updatedAt')  // Exclude Mongoose-generated fields in the main query
+  .populate({
+    path: 'tourGuideId',
+    select: 'username email -_id'  // Exclude password, role, and Mongoose-generated fields for tourGuide
+  })
+  .populate({
+    path: 'preferenceTags',
+    select: '-_id -__v'  // Exclude Mongoose-generated fields for preferenceTags
+  })
+  .populate({
+    path: 'activities',
+    select: ' -_id name'  // Exclude Mongoose-generated fields for activities
+  });
+
+    if (!itineraries)
+      res.status(401).json({ message: "there are no itineraries" });
+    else res.status(200).json(itineraries);
   } catch (e) {
-    return res.status(500).json({ message: "failed", error: e });
+    return res.status(500).json({ message: "failed", error: e.message });
   }
 };
 
-const updateItineary = async (req, res) => {
+const updateItinerary = async (req, res) => {
   try {
-    const itinearyId = req.params.itinearyId;
-    const tourGuideId = req.params.tourGuideId;
+    const itineraryId = req.params.itineraryId;
+    const tourGuideId = req.user._id;
 
     console.log(tourGuideId);
     const itineary = await itinearyModel
-      .findById(itinearyId)
+      .findById(itineraryId)
       .populate("tourGuideId");
 
     if (!itineary) {
@@ -197,9 +220,7 @@ const updateItineary = async (req, res) => {
     }
 
     if (itineary.tourGuideId._id.toString() !== tourGuideId) {
-      return res
-        .status(401)
-        .json({ message: "You are not allowed to edit others' itineraries" });
+      throw Error('you are not allowed to edit others itineraries');
     }
 
     const {
@@ -217,7 +238,7 @@ const updateItineary = async (req, res) => {
     const query = {};
     let locations = [];
     let prefTags = [];
-    let activityIds = [];
+ 
 
     // Update query fields
     if (language) query.language = language;
@@ -226,81 +247,102 @@ const updateItineary = async (req, res) => {
     if (pickUpLocation) query.pickUpLocation = pickUpLocation;
     if (dropOffLocation) query.dropOffLocation = dropOffLocation;
     if (accessibility) query.accessibility = accessibility;
+    if(booked) query.boooked = booked;      
 
     // Process activities
     if (activities) {
-      for (let name of activities) {
-        const activity = await activityModel.findOne({ name });
-
-        if (!activity) {
-          return res
-            .status(400)
-            .json({ error: `Activity "${name}" does not exist` });
-        }
-
-        locations.push(activity.location.name);
-        prefTags.push(activity.tag);
-        activityIds.push(activity._id);
-      }
-
+      const activityIds = await Promise.all(
+        activities.map(async (id) => {
+        
+          const activity = await activityModel.findById(id);
+          if (!activity) {
+            throw Error("some activities doesnt exist please make sure that all activities are available");
+          }
+          if(!activity.bookingAvailable)
+            throw Error(`sorry this activity is not available for booking ${activity.name}`)
+          locations.push(activity.location.name);
+          query.locations = locations;
+          
+          const tag = activity.tags.forEach((t)=>{
+            prefTags.push(t);
+            query.preferenceTags=prefTags;
+            
+          })
+         
+        
+          return activity._id;
+        })
+        
+       
+       
+      );
       query.activities = activityIds;
-      query.locations = locations;
-      query.preferenceTags = prefTags;
+      
+      
     }
+    console.log(prefTags+"tag");
+  
 
-    if (booked !== undefined) query.booked = booked;
-    if (rating !== undefined) query.rating = rating;
+
+    if (rating) query.rating = rating;
 
     // Update the itinerary
     const updatedItineary = await itinearyModel
-      .findByIdAndUpdate(itinearyId, query, { new: true })
-      .populate("tourGuideId")
-      .populate("activities")
-      .populate("preferenceTags");
+      .findByIdAndUpdate(itineraryId, query);
+    
 
     return res
       .status(200)
-      .json({ message: "Updated", itineary: updatedItineary });
+      .json({ message: "Updated itineraryy successfully" });
   } catch (e) {
-    console.error(e);
+   
     return res
       .status(500)
-      .json({ error: e, message: "Couldn't update itinerary" });
+      .json({  message: "Couldn't update itinerary", error: e.message});
   }
 };
 
-const deleteItineary = async (req, res) => {
+const deleteItinerary = async (req, res) => {
   try {
-    const tourGuideId = req.params.tourGuideId;
-    const itinearyId = req.params.itinearyId;
+    const tourGuideId = req.user._id;
+    const itineraryId = req.params.itineraryId;
 
-    const itineary = await itinearyModel
-      .findById(itinearyId)
+    const itinerary = await itinearyModel
+      .findById(itineraryId)
       .populate("tourGuideId");
-    console.log(itineary);
-    // Check if the advertiserId matches the one in the activity
-    if (itineary.tourGuideId._id.toString() === tourGuideId) {
-      await activityModel.findByIdAndDelete(itinearyId);
+    if (itinerary.tourGuideId._id.toString() === tourGuideId) {
+      await activityModel.findByIdAndDelete(itineraryId);
       res.status(200).json({ message: "itineary deleted successfully" });
     } else {
-      res
-        .status(403)
-        .json({ message: "You are not authorized to delete this itineary" });
+     throw Error("you dont own this itinerary you cant delete it");
     }
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(500).json({error: err.message });
   }
 };
 
-const getMyItinearies = async (req, res) => {
+const getMyItineraries = async (req, res) => {
   try {
-    const tourGuideId = req.params.id;
-    const Itinearies = await itinearyModel
-      .find({ tourGuideId: tourGuideId })
-      .populate("tourGuideId")
-      .populate("preferenceTags");
+    const tourGuideId = req.user._id;
+    const itineraries = await itinearyModel
+  .findOne({tourGuideId})
+  .select('-__v -createdAt -updatedAt')  // Exclude Mongoose-generated fields in the main query
+  .populate({
+    path: 'tourGuideId',
+    select: 'username email -_id'  // Exclude password, role, and Mongoose-generated fields for tourGuide
+  })
+  .populate({
+    path: 'preferenceTags',
+    select: '-_id -__v'  // Exclude Mongoose-generated fields for preferenceTags
+  })
+  .populate({
+    path: 'activities',
+    select: ' -_id name'  // Exclude Mongoose-generated fields for activities
+  });
 
-    res.status(200).json(Itinearies);
+  if(!itineraries)
+    throw Error("there are no itineraries for you yet");
+    res.status(200).json(itineraries);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -310,9 +352,9 @@ module.exports = {
   createProfile,
   getProfile,
   updateProfile,
-  createItineary,
-  getItinearies,
-  updateItineary,
-  deleteItineary,
-  getMyItinearies,
+  createItinerary,
+  getItineraries,
+  updateItinerary,
+  deleteItinerary,
+  getMyItineraries
 };

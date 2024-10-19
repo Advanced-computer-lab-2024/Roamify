@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const itinerarySchema = new mongoose.Schema({
     tourGuideId:{
         type:mongoose.Types.ObjectId,
-        ref:'tourguide',
+        ref:'user',
         
         required:true
     },

@@ -31,7 +31,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/tourist", authenticateMiddleWare.authenticateTourist,touristRoutes);
 app.use("/admin", adminRoutes);
 app.use("/product", productRoutes);
-app.use("/tourguide", tourGuideRoutes);
+app.use("/api/tourguide", authenticateMiddleWare.authenticateTourGuide,tourGuideRoutes);
 app.use("/api/advertiser",authenticateMiddleWare.authenticateAdvertiser, advertiserRoutes);
 app.use("/seller", sellerRoutes);
 app.use("/tourismgoverner", tourismGovernerRoutes);
