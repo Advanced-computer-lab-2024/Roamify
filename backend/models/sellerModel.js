@@ -7,11 +7,11 @@ const sellerSchema = new mongoose.Schema(
       ref: "user",
       unique: true,
     },
-    fName: {
+    firstName: {
       type: String,
       required: true,
     },
-    lName: {
+    lastName: {
       type: String,
       required: true,
     },

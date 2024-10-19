@@ -4,7 +4,7 @@ const sellerController = require('../controllers/sellerController');
 const router = express.Router();
 
 
-router.post('/create-profile/:id',sellerController.createProfile);
-router.get('/get-profile/:id',sellerController.getProfile);
-router.put('/update-profile/:id',sellerController.updateProfile);
+router.post('/create-profile',sellerController.createProfile);
+router.get('/get-profile',sellerController.getProfile);
+router.put('/update-profile',sellerController.updateProfile);
 module.exports = router;

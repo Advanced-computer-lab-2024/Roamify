@@ -3,7 +3,7 @@ const sellerModel = require('../models/sellerModel');
 
 const createProfile = async (req, res) => {
     try {
-        const userId = req.params.id;
+        const userId = req.user._id;
 
         if (userId) {
             const result = await sellerModel.findOne({ user: userId });
@@ -12,22 +12,22 @@ const createProfile = async (req, res) => {
             }
         } //check for existence of profile for this user
 
-        const { fName, lName, description } = req.body;
+        const { firstName, lastName, description } = req.body;
         await userModel.findByIdAndUpdate(userId, { status: 'active' });
         const newSeller = new sellerModel({
             
-            fName,
-            lName,
+            firstName,
+            lastName,
             description,
             user:userId
         });
         await newSeller.save();
-        const news = await sellerModel.findById(newSeller).populate('user');
-        res.status(200).json({user:news});
+      
+        res.status(200).json({message:"Created seller successfully"});
 
     }
     catch (e) {
-        res.status(404).json({ message: 'failed', error: e });
+        res.status(404).json({ message: 'failed', error: e.message });
 
     }
 
@@ -35,17 +35,23 @@ const createProfile = async (req, res) => {
 
 const getProfile = async (req, res) => {
     try {
-        const id = req.params.id;
-        const details = await sellerModel.findById(id).populate('user');
+        const id = req.user._id;
+        const details = await sellerModel.findOne({ user: id })
+        .select('firstName lastName description -_id') // Select fields from sellerModel
+        .populate({
+          path: 'user',
+          select: 'username email -_id' // Select specific fields from the user model
+        });
+      
         if (details)
-            res.status(200).json(details);
+            res.status(200).json({username:details.user.username,email:details.user.email,firstName:details.firstName,lastName:details.lastName,description:details.description});
         else {
-            res.status(400).json({ message: "this profile does not exist" });
+            throw Error( "this profile does not exist" );
         }
     }
     catch (e) {
-        res.status(401).json({ error: e });
-        console.log(e);
+        res.status(401).json({ error: e.message});
+       
     }
 }
 

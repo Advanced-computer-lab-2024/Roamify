@@ -33,7 +33,7 @@ app.use("/admin", adminRoutes);
 app.use("/product", productRoutes);
 app.use("/api/tourguide", authenticateMiddleWare.authenticateTourGuide,tourGuideRoutes);
 app.use("/api/advertiser",authenticateMiddleWare.authenticateAdvertiser, advertiserRoutes);
-app.use("/seller", sellerRoutes);
+app.use("/api/seller",authenticateMiddleWare.authenticateSeller ,sellerRoutes);
 app.use("/tourismgoverner", tourismGovernerRoutes);
 app.use("/historical-tag", historicalTagRoutes);
 
