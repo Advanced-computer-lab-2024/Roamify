@@ -1,5 +1,7 @@
 const userModel = require('../models/userModel');
 const sellerModel = require('../models/sellerModel');
+const bcrypt = require('bcrypt');
+const validator = require('validator');
 
 const createProfile = async (req, res) => {
     try {
@@ -56,66 +58,69 @@ const getProfile = async (req, res) => {
 }
 
 const updateProfile = async (req, res) => {
-    const sellerId = req.params.id;
+  try{
+    const sellerId = req.user._id;
     
     const {
-      fName,
-      lName,
-      userName,
+      firstName,
+      lastName,
       email,
-      password,
+      oldPassword,
+      newPassword,
       description
     } = req.body;
   
     const userUpdates = {};
     const sellerUpdates = {};
     
-    const seller = await sellerModel.findById(sellerId).populate('user'); 
+    const seller = await sellerModel.findOne({user:sellerId}).populate('user'); 
   
     
-    const userId = seller.user._id;
     
-    if (fName) sellerUpdates.fName = fName; 
-    if (lName) sellerUpdates.lName = lName; 
     
-    if (userName) {
-      const result = await userModel.findOne({ userName: userName });
-      if (result&&userName!=seller.user.userName) {
-        return res.status(400).json({ error: 'userName already exists' });
-      } else {
-        userUpdates.userName = userName;
+    if (firstName) sellerUpdates.firstName = firstName; 
+    if (lastName) sellerUpdates.lastName = lastName; 
+    
+    if (oldPassword){
+      const match = await  bcrypt.compare(oldPassword,seller.user.password);
+      if(!match)
+        throw Error('password does not match old password');
+      if(!validator.isStrongPassword(newPassword)){
+        throw Error('password doesn\'t meet minimum requirements');
       }
-    }
+      const salt = await bcrypt.genSalt(10);
+  const hash = await bcrypt.hash(newPassword,salt);
+  userUpdates.password = hash;
   
+    }
     if (email) {
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({ error: 'Please enter a valid email address' });
+      const existingUser = await userModel.findOne({ email });
+      if (existingUser && email !== seller.user.email) {
+        return res.status(400).json({ error: "Email already exists" });
       }
-      const result = await userModel.findOne({ email: email });
-      if (result&&email!=seller.user.email) {
-          return res.status(400).json({ error: 'email already exists' });
-        
-  
-      } else {
-        userUpdates.email = email;
+      if(!validator.isEmail(email)){
+        throw Error('Email is not valid');
       }
+      userUpdates.email = email;
     }
   
+   
+  
     
-    if (password) userUpdates.password = password;
+  
     if (description) sellerUpdates.description = description;
   
-    try {
-      const updatedUser = await userModel.findByIdAndUpdate(userId, userUpdates, { new: true });
-      const updatedSeller = await sellerModel.findByIdAndUpdate(sellerId, sellerUpdates, { new: true });
+    
+      const updatedUser = await userModel.findByIdAndUpdate(sellerId, userUpdates, { new: true });
+      const updatedSeller = await sellerModel.findByIdAndUpdate(seller._id, sellerUpdates, { new: true });
   
       if (updatedUser || updatedSeller) {
-        return res.status(200).json({ message: 'updated', updatedSeller: updatedSeller });
+        return res.status(200).json({ message: 'updated'});
       } else {
         return res.status(404).json({ message: 'No updates made' });
       }
     } catch (e) {
-      return res.status(400).json({ message: 'failed', error: e });
+      return res.status(400).json({ message: 'failed', error: e.message });
     }
   };
   
