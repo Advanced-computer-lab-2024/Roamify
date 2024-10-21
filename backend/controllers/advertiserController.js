@@ -119,6 +119,9 @@ const createActivity = async (req, res) => {
     const { name, date, time, location, price, category, tags, discounts } =
       req.body;
 
+      if(!name||!date||!time||!location||!price||!caregory||!tags||!discounts)
+        throw Error('please fill required fields');
+
     const insertedTags = await tagModel.find({ name: { $in: tags } }).select("_id");
     console.log(tags);
     console.log(insertedTags);

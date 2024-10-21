@@ -34,7 +34,7 @@ app.use("/product", productRoutes);
 app.use("/api/tourguide", authenticateMiddleWare.authenticateTourGuide,tourGuideRoutes);
 app.use("/api/advertiser",authenticateMiddleWare.authenticateAdvertiser, advertiserRoutes);
 app.use("/api/seller",authenticateMiddleWare.authenticateSeller ,sellerRoutes);
-app.use("/tourismgoverner", tourismGovernerRoutes);
+app.use("/api/tourismgovernor", authenticateMiddleWare.authenticateTourismGovernor,tourismGovernerRoutes);
 app.use("/historical-tag", historicalTagRoutes);
 
 const PORT = 3000;

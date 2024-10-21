@@ -39,6 +39,11 @@ const placeSchema = new mongoose.Schema({
                 },
                 message: props => `${props.value} is not a valid GeoJSON coordinates array!`
             }
+        },
+        name:{
+            type:String,
+            required:true
+
         }
     },
     ticketPrice: {
@@ -51,6 +56,13 @@ const placeSchema = new mongoose.Schema({
         student: {
             type: Number
         }
+    },
+    openingHours:{
+        type:String
+    },
+    closingHours:{
+        type:String
+
     },
     tourismGovernorId: {
         type: mongoose.Schema.Types.ObjectId,

@@ -1,54 +1,105 @@
 const placeModel = require("../models/placeModel");
 const historicalTagModel = require("../models/historicalTagModel");
+const fs = require('fs');
+const path = require('path');
+
+
+function deleteFileByName(folderName, fileName, callback) {
+  // Adjust the path to target one folder up from the current directory
+  const directoryPath = path.join(__dirname, '..', folderName);
+  console.log("Directory Path:", directoryPath);
+
+  // Read the directory to find the file
+  fs.readdir(directoryPath, (err, files) => {
+
+
+      if (err) {
+          console.error("Error reading directory", err);
+          callback(err);
+          return;
+      }
+
+      // Find the file and delete it
+      const fileToDelete = files.find(file => file.includes(fileName));
+      console.log("Files found:", files);
+      console.log("File to delete:", fileToDelete);
+      if (fileToDelete) {
+          fs.unlink(path.join(directoryPath, fileToDelete), (err) => {
+              if (err) {
+                  console.error("Error deleting file", err);
+                  callback(err);
+                  return;
+              }
+              callback(null);
+          });
+      } else {
+          callback(new Error("File not found"));
+      }
+  });
+}
 
 const createPlace = async (req, res) => {
   try {
-    const tourismGovernorId = req.params.id;
+    const tourismGovernorId = req.user._id;
+    // Parsing JSON strings to objects
     const {
       type,
       name,
       description,
-      pictures,
-      location,
-      tagPlace, // This should contain tag names (not IDs)
-      ticketPrice,
+      location: locationJSON,
+      tagPlace: tagPlaceJSON,
+      openingHours,
+      closingHours,
+      ticketPrice: ticketPriceJSON,
     } = req.body;
 
-    // Find tags based on their names in the provided tagPlace array
-    const tags = await historicalTagModel
-      .find({ name: { $in: tagPlace } }) // Searching for tags by their names
-      .select("_id");
-    const tagIds = tags.map((tag) => tag._id); // Extract the _id of each tag
+    // Convert JSON strings to objects
+    const location = JSON.parse(locationJSON);
+    const ticketPrice = JSON.parse(ticketPriceJSON);
+    const tagPlace = JSON.parse(tagPlaceJSON);
 
-    // Create the new place with the relevant details
-    const newHistoricalPlace = new placeModel({
+    // Check if all required fields are present
+    if (!type || !name || !description || !location || !tagPlace || !ticketPrice || !openingHours || !closingHours) {
+      throw new Error('Please fill all required fields');
+    }
+
+    console.log(req.files);
+    // Get the picture file paths (saved by Multer in req.files)
+    // Ensure req.files is defined and is an array before trying to map over it
+    const picturePaths = req.files ? req.files.map(file => `/placeImages/${file.filename}`) : [];
+
+    // Retrieve the tag IDs based on the provided tag names
+    const tags = await historicalTagModel.find({ name: { $in: tagPlace } }).select('_id');
+    const tagIds = tags.map(tag => tag._id);
+
+    // Create a new place document
+    const newPlace = new placeModel({
       type,
       name,
       description,
-      tags: tagIds, // Save the tag IDs here
-      pictures,
+      tags: tagIds,         // Save the tag IDs here
+      pictures: picturePaths, // Save the file paths as pictures
       location,
       ticketPrice,
+      openingHours,
+      closingHours,
       tourismGovernorId,
     });
 
-    // Save the new historical place to the database
-    await newHistoricalPlace.save();
+    // Save the place in MongoDB
+    await newPlace.save();
 
-    // Populate fields to return additional info in the response
-    const historicalPlace = await placeModel
-      .findById(newHistoricalPlace._id)
-      .populate("tourismGovernorId") // Populate the governor
-      .populate("tags", "name"); // Populate tags but only return their names
-
-    res
-      .status(200)
-      .json({ message: "success", acceptedPlace: historicalPlace });
-  } catch (e) {
-    res.status(404).json({ message: "failed", error: e });
-    console.log(e);
+    // Send a success response
+    res.status(200).json({ message: 'Place created successfully', place: newPlace });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Failed to create place', error: error.message });
   }
 };
+
+
+
+
 
 const getPlaces = async (req, res) => {
   try {
@@ -60,7 +111,7 @@ const getPlaces = async (req, res) => {
       res.status(401).json({ message: "there are no places" });
     else res.status(200).json(historicalPlaces);
   } catch (e) {
-    return res.status(500).json({ message: "failed", error: e });
+    return res.status(500).json({ message: "failed", error: e.message });
   }
 };
 
@@ -135,48 +186,43 @@ const updatePlace = async (req, res) => {
 
 const deletePlace = async (req, res) => {
   try {
-    const tourismGovernorId = req.params.tourismGovernorId;
-    const historicalPlaceId = req.params.historicalPlaceId; // Fixed typo
+    const tourismGovernorId = req.user._id;
+    const historicalPlaceId = req.params.historicalPlaceId;
 
-    // Find the place and populate tourismGovernorId
-    const historicalPlace = await placeModel
-      .findById(historicalPlaceId)
-      .populate("tourismGovernorId");
+    const historicalPlace = await placeModel.findById(historicalPlaceId).populate("tourismGovernorId");
 
-    // Check if the place exists
     if (!historicalPlace) {
-      return res.status(404).json({ message: "Historical place not found" });
+      throw new Error("Place doesn't exist");
     }
 
-    // Check if tourismGovernorId exists in the populated result
-    if (!historicalPlace.tourismGovernorId) {
-      return res
-        .status(400)
-        .json({ message: "tourismGovernorId not found in the place" });
-    }
+    if (historicalPlace.tourismGovernorId._id.toString() === tourismGovernorId) {
+      // Use the delete function for each image path
+      historicalPlace.pictures.forEach((picturePath) => {
+        const fileName = path.basename(picturePath);
+        deleteFileByName('placesImages', fileName, (err) => {
+          if (err) {
+           throw Error('error in deleting images');
+            // Optionally send a response or handle the error further
+          }
+        });
+      });
 
-    // Check if the current user is authorized to delete the place
-    if (
-      historicalPlace.tourismGovernorId._id.toString() === tourismGovernorId
-    ) {
-      await placeModel.findByIdAndDelete(historicalPlaceId); // Correct variable name
-      return res.status(200).json({ message: "Place deleted successfully" });
+      // Delete the place after all files are handled
+      await placeModel.findByIdAndDelete(historicalPlaceId);
+      res.status(200).json({ message: "Place and associated images deleted successfully" });
     } else {
-      return res
-        .status(403)
-        .json({ message: "You are not authorized to delete this place" });
+      throw new Error("You don't own this place; only owners can delete");
     }
   } catch (err) {
     console.error(err);
-    return res
-      .status(500)
-      .json({ message: "Could not delete place", error: err.message });
+    res.status(401).json({error: err.message});
   }
 };
 
+
 const getMyPlaces = async (req, res) => {
   try {
-    const tourismGovernorId = req.params.id;
+    const tourismGovernorId = req.user._id;
     const historicalPlaces = await placeModel
       .find({ tourismGovernorId })
       .populate("tourismGovernorId")
@@ -186,6 +232,10 @@ const getMyPlaces = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+
+
 
 module.exports = {
   createPlace,
