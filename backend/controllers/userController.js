@@ -20,9 +20,15 @@ const setTokenCookie = (res, token) => {
 };
 
 // Adjusted Create User Function
+// Adjusted Create User Function
 const createUser = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
+
+    // Validate role to ensure it's not "admin" or "tourismGovernor"
+    if (role === "admin" || role === "tourismGovernor") {
+      return res.status(403).json({ error: "Invalid role selection" });
+    }
 
     // Creating the user
     const user = await userModel.signUp(username, email, password, role);
@@ -48,8 +54,7 @@ const createUser = async (req, res) => {
 // Adjusted Login Function
 const loginUser = async (req, res) => {
   try {
-    const { username, password } = req.body;
-
+    const { username, password } = req.body
     // Find user by username
     let user = await userModel.findOne({ username });
     if (!user) {
@@ -101,9 +106,7 @@ const loginUser = async (req, res) => {
     if((status === "pending") && ["advertiser", "seller", "tourGuide"].includes(role))
       throw Error('admin have not yet accepted your request');
       
-    if((status === "pendingCreation") && ["advertiser", "seller", "tourGuide"].includes(role))
-      throw Error('please check your mail and activate your account');
-      
+
 
     // General token for other users (tourismGovernor, admin, etc.)
     const token = createToken(_id, role);

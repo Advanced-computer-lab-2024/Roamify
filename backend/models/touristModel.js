@@ -24,12 +24,12 @@ const touristSchema = new mongoose.Schema(
       required: true,
     },
     dateOfBirth: {
-      type: Date, //changed to Date instead of String
+      type: Date,
       required: true,
     },
     occupation: {
       type: String,
-      enum: ["student", "employee","Student","Employee"],
+      enum: ["student", "employee"],
       required: true,
     },
 

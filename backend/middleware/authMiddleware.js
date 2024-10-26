@@ -46,7 +46,7 @@ const authenticateTourGuide = (req,res,next)=>{
   if(!token)
     return res.status(403).json({ message: "Access denied. No token provided." });
   try{
-    console.log("hey");
+
     const verified = jwt.verify(token, process.env.SECRET);
     console.log("Decoded JWT:",verified);
     if(verified.role !=="tourGuide"){
@@ -70,7 +70,6 @@ const authenticateSeller = (req,res,next)=>{
   if(!token)
     return res.status(403).json({ message: "Access denied. No token provided." });
   try{
-    console.log("hey");
     const verified = jwt.verify(token, process.env.SECRET);
     console.log("Decoded JWT:",verified);
     if(verified.role !=="seller"){
@@ -94,7 +93,7 @@ const authenticateTourismGovernor = (req,res,next)=>{
   if(!token)
     return res.status(403).json({ message: "Access denied. No token provided." });
   try{
-    console.log("hey");
+
     const verified = jwt.verify(token, process.env.SECRET);
     console.log("Decoded JWT:",verified);
     if(verified.role !=="tourismGovernor"){
@@ -112,6 +111,29 @@ const authenticateTourismGovernor = (req,res,next)=>{
 
 
 }
+const authenticateAdmin = (req,res,next)=>{
+  const token = req.cookies?.token;
+  console.log(token);
+  if(!token)
+    return res.status(403).json({ message: "Access denied. No token provided." });
+  try{
 
-module.exports = {authenticateTourist,authenticateAdvertiser,authenticateTourGuide,authenticateSeller,authenticateTourismGovernor};
+    const verified = jwt.verify(token, process.env.SECRET);
+    console.log("Decoded JWT:",verified);
+    if(verified.role !=="admin"){
+      console.log(verified.role);
+      return res.status(403).json({ message: "Only Admins can access this route." });
+    }
+    console.log("verified");
+    req.user = verified;
+
+    next();
+  }
+  catch(e){
+    res.status(401).json({message:"Invalid token"});
+  }
+
+
+}
+module.exports = {authenticateAdmin,authenticateTourist,authenticateAdvertiser,authenticateTourGuide,authenticateSeller,authenticateTourismGovernor};
 

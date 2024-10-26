@@ -1,7 +1,11 @@
 const express = require("express");
-const dotenv = require("dotenv");
-const connectDB = require("./config/db");
+const dotenv = require("dotenv").config();
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const connectDB = require("./config/db");
+const authenticate = require("./middleware/authMiddleware");
+
+// Route Imports
 const userRoutes = require("./routes/userRoutes");
 const touristRoutes = require("./routes/touristRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -9,35 +13,37 @@ const productRoutes = require("./routes/productRoutes");
 const tourGuideRoutes = require("./routes/tourGuideRoutes");
 const advertiserRoutes = require("./routes/advertiserRoutes");
 const sellerRoutes = require("./routes/sellerRoutes");
-const tourismGovernerRoutes = require("./routes/tourismGovernorRoutes");
+const tourismGovernorRoutes = require("./routes/tourismGovernorRoutes");
 const historicalTagRoutes = require("./routes/historicalTagRoutes");
-const authenticateMiddleWare = require("./middleware/authMiddleware");
-const cookieParser = require('cookie-parser');
 
-dotenv.config();
-connectDB();
+// Initialize app
 const app = express();
-app.use(
-  cors({
+const PORT = process.env.PORT || 3000;
+
+// Database connection
+connectDB();
+
+// Middleware
+app.use(cors({
     origin: "http://localhost:5173",
-    methods: "GET, POST, PUT, DELETE",
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
-  })
-);
+}));
 app.use(cookieParser());
-
 app.use(express.json());
-app.use("/api/user", userRoutes);
-app.use("/api/tourist", authenticateMiddleWare.authenticateTourist,touristRoutes);
-app.use("/admin", adminRoutes);
-app.use("/product", productRoutes);
-app.use("/api/tourguide", authenticateMiddleWare.authenticateTourGuide,tourGuideRoutes);
-app.use("/api/advertiser",authenticateMiddleWare.authenticateAdvertiser, advertiserRoutes);
-app.use("/api/seller",authenticateMiddleWare.authenticateSeller ,sellerRoutes);
-app.use("/api/tourismgovernor", authenticateMiddleWare.authenticateTourismGovernor,tourismGovernerRoutes);
-app.use("/historical-tag", historicalTagRoutes);
 
-const PORT = 3000;
+// Routes
+app.use("/api/user", userRoutes);
+app.use("/api/tourist", authenticate.authenticateTourist, touristRoutes);
+app.use("/api/tourguide", authenticate.authenticateTourGuide, tourGuideRoutes);
+app.use("/api/advertiser", authenticate.authenticateAdvertiser, advertiserRoutes);
+app.use("/api/seller", authenticate.authenticateSeller, sellerRoutes);
+app.use("/api/tourismgovernor", authenticate.authenticateTourismGovernor, tourismGovernorRoutes);
+app.use("/api/admin", authenticate.authenticateAdmin,adminRoutes);
+app.use("/historical-tag", historicalTagRoutes);
+app.use("/product", productRoutes);
+
+// Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });

@@ -8,7 +8,6 @@ const walletSchema=new mongoose.Schema({
         type:Date,
         
     }
-
 })
 
 const walletModel = mongoose.model('wallet', walletSchema);

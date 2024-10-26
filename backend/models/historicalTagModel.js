@@ -11,5 +11,5 @@ const historicalTagSchema = new mongoose.Schema({
   },
 });
 
-const historicalTagModel = mongoose.model("historicalTag", historicalTagSchema);
+const historicalTagModel = mongoose.model("historical tag", historicalTagSchema);
 module.exports = historicalTagModel;

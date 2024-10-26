@@ -2,9 +2,7 @@ const express = require("express");
 const adminController = require("../controllers/adminController");
 const categoryController = require("../controllers/categoryController");
 const preferenceTagController = require("../controllers/preferenceTagController");
-const {
-  createHistoricalTag,
-} = require("../controllers/historicalTagController");
+const historicalTagController = require("../controllers/historicalTagController");
 const router = express.Router();
 
 router.post("/add-tourism-governor", adminController.addTourismGovernor);
@@ -33,6 +31,6 @@ router.delete(
   "/delete-preference-tags/:id",
   preferenceTagController.deletePreferenceTag
 );
-router.post("/create-historical-tag", createHistoricalTag);
+router.post("/create-historical-tag", historicalTagController.createHistoricalTag);
 
 module.exports = router;
