@@ -17,7 +17,7 @@ const placeSchema = new mongoose.Schema({
     },
     tags: {
         type: [mongoose.Types.ObjectId],
-        ref: 'historicalTag',
+        ref: 'historical tag',
     },
     pictures: {
         type: [String]

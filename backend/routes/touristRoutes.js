@@ -8,4 +8,7 @@ router.get('/get-profile', touristController.getProfile);
 router.put('/update-profile', touristController.updateProfile);
 router.post('/add-wallet', touristController.addWallet);
 
+router.get('/products/')
+
+
 module.exports = router;

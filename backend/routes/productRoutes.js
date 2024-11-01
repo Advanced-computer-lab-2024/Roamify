@@ -1,12 +1,10 @@
 const express = require("express");
 const productController = require("../controllers/productController");
+const {authenticate} = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.post("/add-product/:id", productController.addProduct);
-router.put("/edit-product/:id", productController.updateProduct);
-router.get("/sort-products", productController.sortProductsByRating);
-router.get("/filter-by-price", productController.filterProductsByPrice);
-router.get("/search", productController.searchProductByName);
-router.get("/get-all", productController.getAllProducts);
+router.post("/add-product",authenticate(["admin","seller"]), productController.addProduct);
+router.put("/edit-product/:id",authenticate(["admin","seller"]),productController.updateProduct);
+router.get("/",authenticate(["admin","seller","tourist"]), productController.getFilteredProducts);
 module.exports = router;

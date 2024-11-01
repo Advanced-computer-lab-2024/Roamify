@@ -7,13 +7,13 @@ router.post("/create-profile", advertiserController.createProfile);
 router.get("/get-profile", advertiserController.getProfile);
 router.put("/update-profile", advertiserController.updateProfile);
 router.post("/create-activity", advertiserController.createActivity);
-router.get("/get-activities", advertiserController.getActivities);
 router.put("/update-activity/:activityId",advertiserController.updateActivity
 );
 router.delete(
-  "/delete-activity/:advertiserid/:activityid",
+  "/delete-activity/:activityid",
   advertiserController.deleteActivity
 );
-router.get("/get-my-activities/:id", advertiserController.getMyActivities);
+
+router.get("/get-my-activities", advertiserController.getMyActivities);
 
 module.exports = router;

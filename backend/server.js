@@ -3,18 +3,19 @@ const dotenv = require("dotenv").config();
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
-const authenticate = require("./middleware/authMiddleware");
+const {authenticate} = require("./middleware/authMiddleware");
 
 // Route Imports
 const userRoutes = require("./routes/userRoutes");
 const touristRoutes = require("./routes/touristRoutes");
 const adminRoutes = require("./routes/adminRoutes");
-const productRoutes = require("./routes/productRoutes");
 const tourGuideRoutes = require("./routes/tourGuideRoutes");
 const advertiserRoutes = require("./routes/advertiserRoutes");
 const sellerRoutes = require("./routes/sellerRoutes");
 const tourismGovernorRoutes = require("./routes/tourismGovernorRoutes");
-const historicalTagRoutes = require("./routes/historicalTagRoutes");
+const productRoutes = require("./routes/productRoutes");
+const itineraryRoutes=require("./routes/itineraryRoutes");
+const activityRoutes=require("./routes/activityRoutes");
 
 // Initialize app
 const app = express();
@@ -32,16 +33,20 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 
-// Routes
+//routes
+
 app.use("/api/user", userRoutes);
-app.use("/api/tourist", authenticate.authenticateTourist, touristRoutes);
-app.use("/api/tourguide", authenticate.authenticateTourGuide, tourGuideRoutes);
-app.use("/api/advertiser", authenticate.authenticateAdvertiser, advertiserRoutes);
-app.use("/api/seller", authenticate.authenticateSeller, sellerRoutes);
-app.use("/api/tourismgovernor", authenticate.authenticateTourismGovernor, tourismGovernorRoutes);
-app.use("/api/admin", authenticate.authenticateAdmin,adminRoutes);
-app.use("/historical-tag", historicalTagRoutes);
-app.use("/product", productRoutes);
+app.use("/api/tourist", authenticate(["tourist"]), touristRoutes);
+app.use("/api/tourguide", authenticate(["tourGuide"]), tourGuideRoutes);
+app.use("/api/advertiser", authenticate(["advertiser"]), advertiserRoutes);
+app.use("/api/seller", authenticate(["seller"]), sellerRoutes);
+app.use("/api/tourismgovernor", authenticate(["tourismGovernor"]), tourismGovernorRoutes);
+app.use("/api/admin", authenticate(["admin"]), adminRoutes);
+app.use("/api/product",productRoutes)
+app.use("/api/itinerary",itineraryRoutes);
+app.use("/api/activity",activityRoutes);
+
+
 
 // Start server
 app.listen(PORT, () => {

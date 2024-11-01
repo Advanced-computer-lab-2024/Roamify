@@ -1,4 +1,3 @@
-const User = require("../models/userModel");
 const touristModel = require("../models/touristModel");
 const userModel = require("../models/userModel");
 const sellerModel = require("../models/sellerModel");

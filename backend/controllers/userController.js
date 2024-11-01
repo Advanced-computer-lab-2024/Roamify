@@ -51,10 +51,9 @@ const createUser = async (req, res) => {
   }
 };
 
-// Adjusted Login Function
 const loginUser = async (req, res) => {
   try {
-    const { username, password } = req.body
+    const { username, password } = req.body;
     // Find user by username
     let user = await userModel.findOne({ username });
     if (!user) {
@@ -71,42 +70,52 @@ const loginUser = async (req, res) => {
 
     // Handle tourist login
     if (role === "tourist") {
-      const tourist = await touristModel.findOne({ user: _id }).populate("user");
-      if (!tourist) return res.status(404).json({ message: "Tourist profile not found" });
+      const tourist = await touristModel.findOne({ user: _id });
+      if (!tourist && status !== "pending profile") {
+        return res.status(404).json({ message: "Tourist profile not found" });
+      }
 
-      const token = createToken(tourist.user._id, tourist.user.role);
+      const token = createToken(_id, role);
       setTokenCookie(res, token);
 
       return res.status(200).json({
-        email: tourist.user.email,
-        username: tourist.user.username,
-        role: tourist.user.role,
+        email: user.email,
+        username: user.username,
+        role: user.role,
       });
     }
 
-    // Handle advertiser, seller, tour guide login based on role and active status
-    if (status === "active" && ["advertiser", "seller", "tourGuide"].includes(role)) {
+    // Handle advertiser, seller, tour guide login
+    if (["advertiser", "seller", "tourGuide"].includes(role)) {
+      if (status === "pending") {
+        return res.status(403).json({ message: "Your account is pending approval by an admin." });
+      }
+
       let model, entity;
       if (role === "advertiser") model = advertiserModel;
       if (role === "seller") model = sellerModel;
       if (role === "tourGuide") model = tourGuideModel;
 
-      entity = await model.findOne({ user: _id }).populate("user");
-      if (!entity) return res.status(404).json({ message: `${role} profile not found` });
+      // Check for the specific profile unless status is "pending profile"
+      entity = status !== "pending creation" ? await model.findOne({ user: _id }) : null;
+      if (!entity && status !== "pending creation") {
+        return res.status(404).json({ message: `${role} profile not found` });
+      }
 
-      const token = createToken(entity.user._id, entity.user.role);
+      const token = createToken(_id, role);
       setTokenCookie(res, token);
 
       return res.status(200).json({
-        email: entity.user.email,
-        username: entity.user.username,
-        role: entity.user.role,
+        email: user.email,
+        username: user.username,
+        role: user.role,
       });
     }
-    if((status === "pending") && ["advertiser", "seller", "tourGuide"].includes(role))
-      throw Error('admin have not yet accepted your request');
-      
 
+    // Handle general login for other users, including status check
+    if (status === "pending") {
+      return res.status(403).json({ message: "Your account is pending approval by an admin." });
+    }
 
     // General token for other users (tourismGovernor, admin, etc.)
     const token = createToken(_id, role);
@@ -120,6 +129,7 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Adjusted Logout Function (clear token cookie)
 const logoutUser = (req, res) => {
@@ -169,21 +179,11 @@ const getUsersByRole = async (req, res) => {
   }
 };
 
-// Delete user
-const deleteUser = async (req, res) => {
-  try {
-    const id = req.params.id;
-    await userModel.findByIdAndDelete(id);
-    return res.status(200).json({ message: 'deleted successfully' });
-  } catch (e) {
-    console.log(e.toString());
-  }
-};
+
 
 module.exports = {
   createUser,
   loginUser,
   logoutUser,
   getUsersByRole,
-  deleteUser,
 };

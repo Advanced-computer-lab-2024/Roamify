@@ -1,10 +1,12 @@
+const bcrypt = require('bcrypt');
+const validator = require('validator');
+
 const advertiserModel = require("../models/advertiserModel");
 const userModel = require("../models/userModel");
 const activityModel = require("../models/activityModel");
-const tagModel = require("../models/preferenceTagModel");
+const preferenceTagModel = require('../models/preferenceTagModel');
 const categoryModel = require("../models/categoryModel");
-const bcrypt = require('bcrypt');
-const validator = require('validator');
+
 
 const createProfile = async (req, res) => {
   try {
@@ -114,115 +116,8 @@ userUpdates.password = hash;
 
 const createActivity = async (req, res) => {
   try {
-    const id = req.user._id;
-
-    const { name, date, time, location, price, category, tags, discounts } =
-      req.body;
-
-      if(!name||!date||!time||!location||!price||!caregory||!tags||!discounts)
-        throw Error('please fill required fields');
-
-    const insertedTags = await tagModel.find({ name: { $in: tags } }).select("_id");
-    console.log(tags);
-    console.log(insertedTags);
-    const categoryId = await categoryModel
-      .findOne({ name: category })
-      .select("_id");
-    const categoryIdFinal = categoryId._id;
-
-    const currentDate = new Date();
-    const insertedDate = new Date(date);
-    if(insertedDate<currentDate)
-      throw Error('please enter a valid date');
-
-    // Extract the ObjectId values from the result
-    const tagIds = insertedTags.map((tag) => tag._id);
-
-    const newActivity = new activityModel({
-      name,
-      date,
-      time,
-      location: {
-        type: location.type, // 'Point' is the default type, but you can specify it if needed
-        coordinates: location.coordinates,
-        name: location.name, // [longitude, latitude] format
-      },
-      price,
-      category: categoryIdFinal,
-      tags: tagIds,
-      discounts,
-      advertiser: id,
-    });
-
-    await newActivity.save();
-   
-
-    return res
-      .status(200)
-      .json({ message: "Created activity successfully"});
-  } catch (e) {
-    
-      res
-        .status(401)
-        .json({ message: "Failed to create activity", error: e.message });
-      console.log(e);
-    
-  }
-};
-const getActivities = async (req, res) => {
-  try {
-    const activities = await activityModel
-      .find()
-      .populate({
-        path: "advertiser",
-        select: "username email status role -_id" // Exclude '_id' for advertiser
-      })
-      .populate({
-        path: "tags",
-        select: "name description -_id" // Exclude '_id' for tags
-      })
-      .populate({
-        path: "category",
-        select: "name description -_id" // Exclude '_id' for category
-      })
-      .select("name date time location price discounts bookingAvailable rating -_id") // Select only these fields and exclude '_id'
-      .sort({ createdAt: 1 }); // Sort by creation date in ascending order
-
-    if (!activities || activities.length === 0) {
-      return res.status(404).json({ message: "There are no activities" });
-    } else {
-      return res.status(200).json(activities);
-    }
-  } catch (e) {
-    return res.status(500).json({ message: "Failed to get activities", error: e.message });
-  }
-};
-
-
-//missing this
-const updateActivity = async (req, res) => {
-  try {
-    const activityId = req.params.activityId; // Fixed typo
     const advertiserId = req.user._id;
 
-    // Find the historical place and populate tourismGovernorId
-    const activity = await activityModel
-      .findById(activityId)
-      .populate("advertiser");
-
-    // Check if the place exists
-    if (!activity) {
-      return res.status(404).json({ message: "Activity not found" });
-    }
-
-    // Correctly check if the current user is authorized to edit the place
-    if (activity.advertiser._id.toString() !== advertiserId) {
-      return res
-        .status(403)
-        .json({ message: "You are not allowed to edit others' activities" });
-    }
-
-    // Extract fields from request body
     const {
       name,
       date,
@@ -230,107 +125,217 @@ const updateActivity = async (req, res) => {
       location,
       price,
       category,
-       tags,
+      preferenceTags,
+      discounts,
+      bookingAvailable,
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !date || !time || !location || !price || !category || !preferenceTags) {
+      throw new Error("Please fill all required fields");
+    }
+
+    // Check for duplicate activity name
+    const existingActivity = await activityModel.findOne({ name });
+    if (existingActivity) {
+      return res.status(400).json({ message: "Activity with this name already exists. Please choose a different name." });
+    }
+
+    // Validate and format location coordinates
+    if (!location.coordinates || location.coordinates.length !== 2) {
+      return res.status(400).json({ message: "Location coordinates must be in the format [longitude, latitude]" });
+    }
+    const [longitude, latitude] = location.coordinates;
+    if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) {
+      return res.status(400).json({ message: "Invalid coordinates: longitude must be between -180 and 180, latitude between -90 and 90" });
+    }
+
+    // Validate date is in the future
+    const currentDate = new Date();
+    const activityDate = new Date(date);
+    if (activityDate < currentDate) {
+      return res.status(400).json({ message: "Please enter a future date" });
+    }
+
+    // Retrieve ObjectIds for category and preference tags
+    const categoryDoc = await categoryModel.findOne({ _id: category });
+    if (!categoryDoc) return res.status(400).json({ message: "Invalid category selected" });
+
+    const tagDocs = await preferenceTagModel.find({ _id: { $in: preferenceTags } });
+    if (tagDocs.length !== preferenceTags.length) {
+      return res.status(400).json({ message: "Some preference tags are invalid" });
+    }
+
+    // Extract ObjectIds for tags
+    const tagIds = tagDocs.map((tag) => tag._id);
+
+    // Create new activity
+    const newActivity = new activityModel({
+      name,
+      date,
+      time,
+      location: {
+        type: "Point",
+        coordinates: [longitude, latitude],
+        name: location.name,
+      },
+      price,
+      category: categoryDoc._id,
+      tags: tagIds,
+      discounts,
+      bookingAvailable,
+      advertiser: advertiserId,
+    });
+
+    await newActivity.save();
+
+    res.status(201).json({ message: "Activity created successfully", activity: newActivity });
+  } catch (error) {
+    if (error.code === 11000) {  // 11000 is the MongoDB error code for duplicate keys
+      res.status(400).json({ message: "An activity with this name already exists" });
+    } else {
+      console.error("Error creating activity:", error);
+      res.status(400).json({ message: "Failed to create activity" });
+    }
+  }
+};
+
+
+
+
+const updateActivity = async (req, res) => {
+  try {
+    const activityId = req.params.activityId;
+    const advertiserId = req.user._id;
+
+    // Find the activity and populate the advertiser field
+    const activity = await activityModel
+        .findById(activityId)
+        .populate("advertiser");
+
+    // Check if the activity exists
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+
+    // Verify if the current user is authorized to edit the activity
+    if (activity.advertiser._id.toString() !== advertiserId) {
+      return res
+          .status(403)
+          .json({ message: "You are not allowed to edit others' activities" });
+    }
+
+    // Extract fields from the request body
+    const {
+      name,
+      date,
+      time,
+      location,
+      price,
+      category,
+      tags,
       discounts,
       bookingAvailable,
       rating,
     } = req.body;
     const query = {};
 
+    // Update tags if provided
     if (tags) {
-      const insertedTags = await tagModel
-        .find({ name: { $in: tags } })
-        .select("_id");
-        console.log(insertedTags);
-        if(insertedTags.length==0)
-          throw Error('please choose vald tags');
-      const tagIds = insertedTags.map((tag) => tag._id);
-      query.tags = tagIds;
+      const tagDocs = await preferenceTagModel.find({ _id: { $in: tags } });
+      if (tagDocs.length !== tags.length) {
+        throw Error("Some preference tags are invalid");
+      }
+      query.tags = tags; // Using IDs directly
     }
 
-    // Build the update query
-    if (name) query.name = name;
+    // Update category if provided
+    if (category) {
+      const categoryDoc = await categoryModel.findById(category);
+      if (!categoryDoc) {
+        throw Error("Invalid category selected");
+      }
+      query.category = category; // Using ID directly
+    }
+
+    // Validate and update date
     if (date) {
       const currentDate = new Date();
-      const insertedDate = new Date(date);
-      if(insertedDate<currentDate)
-        throw Error('please enter a valid date');
+      const activityDate = new Date(date);
+      if (activityDate < currentDate) {
+        throw Error("Please enter a future date");
+      }
       query.date = date;
     }
+
+    // Update remaining fields if provided
+    if (name) query.name = name;
     if (location) query.location = location;
     if (price) query.price = price;
     if (time) query.time = time;
-    if (category) {
-
-      const categoryId = await categoryModel.findOne({name:category});
-      if(!categoryId)
-        throw Error('choose a category from the existing ones');
-      query.category = categoryId;
-
-    }
     if (discounts) query.discounts = discounts;
     if (rating) query.rating = rating;
-    if (bookingAvailable) query.bookingAvailable = bookingAvailable;
+    if (bookingAvailable !== undefined) query.bookingAvailable = bookingAvailable;
 
-    // Update the historical place
-    const updatedActivity = await activityModel
-      .findByIdAndUpdate(activityId, query);
-      
+    // Update the activity with the constructed query
+    await activityModel.findByIdAndUpdate(activityId, query);
 
-    // Send response
     res.status(200).json({
-      message: "activity updated successfully"
+      message: "Activity updated successfully",
     });
   } catch (e) {
     console.error(e); // Log the error for debugging
-    res
-      .status(401)
-      .json({ message: e.message}); // Use 500 for server errors
+    res.status(400).json({ message: e.message });
   }
 };
+
 
 const deleteActivity = async (req, res) => {
   try {
-    const activityId = req.params.activityid;
-    const id = req.user._id;
+    const activityId = req.params.activityid.trim();
+    const advertiserId = req.user._id;
 
-    const activity = await activityModel
-      .findById(activityId)
-      .populate("advertiser");
+    // Find the activity
+    const activity = await activityModel.findById(activityId).populate("advertiser");
+
+    // Check if activity exists
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
 
     // Check if the advertiserId matches the one in the activity
-    if (activity.advertiser._id.toString() === id) {
-      await activityModel.findByIdAndDelete(activityId);
-      res.status(200).json({ message: "Activity deleted successfully" });
-    } else {
-      res
-        .status(403)
-        .json({ message: "You are not authorized to delete this activity" });
+    if (activity.advertiser && activity.advertiser._id.toString() !== advertiserId) {
+      return res.status(403).json({ message: "You are not authorized to delete this activity" });
     }
+
+    // Delete the activity if checks pass
+    await activityModel.findByIdAndDelete(activityId);
+    res.status(200).json({ message: "Activity deleted successfully" });
+
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("Error deleting activity:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
+
+
+
 
 const getMyActivities = async (req, res) => {
   try {
     const advertiserId = req.user._id;
     const activities = await activityModel
-      .find({ advertiser: advertiserId })
-      .populate({
-        path: "category",
-        select: "name description -_id" // Select only the necessary fields and exclude '_id'
-      })
-      .populate({
-        path: "tags",
-        select: "name description -_id" // Select only the necessary fields and exclude '_id'
-      })
-      .populate({
-        path: "advertiser",
-        select: "username email status role -_id" // Select only the necessary fields and exclude '_id'
-      })
-      .select("name date time location price discounts bookingAvailable rating -_id") // Select the necessary fields for activities and exclude '_id'
-      .sort({ createdAt: 1 }); // Sort by creation date in ascending order
+        .find({ advertiser: advertiserId })
+        .populate({
+          path: "category",
+          select: "name description -_id" // Select only the necessary fields and exclude '_id'
+        })
+        .populate({
+          path: "tags",
+          select: "name description -_id" // Select only the necessary fields and exclude '_id'
+        })
+        .select("name date time location price discounts bookingAvailable rating _id") // Include '_id' for the activity
+        .sort({ createdAt: 1 }); // Sort by creation date in ascending order
 
     if (activities.length === 0) {
       return res.status(404).json({ message: "No activities found for this advertiser" });
@@ -343,6 +348,8 @@ const getMyActivities = async (req, res) => {
 };
 
 
+
+
 module.exports = {
   createProfile,
   getProfile,
@@ -351,5 +358,4 @@ module.exports = {
   getMyActivities,
   updateActivity,
   deleteActivity,
-  getActivities,
 };

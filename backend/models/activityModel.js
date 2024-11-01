@@ -51,12 +51,12 @@ const activitySchema = new mongoose.Schema(
     },
     category: {
       type: mongoose.Types.ObjectId,
-      ref: "Category",
+      ref: "category",
       required: true,
     },
     tags: {
       type: [mongoose.Types.ObjectId],
-      ref: "PreferenceTag",
+      ref: "preference tag",
       required: true,
     },
     discounts: {

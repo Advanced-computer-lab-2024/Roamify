@@ -1,172 +1,120 @@
 const productModel = require("../models/productModel");
 
+
 const addProduct = async (req, res) => {
   try {
-    const sellerId = req.params.id;
-    const { name, description, price, quantity, rating = 0 } = req.body;
+    const sellerId = req.user._id;
 
+    const { name, description, price, quantity } = req.body;
+
+    // Validate required fields
+    if (!name || !description || price == null || quantity == null) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Create new product with sellerId from req.user
     const newProduct = new productModel({
       sellerId,
       name,
       description,
       price,
-      quantity,
-      rating,
+      quantity
     });
 
     await newProduct.save();
-
-    res.status(201).json();
+    res.status(201).json({ message: "Product added successfully", newProduct });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).json({ message: "Error adding product" });
   }
 };
+
 const updateProduct = async (req, res) => {
   try {
     const productId = req.params.id.trim();
+    const { name, description, price, quantity } = req.body;
+    const user = req.user; // Assuming `req.user` contains the authenticated user's details (role and ID)
 
-    const { description, price } = req.body;
+    // Validate user
+    if (!user || !user._id) {
+      return res.status(401).json({ message: "Unauthorized: User not authenticated" });
+    }
 
-    const updatedProduct = await productModel.findByIdAndUpdate(
-      productId,
-      { description, price },
-      { new: true, runValidators: true }
-    );
+    // Check if at least one field is provided for update
+    if (name == null && description == null && price == null && quantity == null) {
+      return res.status(400).json({ message: "Nothing to update" });
+    }
 
-    if (!updatedProduct) {
+    // Find the product to verify ownership or admin access
+    const product = await productModel.findById(productId);
+    if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.status(200).json({
-      message: "Product updated successfully",
-    });
+    // Allow update if user is admin or if the user owns the product
+    if (user.role === "admin" || (product.sellerId && product.sellerId.toString() === user._id.toString())) {
+      const updateFields = {};
+
+      if (name) updateFields.name = name;
+      if (description) updateFields.description = description;
+      if (price != null) updateFields.price = price;
+      if (quantity != null) updateFields.quantity = quantity;
+
+      const updatedProduct = await productModel.findByIdAndUpdate(
+          productId,
+          updateFields,
+          { new: true, runValidators: true }
+      );
+
+      return res.status(200).json({
+        message: "Product updated successfully",
+        updatedProduct,
+      });
+    } else {
+      // Deny access if a non-admin user tries to update another seller's product
+      return res.status(403).json({
+        message: "You do not have permission to update this product",
+      });
+    }
   } catch (e) {
     console.log(e);
     res.status(500).json({ message: "Error updating product" });
   }
 };
-
-const sortProductsByRating = async (req, res) => {
+const getFilteredProducts = async (req, res) => {
   try {
-    const sortOrder =
-      req.query.order && req.query.order.toLowerCase() === "asc" ? 1 : -1;
-    const products = await productModel.find().sort({ rating: sortOrder });
+    const { minPrice = 0, maxPrice = Infinity, name, order = 'desc' } = req.query;
 
-    if (products.length === 0) {
-      return res.status(404).json({ message: "No products found" });
+    // Build filter object for price range
+    const filter = {
+      price: { $gte: parseFloat(minPrice), $lte: parseFloat(maxPrice) },
+    };
+
+    // Add name filter if provided
+    if (name) {
+      const escapedName = name.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ".*";
+      filter.name = { $regex: escapedName, $options: "i" };
     }
 
-    res.status(200).json({
-      message: "Products sorted by ratings successfully",
-      products,
-    });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ message: "Error fetching and sorting products" });
-  }
-};
+    // Determine sort order for rating
+    const sortOrder = order.toLowerCase() === 'asc' ? 1 : -1;
 
-const filterProductsByPrice = async (req, res) => {
-  try {
-    const { minPrice = 0, maxPrice = Infinity } = req.query;
-
-    const products = await productModel.find({
-      price: { $gte: minPrice, $lte: maxPrice },
-    });
-
-    if (products.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No products found in this price range" });
-    }
-
-    res.status(200).json({
-      message: "Products filtered by price successfully",
-      products,
-    });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ message: "Error filtering products" });
-  }
-};
-
-const searchProductByName = async (req, res) => {
-  try {
-    const { name } = req.query;
-
-    if (!name) {
-      return res
-        .status(400)
-        .json({ message: "Name query parameter is required" });
-    }
-
-    const escapedName =
-      name.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ".*";
-
-    const products = await productModel.find({
-      name: { $regex: escapedName, $options: "i" }, // 'i' for case-insensitive search
-    });
-
-    if (products.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No products found with the given name" });
-    }
-
-    res.status(200).json({
-      message: "Products found",
-      products,
-    });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ message: "Error searching products" });
-  }
-};
-
-const getAllProducts = async (req, res) => {
-  try {
-    const products = await productModel
-      .find()
-      .populate("sellerId", "username role")
-      .exec();
+    // Fetch products with filters and sorting applied
+    const products = await productModel.find(filter).sort({ rating: sortOrder });
 
     if (!products || products.length === 0) {
       return res.status(404).json({ message: "No products found" });
     }
 
-    const modifiedProducts = products.map((product) => {
-      if (product.sellerId && product.sellerId.role === "admin") {
-        // Modify the product where sellerId exists and role is admin
-        return {
-          ...product._doc,
-          sellerId: {
-            ...product.sellerId._doc,
-            username: "Roamify",
-          },
-        };
-      }
-      // Return product as it is if sellerId is null or role is not admin
-      return product;
-    });
-
-    res.status(200).json({
-      message: "List of all available products",
-      products: modifiedProducts,
-    });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ message: "Error fetching products" });
+    res.status(200).json({ message: "Filtered products", products });
+  } catch (error) {
+    console.error("Error fetching filtered products:", error);
+    res.status(500).json({ message: "Error fetching filtered products" });
   }
 };
-
-
 
 module.exports = {
   addProduct,
   updateProduct,
-  sortProductsByRating,
-  filterProductsByPrice,
-  searchProductByName,
-  getAllProducts,
+  getFilteredProducts
 };
