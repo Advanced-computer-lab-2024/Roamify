@@ -5,7 +5,7 @@ const multer = require('multer');
 const mongoose = require('mongoose');
 // Configure multer to store files in memory
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
-const upload = multer({ storage }).array('placesImages', 2); // Accept up to 5 images
+const upload = multer({ storage }).array('placesImages', 2); // Accept up to 2 images
 
 
 
@@ -28,15 +28,17 @@ const createPlace = async (req, res) => {
 
     const location = JSON.parse(locationJSON);
     const ticketPrice = JSON.parse(ticketPriceJSON);
-    console.log("Files received:", req.files);
 if (!req.files || req.files.length === 0) {
-  throw new Error("No files uploaded.");
+  throw new Error("No images uploaded.");
 }
 
 
     if (!type || !name || !description || !location || !tagPlace || !ticketPrice || !openingHours || !closingHours) {
       throw new Error('Please fill all required fields');
     }
+    const nameValidator = await placeModel.findOne({name});
+    if(nameValidator)
+      throw Error("Please choose another name for this place this name already exists");
 
     // Validate that tagPlace is an array of valid ObjectIds
     const tagIds = Array.isArray(tagPlace)
@@ -120,8 +122,9 @@ const getPlaces = async (req, res) => {
 
 const updatePlace = async (req, res) => {
   try {
+    console.log(req.files);
     const historicalPlaceId = req.params.historicalPlaceId; // Fixed typo
-    const tourismGovernorId = req.params.tourismGovernorId;
+    const tourismGovernorId = req.user._id;
 
     // Find the historical place and populate tourismGovernorId
     const historicalPlace = await placeModel
@@ -144,45 +147,82 @@ const updatePlace = async (req, res) => {
 
     // Extract fields from request body
     const {
-      type,
-      name,
       description,
       tagPlace,
-      pictures,
       location,
       ticketPrice,
+      openingHours,
+      closingHours
     } = req.body;
     const query = {};
 
-    const tags = await historicalTagModel
-      .find({ Type: { $in: tagPlace } })
-      .select("_id");
-    const tagIds = tags.map((tag) => tag._id);
 
-    // Build the update query
-    if (type) query.type = type;
-    if (name) query.name = name;
+
+  
+
     if (description) query.description = description;
-    if (tags) query.tags = tagIds;
-    if (pictures) query.pictures = pictures;
-    if (location) query.location = location;
-    if (ticketPrice) query.ticketPrice = ticketPrice;
+    if (location) query.location = JSON.parse(location);
+    if (ticketPrice) query.ticketPrice = JSON.parse(ticketPrice);
+    if(openingHours) query.openingHours = openingHours;
+    if(closingHours) query.closingHours = closingHours;
+    if (tagPlace) {
+      const parsedTagPlace = JSON.parse(tagPlace); // Parse tagPlace as an array
+      const tagDocs = await historicalTagModel.find({ _id: { $in: parsedTagPlace } });
+      
+      if (tagDocs.length !== parsedTagPlace.length) {
+        throw Error("Some preference tags are invalid");
+      }
+
+      const tagIds = tagDocs.map(tag => tag._id);
+      query.tags = tagIds; // Using IDs directly
+    }
+
+
+    if(req.files || req.files.length>0){
+
+      let imageUrls = [];
+      const deletionPromises = historicalPlace.pictures.map(picture => {
+        console.log(picture);
+        cloudinary.uploader.destroy(picture.publicId)
+      }
+      );
+      await Promise.all(deletionPromises);  // Wait for all Cloudinary deletions to complete
+
+      for (const file of req.files) {
+        await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { resource_type: 'image' },
+            (error, result) => {
+              if (error) {
+                reject(new Error('Upload Error'));
+              } else {
+                
+                imageUrls.push({ url: result.secure_url, publicId: result.public_id });     
+                query.pictures = imageUrls;
+                 resolve();
+              }
+            }
+          );
+      
+          // Use .end(file.buffer) to upload the buffer directly to Cloudinary
+          uploadStream.end(file.buffer);
+        });
+      }
+    }
+    
 
     // Update the historical place
     const updatedHistoricalPlace = await placeModel
-      .findByIdAndUpdate(historicalPlaceId, query, { new: true })
-      .populate("tourismGovernorId")
-      .populate("tags");
+      .findByIdAndUpdate(historicalPlaceId, query);
 
     // Send response
+    
     res.status(200).json({
-      message: "Place updated successfully",
-      place: updatedHistoricalPlace,
+      message: "Place updated successfully"
     });
   } catch (e) {
-    console.error(e); // Log the error for debugging
     res
-      .status(500)
+      .status(401)
       .json({ error: e.message, message: "Could not update place" }); // Use 500 for server errors
   }
 };
