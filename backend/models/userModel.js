@@ -8,6 +8,14 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    idDocument: {
+      url: String,           // Secure URL to access the file
+      public_id: String,     // Public ID needed for deletion
+    },
+    certificateDocument: {
+      url: String,           // Secure URL to access the file
+      public_id: String,     // Public ID needed for deletion
+    },
     email: {
       type: String,
       required: true,

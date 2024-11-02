@@ -10,5 +10,4 @@ router.post('/create-itinerary', tourGuideController.createItinerary);
 router.put('/update-itinerary/:itineraryId', tourGuideController.updateItinerary);
 router.delete('/delete-itinerary/:itineraryId', tourGuideController.deleteItinerary);
 router.get('/get-my-itineraries', tourGuideController.getMyItineraries);
-
 module.exports = router;

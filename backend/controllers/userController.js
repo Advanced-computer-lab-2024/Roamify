@@ -6,7 +6,13 @@ const sellerModel = require("../models/sellerModel");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const validator = require("validator");
-
+const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({ storage }).fields([
+  { name: 'ID', maxCount: 1 }, // Field for YourGuide ID
+  { name: 'additionalDocument', maxCount: 1 }  // Field for Certificate
+]);
 
 // Create JWT Token
 const createToken = (_id, role) => {
@@ -163,6 +169,54 @@ const changePassword = async (req, res) => {
   }
 };
 
+const uploadRequiredDocuments = async (req, res) => {
+  try {
+    // Helper function to upload a file to Cloudinary and return its secure URL and public ID
+    const uploadToCloudinary = (fileBuffer, publicId) => {
+      return new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: 'requestsDocuments', public_id: publicId, resource_type: 'auto' },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve({ url: result.secure_url, public_id: result.public_id });
+          }
+        ).end(fileBuffer);
+      });
+    };
+    if (!req.files['ID'] || !!req.files['ID'][0]) {
+      return res.status(400).json({ message: ' ID document is required' });
+    }
+    if (!req.files['additionalDocument'] || !req.files['additionalDocument'][0]) {
+      const message = req.user.role === 'tourGuide' ? 'Certificate document is required' : 'Taxation registry document is required';
+      return res.status(400).json({ message });
+    }
+
+    // Upload tourGuideID and certificate
+    const ID = await uploadToCloudinary(req.files['ID'][0].buffer, req.user._id + "ID");
+    const secondDocument = await uploadToCloudinary(req.files['additionalDocument'][0].buffer, req.user._id + "AdditionalDocuments");
+
+    // Save URLs and public IDs in the database
+    await userModel.findByIdAndUpdate(
+      req.user._id,
+      {
+        idDocument: {
+          url: ID.url,
+          public_id: ID.public_id
+        },
+        certificateDocument: {
+          url: secondDocument.url,
+          public_id: secondDocument.public_id
+        }
+      }
+    );
+
+    res.status(200).json({
+      message: 'Documents uploaded successfully'
+    });
+  } catch (error) {
+    res.status(400).json({ message: 'Error uploading documents', error: error.message });
+  }
+};
 
 // Adjusted Logout Function (clear token cookie)
 const logoutUser = (req, res) => {
@@ -219,5 +273,7 @@ module.exports = {
   loginUser,
   logoutUser,
   getUsersByRole,
-  changePassword
+  changePassword,
+  upload,
+  uploadRequiredDocuments
 };

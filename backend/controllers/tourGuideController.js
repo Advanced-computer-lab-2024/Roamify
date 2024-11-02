@@ -5,6 +5,7 @@ const tourGuideModel = require("../models/tourGuideModel");
 const activityModel = require("../models/activityModel");
 const itineraryModel = require("../models/itineraryModel");
 
+
 const createProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -32,6 +33,9 @@ const createProfile = async (req, res) => {
   }
 };
 
+
+
+
 const getProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -53,7 +57,7 @@ const getProfile = async (req, res) => {
       role,
       mobileNumber: profile.mobileNumber,
       yearsOfExperience: profile.yearsOfExperience,
-      previousWork: profile.previousWork,
+      previousWork: profile.previousWork
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve profile", error: error.message });
