@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema(
       url: String,           // Secure URL to access the file
       public_id: String,     // Public ID needed for deletion
     },
-    certificateDocument: {
+    additionalDocument: {
       url: String,           // Secure URL to access the file
       public_id: String,     // Public ID needed for deletion
     },

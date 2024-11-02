@@ -175,5 +175,24 @@ const addAdmin = async (req, res) => {
   }
 };
 
+const viewUploadedDocuments = async (req,res)=>{
+  try{
+    const users = await userModel.find({
+      role: { $in: ["seller", "advertiser", "tourGuide"] }
+    });
+    let ids = [];
+    let additionalDoc = [];
+    for(const user of users){
+      console.log(user.idDocument);
+      ids.push(user.idDocument.url);
+      additionalDoc.push(user.additionalDocument.url);
+    }
 
-module.exports = { addTourismGovernor, deleteUser, addAdmin };
+    res.status(200).json({IDs:ids , additionalDocuments:additionalDoc})
+  }
+  catch(e){
+    res.status(400).json({message:'couldn\'t get documents' , error:e.message})
+  }
+}
+
+module.exports = { addTourismGovernor, deleteUser, addAdmin ,viewUploadedDocuments};

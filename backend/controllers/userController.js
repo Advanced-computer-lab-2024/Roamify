@@ -183,10 +183,11 @@ const uploadRequiredDocuments = async (req, res) => {
         ).end(fileBuffer);
       });
     };
-    if (!req.files['ID'] || !!req.files['ID'][0]) {
+    console.log(req.files)
+    if (!req.files['ID']) {
       return res.status(400).json({ message: ' ID document is required' });
     }
-    if (!req.files['additionalDocument'] || !req.files['additionalDocument'][0]) {
+    if (!req.files['additionalDocument']) {
       const message = req.user.role === 'tourGuide' ? 'Certificate document is required' : 'Taxation registry document is required';
       return res.status(400).json({ message });
     }
@@ -203,7 +204,7 @@ const uploadRequiredDocuments = async (req, res) => {
           url: ID.url,
           public_id: ID.public_id
         },
-        certificateDocument: {
+        additionalDocument: {
           url: secondDocument.url,
           public_id: secondDocument.public_id
         }
