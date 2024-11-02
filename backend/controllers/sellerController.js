@@ -65,8 +65,6 @@ const updateProfile = async (req, res) => {
       firstName,
       lastName,
       email,
-      oldPassword,
-      newPassword,
       description
     } = req.body;
   
@@ -81,18 +79,7 @@ const updateProfile = async (req, res) => {
     if (firstName) sellerUpdates.firstName = firstName; 
     if (lastName) sellerUpdates.lastName = lastName; 
     
-    if (oldPassword){
-      const match = await  bcrypt.compare(oldPassword,seller.user.password);
-      if(!match)
-        throw Error('password does not match old password');
-      if(!validator.isStrongPassword(newPassword)){
-        throw Error('password doesn\'t meet minimum requirements');
-      }
-      const salt = await bcrypt.genSalt(10);
-  const hash = await bcrypt.hash(newPassword,salt);
-  userUpdates.password = hash;
   
-    }
     if (email) {
       const existingUser = await userModel.findOne({ email });
       if (existingUser && email !== seller.user.email) {

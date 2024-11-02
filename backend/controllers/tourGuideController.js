@@ -63,7 +63,7 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { mobileNumber, yearsOfExperience, previousWork, oldPassword, newPassword, email } = req.body;
+    const { mobileNumber, yearsOfExperience, previousWork, email } = req.body;
 
     const userUpdates = {};
     const tourGuideUpdates = {};
@@ -71,14 +71,7 @@ const updateProfile = async (req, res) => {
     const tourGuide = await tourGuideModel.findOne({ user: userId }).populate("user");
     if (!tourGuide) return res.status(404).json({ message: "Profile not found" });
 
-    if (oldPassword) {
-      const isMatch = await bcrypt.compare(oldPassword, tourGuide.user.password);
-      if (!isMatch) return res.status(400).json({ message: "Old password is incorrect" });
-      if (!validator.isStrongPassword(newPassword)) {
-        return res.status(400).json({ message: "New password does not meet security requirements" });
-      }
-      userUpdates.password = await bcrypt.hash(newPassword, 10);
-    }
+   
 
     if (email && email !== tourGuide.user.email) {
       if (!validator.isEmail(email)) return res.status(400).json({ message: "Invalid email format" });
