@@ -7,6 +7,14 @@ const sellerSchema = new mongoose.Schema(
             ref: "user",
             unique: true,
         },
+        logo: {
+            url: {
+                type: String,
+            },
+            publicId: {
+                type: String,
+            }
+        },
         firstName: {
             type: String,
             required: true,

@@ -4,7 +4,10 @@ const userModel = require("../models/userModel");
 const tourGuideModel = require("../models/tourGuideModel");
 const activityModel = require("../models/activityModel");
 const itineraryModel = require("../models/itineraryModel");
-
+const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
+const multer = require('multer');
+const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
+const upload = multer({ storage }).single('profilePicture'); // Accept only 1 file with field name 'profilePicture'
 
 const createProfile = async (req, res) => {
   try {
@@ -40,10 +43,10 @@ const getProfile = async (req, res) => {
   try {
     const userId = req.user._id;
     const profile = await tourGuideModel.findOne({ user: userId })
-        .select('-_id -__v -createdAt -updatedAt')
+        .select('-_id -__v -createdAt -updatedAt ')
         .populate({
           path: "user",
-          select: "username email role -_id",
+          select: "username email role -_id ",
         });
 
     if (!profile) {
@@ -57,7 +60,8 @@ const getProfile = async (req, res) => {
       role,
       mobileNumber: profile.mobileNumber,
       yearsOfExperience: profile.yearsOfExperience,
-      previousWork: profile.previousWork
+      previousWork: profile.previousWork,
+      profilePicture:profile.picture.url
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve profile", error: error.message });
@@ -229,6 +233,43 @@ const getMyItineraries = async (req, res) => {
   }
 };
 
+const uploadProfilePicture = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Profile picture is required' });
+    }
+
+    const file = req.file;
+    let imageUrl;
+
+    await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { resource_type: 'image' },
+        (error, result) => {
+          if (error) {
+            reject(new Error('Upload Error'));
+          } else {
+            imageUrl = { url: result.secure_url, publicId: result.public_id };
+            resolve();
+          }
+        }
+      );
+
+      // Upload the file buffer directly to Cloudinary
+      uploadStream.end(file.buffer);
+    });
+
+    await tourGuideModel.findOneAndUpdate({user:req.user._id},{picture:imageUrl});
+
+    res.status(200).json({
+      message: 'Profile picture uploaded successfully',
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error uploading profile picture', error: error.message });
+  }
+};
+
+
 module.exports = {
   createProfile,
   getProfile,
@@ -236,5 +277,7 @@ module.exports = {
   createItinerary,
   updateItinerary,
   deleteItinerary,
-  getMyItineraries
+  getMyItineraries,
+  upload,
+  uploadProfilePicture
 };

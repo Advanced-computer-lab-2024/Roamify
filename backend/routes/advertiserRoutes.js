@@ -13,6 +13,7 @@ router.delete(
   "/delete-activity/:activityid",
   advertiserController.deleteActivity
 );
+router.post('/upload-logo',advertiserController.upload,advertiserController.uploadLogo);
 
 router.get("/get-my-activities", advertiserController.getMyActivities);
 

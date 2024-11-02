@@ -5,6 +5,11 @@ const userModel = require("../models/userModel");
 const activityModel = require("../models/activityModel");
 const preferenceTagModel = require('../models/preferenceTagModel');
 const categoryModel = require("../models/categoryModel");
+const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
+const multer = require('multer');
+const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
+const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
+
 
 
 const createProfile = async (req, res) => {
@@ -44,7 +49,7 @@ const getProfile = async (req, res) => {
       path: 'user',
       select: 'username email role password status' // Only return these fields from the user
     });
-    return res.status(200).json({username:details.user.username,email:details.user.email,role:details.user.role,companyName:details.companyName,companyProfile:details.companyProfile,websiteLink:details.websiteLink,hotline:details.hotline});
+    return res.status(200).json({username:details.user.username,email:details.user.email,role:details.user.role,companyName:details.companyName,companyProfile:details.companyProfile,websiteLink:details.websiteLink,hotline:details.hotline,logo:details.logo.url});
    
   } catch (err) {
     res.status(401).json({ message: "failed", error: err.message });
@@ -334,7 +339,45 @@ const getMyActivities = async (req, res) => {
   }
 };
 
+const uploadLogo = async (req,res)=>{
+  try{
 
+    if (!req.file) {
+      return res.status(400).json({ message: 'Logo is required' });
+    }
+
+    const file = req.file;
+    let imageUrl;
+
+    await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { resource_type: 'image' },
+        (error, result) => {
+          if (error) {
+            reject(new Error('Upload Error'));
+          } else {
+            imageUrl = { url: result.secure_url, publicId: result.public_id };
+            resolve();
+          }
+        }
+      );
+
+      // Upload the file buffer directly to Cloudinary
+      uploadStream.end(file.buffer);
+    });
+
+    await advertiserModel.findOneAndUpdate({user:req.user._id},{logo:imageUrl});
+
+    res.status(200).json({
+      message: 'Logo uploaded successfully',
+    });
+  }
+  catch(error){
+    res.status(500).json({ message: 'Error uploading logo', error: error.message });
+
+
+  }
+}
 
 
 module.exports = {
@@ -345,4 +388,6 @@ module.exports = {
   getMyActivities,
   updateActivity,
   deleteActivity,
+  uploadLogo,
+  upload
 };
