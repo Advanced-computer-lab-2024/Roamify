@@ -273,6 +273,8 @@ const termsAndConditions = async (req,res)=>{
     const user = await userModel.findById(userId);
     if(user.status === 'pending')
       throw Error('please wait for admin to view yur documents before you proceed');
+    if(user.status === "rejected")
+      throw Error('you don\'t have the privilege to do this action');
     const accepted = req.body.accepted;
     if(accepted === null || accepted === "")
       throw Error('please accept or reject our terms and')
