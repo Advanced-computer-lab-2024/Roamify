@@ -142,42 +142,7 @@ const logoutUser = (req, res) => {
   return res.status(200).json({ message: "Successfully logged out" });
 };
 
-// Get users by role
-const getUsersByRole = async (req, res) => {
-  try {
-    const role = req.params.role;
 
-    if (
-      ![
-        "admin",
-        "tourist",
-        "seller",
-        "tourGuide",
-        "advertiser",
-        "tourismGovernor",
-      ].includes(role)
-    ) {
-      return res.status(400).json({ message: "Invalid role" });
-    }
-
-    // Fetch users based on the role
-    const users = await userModel.find({ role });
-
-    if (users.length === 0) {
-      return res
-        .status(404)
-        .json({ message: `No users found with role ${role}` });
-    }
-
-    res.status(200).json({
-      message: `Users with role ${role} retrieved successfully`,
-      users,
-    });
-  } catch (error) {
-    console.error("Error retrieving users by role:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
 
 
 
@@ -185,5 +150,4 @@ module.exports = {
   createUser,
   loginUser,
   logoutUser,
-  getUsersByRole,
 };
