@@ -1,7 +1,6 @@
 const touristModel = require("../models/touristModel");
 const userModel = require("../models/userModel");
 const walletModel = require("../models/walletModel");
-const bcrypt = require("bcrypt");
 const validator = require("validator");
 
 // Helper function to check if a user is an adult based on date of birth
@@ -166,4 +165,5 @@ const addWallet = async (req, res) => {
   }
 };
 
-module.exports = { createProfile, getProfile, updateProfile, addWallet };
+
+module.exports = { createProfile, getProfile, updateProfile, addWallet};

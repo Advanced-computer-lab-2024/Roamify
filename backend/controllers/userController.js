@@ -3,6 +3,7 @@ const touristModel = require("../models/touristModel");
 const advertiserModel = require("../models/advertiserModel");
 const tourGuideModel = require("../models/tourGuideModel");
 const sellerModel = require("../models/sellerModel");
+
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const validator = require("validator");
@@ -292,6 +293,46 @@ const termsAndConditions = async (req,res)=>{
   }
 }
 
+// const deleteAccount = async (req,res)=>{
+//   try{
+//     const user = await userModel.findById(req.user._id);
+//     if(!user)
+//       throw Error('user does not exist');
+//     if(user.status !== "active")
+//       throw Error('you must activate your account first to be able to delete');
+//     const role = user.role;
+//     if(role === "advertiser"){
+//       const activities = await activityModel.find({advertiser:req.user._id,booked: true,date: { $gte: currentDate }});
+//       if(activities)
+//         throw Error('sorry you have upcoming activities that are booked and payed for try again after them');
+//       else{
+//         await activityModel.deleteMany({ advertiser: req.user._id });
+//         await advertiserModel.findOneAndDelete({user:req.user._id});
+//         await userModel.findByIdAndDelete(req.user._id);
+//         return res.status(200).json({message:'deleted advertiser and his corresponding activities successfully'});
+//       }
+
+//     }
+//     else if(role === "seller"){
+//       await productModel.deleteMany({sellerId:req.user._id});
+//       await sellerModel.deleteMany({user:req.user._id});
+//       await userModel.findByIdAndDelete(req.user._id);
+//       return res.status(200).json({message:'deleted seller and his corresponding products successfully'});
+
+//     }
+//     else if(role === "tourGuide"){
+//       const 
+
+//     }
+//     else{
+
+//     }
+
+//   }
+//   catch(error){
+
+//   }
+// }
 
 module.exports = {
   createUser,
@@ -302,4 +343,5 @@ module.exports = {
   upload,
   uploadRequiredDocuments,
   termsAndConditions
+  // deleteAccount
 };
