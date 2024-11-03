@@ -267,6 +267,28 @@ const getUsersByRole = async (req, res) => {
   }
 };
 
+const termsAndConditions = async (req,res)=>{
+  try{
+    const userId = req.user._id;
+    const user = await userModel.findById(userId);
+    if(user.status === 'pending')
+      throw Error('please wait for admin to view yur documents before you proceed');
+    const accepted = req.body.accepted;
+    if(accepted === null || accepted === "")
+      throw Error('please accept or reject our terms and')
+    if(accepted){
+      await userModel.findByIdAndUpdate(userId,{termsAndConditions:true});
+      return res.status(200).json({message:'accepted terms and conditions successfully'});
+    }
+    else{
+      await userModel.findByIdAndUpdate(userId,{termsAndConditions:false});
+      return res.status(200).json({message:'rejected terms and conditions'});
+    }
+  }
+  catch(error){
+    res.status(400).json({message:'couldn\'t accept or reject terms and conditions', error:error.message});
+  }
+}
 
 
 module.exports = {
@@ -276,5 +298,6 @@ module.exports = {
   getUsersByRole,
   changePassword,
   upload,
-  uploadRequiredDocuments
+  uploadRequiredDocuments,
+  termsAndConditions
 };

@@ -41,6 +41,9 @@ const userSchema = new mongoose.Schema(
         "admin",
       ]
     },
+    termsAndConditions:{
+      type:Boolean
+    }
   },
   { timestamps: true }
 );

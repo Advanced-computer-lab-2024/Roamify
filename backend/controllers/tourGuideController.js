@@ -15,6 +15,9 @@ const createProfile = async (req, res) => {
     const user = await userModel.findById(userId);
     if(user.status === "pending")
       throw Error('pending admin approval');
+    
+    if(!user.termsAndConditions)
+      throw Error('sorry you must accept our terms and conditions in order to proceed');
     const { mobileNumber, yearsOfExperience, previousWork } = req.body;
 
     if (!userId) return res.status(400).json({ message: "User ID is required" });
