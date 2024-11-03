@@ -5,6 +5,8 @@ const tourGuideModel = require("../models/tourGuideModel");
 const sellerModel = require("../models/sellerModel");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const validator = require("validator");
+
 
 // Create JWT Token
 const createToken = (_id, role) => {
@@ -130,6 +132,37 @@ const loginUser = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.user._id);
+    if (!user) throw Error("User not found");
+
+    const { oldPassword, newPassword1, newPassword2 } = req.body;
+
+    if (!oldPassword) throw Error("Please enter old password");
+    if (!newPassword1 || !newPassword2) throw Error("Please enter your new password and confirm it");
+
+    if (newPassword1 !== newPassword2) throw Error("New passwords do not match");
+
+    const match = await bcrypt.compare(oldPassword, user.password);
+    if (!match) throw Error("Old password is incorrect");
+
+    if (!validator.isStrongPassword(newPassword1)) throw Error("Password does not meet minimum requirements");
+
+    const oldMatchNew = await bcrypt.compare(newPassword1, user.password);
+    if (oldMatchNew) throw Error("Please enter a new password that is different from the old one");
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword1, salt);
+
+    await userModel.findByIdAndUpdate(req.user._id, { password: hashedPassword });
+
+    return res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    res.status(400).json({ message: "Couldn't change password", error: error.message });
+  }
+};
+
 
 // Adjusted Logout Function (clear token cookie)
 const logoutUser = (req, res) => {
@@ -150,4 +183,5 @@ module.exports = {
   createUser,
   loginUser,
   logoutUser,
+  changePassword
 };

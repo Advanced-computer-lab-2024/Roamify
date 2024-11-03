@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt');
 const validator = require('validator');
 
 const advertiserModel = require("../models/advertiserModel");
@@ -56,7 +55,7 @@ const updateProfile = async (req, res) => {
   try{
   const id = req.user._id;
 
-  const { companyName, websiteLink, hotline, companyProfile , oldPassword,newPassword ,email} = req.body;
+  const { companyName, websiteLink, hotline, companyProfile  ,email} = req.body;
 
   const userUpdates = {};
   const advertiserUpdates = {};
@@ -73,18 +72,6 @@ const updateProfile = async (req, res) => {
   if (hotline) advertiserUpdates.hotline = hotline;
   if (companyProfile) advertiserUpdates.companyProfile = companyProfile;
 
-  if (oldPassword){
-    const match = await  bcrypt.compare(oldPassword,advertiser.user.password);
-    if(!match)
-      throw Error('password does not match old password');
-    if(!validator.isStrongPassword(newPassword)){
-      throw Error('password doesn\'t meet minimum requirements');
-    }
-    const salt = await bcrypt.genSalt(10);
-const hash = await bcrypt.hash(newPassword,salt);
-userUpdates.password = hash;
-
-  }
   if (email) {
     const existingUser = await userModel.findOne({ email });
     if (existingUser && email !== advertiser.user.email) {

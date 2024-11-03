@@ -1,4 +1,8 @@
 const productModel = require("../models/productModel");
+const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
+const multer = require('multer');
+const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
+const upload = multer({ storage }).array('productImages', 2); // Accept up to 2 images
 
 
 const addProduct = async (req, res) => {
@@ -12,13 +16,39 @@ const addProduct = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+
+    if(!req.files)
+      throw Error('please insert pictures for your product');
+    const imageUrls = [];
+for (const file of req.files) {
+  await new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { resource_type: 'image' },
+      (error, result) => {
+        if (error) {
+          reject(new Error('Upload Error'));
+        } else {
+          imageUrls.push({ url: result.secure_url, publicId: result.public_id });     
+           resolve();
+        }
+      }
+    );
+
+    // Use .end(file.buffer) to upload the buffer directly to Cloudinary
+    uploadStream.end(file.buffer);
+  });
+}
+
+const parsedPrice = parseFloat(price);
+const parsedQuantity = parseInt(quantity, 10);
     // Create new product with sellerId from req.user
     const newProduct = new productModel({
       sellerId,
       name,
       description,
-      price,
-      quantity
+      price:parsedPrice,
+      quantity:parsedQuantity,
+      picture:imageUrls
     });
 
     await newProduct.save();
@@ -41,7 +71,7 @@ const updateProduct = async (req, res) => {
     }
 
     // Check if at least one field is provided for update
-    if (name == null && description == null && price == null && quantity == null) {
+    if (name == null && description == null && price == null && quantity == null && !req.files) {
       return res.status(400).json({ message: "Nothing to update" });
     }
 
@@ -57,9 +87,40 @@ const updateProduct = async (req, res) => {
 
       if (name) updateFields.name = name;
       if (description) updateFields.description = description;
-      if (price != null) updateFields.price = price;
-      if (quantity != null) updateFields.quantity = quantity;
+      if (price != null) updateFields.price = parseFloat(price);
+      if (quantity != null) updateFields.quantity = parseInt(quantity, 10);
 
+      if(req.files || req.files.length>0){
+
+        let imageUrls = [];
+        const deletionPromises = product.picture.map(picture => {
+          console.log(picture);
+          cloudinary.uploader.destroy(picture.publicId)
+        }
+        );
+        await Promise.all(deletionPromises);  // Wait for all Cloudinary deletions to complete
+  
+        for (const file of req.files) {
+          await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              { resource_type: 'image' },
+              (error, result) => {
+                if (error) {
+                  reject(new Error('Upload Error'));
+                } else {
+                  
+                  imageUrls.push({ url: result.secure_url, publicId: result.public_id });     
+                  updateFields.picture = imageUrls;
+                   resolve();
+                }
+              }
+            );
+        
+            // Use .end(file.buffer) to upload the buffer directly to Cloudinary
+            uploadStream.end(file.buffer);
+          });
+        }
+      }
       const updatedProduct = await productModel.findByIdAndUpdate(
           productId,
           updateFields,
@@ -116,5 +177,6 @@ const getFilteredProducts = async (req, res) => {
 module.exports = {
   addProduct,
   updateProduct,
-  getFilteredProducts
+  getFilteredProducts,
+  upload
 };

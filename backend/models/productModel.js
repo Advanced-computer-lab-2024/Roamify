@@ -2,9 +2,18 @@ const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
-    picture: {
-      type: String,
-    },
+    picture: [
+      {
+          url: {
+              type: String,
+              required: true // The Cloudinary URL for displaying the image
+          },
+          publicId: {
+              type: String,
+              required: true // The Cloudinary public ID for deletion
+          }
+      }
+  ],
     sellerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",

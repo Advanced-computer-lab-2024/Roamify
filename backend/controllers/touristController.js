@@ -96,7 +96,7 @@ const getProfile = async (req, res) => {
 // Update Profile
 const updateProfile = async (req, res) => {
   const id = req.user._id;
-  const { firstName, lastName, email, oldPassword, newPassword, mobileNumber, nationality, occupation } = req.body;
+  const { firstName, lastName, email, mobileNumber, nationality, occupation } = req.body;
 
   const userUpdates = {};
   const touristUpdates = {};
@@ -123,15 +123,7 @@ const updateProfile = async (req, res) => {
       userUpdates.email = email;
     }
 
-    // Handle password update
-    if (oldPassword) {
-      const match = await bcrypt.compare(oldPassword, tourist.user.password);
-      if (!match) throw Error("Old password is incorrect");
-      if (!validator.isStrongPassword(newPassword)) throw Error("Password does not meet minimum requirements");
-
-      const salt = await bcrypt.genSalt(10);
-      userUpdates.password = await bcrypt.hash(newPassword, salt);
-    }
+    
 
     // Perform updates
     await userModel.findByIdAndUpdate(id, userUpdates, { new: true });
