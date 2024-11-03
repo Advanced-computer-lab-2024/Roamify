@@ -11,6 +11,9 @@ const upload = multer({ storage }).single('logo'); // Accept only 1 file with fi
 const createProfile = async (req, res) => {
     try {
         const userId = req.user._id;
+        const user = await userModel.findById(userId);
+        if(user.status === "pending")
+          throw Error('pending admin approval');
 
         if (userId) {
             const result = await sellerModel.findOne({ user: userId });

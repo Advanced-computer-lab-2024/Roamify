@@ -16,6 +16,10 @@ const createProfile = async (req, res) => {
   try {
     const userId = req.user._id;
 
+    const user = await userModel.findById(userId);
+    if(user.status === "pending")
+      throw Error('pending admin approval');
+
     if (userId) {
       const result = await advertiserModel.findOne({ user: userId });
       if (result && userId) {

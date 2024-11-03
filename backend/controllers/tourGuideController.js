@@ -12,6 +12,9 @@ const upload = multer({ storage }).single('profilePicture'); // Accept only 1 fi
 const createProfile = async (req, res) => {
   try {
     const userId = req.user._id;
+    const user = await userModel.findById(userId);
+    if(user.status === "pending")
+      throw Error('pending admin approval');
     const { mobileNumber, yearsOfExperience, previousWork } = req.body;
 
     if (!userId) return res.status(400).json({ message: "User ID is required" });
