@@ -22,5 +22,26 @@ const createHistoricalTag = async (req, res) => {
     });
   }
 };
+const getAllHistoricalTags = async (req, res) => {
+  try {
+    const tags = await HistoricalTag.find();
 
-module.exports = { createHistoricalTag };
+    if (!tags || tags.length === 0) {
+      return res.status(404).json({
+        message: "No historical tags found.",
+      });
+    }
+
+    res.status(200).json({
+      message: "Historical tags retrieved successfully!",
+      data: tags,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error retrieving historical tags",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { createHistoricalTag,getAllHistoricalTags };
