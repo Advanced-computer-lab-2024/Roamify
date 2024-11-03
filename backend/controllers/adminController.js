@@ -76,7 +76,7 @@ const deleteUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Perform deletion based on role
+
     let deletionResult;
     switch (user.role) {
       case "tourist":
@@ -118,8 +118,6 @@ const deleteUser = async (req, res) => {
     return res.status(500).json({ message: "Failed to delete user", error: error.message });
   }
 };
-
-
 
 const addAdmin = async (req, res) => {
   const { username, password } = req.body;
@@ -179,6 +177,7 @@ const getUsersByRole = async (req, res) => {
   try {
     const role = req.params.role;
 
+    // Validate the role
     if (
         ![
           "admin",
@@ -189,27 +188,30 @@ const getUsersByRole = async (req, res) => {
           "tourismGovernor",
         ].includes(role)
     ) {
-      return res.status(400).json({ message: "Invalid role" });
+      return res.status(400).json({ message: "Invalid role specified." });
     }
 
-    // Fetch users based on the role
-    const users = await userModel.find({ role });
+    // Fetch users based on the role, selecting only specific fields
+    const users = await userModel
+        .find({ role })
+        .select("id username email status"); // Only include necessary fields
 
+    // Check if no users were found
     if (users.length === 0) {
-      return res
-          .status(404)
-          .json({ message: `No users found with role ${role}` });
+      return res.status(404).json({
+        message: `No accounts found with the role: ${role}.`,
+      });
     }
 
+    // Respond with the filtered user data
     res.status(200).json({
-      message: `Users with role ${role} retrieved successfully`,
+      message: `Users with role ${role} retrieved successfully.`,
       users,
     });
   } catch (error) {
     console.error("Error retrieving users by role:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "An error occurred on the server." });
   }
 };
-
 
 module.exports = { addTourismGovernor, deleteUser, addAdmin , getUsersByRole };
