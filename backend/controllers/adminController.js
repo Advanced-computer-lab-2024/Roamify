@@ -5,6 +5,7 @@ const advertiserModel = require("../models/advertiserModel");
 const tourGuideModel = require("../models/tourGuideModel");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
+const { default: mongoose } = require("mongoose");
 
 
 const addTourismGovernor = async (req, res) => {
@@ -195,4 +196,46 @@ const viewUploadedDocuments = async (req,res)=>{
   }
 }
 
-module.exports = { addTourismGovernor, deleteUser, addAdmin ,viewUploadedDocuments};
+const acceptRejectUser = async (req, res) => {
+  try {
+    const { url, approved } = req.body;
+
+    if (!url) {
+      console.log('No URL provided');
+      return res.status(400).json({ message: 'URL is required' });
+    }
+    if(approved === null || approved === '')
+      throw Error('please accept or reject')
+    const lastPart = url.split('/').pop(); // Get the last part after splitting by '/'
+
+    const result = lastPart.replace(/ID\.pdf$/, ''); // Matches "ID.pdf" at the end and removes it
+
+    if (!mongoose.Types.ObjectId.isValid(result)) {
+      return res.status(400).json({ message: 'Invalid user ID in URL' });
+    }
+
+    const userId = new mongoose.Types.ObjectId(result);
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if(user.status !== "pending")
+      throw Error('we have responded our approval/dissaproval for this user')
+
+    if (approved === "accept") {
+      await userModel.findByIdAndUpdate(userId, { status: "pending creation" });
+      return res.status(200).json({ message: 'Accepted user successfully' });
+    } else {
+      await userModel.findByIdAndUpdate(userId, { status: "rejected" });
+      return res.status(200).json({ message: 'Rejected and user successfully' });
+    }
+
+  } catch (error) {
+    res.status(400).json({ message: "Couldn't accept or reject user", error: error.message });
+  }
+};
+
+
+module.exports = { addTourismGovernor, deleteUser, addAdmin ,viewUploadedDocuments,acceptRejectUser};

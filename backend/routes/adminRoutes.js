@@ -25,6 +25,7 @@ router.post("/create-historical-tag", historicalTagController.createHistoricalTa
 router.put("/edit-product/:id", productController.updateProduct);
 router.put("/add-product/:id", productController.addProduct);
 router.get("/view-uploaded-docs", adminController.viewUploadedDocuments);
+router.put("/accept-reject-user",adminController.acceptRejectUser)
 
 
 module.exports = router;
