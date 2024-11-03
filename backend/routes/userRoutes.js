@@ -6,5 +6,5 @@ const userController = require("../controllers/userController");
 
 router.post("/create-user", userController.createUser);
 router.post("/login", userController.loginUser);
-router.post("/change-password",authenticate(["admin","seller","tourist","tourismGovernor","advertiser","tourGuide"]),userController.changePassword)
+router.post("/change-password",authenticate(["admin","seller","tourist","tourismGovernor","advertiser","tourGuide"]),userController.changePassword);
 module.exports = router;
