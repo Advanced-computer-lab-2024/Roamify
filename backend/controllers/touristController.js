@@ -2,6 +2,7 @@ const touristModel = require("../models/touristModel");
 const userModel = require("../models/userModel");
 const walletModel = require("../models/walletModel");
 const validator = require("validator");
+const mongoose = require('mongoose');
 
 // Helper function to check if a user is an adult based on date of birth
 function isAdult(dateOfBirth) {
@@ -26,6 +27,7 @@ const createProfile = async (req, res) => {
       return res.status(400).json({ error: "Profile already created" });
     }
   }
+  await userModel.findByIdAndUpdate(req.user._id,{status:'active'});
 
   const { firstName, lastName, mobileNumber, nationality, dateOfBirth, occupation } = req.body;
   try {
@@ -84,6 +86,8 @@ const getProfile = async (req, res) => {
       adult: details.adult,
       cardNumber: details.wallet?.cardNumber || "",
       cardValidUntil: details.wallet?.cardValidUntil || "",
+      bookedItineraries: details.bookedItineraries,
+      bookedActivities: details.bookedActivities
     };
 
     return res.status(200).json(responseData);
@@ -166,4 +170,60 @@ const addWallet = async (req, res) => {
 };
 
 
-module.exports = { createProfile, getProfile, updateProfile, addWallet};
+const bookActivity = async (req, res) => {
+  try {
+    // Find the tourist by the user's ID
+    const tourist = await touristModel.findOne({ user: req.user._id });
+    if (!tourist) throw new Error("Tourist does not exist");
+
+    const activity = req.body.activity;
+    if (!activity) throw new Error("Please choose an activity to book");
+
+    const activityId = new mongoose.Types.ObjectId(activity);
+
+    await touristModel.updateOne(
+      { user: req.user._id },
+      { $addToSet: { bookedActivities: activityId } }
+    );
+
+    return res.status(200).json({ message: "Activity booked successfully" });
+  } catch (error) {
+    res.status(400).json({ message: "Error booking activity", error: error.message });
+  }
+};
+
+
+const bookItinerary = async (req, res) => {
+  try {
+    const tourist = await touristModel.findOne({ user: req.user._id });
+    if (!tourist) throw new Error("Tourist does not exist");
+
+    const { itinerary, date } = req.body;
+    if (!itinerary) throw new Error("Itinerary is required");
+    if (!date) throw new Error("date is required");
+
+    const itineraryId = new mongoose.Types.ObjectId(itinerary);
+
+    const bookingDate = new Date(date);
+    if (isNaN(bookingDate)) throw new Error("Invalid date format");
+
+    const itineraryEntry = {
+      itinerary: itineraryId,
+      date: bookingDate,
+    };
+
+    await touristModel.updateOne(
+      { user: req.user._id },
+      { $addToSet: { bookedItineraries: itineraryEntry } } 
+    );
+
+    return res.status(200).json({ message: "Itinerary booked successfully" });
+  } catch (error) {
+    res.status(400).json({ message: "Error booking itinerary", error: error.message });
+  }
+};
+
+
+
+
+module.exports = { createProfile, getProfile, updateProfile, addWallet,bookActivity,bookItinerary};

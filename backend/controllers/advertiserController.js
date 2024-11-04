@@ -45,7 +45,7 @@ const createProfile = async (req, res) => {
     await newAdvertiser.save();
     res.status(201).json({ message: "Created advertiser successfully" });
   } catch (e) {
-    res.status(404).json({ message: "failed", error: e });
+    res.status(404).json({ message: "failed", error: e.message });
     console.log(e);
   }
 };

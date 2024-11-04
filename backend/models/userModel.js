@@ -73,7 +73,7 @@ userSchema.statics.signUp = async function (username,email,password,role){
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(password,salt);
   const status =
-      role === "tourist" || role === "tourismGovernor" || role==="admin" ? "active" : "pending";
+       role === "tourismGovernor" || role==="admin" ? "active" : role==="tourist"? "pending creation" :"pending";
 
   return await this.create({username, email, password: hash, status, role});
 

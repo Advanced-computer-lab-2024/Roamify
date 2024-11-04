@@ -40,7 +40,22 @@ const touristSchema = new mongoose.Schema(
     wallet: {
       type: mongoose.Types.ObjectId,
       ref: "wallet",
-    }
+    },
+    bookedActivities:{
+      type:[mongoose.Types.ObjectId],
+      ref:'activity'
+    },
+    bookedItineraries: [
+      {
+        itinerary: {
+          type: mongoose.Types.ObjectId,
+          ref: 'itinerary', // Reference to the Itinerary model
+        },
+        date: {
+          type: Date
+        }
+      }
+    ]
 
   },
   { timestamps: true }
