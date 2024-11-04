@@ -11,6 +11,8 @@ router.post('/add-wallet', touristController.addWallet);
 router.get('/products/')
 router.post('/book-itinerary',touristController.bookItinerary);
 router.post('/book-activity',touristController.bookActivity);
+router.put('/select-preferences',touristController.selectPreferenceTag);
+
 
 
 

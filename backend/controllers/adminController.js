@@ -1,4 +1,5 @@
 const touristModel = require("../models/touristModel");
+const itineraryModel = require("../models/itineraryModel");
 const userModel = require("../models/userModel");
 const sellerModel = require("../models/sellerModel");
 const advertiserModel = require("../models/advertiserModel");
@@ -237,5 +238,45 @@ const acceptRejectUser = async (req, res) => {
   }
 };
 
+const flagItinerary = async (req, res) => {
+  try {
+    const { itineraryIdString } = req.body;
+    if (!itineraryIdString) throw Error("Please choose an itinerary to unflag");
 
-module.exports = { addTourismGovernor, deleteUser, addAdmin ,viewUploadedDocuments,acceptRejectUser};
+    const itineraryId = new mongoose.Types.ObjectId(itineraryIdString);
+
+    await itineraryModel.findByIdAndUpdate(itineraryId, { flag: true });
+
+    return res.status(200).json({
+      message: "Itinerary flagged. It is now invisible to tourists and guests."
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Couldn't flag itinerary",
+      error: error.message
+    });
+  }
+}
+const unflagItinerary = async (req, res) => {
+  try {
+    const { itineraryIdString } = req.body;
+    if (!itineraryIdString) throw Error("Please choose an itinerary to unflag");
+
+    const itineraryId = new mongoose.Types.ObjectId(itineraryIdString);
+
+    await itineraryModel.findByIdAndUpdate(itineraryId, { flag: false });
+
+    return res.status(200).json({
+      message: "Itinerary unflagged. It is now visible to tourists and guests."
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Couldn't unflag itinerary",
+      error: error.message
+    });
+  }
+}
+
+
+
+module.exports = { addTourismGovernor, deleteUser, addAdmin ,viewUploadedDocuments,acceptRejectUser,flagItinerary,unflagItinerary};

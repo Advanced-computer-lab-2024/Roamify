@@ -3,6 +3,7 @@ const userModel = require("../models/userModel");
 const walletModel = require("../models/walletModel");
 const validator = require("validator");
 const mongoose = require('mongoose');
+const preferenceTagModel = require("../models/preferenceTagModel");
 
 // Helper function to check if a user is an adult based on date of birth
 function isAdult(dateOfBirth) {
@@ -254,6 +255,35 @@ const bookItinerary = async (req, res) => {
 };
 
 
+const selectPreferenceTag = async (req,res)=>{
+  try{
+    const preferences = req.body.preferences;
+    const user = await userModel.findById(req.user._id);
+    if(!preferences)
+      throw Error('please select preferences');
 
+    const preferenceIds = preferences.map(preference => new mongoose.Types.ObjectId(preference));
+    const tourist = await touristModel.findOne({user:req.user._id});
 
-module.exports = { createProfile, getProfile, updateProfile, addWallet,bookActivity,bookItinerary};
+    for(preferenceId of preferenceIds){
+      const pTag = await preferenceTagModel.findById(preferenceId);
+      if(!pTag) throw Error('please choose valid preference tags');
+      else{
+        if (!tourist.preferences.includes(preferenceId)) 
+          tourist.preferences.push(preferenceId);
+        
+        else
+          throw Error('preferenc already exists in your preferences please try again and select new preferences')
+      }
+
+    }
+    await tourist.save();
+    return res.status(200).json({message:'added preferences successfuly'});
+    
+  }
+  catch(error){
+    res.status(400).json({message:'error in choosing preferences ',error:error.message});
+  }
+}
+
+module.exports = { createProfile, getProfile, updateProfile, addWallet,bookActivity,bookItinerary,selectPreferenceTag};

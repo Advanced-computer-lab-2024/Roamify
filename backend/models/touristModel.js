@@ -62,7 +62,11 @@ const touristSchema = new mongoose.Schema(
           type: Date
         }
       }
-    ]
+    ],
+    preferences:{
+      type:[mongoose.Types.ObjectId],
+      ref:'preference tag'
+    }
 
   },
   { timestamps: true }
