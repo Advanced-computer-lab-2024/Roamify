@@ -1,5 +1,5 @@
-const bcrypt = require('bcrypt');
 const validator = require('validator');
+const mongoose = require('mongoose');
 const userModel = require("../models/userModel");
 const tourGuideModel = require("../models/tourGuideModel");
 const activityModel = require("../models/activityModel");
@@ -275,6 +275,26 @@ const uploadProfilePicture = async (req, res) => {
   }
 };
 
+const setStatusOfItinerary = async (req,res)=>{
+  try{
+    if(!req.body.itineraryId) throw Error('please choose an itinerary')
+    const itineraryId = new mongoose.Types.ObjectId(req.body.itineraryId);
+    const status = req.body.status;
+    console.log(status)
+    const itinerary = await itineraryModel.findById(itineraryId);
+    if(!itinerary) throw Error('please choose a valid itinerary');
+    if(status!=="active" && status!== "inactive") throw Error('please choose to activate or deactivate your itinerary');
+
+    await itineraryModel.findByIdAndUpdate(itineraryId,{status});
+    res.status(200).json({message:'changed status of itinerary to '+status})
+
+  }
+  catch(error){
+    res.status(400).json({message:'could not change status due to errors' ,error:error.message})
+
+  }
+}
+
 
 module.exports = {
   createProfile,
@@ -285,5 +305,6 @@ module.exports = {
   deleteItinerary,
   getMyItineraries,
   upload,
-  uploadProfilePicture
+  uploadProfilePicture,
+  setStatusOfItinerary
 };
