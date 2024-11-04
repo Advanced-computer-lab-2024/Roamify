@@ -164,8 +164,8 @@ const getFilteredProducts = async (req, res) => {
     const products = await productModel
     .find(filter)
     .sort({ rating: sortOrder })
-    .populate('sellerId' , 'username -_id'); // Populates the seller details
-    
+    .populate('sellerId' , 'username _id'); // Populates the seller details
+
   
     if (!products || products.length === 0) {
       return res.status(404).json({ message: "No products found" });
