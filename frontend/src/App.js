@@ -18,8 +18,7 @@ import TopDestinationsMain from "./page/TouristPlaces";
 import DestinationDetails from "./page/DestinationDetails";
 // Import FlightSearch
 import TouristActivities from "./page/TouristActivities";
-// Import BookingConfirmation
-import BookingConfirmation from "./page/BookingConfirmation";
+
 // Import Testimonials
 import Testimonials from "./page/Testimonials";
 // Import FaqsArea
@@ -52,8 +51,11 @@ import Header from "./layout/Header";
 import CtaArea from "./layout/CtaArea";
 import Footer from "./layout/Footer";
 import CopyRight from "./layout/CopyRight";
-import TouristPlaces from "./page/TouristPlaces";
 
+import TouristPlaces from "./page/TouristPlaces";
+import ProductDetails from "./page/ProductDetails"
+import TouristItinerary from "./page/TouristItinerary";
+import TouristProfile from "./page/TouristProfile";
 const App = () => {
   return (
     <>
@@ -62,13 +64,15 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/tour-guids" element={<TourGuides />} />
+        <Route path="/tourist-profile" element={<TouristProfile />} />
         <Route path="/tourist-products" element={<TouristProducts />} />
+        <Route path="/tourist-itinerary" element={<TouristItinerary />} />
         <Route path="/tour-details/:id" element={<TourDetails />} />
+        <Route path="/product-details/:id" element={<ProductDetails />} />
         <Route path="/activity-booking/:id" element={<ActivityBooking />} />
         <Route path="/tourist-places" element={<TouristPlaces />} />
         <Route path="/destinations-details" element={<DestinationDetails />} />
         <Route path="/tourist-activities" element={<TouristActivities />} />
-        <Route path="/booking-confirmation" element={<BookingConfirmation />} />
         <Route path="/testimonials" element={<Testimonials />} />
         <Route path="/faqs" element={<FaqsArea />} />
         <Route path="/become-expert" element={<BecomeExpert />} />

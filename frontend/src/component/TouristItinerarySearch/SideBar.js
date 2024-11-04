@@ -1,18 +1,12 @@
 import React, { useState } from "react";
-import DateFilter from "./DateFilter";
-const SideBar = ({ priceRange, setPriceRange, onPriceApply, date, setdate, onDateApply, onCategoryApply,onSortChange,  onRatingApply }) => {
+import DateFilter from "../TouristActivitiesSearch/DateFilter";
+const SideBar = ({ date, setdate, onDateApply,onSortChange,  onRatingApply }) => {
   
-  const [categoryInput, setCategoryInput] = useState("");
+
   const [sortField, setSortField] = useState("price");
   const [sortOrder, setSortOrder] = useState("asc");
   const [selectedStars, setSelectedStars] = useState([false, false, false, false, false]); // Track selected stars
-  const handleCategoryInputChange = (event) => {
-    setCategoryInput(event.target.value);
-  };
-
-  const handleCategoryApplyClick = () => {
-    onCategoryApply(categoryInput); // Call the parent handler with the current input value
-  };
+ 
 
   const handleSortChange = (field, order) => {
     setSortField(field);
@@ -46,23 +40,7 @@ const SideBar = ({ priceRange, setPriceRange, onPriceApply, date, setdate, onDat
           </div>
         </div>
         
-        <div className="left_side_search_boxed">
-          <div className="left_side_search_heading">
-            <h5>Search by Category or Name or Tag </h5>
-          </div>
-          <div className="name_search_form">
-        <input
-        className="form-control"
-          type="text"
-          placeholder="Search..."
-          value={categoryInput}
-          onChange={handleCategoryInputChange}
-        />
-        <button onClick={handleCategoryApplyClick} className="apply" type="button">
-          Apply
-        </button>
-      </div>
-        </div>
+      
         <div className="left_side_search_boxed">
           <div className="left_side_search_heading">
             <h5>Filter by Review</h5>
