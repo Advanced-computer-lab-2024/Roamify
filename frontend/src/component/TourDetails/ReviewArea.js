@@ -4,7 +4,7 @@ import ReviewCard from "../Common/CustomerReview/ReviewCard";
 // Import ReviewData
 import { ReviewData } from "../Common/CustomerReview/ReviewData";
 
-const ReviewArea = () => {
+const ReviewArea = ({ reviews }) => {
   return (
     <>
       <div className="container">
@@ -56,7 +56,7 @@ const ReviewArea = () => {
         <div className="row">
           <div className="col-lg-12">
             <div className="all_review_wrapper">
-              <h3 className="heading_theme">All review</h3>
+              <h3 className="heading_theme">All reviews</h3>
             </div>
           </div>
           {ReviewData.slice(0, 3).map((data, index) => (

@@ -53,39 +53,32 @@ import CtaArea from "./layout/CtaArea";
 import Footer from "./layout/Footer";
 import CopyRight from "./layout/CopyRight";
 import TouristPlaces from "./page/TouristPlaces";
+import Profile from "./page/Profile";
+import Tourist from "./pages/Tourist/Tourist";
+import LoginArea from "./component/Login";
+import Admin from "./pages/Admin/Admin";
+import ProductDetails from "./pages/Admin/Products/ProductDetails";
+import Seller from "./pages/Seller/Seller";
+import TourismGovernor from "./pages/TourismGovernor/TourismGovernor";
 
 const App = () => {
   return (
     <>
-      <Header />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/tour-guids" element={<TourGuides />} />
-        <Route path="/tourist-products" element={<TouristProducts />} />
-        <Route path="/tour-details/:id" element={<TourDetails />} />
-        <Route path="/activity-booking/:id" element={<ActivityBooking />} />
-        <Route path="/tourist-places" element={<TouristPlaces />} />
-        <Route path="/destinations-details" element={<DestinationDetails />} />
-        <Route path="/tourist-activities" element={<TouristActivities />} />
-        <Route path="/booking-confirmation" element={<BookingConfirmation />} />
-        <Route path="/testimonials" element={<Testimonials />} />
-        <Route path="/faqs" element={<FaqsArea />} />
-        <Route path="/become-expert" element={<BecomeExpert />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/verifyOTP" element={<VerifyOtp />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/forget-password" element={<ForgetPassword />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="*" element={<Error />} />
-        <Route path="/news" element={<News />} />
-        <Route path="/news-details" element={<NewsDetails />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route path="/tourist/*" element={<Tourist />} />
+        <Route path="/admin/*" element={<Admin />} />
+        <Route path="/advertisor/*" element={<Tourist />} />
+        <Route path="/tourism-governor/*" element={<TourismGovernor />} />
+        <Route path="/tour-guide/*" element={<Tourist />} />
+        <Route path="/seller/*" element={<Seller />} />
+        <Route path="/product-details/:id" element={<ProductDetails />} />
+        <Route
+          path="/destinations-details/:id"
+          element={<DestinationDetails />}
+        />
       </Routes>
-      <CtaArea />
-      <Footer />
-      <CopyRight />
     </>
   );
 };

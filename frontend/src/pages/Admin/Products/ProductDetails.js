@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 // import Common Banner
-import CommonBanner from "../component/Common/CommonBanner";
+import CommonBanner from "../../../component/Common/CommonBanner";
 // import TourDetails
-import TourDetailsArea from "../component/TourDetails";
-import { ExploreData } from "../component/Common/CommonCard/Data";
+
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import ProductDetailsArea from "./ProductDetailsArea";
 
-const TourDetails = () => {
+const ProductDetails = () => {
   const { id } = useParams();
   const [desiredProduct, setDesiredProduct] = useState({});
   useEffect(() => {
@@ -29,14 +29,15 @@ const TourDetails = () => {
   return (
     <>
       <CommonBanner heading="Product Details" pagination="Product Details" />
-      <TourDetailsArea
+      <ProductDetailsArea
+        name={desiredProduct.name}
         price={desiredProduct.price}
         rating={desiredProduct.reviewRating}
-        description={desiredProduct.location}
+        description={desiredProduct.description}
         reviews={desiredProduct.reviewCount}
       />
     </>
   );
 };
 
-export default TourDetails;
+export default ProductDetails;

@@ -12,7 +12,7 @@ const TouristPlacesArea = () => {
   return (
     <>
       {/* <!-- Form Area --> */}
-      <section id="theme_search_form_tour">
+      {/* <section id="theme_search_form_tour">
         <div className="container">
           <div className="row">
             <div className="col-lg-12">
@@ -171,7 +171,7 @@ const TouristPlacesArea = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* <!-- Destinations Areas --> */}
       <section id="top_testinations" className="section_padding">

@@ -14,13 +14,10 @@ const CommonCard = (props) => {
       >
         <div className="theme_common_box_two img_hover">
           <div className="theme_two_box_img">
-            <Link to={`/tour-details/${props.id}`}>
+            <Link to={`/tourist/tour-details/${props.id}`}>
               <img src={props.img} alt="img" />
             </Link>
-            <p>
-              <i className="fas fa-map-marker-alt"></i>
-              {props.location}
-            </p>
+
             {props.discount === true ? (
               <div className="discount_tab">
                 <span>{props.discountPrice}</span>
@@ -31,7 +28,7 @@ const CommonCard = (props) => {
           </div>
           <div className="theme_two_box_content">
             <h4>
-              <Link to={`/tour-details/${props.id}`}>{props.heading}</Link>
+              <Link to={`/tour-details/${props.id}`}>{props.name}</Link>
             </h4>
             <p>
               <span className="review_rating">{props.reviewRating}</span>

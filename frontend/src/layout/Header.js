@@ -2,9 +2,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 import logo from ".././assets/img/logo.png";
 import logoBlack from ".././assets/img/logo_black.png";
-import { HeaderData } from "./HeaderData";
+import ProfileButton from "../component/Profile/ProfileButton";
 
-const Header = () => {
+const Header = ({ HeaderData }) => {
   return (
     <>
       <header className="main_header_arae">
@@ -108,9 +108,7 @@ const Header = () => {
                   </ul>
                   <div className="others-options d-flex align-items-center">
                     <div className="option-item">
-                      <a href="#!" className="search-box">
-                        <i className="bi bi-search"></i>
-                      </a>
+                      <ProfileButton />
                     </div>
                   </div>
                 </div>
