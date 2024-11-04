@@ -1,8 +1,9 @@
 export const HeaderData = [
   {
     menu: "Home",
-    link: "",
+    link: "/tourist-profile",
   },
+
   {
     menu: "Activities",
     link: "tourist-activities",
@@ -10,7 +11,7 @@ export const HeaderData = [
   },
   {
     menu: "Itineraries",
-    link: "/#",
+    link: "/tourist-itinerary",
     submenu: false,
   },
   {
