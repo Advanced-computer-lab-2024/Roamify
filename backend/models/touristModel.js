@@ -41,10 +41,17 @@ const touristSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "wallet",
     },
-    bookedActivities:{
-      type:[mongoose.Types.ObjectId],
-      ref:'activity'
-    },
+    bookedActivities:[
+      {
+        activity: {
+          type: mongoose.Types.ObjectId,
+          ref: 'activity', // Reference to the activity model
+        },
+        date: {
+          type: Date
+        }
+      }
+    ],
     bookedItineraries: [
       {
         itinerary: {

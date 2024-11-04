@@ -309,12 +309,9 @@ const deleteAccount = async (req,res)=>{
       const tourists = await touristModel.find().select('bookedActivities');
 
       const bookedActivities = tourists.flatMap(tourist => tourist.bookedActivities); 
-      for (const activityId of bookedActivities) {
-        const activity = await activityModel.findById(activityId);
+      for (const bookedActivity of bookedActivities) {
+        const activity = await activityModel.findById(bookedActivity.activity);
         const advertiserId = activity.advertiser;
-        console.log(advertiserId,req.user._id);
-        console.log(advertiserId.toString())
-        console.log(req.user._id)
         if (advertiserId.toString()===req.user._id) {
           return res.status(400).json({
             message: 'Can\'t delete your account; some activities are booked already. Try again later.',
@@ -343,8 +340,8 @@ const deleteAccount = async (req,res)=>{
     else if(role === "tourGuide"){
       const tourists = await touristModel.find().select('bookedItineraries');
       const bookedItineraries = tourists.flatMap(tourist => tourist.bookedItineraries); 
-      for (const itineraryId of bookedItineraries) {
-        const itinerary = await itineraryModel.findById(itineraryId.itinerary);
+      for (const bookedItinerary of bookedItineraries) {
+        const itinerary = await itineraryModel.findById(bookedItinerary.itinerary);
         const tourGuideId = itinerary.tourGuide;
         if (tourGuideId.toString()===req.user._id) {
           return res.status(400).json({

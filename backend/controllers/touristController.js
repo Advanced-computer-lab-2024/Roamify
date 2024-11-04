@@ -176,14 +176,33 @@ const bookActivity = async (req, res) => {
     const tourist = await touristModel.findOne({ user: req.user._id });
     if (!tourist) throw new Error("Tourist does not exist");
 
-    const activity = req.body.activity;
+    const { activity, date } = req.body;
     if (!activity) throw new Error("Please choose an activity to book");
+    if (!date) throw new Error("Date is required");
 
     const activityId = new mongoose.Types.ObjectId(activity);
+    const bookingDate = new Date(date);
 
+    // Check if the activity with the same date already exists in bookedActivities
+    const exists = tourist.bookedActivities.some(
+      (entry) =>
+        entry.activity.equals(activityId) && 
+        entry.date.getTime() === bookingDate.getTime()
+    );
+
+    if (exists) {
+      return res.status(400).json({ message: "Activity already booked for this date" });
+    }
+
+    const activityEntry = {
+      activity: activityId,
+      date: bookingDate,
+    };
+
+    // Add the activity to bookedActivities if it doesn't exist
     await touristModel.updateOne(
       { user: req.user._id },
-      { $addToSet: { bookedActivities: activityId } }
+      { $addToSet: { bookedActivities: activityEntry } }
     );
 
     return res.status(200).json({ message: "Activity booked successfully" });
@@ -191,6 +210,7 @@ const bookActivity = async (req, res) => {
     res.status(400).json({ message: "Error booking activity", error: error.message });
   }
 };
+
 
 
 const bookItinerary = async (req, res) => {
@@ -206,6 +226,16 @@ const bookItinerary = async (req, res) => {
 
     const bookingDate = new Date(date);
     if (isNaN(bookingDate)) throw new Error("Invalid date format");
+
+    const exists = tourist.bookedItineraries.some(
+      (entry) =>
+        entry.itinerary.equals(itineraryId) && 
+        entry.date.getTime() === bookingDate.getTime()
+    );
+
+    if (exists) {
+      return res.status(400).json({ message: "Itinerary already booked for this date" });
+    }
 
     const itineraryEntry = {
       itinerary: itineraryId,
