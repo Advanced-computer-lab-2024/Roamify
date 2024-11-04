@@ -28,14 +28,11 @@ const PriceSlider = ({ onApply }) => {
         onChange={handleSliderChange}
         value={priceRange}
         trackStyle={[{ backgroundColor: "#52c41a" }]}
-        handleStyle={[
-          { borderColor: "#52c41a" },
-          { borderColor: "#52c41a" }
-        ]}
+        handleStyle={[{ borderColor: "#52c41a" }, { borderColor: "#52c41a" }]}
       />
       <button className="apply" type="button" onClick={handleApplyClick}>
-            Apply
-          </button>
+        Apply
+      </button>
     </div>
   );
 };

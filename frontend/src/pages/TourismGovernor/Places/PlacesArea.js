@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 // import Section Heading
 import SectionHeading from "../../../component/Common/SectionHeading";
 // import Sidebar
-import SideBar from "../../../component/TouristPlaces/SideBar";
+import SideBar from "../../Tourist/component/TouristPlaces/SideBar";
 // import Data
 // import Link
 import { Link } from "react-router-dom";

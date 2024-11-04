@@ -7,17 +7,17 @@ import About from "./page/About";
 // Import TourGuides
 import TourGuides from "./page/TourGuides";
 // Import TourSearch
-import TouristProducts from "./page/TouristProducts";
+import TouristProducts from "./pages/Tourist/TouristProducts";
 // Import TourDetails
 import TourDetails from "./page/TourDetails";
 // Import TourBooking
 import ActivityBooking from "./page/ActivityBooking";
 // Import TopDestinations
-import TopDestinationsMain from "./page/TouristPlaces";
+import TopDestinationsMain from "./pages/Tourist/TouristPlaces";
 // Import DestinationDetails
 import DestinationDetails from "./page/DestinationDetails";
 // Import FlightSearch
-import TouristActivities from "./page/TouristActivities";
+// import TouristActivities from "./page/TouristActivities";
 
 // Import Testimonials
 import Testimonials from "./page/Testimonials";
@@ -52,10 +52,10 @@ import CtaArea from "./layout/CtaArea";
 import Footer from "./layout/Footer";
 import CopyRight from "./layout/CopyRight";
 
-import TouristPlaces from "./page/TouristPlaces";
-import ProductDetails from "./page/ProductDetails";
-import TouristItinerary from "./page/TouristItinerary";
-import TouristProfile from "./page/TouristProfile";
+// import TouristPlaces from "./pages/Tourist/TouristPlaces";
+// import ProductDetails from "./page/ProductDetails";
+// import TouristItinerary from "./page/TouristItinerary";
+// import TouristProfile from "./pages/Tourist/TouristProfile";
 import Profile from "./page/Profile";
 import Tourist from "./pages/Tourist/Tourist";
 import LoginArea from "./component/Login";
@@ -68,22 +68,22 @@ const App = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
+        {/* <Route path="/" element={<Home />} /> */}
         <Route path="/about" element={<About />} />
-        <Route path="/tour-guids" element={<TourGuides />} />
-        <Route path="/tourist-profile" element={<TouristProfile />} />
+        {/* <Route path="/tour-guids" element={<TourGuides />} /> */}
+        {/* <Route path="/tourist-profile" element={<TouristProfile />} />
         <Route path="/tourist-products" element={<TouristProducts />} />
         <Route path="/tourist-itinerary" element={<TouristItinerary />} />
-        <Route path="/tour-details/:id" element={<TourDetails />} />
-        <Route path="/product-details/:id" element={<ProductDetails />} />
-        <Route path="/activity-booking/:id" element={<ActivityBooking />} />
-        <Route path="/tourist-places" element={<TouristPlaces />} />
-        <Route path="/destinations-details" element={<DestinationDetails />} />
-        <Route path="/tourist-activities" element={<TouristActivities />} />
-        <Route path="/testimonials" element={<Testimonials />} />
-        <Route path="/faqs" element={<FaqsArea />} />
-        <Route path="/become-expert" element={<BecomeExpert />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/tour-details/:id" element={<TourDetails />} /> */}
+        {/* <Route path="/product-details/:id" element={<ProductDetails />} /> */}
+        {/* <Route path="/activity-booking/:id" element={<ActivityBooking />} />
+        <Route path="/tourist-places" element={<TouristPlaces />} /> */}
+        {/* <Route path="/destinations-details" element={<DestinationDetails />} /> */}
+        {/* <Route path="/tourist-activities" element={<TouristActivities />} /> */}
+        {/* <Route path="/testimonials" element={<Testimonials />} /> */}
+        {/* <Route path="/faqs" element={<FaqsArea />} /> */}
+        {/* <Route path="/become-expert" element={<BecomeExpert />} /> */}
+        {/* <Route path="/login" element={<Login />} /> */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/tourist/*" element={<Tourist />} />

@@ -1,8 +1,8 @@
 import React from "react";
 // import  CommonBanner
-import CommonBanner from "../component/Common/CommonBanner";
+import CommonBanner from "../../component/Common/CommonBanner";
 // import FlightSearchArea
-import TouristActivitiesArea from "../component/TouristActivitiesSearch";
+import TouristActivitiesArea from "../../component/TouristActivitiesSearch";
 
 const TouristActivities = () => {
   return (

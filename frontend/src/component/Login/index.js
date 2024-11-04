@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import axios from "axios";
 
 const LoginArea = () => {
   // Define state for form input and errors
@@ -48,12 +45,14 @@ const LoginArea = () => {
                   <h2>Logged in to stay in touch</h2>
                 </div>
                 <div className="common_author_form">
-                  <form action="#" id="main_author_form">
+                  <form onSubmit={handleLogin} id="main_author_form">
                     <div className="form-group">
                       <input
                         type="text"
                         className="form-control"
                         placeholder="Enter user name"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                       />
                     </div>
                     <div className="form-group">
@@ -61,15 +60,20 @@ const LoginArea = () => {
                         type="password"
                         className="form-control"
                         placeholder="Enter password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                       />
                       <Link to="/forget-password">Forgot password?</Link>
                     </div>
+                    {error && <p className="error-message">{error}</p>}
                     <div className="common_form_submit">
-                      <button className="btn btn_theme btn_md">Log in</button>
+                      <button type="submit" className="btn btn_theme btn_md">
+                        Log in
+                      </button>
                     </div>
                     <div className="have_acount_area">
                       <p>
-                        Dont have an account?{" "}
+                        Don’t have an account?{" "}
                         <Link to="/register">Register now</Link>
                       </p>
                     </div>

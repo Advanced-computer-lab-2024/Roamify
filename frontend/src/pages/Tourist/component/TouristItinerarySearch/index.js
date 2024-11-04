@@ -7,7 +7,7 @@ import TouristItineraryWrapper from "./TouristItinerarySearchArea";
 const TouristItineraryArea = () => {
   return (
     <>
-       <TouristItineraryForm /> 
+      <TouristItineraryForm />
       <TouristItineraryWrapper />
     </>
   );

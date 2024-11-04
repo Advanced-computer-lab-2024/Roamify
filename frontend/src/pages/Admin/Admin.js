@@ -4,13 +4,13 @@ import { Routes, Route } from "react-router-dom";
 import Home from "../../page/Home";
 import About from "../../page/About";
 import Header from "../../layout/Header";
-import TouristProducts from "../../page/TouristProducts";
+import TouristProducts from "../Tourist/TouristProducts.js";
 import TourDetails from "../../page/TourDetails";
 import ActivityBooking from "../../page/ActivityBooking";
-import TouristPlaces from "../../page/TouristPlaces";
+import TouristPlaces from "../Tourist/TouristPlaces.js";
 import DestinationDetails from "../../page/DestinationDetails";
-import TouristActivities from "../../page/TouristActivities";
-import BookingConfirmation from "../../page/BookingConfirmation";
+// import TouristActivities from "../../page/TouristActivities";
+// import BookingConfirmation from "../../page/BookingConfirmation";
 import Profile from "../../page/Profile";
 import TourGuides from "../../page/TourGuides";
 import CopyRight from "../../layout/CopyRight";
@@ -55,8 +55,8 @@ const Admin = () => {
         <Route path="/activity-booking/:id" element={<ActivityBooking />} />
         <Route path="/tourist-places" element={<TouristPlaces />} />
         <Route path="/destinations-details" element={<DestinationDetails />} />
-        <Route path="/tourist-activities" element={<TouristActivities />} />
-        <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+        {/* <Route path="/tourist-activities" element={<TouristActivities />} /> */}
+        {/* <Route path="/booking-confirmation" element={<BookingConfirmation />} /> */}
         <Route path="/profile/:id" element={<Profile />} />
       </Routes>
       <CopyRight />

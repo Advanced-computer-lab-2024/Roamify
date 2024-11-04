@@ -1,6 +1,6 @@
 import React from "react";
 // import Section Heading
-import SectionHeading from "../Common/SectionHeading";
+import SectionHeading from "../../../../component/Common/SectionHeading";
 // import Sidebar
 import SideBar from "./SideBar";
 // import Data
