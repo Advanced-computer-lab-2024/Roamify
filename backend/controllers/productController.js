@@ -161,8 +161,12 @@ const getFilteredProducts = async (req, res) => {
     const sortOrder = order.toLowerCase() === 'asc' ? 1 : -1;
 
     // Fetch products with filters and sorting applied
-    const products = await productModel.find(filter).sort({ rating: sortOrder });
-
+    const products = await productModel
+    .find(filter)
+    .sort({ rating: sortOrder })
+    .populate('sellerId' , 'username -_id'); // Populates the seller details
+    
+  
     if (!products || products.length === 0) {
       return res.status(404).json({ message: "No products found" });
     }
