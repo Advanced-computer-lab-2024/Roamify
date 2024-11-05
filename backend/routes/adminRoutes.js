@@ -15,7 +15,7 @@ router.get("/get-categories", categoryController.getAllCategories);
 router.put("/update-category/:id", categoryController.updateCategory);
 router.delete("/delete-category/:id", categoryController.deleteCategory);
 
-router.post("/create-preference-tag",preferenceTagController.createPreferenceTag);
+router.post("/create-preference-tag", preferenceTagController.createPreferenceTag);
 router.get("/get-all-preference-tags", preferenceTagController.getAllPreferenceTags);
 router.put("/update-preference-tag/:id", preferenceTagController.updatePreferenceTag);
 router.delete("/delete-preference-tag/:id", preferenceTagController.deletePreferenceTag);
@@ -25,9 +25,10 @@ router.post("/create-historical-tag", historicalTagController.createHistoricalTa
 router.put("/edit-product/:id", productController.updateProduct);
 router.put("/add-product/:id", productController.addProduct);
 router.get("/view-uploaded-docs", adminController.viewUploadedDocuments);
-router.put("/accept-reject-user",adminController.acceptRejectUser);
-router.put("/flag-itinerary",adminController.flagItinerary);
-router.put("/unflag-itinerary",adminController.unflagItinerary);
+router.put("/accept-reject-user", adminController.acceptRejectUser);
+router.put("/flag-itinerary", adminController.flagItinerary);
+router.put("/unflag-itinerary", adminController.unflagItinerary);
+router.get("/get-pending-users", adminController.getPendingUsers);
 
 
 module.exports = router;

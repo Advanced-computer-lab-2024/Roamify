@@ -177,23 +177,19 @@ const addAdmin = async (req, res) => {
   }
 };
 
-const viewUploadedDocuments = async (req,res)=>{
-  try{
-    const users = await userModel.find({
-      role: { $in: ["seller", "advertiser", "tourGuide"] }
-    });
-    let ids = [];
-    let additionalDoc = [];
-    for(const user of users){
-      console.log(user.idDocument);
-      ids.push(user.idDocument.url);
-      additionalDoc.push(user.additionalDocument.url);
-    }
+const viewUploadedDocuments = async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    if (!userId) return res.status(400).json({ message: 'please choose a user' });
 
-    res.status(200).json({IDs:ids , additionalDocuments:additionalDoc})
+    const id = new mongoose.Types.ObjectId(userId);
+
+    const userUrls = await userModel.findById(id).select('idDocument additionalDocument');
+
+    res.status(200).json({ IDs: userUrls.idDocument.url, additionalDocuments: userUrls.additionalDocument.url });
   }
-  catch(e){
-    res.status(400).json({message:'couldn\'t get documents' , error:e.message})
+  catch (e) {
+    res.status(400).json({ message: 'couldn\'t get document', error: e.message })
   }
 }
 
@@ -205,7 +201,7 @@ const acceptRejectUser = async (req, res) => {
       console.log('No URL provided');
       return res.status(400).json({ message: 'URL is required' });
     }
-    if(approved === null || approved === '')
+    if (approved === null || approved === '')
       throw Error('please accept or reject')
     const lastPart = url.split('/').pop(); // Get the last part after splitting by '/'
 
@@ -222,7 +218,7 @@ const acceptRejectUser = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    if(user.status !== "pending")
+    if (user.status !== "pending")
       throw Error('we have responded our approval/dissaproval for this user')
 
     if (approved === "accept") {
@@ -277,6 +273,19 @@ const unflagItinerary = async (req, res) => {
   }
 }
 
+const getPendingUsers = async (req, res) => {
+  try {
+    const pendingUsers = await userModel.find({ status: 'pending' }).select('username _id email role');
+    if (!pendingUsers) return res.status(400).json({ message: 'no pending users' });
+    return res.status(200).json({ pendingUsers });
+
+  }
+  catch (error) {
+    return res.status(400).json({ message: 'error in fetching pending users', error: error.message });
+
+  }
+}
 
 
-module.exports = { addTourismGovernor, deleteUser, addAdmin ,viewUploadedDocuments,acceptRejectUser,flagItinerary,unflagItinerary};
+
+module.exports = { addTourismGovernor, deleteUser, addAdmin, viewUploadedDocuments, acceptRejectUser, flagItinerary, unflagItinerary, getPendingUsers };
