@@ -144,22 +144,22 @@ const loginUser = async (req, res) => {
 const changePassword = async (req, res) => {
   try {
     const user = await userModel.findById(req.user._id);
-    if (!user) throw Error("User not found");
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const { oldPassword, newPassword1, newPassword2 } = req.body;
 
-    if (!oldPassword) throw Error("Please enter old password");
-    if (!newPassword1 || !newPassword2) throw Error("Please enter your new password and confirm it");
+    if (!oldPassword) return res.status(400).json({ message: "Please enter your old password" });
+    if (!newPassword1 || !newPassword2) return res.status(400).json({ message: "Please enter your new password and confirm it" });
 
-    if (newPassword1 !== newPassword2) throw Error("New passwords do not match");
+    if (newPassword1 !== newPassword2) return res.status(400).json({ message: "New passwords do not match" });
 
     const match = await bcrypt.compare(oldPassword, user.password);
-    if (!match) throw Error("Old password is incorrect");
+    if (!match) return res.status(400).json({ message: "Old password is incorrect" });
 
-    if (!validator.isStrongPassword(newPassword1)) throw Error("Password does not meet minimum requirements");
+    if (!validator.isStrongPassword(newPassword1)) return res.status(400).json({ message: "Password does not meet minimum strength requirements" });
 
     const oldMatchNew = await bcrypt.compare(newPassword1, user.password);
-    if (oldMatchNew) throw Error("Please enter a new password that is different from the old one");
+    if (oldMatchNew) return res.status(400).json({ message: "New password should be different from the old one" });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword1, salt);
@@ -168,7 +168,7 @@ const changePassword = async (req, res) => {
 
     return res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
-    res.status(400).json({ message: "Couldn't change password", error: error.message });
+    res.status(500).json({ message: "Couldn't change password", error: error.message });
   }
 };
 
@@ -186,18 +186,27 @@ const uploadRequiredDocuments = async (req, res) => {
         ).end(fileBuffer);
       });
     };
-    console.log(req.files)
-    if (!req.files['ID']) {
-      return res.status(400).json({ message: ' ID document is required' });
+
+    // Check if any files were uploaded
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).json({ message: 'No files were uploaded. Please upload the required documents.' });
     }
+
+    // Check for specific required documents
+    if (!req.files['ID']) {
+      return res.status(400).json({ message: 'ID document is required. Please upload your ID.' });
+    }
+
     if (!req.files['additionalDocument']) {
-      const message = req.user.role === 'tourGuide' ? 'Certificate document is required' : 'Taxation registry document is required';
+      const message = req.user.role === 'tourGuide'
+        ? 'Certificate document is required. Please upload your certificate.'
+        : 'Taxation registry document is required. Please upload your taxation registry.';
       return res.status(400).json({ message });
     }
 
-    // Upload tourGuideID and certificate
-    const ID = await uploadToCloudinary(req.files['ID'][0].buffer, req.user._id + "ID");
-    const secondDocument = await uploadToCloudinary(req.files['additionalDocument'][0].buffer, req.user._id + "AdditionalDocuments");
+    // Upload ID and additional document
+    const ID = await uploadToCloudinary(req.files['ID'][0].buffer, `${req.user._id}ID`);
+    const secondDocument = await uploadToCloudinary(req.files['additionalDocument'][0].buffer, `${req.user._id}AdditionalDocuments`);
 
     // Save URLs and public IDs in the database
     await userModel.findByIdAndUpdate(
@@ -218,7 +227,7 @@ const uploadRequiredDocuments = async (req, res) => {
       message: 'Documents uploaded successfully'
     });
   } catch (error) {
-    res.status(400).json({ message: 'Error uploading documents', error: error.message });
+    res.status(500).json({ message: 'Error uploading documents', error: error.message });
   }
 };
 
