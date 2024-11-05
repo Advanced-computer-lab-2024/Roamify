@@ -8,6 +8,7 @@ const preferenceTagModel = require('../models/preferenceTagModel');
 const categoryModel = require("../models/categoryModel");
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
+const { default: mongoose } = require('mongoose');
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
 const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
 
@@ -24,15 +25,15 @@ const createProfile = async (req, res) => {
 
     if (!user.termsAndConditions)
       throw Error('sorry you must accept our terms and conditions in order to proceed');
+    const { companyName, websiteLink, hotline, companyProfile } = req.body;
 
     if (userId) {
-      const result = await advertiserModel.findOne({ user: userId });
+      const result = await advertiserModel.findOne({ user: userId, companyName });
       if (result && userId) {
         return res.status(400).json({ error: "profile already created" });
       }
     } //check for existence of profile for this user
 
-    const { companyName, websiteLink, hotline, companyProfile } = req.body;
     if (!companyName || !websiteLink || !hotline || !companyProfile)
       throw Error('please fill all fields');
     await userModel.findByIdAndUpdate(userId, { status: "active" });
@@ -397,7 +398,7 @@ const createTransportation = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const exists = await transportationModel.find({ name });
+    const exists = await transportationModel.findOne({ name });
     if (exists) throw Error('this name already exists')
     // Create a new transportation entry
     const newTransportation = new transportationModel({
@@ -427,8 +428,9 @@ const createTransportation = async (req, res) => {
 const getAllTransportation = async (req, res) => {
   try {
     const transportations = await transportationModel.find().populate('advertiser', 'username');
-    if (!transportations)
+    if (!transportations || transportations.length == 0)
       return res.status(400).json({ message: 'no transportation created yet' });
+
 
     return res.status(200).json({ message: 'transportations retrieved successfully', transportations })
 
@@ -437,6 +439,32 @@ const getAllTransportation = async (req, res) => {
     return res.status(400).json({ message: 'can\'t retrieve transportation', error: error.message })
   }
 }
+const deleteTransportation = async (req, res) => {
+  try {
+    const transportationIdString = req.body.transportationId;
+
+    if (!transportationIdString) {
+      return res.status(400).json({ message: 'Please choose a transportation to delete' });
+    }
+
+    const transportationId = new mongoose.Types.ObjectId(transportationIdString);
+
+    const transportation = await transportationModel.findById(transportationId);
+
+    if (!transportation) {
+      return res.status(404).json({ message: 'Transportation not found' });
+    }
+
+    if (req.user._id.toString() !== transportation.advertiser.toString()) return res.status(403).json({ message: 'sorry you dont have the authority to delete this transportation' })
+    if (transportation.touristsBooked.length > 0) return res.status(400).json({ message: 'transportation is booked by tourists can\'t delete it' })
+    await transportationModel.findByIdAndDelete(transportationId);
+    return res.status(200).json({ message: 'Deleted transportation successfully' });
+
+  } catch (error) {
+    return res.status(500).json({ message: 'Error deleting transportation', error: error.message });
+  }
+};
+
 
 module.exports = {
   createProfile,
@@ -449,5 +477,6 @@ module.exports = {
   uploadLogo,
   upload,
   createTransportation,
-  getAllTransportation
+  getAllTransportation,
+  deleteTransportation
 };

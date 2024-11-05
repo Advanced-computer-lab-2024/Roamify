@@ -18,5 +18,6 @@ router.post('/upload-logo', advertiserController.upload, advertiserController.up
 router.get("/get-my-activities", advertiserController.getMyActivities);
 router.post("/create-transportation", advertiserController.createTransportation);
 router.get("/get-transportations", advertiserController.getAllTransportation);
+router.delete("/delete-transportation", advertiserController.deleteTransportation);
 
 module.exports = router;
