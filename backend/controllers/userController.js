@@ -21,6 +21,7 @@ const upload = multer({ storage }).fields([
 const createToken = (_id, role) => {
   return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: '3d' });
 }
+
 const setTokenCookie = (res, token) => {
   res.cookie("token", token, {
     httpOnly: true,
@@ -30,7 +31,6 @@ const setTokenCookie = (res, token) => {
   });
 };
 
-// Adjusted Create User Function
 // Adjusted Create User Function
 const createUser = async (req, res) => {
   try {
@@ -400,8 +400,8 @@ module.exports = {
   logoutUser,
   getUsersByRole,
   changePassword,
-  upload,
   uploadRequiredDocuments,
   termsAndConditions,
-  deleteAccount
+  deleteAccount,
+  upload
 };

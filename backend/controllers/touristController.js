@@ -171,7 +171,6 @@ const addWallet = async (req, res) => {
   }
 };
 
-
 const bookActivity = async (req, res) => {
   try {
     // Find the tourist by the user's ID
@@ -213,8 +212,6 @@ const bookActivity = async (req, res) => {
   }
 };
 
-
-
 const bookItinerary = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
@@ -254,7 +251,6 @@ const bookItinerary = async (req, res) => {
     res.status(400).json({ message: "Error booking itinerary", error: error.message });
   }
 };
-
 
 const selectPreferenceTag = async (req, res) => {
   try {
