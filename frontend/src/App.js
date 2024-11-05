@@ -56,7 +56,7 @@ import CopyRight from "./layout/CopyRight";
 // import ProductDetails from "./page/ProductDetails";
 // import TouristItinerary from "./page/TouristItinerary";
 // import TouristProfile from "./pages/Tourist/TouristProfile";
-import Profile from "./pages/Profile/Profile";
+import Settings from "./pages/Profile/Settings";
 import Tourist from "./pages/Tourist/Tourist";
 import LoginArea from "./component/Login";
 import Admin from "./pages/Admin/Admin";
@@ -93,7 +93,7 @@ const App = () => {
         <Route path="/tour-guide/*" element={<Tourist />} />
         <Route path="/seller/*" element={<Seller />} />
         <Route path="/product-details/:id" element={<ProductDetails />} />
-        <Route path="/profile/*" element={<Profile />} />
+        <Route path="/settings/*" element={<Settings />} />
         <Route
           path="/destinations-details/:id"
           element={<DestinationDetails />}

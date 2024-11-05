@@ -7,7 +7,7 @@ import AccoutPreferences from "./AccountPreferences";
 import { Routes, Route } from "react-router-dom";
 import SignInAndSecurity from "./SignInAndSecurity";
 
-const Profile = () => {
+const Settings = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -88,4 +88,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default Settings;

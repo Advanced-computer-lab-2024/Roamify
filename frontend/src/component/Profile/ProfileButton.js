@@ -36,11 +36,15 @@ function ProfileButton() {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <Link to={"/profile/1"}>
+          <Link to={""}>
             <button onClick={() => setModalIsOpen(false)}>Profile</button>
           </Link>
-          <button onClick={() => setModalIsOpen(false)}>Settings</button>
-          <button onClick={() => setModalIsOpen(false)}>Logout</button>
+          <Link to={"/settings"}>
+            <button onClick={() => setModalIsOpen(false)}>Settings</button>
+          </Link>
+          <Link to={""}>
+            <button onClick={() => setModalIsOpen(false)}>Logout</button>
+          </Link>
         </div>
       </Modal>
     </div>
