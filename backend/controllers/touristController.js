@@ -176,11 +176,11 @@ const bookActivity = async (req, res) => {
   try {
     // Find the tourist by the user's ID
     const tourist = await touristModel.findOne({ user: req.user._id });
-    if (!tourist) throw new Error("Tourist does not exist");
+    if (!tourist) return res.status(404).json({ message: "Tourist does not exist" });
 
     const { activity, date } = req.body;
-    if (!activity) throw new Error("Please choose an activity to book");
-    if (!date) throw new Error("Date is required");
+    if (!activity) return res.status(400).json({ message: "Please choose an activity to book" });
+    if (!date) return res.status(400).json({ message: "Date is required" });
 
     const activityId = new mongoose.Types.ObjectId(activity);
     const bookingDate = new Date(date);
@@ -218,16 +218,16 @@ const bookActivity = async (req, res) => {
 const bookItinerary = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
-    if (!tourist) throw new Error("Tourist does not exist");
+    if (!tourist) return res.status(404).json({ message: "Tourist does not exist" });
 
     const { itinerary, date } = req.body;
-    if (!itinerary) throw new Error("Itinerary is required");
-    if (!date) throw new Error("date is required");
+    if (!itinerary) return res.status(400).json({ message: "Itinerary is required" });
+    if (!date) return res.status(400).json({ message: "Date is required" });
 
     const itineraryId = new mongoose.Types.ObjectId(itinerary);
 
     const bookingDate = new Date(date);
-    if (isNaN(bookingDate)) throw new Error("Invalid date format");
+    if (isNaN(bookingDate)) return res.status(400).json({ message: "Invalid date format" });
 
     const exists = tourist.bookedItineraries.some(
       (entry) =>
@@ -255,6 +255,77 @@ const bookItinerary = async (req, res) => {
   }
 };
 
+const cancelItinerary = async (req, res) => {
+  try {
+    const tourist = await touristModel.findOne({ user: req.user._id });
+    const itineraryIdString = req.body.itineraryId;
+    if (!itineraryIdString) return res.status(400).json({ message: 'please select an itinerary to cancel' });
+
+    const date = new Date();
+    for (itinerary of tourist.bookedItineraries) {
+      if (itinerary.itinerary.toString() === itineraryIdString) {
+        const timeDifference = itinerary.date.getTime() - date.getTime();
+        const hoursDifference = timeDifference / (1000 * 60 * 60);
+        if (hoursDifference <= 48) {
+          return res.status(400).json({ message: "Unable to cancel booking as it must be done at least 48 hours in advance." });
+        }
+        else {
+          await touristModel.updateOne(
+            { user: req.user._id },
+            { $pull: { bookedItineraries: { itinerary: itinerary.itinerary } } }
+          );
+
+          return res.status(200).json({ message: "Itinerary cancelled successfully." });
+        }
+      }
+    }
+
+    return res.status(404).json({ message: "Itinerary not found in bookings." });
+
+
+  }
+  catch (error) {
+    return res.status(400).json({ message: 'error in cancelling itinerary', error: error.message })
+
+  }
+}
+
+const cancelActivity = async (req, res) => {
+  try {
+    const tourist = await touristModel.findOne({ user: req.user._id });
+    const activityIdString = req.body.activityId;
+
+    if (!activityIdString) {
+      return res.status(400).json({ message: 'Please select an activity to cancel' });
+    }
+
+    const date = new Date();
+
+    for (const activity of tourist.bookedActivities) {
+      if (activity.activity.toString() === activityIdString) {
+        const timeDifference = activity.date.getTime() - date.getTime();
+        const hoursDifference = timeDifference / (1000 * 60 * 60);
+
+
+        if (hoursDifference <= 48) {
+          return res.status(400).json({ message: "Unable to cancel booking as it must be done at least 48 hours in advance." });
+        } else {
+          await touristModel.updateOne(
+            { user: req.user._id },
+            { $pull: { bookedActivities: { activity: activity.activity } } }
+          );
+
+          return res.status(200).json({ message: "Activity cancelled successfully." });
+        }
+      }
+    }
+
+    return res.status(404).json({ message: "Activity not found in bookings." });
+
+  } catch (error) {
+    return res.status(400).json({ message: 'Error in cancelling activity', error: error.message });
+  }
+};
 
 const selectPreferenceTag = async (req, res) => {
   try {
@@ -287,6 +358,8 @@ const selectPreferenceTag = async (req, res) => {
   }
 }
 
+
+
 const bookTransportation = async (req, res) => {
   try {
 
@@ -313,4 +386,4 @@ const bookTransportation = async (req, res) => {
 
   }
 }
-module.exports = { createProfile, getProfile, updateProfile, addWallet, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation };
+module.exports = { createProfile, getProfile, updateProfile, addWallet, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity };
