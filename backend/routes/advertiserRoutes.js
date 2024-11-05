@@ -19,5 +19,6 @@ router.get("/get-my-activities", advertiserController.getMyActivities);
 router.post("/create-transportation", advertiserController.createTransportation);
 router.get("/get-transportations", advertiserController.getAllTransportation);
 router.delete("/delete-transportation", advertiserController.deleteTransportation);
+router.put("/edit-transportation", advertiserController.editTransportation);
 
 module.exports = router;

@@ -465,6 +465,53 @@ const deleteTransportation = async (req, res) => {
   }
 };
 
+const editTransportation = async (req, res) => {
+  try {
+    const transportationIdString = req.body.transportationId;
+
+    if (!transportationIdString) {
+      return res.status(400).json({ message: 'Please choose a transportation to edit' });
+    }
+
+    const transportationId = new mongoose.Types.ObjectId(transportationIdString);
+
+    // Find the transportation by ID
+    const transportation = await transportationModel.findById(transportationId);
+
+    if (!transportation) {
+      return res.status(404).json({ message: 'Transportation not found' });
+    }
+
+    // Check if the user is the advertiser
+    if (req.user._id.toString() !== transportation.advertiser.toString()) {
+      return res.status(403).json({ message: 'Sorry, you do not have the authority to edit this transportation' });
+    }
+
+    // Check if the transportation is booked by tourists
+    if (transportation.touristsBooked.length > 0) {
+      return res.status(400).json({ message: 'Transportation is booked by tourists and cannot be edited' });
+    }
+
+    // Define the fields that can be updated
+    const { name, dropOffLocation, pickupLocation, time, type } = req.body;
+
+    // Update only the allowed fields if they are provided
+    if (name) transportation.name = name;
+    if (dropOffLocation) transportation.dropOffLocation = dropOffLocation;
+    if (pickupLocation) transportation.pickupLocation = pickupLocation;
+    if (time) transportation.time = time;
+    if (type) transportation.type = type;
+
+    // Save the updated transportation document
+    await transportation.save();
+
+    return res.status(200).json({ message: 'Transportation updated successfully' });
+
+  } catch (error) {
+    return res.status(500).json({ message: 'Error updating transportation', error: error.message });
+  }
+};
+
 
 module.exports = {
   createProfile,
@@ -478,5 +525,6 @@ module.exports = {
   upload,
   createTransportation,
   getAllTransportation,
-  deleteTransportation
+  deleteTransportation,
+  editTransportation
 };
