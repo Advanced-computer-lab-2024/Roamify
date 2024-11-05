@@ -53,4 +53,9 @@ export const HeaderData = [
     link: "products",
     submenu: false,
   },
+  {
+    menu: "Complaints",
+    link: "complaints",
+    submenu: false,
+  },
 ];

@@ -32,8 +32,8 @@ const SignInAndSecurity = () => {
       });
     } catch (err) {
       if (err.response && err.response.status === 400) {
-        const { message, error } = err.response.data;
-        toast.error(`Error: ${message} - ${error}`, {
+        const { message } = err.response.data;
+        toast.error(`Error: ${message}`, {
           position: "top-center", // Use string literal
         });
       } else {

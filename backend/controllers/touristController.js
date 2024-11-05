@@ -3,7 +3,7 @@ const transportationModel = require("../models/transportationModel");
 const userModel = require("../models/userModel");
 const walletModel = require("../models/walletModel");
 const validator = require("validator");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const preferenceTagModel = require("../models/preferenceTagModel");
 
 // Helper function to check if a user is an adult based on date of birth
@@ -12,7 +12,10 @@ function isAdult(dateOfBirth) {
   const birthDate = new Date(dateOfBirth);
   let age = today.getFullYear() - birthDate.getFullYear();
   const monthDiff = today.getMonth() - birthDate.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
     age--;
   }
   return age >= 18;
@@ -29,9 +32,16 @@ const createProfile = async (req, res) => {
       return res.status(400).json({ error: "Profile already created" });
     }
   }
-  await userModel.findByIdAndUpdate(req.user._id, { status: 'active' });
+  await userModel.findByIdAndUpdate(req.user._id, { status: "active" });
 
-  const { firstName, lastName, mobileNumber, nationality, dateOfBirth, occupation } = req.body;
+  const {
+    firstName,
+    lastName,
+    mobileNumber,
+    nationality,
+    dateOfBirth,
+    occupation,
+  } = req.body;
   try {
     const adult = isAdult(dateOfBirth);
 
@@ -89,19 +99,22 @@ const getProfile = async (req, res) => {
       cardNumber: details.wallet?.cardNumber || "",
       cardValidUntil: details.wallet?.cardValidUntil || "",
       bookedItineraries: details.bookedItineraries,
-      bookedActivities: details.bookedActivities
+      bookedActivities: details.bookedActivities,
     };
 
     return res.status(200).json(responseData);
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch profile", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch profile", error: err.message });
   }
 };
 
 // Update Profile
 const updateProfile = async (req, res) => {
   const id = req.user._id;
-  const { firstName, lastName, email, mobileNumber, nationality, occupation } = req.body;
+  const { firstName, lastName, email, mobileNumber, nationality, occupation } =
+    req.body;
 
   const userUpdates = {};
   const touristUpdates = {};
@@ -128,15 +141,17 @@ const updateProfile = async (req, res) => {
       userUpdates.email = email;
     }
 
-
-
     // Perform updates
     await userModel.findByIdAndUpdate(id, userUpdates, { new: true });
-    await touristModel.findByIdAndUpdate(tourist._id, touristUpdates, { new: true });
+    await touristModel.findByIdAndUpdate(tourist._id, touristUpdates, {
+      new: true,
+    });
 
     return res.status(200).json({ message: "Profile updated successfully" });
   } catch (e) {
-    return res.status(400).json({ message: "Failed to update profile", error: e.message });
+    return res
+      .status(400)
+      .json({ message: "Failed to update profile", error: e.message });
   }
 };
 
@@ -147,10 +162,13 @@ const addWallet = async (req, res) => {
     const { cardNumber, cardValidUntil } = req.body;
     const tourist = await touristModel.findOne({ user: id });
 
-    if (!tourist.adult) throw Error("Tourist must be an adult to add a wallet.");
-    if (tourist.wallet) throw Error("A wallet already exists, remove it first.");
+    if (!tourist.adult)
+      throw Error("Tourist must be an adult to add a wallet.");
+    if (tourist.wallet)
+      throw Error("A wallet already exists, remove it first.");
 
-    if (!cardNumber || !cardValidUntil) throw Error("Please provide card details.");
+    if (!cardNumber || !cardValidUntil)
+      throw Error("Please provide card details.");
 
     const currentDate = new Date();
     const validUntilDate = new Date(cardValidUntil);
@@ -163,7 +181,9 @@ const addWallet = async (req, res) => {
     const savedWallet = await wallet.save();
 
     // Update tourist profile with wallet
-    await touristModel.findByIdAndUpdate(tourist._id, { wallet: savedWallet._id });
+    await touristModel.findByIdAndUpdate(tourist._id, {
+      wallet: savedWallet._id,
+    });
 
     return res.status(201).json({ message: "Card added successfully" });
   } catch (e) {
@@ -171,15 +191,18 @@ const addWallet = async (req, res) => {
   }
 };
 
-
 const bookActivity = async (req, res) => {
   try {
     // Find the tourist by the user's ID
     const tourist = await touristModel.findOne({ user: req.user._id });
-    if (!tourist) return res.status(404).json({ message: "Tourist does not exist" });
+    if (!tourist)
+      return res.status(404).json({ message: "Tourist does not exist" });
 
     const { activity, date } = req.body;
-    if (!activity) return res.status(400).json({ message: "Please choose an activity to book" });
+    if (!activity)
+      return res
+        .status(400)
+        .json({ message: "Please choose an activity to book" });
     if (!date) return res.status(400).json({ message: "Date is required" });
 
     const activityId = new mongoose.Types.ObjectId(activity);
@@ -193,7 +216,9 @@ const bookActivity = async (req, res) => {
     );
 
     if (exists) {
-      return res.status(400).json({ message: "Activity already booked for this date" });
+      return res
+        .status(400)
+        .json({ message: "Activity already booked for this date" });
     }
 
     const activityEntry = {
@@ -209,25 +234,28 @@ const bookActivity = async (req, res) => {
 
     return res.status(200).json({ message: "Activity booked successfully" });
   } catch (error) {
-    res.status(400).json({ message: "Error booking activity", error: error.message });
+    res
+      .status(400)
+      .json({ message: "Error booking activity", error: error.message });
   }
 };
-
-
 
 const bookItinerary = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
-    if (!tourist) return res.status(404).json({ message: "Tourist does not exist" });
+    if (!tourist)
+      return res.status(404).json({ message: "Tourist does not exist" });
 
     const { itinerary, date } = req.body;
-    if (!itinerary) return res.status(400).json({ message: "Itinerary is required" });
+    if (!itinerary)
+      return res.status(400).json({ message: "Itinerary is required" });
     if (!date) return res.status(400).json({ message: "Date is required" });
 
     const itineraryId = new mongoose.Types.ObjectId(itinerary);
 
     const bookingDate = new Date(date);
-    if (isNaN(bookingDate)) return res.status(400).json({ message: "Invalid date format" });
+    if (isNaN(bookingDate))
+      return res.status(400).json({ message: "Invalid date format" });
 
     const exists = tourist.bookedItineraries.some(
       (entry) =>
@@ -236,7 +264,9 @@ const bookItinerary = async (req, res) => {
     );
 
     if (exists) {
-      return res.status(400).json({ message: "Itinerary already booked for this date" });
+      return res
+        .status(400)
+        .json({ message: "Itinerary already booked for this date" });
     }
 
     const itineraryEntry = {
@@ -251,15 +281,19 @@ const bookItinerary = async (req, res) => {
 
     return res.status(200).json({ message: "Itinerary booked successfully" });
   } catch (error) {
-    res.status(400).json({ message: "Error booking itinerary", error: error.message });
+    res
+      .status(400)
+      .json({ message: "Error booking itinerary", error: error.message });
   }
 };
-
 const cancelItinerary = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
     const itineraryIdString = req.body.itineraryId;
-    if (!itineraryIdString) return res.status(400).json({ message: 'please select an itinerary to cancel' });
+    if (!itineraryIdString)
+      return res
+        .status(400)
+        .json({ message: "please select an itinerary to cancel" });
 
     const date = new Date();
     for (itinerary of tourist.bookedItineraries) {
@@ -267,28 +301,34 @@ const cancelItinerary = async (req, res) => {
         const timeDifference = itinerary.date.getTime() - date.getTime();
         const hoursDifference = timeDifference / (1000 * 60 * 60);
         if (hoursDifference <= 48) {
-          return res.status(400).json({ message: "Unable to cancel booking as it must be done at least 48 hours in advance." });
-        }
-        else {
+          return res
+            .status(400)
+            .json({
+              message:
+                "Unable to cancel booking as it must be done at least 48 hours in advance.",
+            });
+        } else {
           await touristModel.updateOne(
             { user: req.user._id },
             { $pull: { bookedItineraries: { itinerary: itinerary.itinerary } } }
           );
 
-          return res.status(200).json({ message: "Itinerary cancelled successfully." });
+          return res
+            .status(200)
+            .json({ message: "Itinerary cancelled successfully." });
         }
       }
     }
 
-    return res.status(404).json({ message: "Itinerary not found in bookings." });
-
-
+    return res
+      .status(404)
+      .json({ message: "Itinerary not found in bookings." });
+  } catch (error) {
+    return res
+      .status(400)
+      .json({ message: "error in cancelling itinerary", error: error.message });
   }
-  catch (error) {
-    return res.status(400).json({ message: 'error in cancelling itinerary', error: error.message })
-
-  }
-}
+};
 
 const cancelActivity = async (req, res) => {
   try {
@@ -296,7 +336,9 @@ const cancelActivity = async (req, res) => {
     const activityIdString = req.body.activityId;
 
     if (!activityIdString) {
-      return res.status(400).json({ message: 'Please select an activity to cancel' });
+      return res
+        .status(400)
+        .json({ message: "Please select an activity to cancel" });
     }
 
     const date = new Date();
@@ -306,24 +348,31 @@ const cancelActivity = async (req, res) => {
         const timeDifference = activity.date.getTime() - date.getTime();
         const hoursDifference = timeDifference / (1000 * 60 * 60);
 
-
         if (hoursDifference <= 48) {
-          return res.status(400).json({ message: "Unable to cancel booking as it must be done at least 48 hours in advance." });
+          return res
+            .status(400)
+            .json({
+              message:
+                "Unable to cancel booking as it must be done at least 48 hours in advance.",
+            });
         } else {
           await touristModel.updateOne(
             { user: req.user._id },
             { $pull: { bookedActivities: { activity: activity.activity } } }
           );
 
-          return res.status(200).json({ message: "Activity cancelled successfully." });
+          return res
+            .status(200)
+            .json({ message: "Activity cancelled successfully." });
         }
       }
     }
 
     return res.status(404).json({ message: "Activity not found in bookings." });
-
   } catch (error) {
-    return res.status(400).json({ message: 'Error in cancelling activity', error: error.message });
+    return res
+      .status(400)
+      .json({ message: "Error in cancelling activity", error: error.message });
   }
 };
 
@@ -331,32 +380,36 @@ const selectPreferenceTag = async (req, res) => {
   try {
     const preferences = req.body.preferences;
     const user = await userModel.findById(req.user._id);
-    if (!preferences)
-      throw Error('please select preferences');
+    if (!preferences) throw Error("please select preferences");
 
-    const preferenceIds = preferences.map(preference => new mongoose.Types.ObjectId(preference));
+    const preferenceIds = preferences.map(
+      (preference) => new mongoose.Types.ObjectId(preference)
+    );
     const tourist = await touristModel.findOne({ user: req.user._id });
 
     for (preferenceId of preferenceIds) {
       const pTag = await preferenceTagModel.findById(preferenceId);
-      if (!pTag) throw Error('please choose valid preference tags');
+      if (!pTag) throw Error("please choose valid preference tags");
       else {
         if (!tourist.preferences.includes(preferenceId))
           tourist.preferences.push(preferenceId);
-
         else
-          throw Error('preferenc already exists in your preferences please try again and select new preferences')
+          throw Error(
+            "preferenc already exists in your preferences please try again and select new preferences"
+          );
       }
-
     }
     await tourist.save();
-    return res.status(200).json({ message: 'added preferences successfuly' });
-
+    return res.status(200).json({ message: "added preferences successfuly" });
+  } catch (error) {
+    res
+      .status(400)
+      .json({
+        message: "error in choosing preferences ",
+        error: error.message,
+      });
   }
-  catch (error) {
-    res.status(400).json({ message: 'error in choosing preferences ', error: error.message });
-  }
-}
+};
 
 const cancelTransportationBooking = async (req, res) => {
   try {
@@ -364,17 +417,31 @@ const cancelTransportationBooking = async (req, res) => {
 
     // Check if transportation ID is provided
     if (!transportationIdString) {
-      return res.status(400).json({ message: 'Please select one of your booked transportations to cancel.' });
+      return res
+        .status(400)
+        .json({
+          message:
+            "Please select one of your booked transportations to cancel.",
+        });
     }
 
-    const transportationId = new mongoose.Types.ObjectId(transportationIdString);
+    const transportationId = new mongoose.Types.ObjectId(
+      transportationIdString
+    );
 
     // Find the transportation with the provided ID and check if the user has booked it
-    const transportation = await transportationModel.findOne({ _id: transportationId, touristsBooked: req.user._id });
+    const transportation = await transportationModel.findOne({
+      _id: transportationId,
+      touristsBooked: req.user._id,
+    });
 
     // If the transportation is not found or the user has not booked it, return an error
     if (!transportation) {
-      return res.status(400).json({ message: 'Please choose a valid booked transportation to cancel.' });
+      return res
+        .status(400)
+        .json({
+          message: "Please choose a valid booked transportation to cancel.",
+        });
     }
 
     // Remove the user from the touristsBooked array
@@ -383,10 +450,16 @@ const cancelTransportationBooking = async (req, res) => {
       { $pull: { touristsBooked: req.user._id } }
     );
 
-    return res.status(200).json({ message: 'Transportation booking cancelled successfully.' });
-
+    return res
+      .status(200)
+      .json({ message: "Transportation booking cancelled successfully." });
   } catch (error) {
-    return res.status(500).json({ message: 'Error cancelling transportation booking', error: error.message });
+    return res
+      .status(500)
+      .json({
+        message: "Error cancelling transportation booking",
+        error: error.message,
+      });
   }
 };
 
@@ -395,41 +468,64 @@ const getBookedTransportations = async (req, res) => {
     const userId = req.user._id;
 
     // Find all transportations where the user's ID is in touristsBooked
-    const transportations = await transportationModel.find({ touristsBooked: userId });
+    const transportations = await transportationModel.find({
+      touristsBooked: userId,
+    });
 
-    if (!transportations) return res.status(400).json({ message: 'you have not booked any transportations yet' });
+    if (!transportations)
+      return res
+        .status(400)
+        .json({ message: "you have not booked any transportations yet" });
     return res.status(200).json({ transportations });
   } catch (error) {
-    return res.status(400).json({ message: 'Error fetching booked transportations', error: error.message });
+    return res
+      .status(400)
+      .json({
+        message: "Error fetching booked transportations",
+        error: error.message,
+      });
   }
 };
 
-
-
 const bookTransportation = async (req, res) => {
   try {
-
     const transportationIdString = req.body.transportationIdString;
-    if (!transportationIdString) throw Error('please pick a transportation');
+    if (!transportationIdString) throw Error("please pick a transportation");
 
-    const transportationId = new mongoose.Types.ObjectId(transportationIdString);
+    const transportationId = new mongoose.Types.ObjectId(
+      transportationIdString
+    );
 
     const transportation = await transportationModel.findById(transportationId);
     if (!transportation) throw Error("Invalid transportation");
     if (transportation.touristsBooked.includes(req.user._id)) {
-      return res.status(400).json({ message: "You have already booked this transportation" });
+      return res
+        .status(400)
+        .json({ message: "You have already booked this transportation" });
     }
     transportation.touristsBooked.push(req.user._id);
     await transportation.save();
 
     return res.status(200).json({
-      message: "Transportation booked successfully"
+      message: "Transportation booked successfully",
     });
-
+  } catch (error) {
+    return res
+      .status(400)
+      .json({ message: "unable to book transportation", error: error.message });
   }
-  catch (error) {
-    return res.status(400).json({ message: 'unable to book transportation', error: error.message })
-
-  }
-}
-module.exports = { createProfile, getProfile, updateProfile, addWallet, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking };
+};
+module.exports = {
+  createProfile,
+  getProfile,
+  updateProfile,
+  addWallet,
+  bookActivity,
+  bookItinerary,
+  selectPreferenceTag,
+  bookTransportation,
+  cancelItinerary,
+  cancelActivity,
+  getBookedTransportations,
+  cancelTransportationBooking,
+};
