@@ -270,37 +270,37 @@ const getUsersByRole = async (req, res) => {
   }
 };
 
-const termsAndConditions = async (req,res)=>{
-  try{
+const termsAndConditions = async (req, res) => {
+  try {
     const userId = req.user._id;
     const user = await userModel.findById(userId);
-    if(user.status === 'pending')
+    if (user.status === 'pending')
       throw Error('please wait for admin to view yur documents before you proceed');
-    if(user.status === "rejected")
+    if (user.status === "rejected")
       throw Error('you don\'t have the privilege to do this action');
     const accepted = req.body.accepted;
-    if(accepted === null || accepted === "")
+    if (accepted === null || accepted === "")
       throw Error('please accept or reject our terms and')
-    if(accepted){
-      await userModel.findByIdAndUpdate(userId,{termsAndConditions:true});
-      return res.status(200).json({message:'accepted terms and conditions successfully'});
+    if (accepted) {
+      await userModel.findByIdAndUpdate(userId, { termsAndConditions: true });
+      return res.status(200).json({ message: 'accepted terms and conditions successfully' });
     }
-    else{
-      await userModel.findByIdAndUpdate(userId,{termsAndConditions:false});
-      return res.status(200).json({message:'rejected terms and conditions'});
+    else {
+      await userModel.findByIdAndUpdate(userId, { termsAndConditions: false });
+      return res.status(200).json({ message: 'rejected terms and conditions' });
     }
   }
-  catch(error){
-    res.status(400).json({message:'couldn\'t accept or reject terms and conditions', error:error.message});
+  catch (error) {
+    res.status(400).json({ message: 'couldn\'t accept or reject terms and conditions', error: error.message });
   }
 }
 
-const deleteAccount = async (req,res)=>{
-  try{
+const deleteAccount = async (req, res) => {
+  try {
     const user = await userModel.findById(req.user._id);
-    if(!user)
+    if (!user)
       throw Error('user does not exist');
-    if(user.status !== "active")
+    if (user.status !== "active")
       throw Error('you must activate your account first to be able to delete');
     const role = user.role;
 
@@ -308,80 +308,80 @@ const deleteAccount = async (req,res)=>{
 
       const tourists = await touristModel.find().select('bookedActivities');
 
-      const bookedActivities = tourists.flatMap(tourist => tourist.bookedActivities); 
+      const bookedActivities = tourists.flatMap(tourist => tourist.bookedActivities);
       for (const bookedActivity of bookedActivities) {
         const activity = await activityModel.findById(bookedActivity.activity);
         const advertiserId = activity.advertiser;
-        if (advertiserId.toString()===req.user._id) {
+        if (advertiserId.toString() === req.user._id) {
           return res.status(400).json({
             message: 'Can\'t delete your account; some activities are booked already. Try again later.',
           });
         }
       }
-    
+
       await activityModel.deleteMany({ advertiser: req.user._id });
       await advertiserModel.findOneAndDelete({ user: req.user._id });
-      await userModel.findByIdAndDelete(req.user._id); 
+      await userModel.findByIdAndDelete(req.user._id);
       res.clearCookie('token'); // Assuming your JWT is stored in a cookie named 'token'
-    
+
       return res.status(200).json({
         message: 'Deleted advertiser and their activities successfully.',
       });
     }
-    
-    else if(role === "seller"){ //didnt apply any checks since seller doesnt have future things unlike advertiser and tourguide
-      await productModel.deleteMany({sellerId:req.user._id});
-      await sellerModel.deleteMany({user:req.user._id});
+
+    else if (role === "seller") { //didnt apply any checks since seller doesnt have future things unlike advertiser and tourguide
+      await productModel.deleteMany({ sellerId: req.user._id });
+      await sellerModel.deleteMany({ user: req.user._id });
       await userModel.findByIdAndDelete(req.user._id);
       res.clearCookie('token'); // Assuming your JWT is stored in a cookie named 'token'
-      return res.status(200).json({message:'deleted seller and his corresponding products successfully'});
+      return res.status(200).json({ message: 'deleted seller and his corresponding products successfully' });
 
     }
-    else if(role === "tourGuide"){
+    else if (role === "tourGuide") {
       const tourists = await touristModel.find().select('bookedItineraries');
-      const bookedItineraries = tourists.flatMap(tourist => tourist.bookedItineraries); 
+      const bookedItineraries = tourists.flatMap(tourist => tourist.bookedItineraries);
       for (const bookedItinerary of bookedItineraries) {
         const itinerary = await itineraryModel.findById(bookedItinerary.itinerary);
         const tourGuideId = itinerary.tourGuide;
-        if (tourGuideId.toString()===req.user._id) {
+        if (tourGuideId.toString() === req.user._id) {
           return res.status(400).json({
             message: 'Can\'t delete your account; some itineraries are booked already. Try again later.',
           });
         }
       }
-    
+
       await itineraryModel.deleteMany({ tourGuide: req.user._id });
       await tourGuideModel.findOneAndDelete({ user: req.user._id });
-      await userModel.findByIdAndDelete(req.user._id); 
+      await userModel.findByIdAndDelete(req.user._id);
       res.clearCookie('token'); // Assuming your JWT is stored in a cookie named 'token'
-    
+
       return res.status(200).json({
         message: 'Deleted tourGuide and their itineraries successfully.',
       });
 
 
     }
-    else{
+    else {
       console.log(1);
-      const tourist = await touristModel.findOne({user:req.user._id}).select('bookedActivities bookedItineraries');
-      if(!tourist)
+      const tourist = await touristModel.findOne({ user: req.user._id }).select('bookedActivities bookedItineraries');
+      if (!tourist)
         throw Error('user does not exist');
 
-      if(tourist.bookedActivities.length===0 && tourist.bookedItineraries.length===0){
-        await touristModel.deleteOne({user:req.user._id});
+      if (tourist.bookedActivities.length === 0 && tourist.bookedItineraries.length === 0) {
+        await touristModel.deleteOne({ user: req.user._id });
         await userModel.findByIdAndDelete(req.user._id);
         res.clearCookie('token'); // Assuming your JWT is stored in a cookie named 'token'
-        return res.status(200).json({message:'deleted tourist successfully'});
+        return res.status(200).json({ message: 'deleted tourist successfully' });
       }
       else
-      return res.status(400).json({message:'you still have pending events finish it then delete your account'});
+        return res.status(400).json({ message: 'you still have pending events finish it then delete your account' });
 
     }
 
   }
-  catch(error){
+  catch (error) {
 
-    return res.status(400).json({message:'error could not delete account' , error:error.message})
+    return res.status(400).json({ message: 'error could not delete account', error: error.message })
   }
 }
 
