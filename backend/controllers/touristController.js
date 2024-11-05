@@ -358,6 +358,52 @@ const selectPreferenceTag = async (req, res) => {
   }
 }
 
+const cancelTransportationBooking = async (req, res) => {
+  try {
+    const transportationIdString = req.body.transportationId;
+
+    // Check if transportation ID is provided
+    if (!transportationIdString) {
+      return res.status(400).json({ message: 'Please select one of your booked transportations to cancel.' });
+    }
+
+    const transportationId = new mongoose.Types.ObjectId(transportationIdString);
+
+    // Find the transportation with the provided ID and check if the user has booked it
+    const transportation = await transportationModel.findOne({ _id: transportationId, touristsBooked: req.user._id });
+
+    // If the transportation is not found or the user has not booked it, return an error
+    if (!transportation) {
+      return res.status(400).json({ message: 'Please choose a valid booked transportation to cancel.' });
+    }
+
+    // Remove the user from the touristsBooked array
+    await transportationModel.updateOne(
+      { _id: transportationId },
+      { $pull: { touristsBooked: req.user._id } }
+    );
+
+    return res.status(200).json({ message: 'Transportation booking cancelled successfully.' });
+
+  } catch (error) {
+    return res.status(500).json({ message: 'Error cancelling transportation booking', error: error.message });
+  }
+};
+
+const getBookedTransportations = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Find all transportations where the user's ID is in touristsBooked
+    const transportations = await transportationModel.find({ touristsBooked: userId });
+
+    if (!transportations) return res.status(400).json({ message: 'you have not booked any transportations yet' });
+    return res.status(200).json({ transportations });
+  } catch (error) {
+    return res.status(400).json({ message: 'Error fetching booked transportations', error: error.message });
+  }
+};
+
 
 
 const bookTransportation = async (req, res) => {
@@ -386,4 +432,4 @@ const bookTransportation = async (req, res) => {
 
   }
 }
-module.exports = { createProfile, getProfile, updateProfile, addWallet, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity };
+module.exports = { createProfile, getProfile, updateProfile, addWallet, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking };

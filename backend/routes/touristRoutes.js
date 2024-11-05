@@ -15,6 +15,8 @@ router.put('/select-preferences', touristController.selectPreferenceTag);
 router.put('/book-transportation', touristController.bookTransportation);
 router.delete('/cancel-itinerary-booking', touristController.cancelItinerary);
 router.delete('/cancel-activity-booking', touristController.cancelActivity);
+router.delete('/cancel-transportation-booking', touristController.cancelTransportationBooking);
+router.get('/get-booked-transportations', touristController.getBookedTransportations);
 
 
 
