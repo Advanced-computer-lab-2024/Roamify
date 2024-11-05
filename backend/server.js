@@ -16,7 +16,10 @@ const tourismGovernorRoutes = require("./routes/tourismGovernorRoutes");
 const productRoutes = require("./routes/productRoutes");
 const itineraryRoutes=require("./routes/itineraryRoutes");
 const activityRoutes=require("./routes/activityRoutes");
-
+const categoryRoutes=require("./routes/categoryRoutes");
+const historicalTagRoutes=require("./routes/historicalTagRoutes");
+const preferenceTagRoutes=require("./routes/preferenceTagRoutes");
+const placesRoutes = require("./routes/placesRoutes")
 // Initialize app
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -45,6 +48,11 @@ app.use("/api/admin", authenticate(["admin"]), adminRoutes);
 app.use("/api/product",productRoutes)
 app.use("/api/itinerary",itineraryRoutes);
 app.use("/api/activity",activityRoutes);
+app.use("/api/category",categoryRoutes);
+app.use("/api/preference-tag",preferenceTagRoutes);
+app.use("/api/historical-tag",historicalTagRoutes);
+app.use("/api/places",placesRoutes);
+
 
 
 

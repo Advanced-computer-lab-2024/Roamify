@@ -38,20 +38,6 @@ const getAllPreferenceTags = async (req, res) => {
 };
 
 
-const getPreferenceTagById = async (req, res) => {
-  try {
-    const tag = await preferenceTagModel.findById(req.params.id);
-    if (!tag) {
-      return res.status(404).json({ message: "Preference tag not found" });
-    }
-    res
-      .status(200)
-      .json({ message: "Preference tag retrieved successfully", tag });
-  } catch (error) {
-    console.error("Error retrieving preference tag:", error);
-    res.status(500).json({ message: "Error retrieving preference tag" });
-  }
-};
 
 
 const updatePreferenceTag = async (req, res) => {
@@ -100,7 +86,6 @@ const deletePreferenceTag = async (req, res) => {
 module.exports = {
   createPreferenceTag,
   getAllPreferenceTags,
-  getPreferenceTagById,
   updatePreferenceTag,
   deletePreferenceTag,
 };

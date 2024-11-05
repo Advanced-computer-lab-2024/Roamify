@@ -78,7 +78,7 @@ const deleteUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Perform deletion based on role
+
     let deletionResult;
     switch (user.role) {
       case "tourist":
@@ -120,8 +120,6 @@ const deleteUser = async (req, res) => {
     return res.status(500).json({ message: "Failed to delete user", error: error.message });
   }
 };
-
-
 
 const addAdmin = async (req, res) => {
   const { username, password } = req.body;

@@ -8,10 +8,10 @@ const router = express.Router();
 
 router.post("/add-tourism-governor", adminController.addTourismGovernor);
 router.delete("/delete-account/:id", adminController.deleteUser);
+router.get("/get-users/:role",adminController.getUsersByRole);
 router.post("/add-admin", adminController.addAdmin);
 
 router.post("/create-category", categoryController.createCategory);
-router.get("/get-categories", categoryController.getAllCategories);
 router.put("/update-category/:id", categoryController.updateCategory);
 router.delete("/delete-category/:id", categoryController.deleteCategory);
 
