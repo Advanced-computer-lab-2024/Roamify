@@ -512,6 +512,22 @@ const editTransportation = async (req, res) => {
   }
 };
 
+const getMyTransportations = async (req, res) => {
+  try {
+    // Find all transportation records where the user is the advertiser
+    const transportations = await transportationModel.find({ advertiser: req.user._id });
+
+    // Check if the user has any transportations
+    if (transportations.length === 0) {
+      return res.status(404).json({ message: 'No transportations found for this user.' });
+    }
+
+    return res.status(200).json({ transportations });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error fetching transportations', error: error.message });
+  }
+};
+
 
 module.exports = {
   createProfile,
@@ -526,5 +542,6 @@ module.exports = {
   createTransportation,
   getAllTransportation,
   deleteTransportation,
-  editTransportation
+  editTransportation,
+  getMyTransportations
 };
