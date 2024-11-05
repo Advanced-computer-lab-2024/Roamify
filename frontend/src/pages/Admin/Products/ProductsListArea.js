@@ -138,7 +138,7 @@ const ProductsListArea = () => {
                         type="radio"
                         name="ratingSort"
                         value="highToLow"
-                        onChange={() => setRatingSort("highToLow")}
+                        onChange={() => setRatingSort("desc")}
                         style={{
                           // appearance: "none", // Remove default radio styling
                           width: "20px",
@@ -166,7 +166,7 @@ const ProductsListArea = () => {
                         type="radio"
                         name="ratingSort"
                         value="lowToHigh"
-                        onChange={() => setRatingSort("lowToHigh")}
+                        onChange={() => setRatingSort("asc")}
                         style={{
                           // appearance: "none", // Remove default radio styling
                           appearance: "square-button",

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import SectionHeading from "../Common/SectionHeading";
+import SectionHeading from "../../../../component/Common/SectionHeading";
 import SideBar from "./SideBar";
 import { Link } from "react-router-dom";
 import PriceSlider from "./PriceSlider";
@@ -11,14 +11,25 @@ const TouristActivitiesWrapper = () => {
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [date, setdate] = useState(null);
   const [category, setCategory] = useState("");
-  const [sortCriteria, setSortCriteria] = useState({ field: "price", order: "asc" });
+  const [sortCriteria, setSortCriteria] = useState({
+    field: "price",
+    order: "asc",
+  });
   const [error, setError] = useState(null); // Track errors
   const [minRating, setMinRating] = useState(0);
   const [searchQuery, setSearchQuery] = useState(""); // New: search input
   const [categoriesSearch, setCategoriesSearch] = useState([]);
   const [tags, setTags] = useState([]);
 
-  const fetchActivities = async (minBudget, maxBudget, date, minRating, category, tag, searchQuery) => {
+  const fetchActivities = async (
+    minBudget,
+    maxBudget,
+    date,
+    minRating,
+    category,
+    tag,
+    searchQuery
+  ) => {
     setLoading(true);
     setError(null);
     try {
@@ -51,7 +62,7 @@ const TouristActivitiesWrapper = () => {
   };
 
   useEffect(() => {
-    fetchActivities(priceRange[0], priceRange[1], date,  minRating, category);
+    fetchActivities(priceRange[0], priceRange[1], date, minRating, category);
   }, [priceRange, date, minRating, category, sortCriteria]);
 
   const applyFilters = (newPriceRange) => {
@@ -61,15 +72,20 @@ const TouristActivitiesWrapper = () => {
   const handleCategoryApply = (selectedCategory) => {
     setCategory(selectedCategory);
     applyFilters(priceRange);
-    fetchActivities(priceRange[0], priceRange[1], date, minRating, selectedCategory);
+    fetchActivities(
+      priceRange[0],
+      priceRange[1],
+      date,
+      minRating,
+      selectedCategory
+    );
   };
-  
- 
+
   const handleSortChange = (field, order) => {
     setSortCriteria({ field, order });
     // Trigger fetchActivities here to refetch with new sorting
     fetchActivities(priceRange[0], priceRange[1], date, minRating, category);
-};
+  };
   const handleRatingApply = (rating) => {
     setMinRating(rating); // Update minRating
     fetchActivities(priceRange[0], priceRange[1], date, rating, category); // Refetch activities with new minRating
@@ -77,18 +93,20 @@ const TouristActivitiesWrapper = () => {
 
   const [categories, setCategories] = useState([]);
 
-useEffect(() => {
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000/api/category/get-all");
-      setCategories(response.data.categories);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/category/get-all"
+        );
+        setCategories(response.data.categories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
 
-  fetchCategories();
-}, []);
+    fetchCategories();
+  }, []);
 
   return (
     <section id="explore_area" className="section_padding">
@@ -96,15 +114,16 @@ useEffect(() => {
         <SectionHeading heading={`${activities.length} activities found`} />
         <div className="row">
           <div className="col-lg-3">
-          <div className="left_side_search_boxed">
-          <div className="left_side_search_heading">
-            <h5>Filter by price</h5>
-          </div>
-          <div className="filter-price">
-            <div id="price-slider"><PriceSlider onApply={applyFilters}  /></div>
-          </div>
-          
-        </div>
+            <div className="left_side_search_boxed">
+              <div className="left_side_search_heading">
+                <h5>Filter by price</h5>
+              </div>
+              <div className="filter-price">
+                <div id="price-slider">
+                  <PriceSlider onApply={applyFilters} />
+                </div>
+              </div>
+            </div>
             <SideBar
               priceRange={priceRange}
               setPriceRange={setPriceRange}
@@ -115,22 +134,21 @@ useEffect(() => {
               onSortChange={handleSortChange}
               onRatingApply={handleRatingApply}
             />
-            
-          
-          <div className="left_side_search_boxed">
-        <div className="left_side_search_heading">
-        <h5>Filter by category</h5>
-        </div>
-        <select onChange={(e) => handleCategoryApply(e.target.value)}>
-          <option value="">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat._id} value={cat._id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-        </div>
-        </div>
+
+            <div className="left_side_search_boxed">
+              <div className="left_side_search_heading">
+                <h5>Filter by category</h5>
+              </div>
+              <select onChange={(e) => handleCategoryApply(e.target.value)}>
+                <option value="">All Categories</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
           <div className="col-lg-9">
             {loading ? (
               <p>Loading activities...</p>
@@ -139,7 +157,10 @@ useEffect(() => {
             ) : (
               <div className="flight_search_result_wrapper">
                 {activities.map((activity, index) => (
-                  <div className="flight_search_item_wrappper" key={activity._id}>
+                  <div
+                    className="flight_search_item_wrappper"
+                    key={activity._id}
+                  >
                     <div className="flight_search_items">
                       <div className="multi_city_flight_lists">
                         <div className="flight_multis_area_wrapper">
@@ -148,7 +169,8 @@ useEffect(() => {
                               <p>Location</p>
                               <h3>{activity.location.name}</h3>
                               <h6>
-                                Coordinates: {activity.location.coordinates.join(", ")}
+                                Coordinates:{" "}
+                                {activity.location.coordinates.join(", ")}
                               </h6>
                             </div>
                           </div>
@@ -159,7 +181,9 @@ useEffect(() => {
                             </div>
                             <div className="flight_search_destination">
                               <p>Date</p>
-                              <h3>{new Date(activity.date).toLocaleDateString()}</h3>
+                              <h3>
+                                {new Date(activity.date).toLocaleDateString()}
+                              </h3>
                               <h6>Time: {activity.time}</h6>
                             </div>
                           </div>
@@ -169,7 +193,11 @@ useEffect(() => {
                         <h5>
                           {activity.discounts ? (
                             <del>
-                              {(activity.price * (1 + activity.discounts / 100)).toFixed(2)} EGP
+                              {(
+                                activity.price *
+                                (1 + activity.discounts / 100)
+                              ).toFixed(2)}{" "}
+                              EGP
                             </del>
                           ) : (
                             ""
@@ -177,9 +205,16 @@ useEffect(() => {
                         </h5>
                         <h2>
                           {activity.price} EGP
-                          <sup>{activity.discounts ? `${activity.discounts}% off` : ""}</sup>
+                          <sup>
+                            {activity.discounts
+                              ? `${activity.discounts}% off`
+                              : ""}
+                          </sup>
                         </h2>
-                        <Link to={`/activity-booking/${activity._id}`} className="btn btn_theme btn_sm">
+                        <Link
+                          to={`/activity-booking/${activity._id}`}
+                          className="btn btn_theme btn_sm"
+                        >
                           Book now
                         </Link>
                         {activity.discounts ? <p>*Discount available</p> : ""}
@@ -193,13 +228,19 @@ useEffect(() => {
                         </div>
                       </div>
                     </div>
-                    <div className="flight_policy_refund collapse" id={`collapseExample${index}`}>
+                    <div
+                      className="flight_policy_refund collapse"
+                      id={`collapseExample${index}`}
+                    >
                       <div className="flight_show_down_wrapper">
                         <div className="flight-shoe_dow_item">
                           <h4>Activity Details</h4>
-                          <p className="fz12">{activity.category.description}</p>
                           <p className="fz12">
-                            Advertiser: {activity.advertiser.username} ({activity.advertiser.email})
+                            {activity.category.description}
+                          </p>
+                          <p className="fz12">
+                            Advertiser: {activity.advertiser.username} (
+                            {activity.advertiser.email})
                           </p>
                         </div>
                         <div className="flight_refund_policy">
