@@ -177,7 +177,7 @@ const addAdmin = async (req, res) => {
 
 const viewUploadedDocuments = async (req, res) => {
   try {
-    const userId = req.body.userId;
+    const userId = req.params.userId;
     if (!userId) return res.status(400).json({ message: 'please choose a user' });
 
     const id = new mongoose.Types.ObjectId(userId);

@@ -8,7 +8,6 @@ const router = express.Router();
 
 router.post("/add-tourism-governor", adminController.addTourismGovernor);
 router.delete("/delete-account/:id", adminController.deleteUser);
-router.get("/get-users/:role",adminController.getUsersByRole);
 router.post("/add-admin", adminController.addAdmin);
 
 router.post("/create-category", categoryController.createCategory);
@@ -24,7 +23,7 @@ router.post("/create-historical-tag", historicalTagController.createHistoricalTa
 
 router.put("/edit-product/:id", productController.updateProduct);
 router.put("/add-product/:id", productController.addProduct);
-router.get("/view-uploaded-docs", adminController.viewUploadedDocuments);
+router.get("/view-uploaded-docs/:userId", adminController.viewUploadedDocuments);
 router.put("/accept-reject-user", adminController.acceptRejectUser);
 router.put("/flag-itinerary", adminController.flagItinerary);
 router.put("/unflag-itinerary", adminController.unflagItinerary);
