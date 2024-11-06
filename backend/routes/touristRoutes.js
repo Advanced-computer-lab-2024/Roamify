@@ -17,6 +17,10 @@ router.delete('/cancel-itinerary-booking', touristController.cancelItinerary);
 router.delete('/cancel-activity-booking', touristController.cancelActivity);
 router.delete('/cancel-transportation-booking', touristController.cancelTransportationBooking);
 router.get('/get-booked-transportations', touristController.getBookedTransportations);
+router.get('/get-all-booked-activities', touristController.getAllBookedActivities);
+router.get('/get-all-booked-itineraries', touristController.getAllBookedItineraries);
+router.get('/get-all-upcoming-booked-itineraries', touristController.getAllUpcomingBookedItineraries);
+router.get('/get-all-upcoming-booked-activities', touristController.getAllUpcomingBookedActivities);
 
 
 

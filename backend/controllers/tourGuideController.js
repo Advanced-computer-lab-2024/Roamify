@@ -6,6 +6,7 @@ const activityModel = require("../models/activityModel");
 const itineraryModel = require("../models/itineraryModel");
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
+const { name } = require('pug');
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
 const upload = multer({ storage }).single('profilePicture'); // Accept only 1 file with field name 'profilePicture'
 
@@ -110,11 +111,14 @@ const updateProfile = async (req, res) => {
 const createItinerary = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { activities, language, price, availableDates, pickUpLocation, dropOffLocation, accessibility } = req.body;
+    const { name, activities, language, price, availableDates, pickUpLocation, dropOffLocation, accessibility } = req.body;
 
-    if (!activities || !language || price == null || !availableDates || !pickUpLocation || !dropOffLocation || accessibility == null) {
+    if (!name || !activities || !language || price == null || !availableDates || !pickUpLocation || !dropOffLocation || accessibility == null) {
       return res.status(400).json({ message: "All required fields must be filled" });
     }
+
+    const itinerary = await itineraryModel.findOne({ name });
+    if (itinerary) return res.status(400).json({ message: 'this itinerary name already exists please choose another name' });
 
     const activityIds = [];
     const locations = [];
@@ -133,6 +137,7 @@ const createItinerary = async (req, res) => {
       tourGuide: userId,
       activities: activityIds,
       language,
+      name,
       price,
       availableDates,
       pickUpLocation,

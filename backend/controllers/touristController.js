@@ -432,4 +432,88 @@ const bookTransportation = async (req, res) => {
 
   }
 }
-module.exports = { createProfile, getProfile, updateProfile, addWallet, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking };
+
+const getAllBookedItineraries = async (req, res) => {
+  try {
+
+    const tourist = await touristModel.findOne({ user: req.user._id }).populate('bookedItineraries.itinerary');
+    if (!tourist) return res.status(400).json({ message: 'user does not exist' });
+
+    if (tourist.bookedItineraries.length === 0) return res.status(400).json({ message: 'you have no itineraries booked yet' });
+
+    return res.status(200).json(tourist.bookedItineraries);
+
+  }
+  catch (error) {
+    return res.status(400).json({ message: 'couldn\'t retrieve booked itineraries', error: error.message });
+
+  }
+}
+const getAllBookedActivities = async (req, res) => {
+  try {
+
+    const tourist = await touristModel.findOne({ user: req.user._id }).populate('bookedActivities.activity');
+
+    if (!tourist) return res.status(400).json({ message: 'user does not exist' });
+
+    if (tourist.bookedActivities.length === 0) return res.status(400).json({ message: 'you have no activities booked yet' });
+
+    return res.status(200).json(tourist.bookedActivities);
+
+  }
+  catch (error) {
+    return res.status(400).json({ message: 'couldn\'t retrieve booked activities', error: error.message });
+
+  }
+}
+
+const getAllUpcomingBookedItineraries = async (req, res) => {
+  try {
+    const tourist = await touristModel
+      .findOne({ user: req.user._id })
+      .populate('bookedItineraries.itinerary');
+
+    if (!tourist) return res.status(400).json({ message: 'User does not exist' });
+
+    const currentDate = new Date();
+
+    // Filter bookedActivities for future dates
+    const upcomingItineraries = tourist.bookedItineraries.filter(itinerary =>
+      itinerary.date && itinerary.date > currentDate
+    );
+
+    if (upcomingItineraries.length === 0) {
+      return res.status(200).json({ message: 'No upcoming booked itineraries' });
+    }
+
+    return res.status(200).json(upcomingItineraries);
+  } catch (error) {
+    return res.status(400).json({ message: "Couldn't retrieve booked itineraries", error: error.message });
+  }
+};
+const getAllUpcomingBookedActivities = async (req, res) => {
+  try {
+    const tourist = await touristModel
+      .findOne({ user: req.user._id })
+      .populate('bookedActivities.activity'); // Populate activity details in bookedActivities
+
+    if (!tourist) return res.status(400).json({ message: 'User does not exist' });
+
+    const currentDate = new Date();
+
+    // Filter bookedActivities for future dates
+    const upcomingActivities = tourist.bookedActivities.filter(activity =>
+      activity.date && activity.date > currentDate
+    );
+
+    if (upcomingActivities.length === 0) {
+      return res.status(200).json({ message: 'No upcoming booked activities' });
+    }
+
+    return res.status(200).json(upcomingActivities);
+  } catch (error) {
+    return res.status(400).json({ message: "Couldn't retrieve booked activities", error: error.message });
+  }
+};
+
+module.exports = { createProfile, getProfile, updateProfile, addWallet, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries };
