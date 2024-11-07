@@ -404,6 +404,61 @@ const getBookedTransportations = async (req, res) => {
   }
 };
 
+const getFilteredTransportations = async (req, res) => {
+  try {
+    const { pickupLocation, dropOffLocation, date, time, type, sortBy, sortOrder = "asc" } = req.query;
+
+    let filter = {};
+
+    // Filter by pickup location if provided
+    if (pickupLocation) {
+      filter.pickupLocation = { $regex: pickupLocation, $options: "i" }; // Case-insensitive search
+    }
+
+    // Filter by drop-off location if provided
+    if (dropOffLocation) {
+      filter.dropOffLocation = { $regex: dropOffLocation, $options: "i" }; // Case-insensitive search
+    }
+
+    // Filter by date if provided (any date on or after the specified date)
+    if (date) {
+      filter.date = { $gte: new Date(date) };
+    }
+
+    // Filter by exact time if provided
+    if (time) {
+      filter.time = time;
+    }
+
+    // Filter by type if provided (e.g., bus, train, etc.)
+    if (type) {
+      filter.type = type;
+    }
+
+    // Sorting options
+    let sortOptions = {};
+    if (sortBy) {
+      sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1;
+    }
+
+    // Execute the query with the defined filters
+    const transportations = await transportationModel.find(filter)
+      .sort(sortOptions)
+      .populate({
+        path: "advertiser",
+        select: "name email" // Populate advertiser with specific fields
+      });
+
+    if (!transportations.length) {
+      return res.status(404).json({ message: "No transportations found matching your criteria" });
+    }
+
+    res.status(200).json({ message: "Transportations retrieved successfully", transportations });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve transportations", error: error.message });
+  }
+};
+
 
 
 const bookTransportation = async (req, res) => {
@@ -516,4 +571,5 @@ const getAllUpcomingBookedActivities = async (req, res) => {
   }
 };
 
-module.exports = { createProfile, getProfile, updateProfile, addWallet, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries };
+
+module.exports = { createProfile, getProfile, updateProfile, addWallet, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations };
