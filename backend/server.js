@@ -1,5 +1,4 @@
 const express = require("express");
-const dotenv = require("dotenv").config();
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
@@ -54,8 +53,6 @@ app.use("/api/preference-tag",preferenceTagRoutes);
 app.use("/api/historical-tag",historicalTagRoutes);
 app.use("/api/places",placesRoutes);
 app.use("/api/complaint",complaintRoutes);
-
-
 
 
 // Start server
