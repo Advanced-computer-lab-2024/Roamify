@@ -1,149 +1,130 @@
 import React, { useState } from "react";
-import DateFilter from "./DateFilter";
-const SideBar = ({ priceRange, setPriceRange, onPriceApply, date, setdate, onDateApply, onCategoryApply,onSortChange,  onRatingApply }) => {
-  
+
+const SideBar = ({
+  date,
+  setdate,
+  onDateApply,
+  onCategoryApply,
+  onSortChange,
+}) => {
   const [categoryInput, setCategoryInput] = useState("");
-  const [sortField, setSortField] = useState("price");
-  const [sortOrder, setSortOrder] = useState("asc");
-  const [selectedStars, setSelectedStars] = useState([false, false, false, false, false]); // Track selected stars
+  const [searchType, setSearchType] = useState("category");
+  const [sortOrder, setSortOrder] = useState("asc"); // Only for ratings
+
+  // Date range states
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // Handle search input and type selection
   const handleCategoryInputChange = (event) => {
     setCategoryInput(event.target.value);
   };
+  
+  const handleSearchTypeChange = (event) => {
+    setSearchType(event.target.value);
+  };
 
   const handleCategoryApplyClick = () => {
-    onCategoryApply(categoryInput); // Call the parent handler with the current input value
+    onCategoryApply({ type: searchType, value: categoryInput });
   };
 
-  const handleSortChange = (field, order) => {
-    setSortField(field);
+  const handleDateApplyClick = () => {
+    onDateApply({ startDate, endDate });
+  };
+
+  const handleSortOrderChange = (order) => {
     setSortOrder(order);
-    onSortChange(field, order);
+    onSortChange("rating", order);
   };
-  const handleRatingChange = (index) => {
-    const newSelectedStars = selectedStars.map((star, i) => i <= index);
-    setSelectedStars(newSelectedStars);
-  };
-  const handleApplyFilters = () => {
-    const minRating = selectedStars.filter(Boolean).length; // Count selected stars
-    onRatingApply(minRating); // Pass minRating to the parent
-  };
+
   return (
-    <>
-      <div className="left_side_search_area">
-        
-        <div className="left_side_search_boxed">
-          <div className="left_side_search_heading">
-            <h5>Filter by Date</h5>
-          </div>
-          <div className="tour_search_type">
-          <div className="filter-date">
-          <DateFilter
-            date={date}
-            setdate={setdate}
-            onApply={onDateApply}
-          />
+    <div className="left_side_search_area">
+      {/* Date Filter Section */}
+      <div className="left_side_search_boxed">
+        <div className="left_side_search_heading">
+          <h5>Filter by Date</h5>
         </div>
-          </div>
-        </div>
-        
-        <div className="left_side_search_boxed">
-          <div className="left_side_search_heading">
-            <h5>Search by Category or Name or Tag </h5>
-          </div>
-          <div className="name_search_form">
-        <input
-        className="form-control"
-          type="text"
-          placeholder="Search..."
-          value={categoryInput}
-          onChange={handleCategoryInputChange}
-        />
-        <button onClick={handleCategoryApplyClick} className="apply" type="button">
-          Apply
-        </button>
-      </div>
-        </div>
-        <div className="left_side_search_boxed">
-          <div className="left_side_search_heading">
-            <h5>Filter by Review</h5>
-          </div>
-          <div className="filter_review">
-            <form className="review_star">
-              {selectedStars.map((isChecked, index) => (
-                <div className="form-check" key={index}>
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => handleRatingChange(index)}
-                  />
-                  <label className="form-check-label">
-                    {[...Array(index + 1)].map((_, i) => (
-                      <i key={i} className="fas fa-star color_theme"></i>
-                    ))}
-                    {[...Array(5 - (index + 1))].map((_, i) => (
-                      <i key={i} className="fas fa-star color_asse"></i>
-                    ))}
-                  </label>
-                </div>
-              ))}
-            </form>
-            <button onClick={handleApplyFilters} className="apply" type="button">
-              Apply Rating Filter
+        <div className="tour_search_type">
+          <div className="filter-date" style={{ display: "block" }}>
+            <input
+              type="date"
+              className="form-control"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              placeholder="Start Date"
+              style={{ marginBottom: "10px" }}
+            />
+            <input
+              type="date"
+              className="form-control"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              placeholder="End Date"
+              style={{ marginBottom: "10px" }}
+            />
+            <button onClick={handleDateApplyClick} className="btn btn_theme btn_sm">
+              Apply
             </button>
           </div>
         </div>
-        <div className="left_side_search_boxed">
-          <div className="left_side_search_heading">
-            <h5>Sort by</h5>
-          </div>
-          <div className="name_search_form">
-          <label>
-            <input
-              type="radio"
-              name="sortField"
-              value="price"
-              checked={sortField === "price"}
-              onChange={() => handleSortChange("price", sortOrder)}
-            />
-            Price
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="sortField"
-              value="rating"
-              checked={sortField === "rating"}
-              onChange={() => handleSortChange("rating", sortOrder)}
-            />
-            Rating
-          </label>
+      </div>
+
+      {/* Category/Name/Tag Search Section */}
+      <div className="left_side_search_boxed">
+        <div className="left_side_search_heading">
+          <h5>Search by</h5>
         </div>
-        <div>
-          <label>
+        <div className="name_search_form" style={{ display: "block" }}>
+          <select
+            className="form-control"
+            value={searchType}
+            onChange={handleSearchTypeChange}
+            style={{ marginBottom: "10px" }}
+          >
+            <option value="category">Category</option>
+            <option value="name">Name</option>
+            <option value="tag">Tag</option>
+          </select>
+          <input
+            className="form-control"
+            type="text"
+            placeholder={`Search by ${searchType}...`}
+            value={categoryInput}
+            onChange={handleCategoryInputChange}
+            style={{ marginBottom: "10px" }}
+          />
+          <button onClick={handleCategoryApplyClick} className="btn btn_theme btn_sm">
+            Apply
+          </button>
+        </div>
+      </div>
+
+
+      {/* Sort by Rating Section */}
+      <div className="left_side_search_boxed">
+        <div className="left_side_search_heading">
+          <h5>Sort by Rating</h5>
+        </div>
+        <div className="name_search_form" style={{ display: "block" }}>
+          <label style={{ display: "block", marginBottom: "5px" }}>
             <input
-              type="radio"
-              name="sortOrder"
-              value="asc"
+              type="checkbox"
               checked={sortOrder === "asc"}
-              onChange={() => handleSortChange(sortField, "asc")}
+              onChange={() => handleSortOrderChange("asc")}
             />
             Ascending
           </label>
-          <label>
+          <label style={{ display: "block" }}>
             <input
-              type="radio"
-              name="sortOrder"
-              value="desc"
+              type="checkbox"
               checked={sortOrder === "desc"}
-              onChange={() => handleSortChange(sortField, "desc")}
+              onChange={() => handleSortOrderChange("desc")}
             />
             Descending
           </label>
         </div>
       </div>
-      </div>
-    </>
+    </div>
   );
 };
 

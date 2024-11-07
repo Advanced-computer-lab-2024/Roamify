@@ -53,18 +53,6 @@ const Form = () => {
                 required
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="complaintDate" className="form-label">Date</label>
-              <input
-                type="date"
-                id="complaintDate"
-                className="form-control"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-              />
-              {errors.date && <small className="text-danger">{errors.date}</small>}
-            </div>
             <button type="submit" className="btn btn_theme btn_sm" style={{ marginTop: "15px" }}>
               Submit Complain
             </button>

@@ -1,6 +1,5 @@
 import React from "react";
 // import FlightForm
-import TouristActivitiesForm from "./TouristActivitiesForm";
 // import FlightSearchWrapper
 import TouristActivitiesWrapper from "./TouristActivitiesSearchArea";
 
