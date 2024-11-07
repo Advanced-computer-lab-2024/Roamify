@@ -39,6 +39,9 @@ const transportationSchema = new mongoose.Schema(
         touristsBooked: {
             type: [mongoose.Types.ObjectId],
             ref: 'user'
+        },
+        cost: {
+            type: Number
         }
     },
     { timestamps: true }

@@ -1,7 +1,7 @@
 const touristModel = require("../models/touristModel");
 const transportationModel = require("../models/transportationModel");
 const userModel = require("../models/userModel");
-const walletModel = require("../models/walletModel");
+const walletModel = require("../models/cardModel");
 const validator = require("validator");
 const mongoose = require("mongoose");
 const preferenceTagModel = require("../models/preferenceTagModel");
@@ -301,12 +301,10 @@ const cancelItinerary = async (req, res) => {
         const timeDifference = itinerary.date.getTime() - date.getTime();
         const hoursDifference = timeDifference / (1000 * 60 * 60);
         if (hoursDifference <= 48) {
-          return res
-            .status(400)
-            .json({
-              message:
-                "Unable to cancel booking as it must be done at least 48 hours in advance.",
-            });
+          return res.status(400).json({
+            message:
+              "Unable to cancel booking as it must be done at least 48 hours in advance.",
+          });
         } else {
           await touristModel.updateOne(
             { user: req.user._id },
@@ -349,12 +347,10 @@ const cancelActivity = async (req, res) => {
         const hoursDifference = timeDifference / (1000 * 60 * 60);
 
         if (hoursDifference <= 48) {
-          return res
-            .status(400)
-            .json({
-              message:
-                "Unable to cancel booking as it must be done at least 48 hours in advance.",
-            });
+          return res.status(400).json({
+            message:
+              "Unable to cancel booking as it must be done at least 48 hours in advance.",
+          });
         } else {
           await touristModel.updateOne(
             { user: req.user._id },
@@ -402,12 +398,10 @@ const selectPreferenceTag = async (req, res) => {
     await tourist.save();
     return res.status(200).json({ message: "added preferences successfuly" });
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        message: "error in choosing preferences ",
-        error: error.message,
-      });
+    res.status(400).json({
+      message: "error in choosing preferences ",
+      error: error.message,
+    });
   }
 };
 
@@ -417,12 +411,9 @@ const cancelTransportationBooking = async (req, res) => {
 
     // Check if transportation ID is provided
     if (!transportationIdString) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Please select one of your booked transportations to cancel.",
-        });
+      return res.status(400).json({
+        message: "Please select one of your booked transportations to cancel.",
+      });
     }
 
     const transportationId = new mongoose.Types.ObjectId(
@@ -437,11 +428,9 @@ const cancelTransportationBooking = async (req, res) => {
 
     // If the transportation is not found or the user has not booked it, return an error
     if (!transportation) {
-      return res
-        .status(400)
-        .json({
-          message: "Please choose a valid booked transportation to cancel.",
-        });
+      return res.status(400).json({
+        message: "Please choose a valid booked transportation to cancel.",
+      });
     }
 
     // Remove the user from the touristsBooked array
@@ -454,12 +443,10 @@ const cancelTransportationBooking = async (req, res) => {
       .status(200)
       .json({ message: "Transportation booking cancelled successfully." });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: "Error cancelling transportation booking",
-        error: error.message,
-      });
+    return res.status(500).json({
+      message: "Error cancelling transportation booking",
+      error: error.message,
+    });
   }
 };
 
@@ -478,10 +465,84 @@ const getBookedTransportations = async (req, res) => {
         .json({ message: "you have not booked any transportations yet" });
     return res.status(200).json({ transportations });
   } catch (error) {
-    return res
-      .status(400)
+    return res.status(400).json({
+      message: "Error fetching booked transportations",
+      error: error.message,
+    });
+  }
+};
+
+const getFilteredTransportations = async (req, res) => {
+  try {
+    const {
+      pickupLocation,
+      dropOffLocation,
+      date,
+      time,
+      type,
+      sortBy,
+      sortOrder = "asc",
+    } = req.query;
+
+    let filter = {};
+
+    // Filter by pickup location if provided
+    if (pickupLocation) {
+      filter.pickupLocation = { $regex: pickupLocation, $options: "i" }; // Case-insensitive search
+    }
+
+    // Filter by drop-off location if provided
+    if (dropOffLocation) {
+      filter.dropOffLocation = { $regex: dropOffLocation, $options: "i" }; // Case-insensitive search
+    }
+
+    // Filter by date if provided (any date on or after the specified date)
+    if (date) {
+      filter.date = { $gte: new Date(date) };
+    }
+
+    // Filter by exact time if provided
+    if (time) {
+      filter.time = time;
+    }
+
+    // Filter by type if provided (e.g., bus, train, etc.)
+    if (type) {
+      filter.type = type;
+    }
+
+    // Sorting options
+    let sortOptions = {};
+    if (sortBy) {
+      sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1;
+    }
+
+    // Execute the query with the defined filters
+    const transportations = await transportationModel
+      .find(filter)
+      .sort(sortOptions)
+      .populate({
+        path: "advertiser",
+        select: "name email", // Populate advertiser with specific fields
+      });
+
+    if (!transportations.length) {
+      return res
+        .status(404)
+        .json({ message: "No transportations found matching your criteria" });
+    }
+
+    res
+      .status(200)
       .json({
-        message: "Error fetching booked transportations",
+        message: "Transportations retrieved successfully",
+        transportations,
+      });
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        message: "Failed to retrieve transportations",
         error: error.message,
       });
   }
@@ -514,89 +575,135 @@ const bookTransportation = async (req, res) => {
       .status(400)
       .json({ message: "unable to book transportation", error: error.message });
   }
-}
+};
 
 const getAllBookedItineraries = async (req, res) => {
   try {
+    const tourist = await touristModel
+      .findOne({ user: req.user._id })
+      .populate("bookedItineraries.itinerary");
+    if (!tourist)
+      return res.status(400).json({ message: "user does not exist" });
 
-    const tourist = await touristModel.findOne({ user: req.user._id }).populate('bookedItineraries.itinerary');
-    if (!tourist) return res.status(400).json({ message: 'user does not exist' });
-
-    if (tourist.bookedItineraries.length === 0) return res.status(400).json({ message: 'you have no itineraries booked yet' });
+    if (tourist.bookedItineraries.length === 0)
+      return res
+        .status(400)
+        .json({ message: "you have no itineraries booked yet" });
 
     return res.status(200).json(tourist.bookedItineraries);
-
+  } catch (error) {
+    return res
+      .status(400)
+      .json({
+        message: "couldn't retrieve booked itineraries",
+        error: error.message,
+      });
   }
-  catch (error) {
-    return res.status(400).json({ message: 'couldn\'t retrieve booked itineraries', error: error.message });
-
-  }
-}
+};
 const getAllBookedActivities = async (req, res) => {
   try {
+    const tourist = await touristModel
+      .findOne({ user: req.user._id })
+      .populate("bookedActivities.activity");
 
-    const tourist = await touristModel.findOne({ user: req.user._id }).populate('bookedActivities.activity');
+    if (!tourist)
+      return res.status(400).json({ message: "user does not exist" });
 
-    if (!tourist) return res.status(400).json({ message: 'user does not exist' });
-
-    if (tourist.bookedActivities.length === 0) return res.status(400).json({ message: 'you have no activities booked yet' });
+    if (tourist.bookedActivities.length === 0)
+      return res
+        .status(400)
+        .json({ message: "you have no activities booked yet" });
 
     return res.status(200).json(tourist.bookedActivities);
-
+  } catch (error) {
+    return res
+      .status(400)
+      .json({
+        message: "couldn't retrieve booked activities",
+        error: error.message,
+      });
   }
-  catch (error) {
-    return res.status(400).json({ message: 'couldn\'t retrieve booked activities', error: error.message });
-
-  }
-}
+};
 
 const getAllUpcomingBookedItineraries = async (req, res) => {
   try {
     const tourist = await touristModel
       .findOne({ user: req.user._id })
-      .populate('bookedItineraries.itinerary');
+      .populate("bookedItineraries.itinerary");
 
-    if (!tourist) return res.status(400).json({ message: 'User does not exist' });
+    if (!tourist)
+      return res.status(400).json({ message: "User does not exist" });
 
     const currentDate = new Date();
 
     // Filter bookedActivities for future dates
-    const upcomingItineraries = tourist.bookedItineraries.filter(itinerary =>
-      itinerary.date && itinerary.date > currentDate
+    const upcomingItineraries = tourist.bookedItineraries.filter(
+      (itinerary) => itinerary.date && itinerary.date > currentDate
     );
 
     if (upcomingItineraries.length === 0) {
-      return res.status(200).json({ message: 'No upcoming booked itineraries' });
+      return res
+        .status(200)
+        .json({ message: "No upcoming booked itineraries" });
     }
 
     return res.status(200).json(upcomingItineraries);
   } catch (error) {
-    return res.status(400).json({ message: "Couldn't retrieve booked itineraries", error: error.message });
+    return res
+      .status(400)
+      .json({
+        message: "Couldn't retrieve booked itineraries",
+        error: error.message,
+      });
   }
 };
 const getAllUpcomingBookedActivities = async (req, res) => {
   try {
     const tourist = await touristModel
       .findOne({ user: req.user._id })
-      .populate('bookedActivities.activity'); // Populate activity details in bookedActivities
+      .populate("bookedActivities.activity"); // Populate activity details in bookedActivities
 
-    if (!tourist) return res.status(400).json({ message: 'User does not exist' });
+    if (!tourist)
+      return res.status(400).json({ message: "User does not exist" });
 
     const currentDate = new Date();
 
     // Filter bookedActivities for future dates
-    const upcomingActivities = tourist.bookedActivities.filter(activity =>
-      activity.date && activity.date > currentDate
+    const upcomingActivities = tourist.bookedActivities.filter(
+      (activity) => activity.date && activity.date > currentDate
     );
 
     if (upcomingActivities.length === 0) {
-      return res.status(200).json({ message: 'No upcoming booked activities' });
+      return res.status(200).json({ message: "No upcoming booked activities" });
     }
 
     return res.status(200).json(upcomingActivities);
   } catch (error) {
-    return res.status(400).json({ message: "Couldn't retrieve booked activities", error: error.message });
+    return res
+      .status(400)
+      .json({
+        message: "Couldn't retrieve booked activities",
+        error: error.message,
+      });
   }
 };
 
-module.exports = { createProfile, getProfile, updateProfile, addWallet, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries };
+module.exports = {
+  createProfile,
+  getProfile,
+  updateProfile,
+  addWallet,
+  bookActivity,
+  bookItinerary,
+  selectPreferenceTag,
+  bookTransportation,
+  cancelItinerary,
+  cancelActivity,
+  getBookedTransportations,
+  cancelTransportationBooking,
+  getAllBookedActivities,
+  getAllBookedItineraries,
+  getAllUpcomingBookedActivities,
+  getAllUpcomingBookedItineraries,
+  getFilteredTransportations,
+};

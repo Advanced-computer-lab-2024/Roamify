@@ -217,9 +217,8 @@ const acceptRejectUser = async (req, res) => {
   try {
     const { userIdString, approved } = req.body;
 
-    if (!url) {
-      console.log("No URL provided");
-      return res.status(400).json({ message: "URL is required" });
+    if (!userIdString) {
+      return res.status(400).json({ message: "select a user" });
     }
     if (approved === null || approved === "")
       throw Error("please accept or reject");
@@ -302,8 +301,9 @@ const getPendingUsers = async (req, res) => {
     const pendingUsers = await userModel
       .find({ status: "pending" })
       .select("username _id email role");
-    if (!pendingUsers)
+    if (!pendingUsers || pendingUsers.length === 0)
       return res.status(400).json({ message: "no pending users" });
+
     return res.status(200).json({ pendingUsers });
   } catch (error) {
     return res.status(400).json({

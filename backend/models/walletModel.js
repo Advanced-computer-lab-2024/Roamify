@@ -1,14 +1,14 @@
- const mongoose = require('mongoose');
-const walletSchema=new mongoose.Schema({
-    cardNumber:{
-        type:String,
-        
+const mongoose = require('mongoose');
+const walletSchema = new mongoose.Schema({
+    card: {
+        type: [mongoose.Types.ObjectId],
+        ref: 'card'
     },
-    cardValidUntil:{
-        type:Date,
-        
+    availableCredit: {
+        type: Number,
+
     }
 })
 
-const walletModel = mongoose.model('wallet', walletSchema);
+const walletModel = mongoose.model('card', walletSchema);
 module.exports = walletModel;
