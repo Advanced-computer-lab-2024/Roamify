@@ -202,12 +202,10 @@ const viewUploadedDocuments = async (req, res) => {
       .findById(id)
       .select("idDocument additionalDocument");
 
-    res
-      .status(200)
-      .json({
-        IDs: userUrls.idDocument.url,
-        additionalDocuments: userUrls.additionalDocument.url,
-      });
+    res.status(200).json({
+      IDs: userUrls.idDocument.url,
+      additionalDocuments: userUrls.additionalDocument.url,
+    });
   } catch (e) {
     res
       .status(400)
@@ -217,7 +215,7 @@ const viewUploadedDocuments = async (req, res) => {
 
 const acceptRejectUser = async (req, res) => {
   try {
-    const { url, approved } = req.body;
+    const { userIdString, approved } = req.body;
 
     if (!url) {
       console.log("No URL provided");
@@ -233,7 +231,7 @@ const acceptRejectUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid user ID in URL" });
     }
 
-    const userId = new mongoose.Types.ObjectId(result);
+    const userId = new mongoose.Types.ObjectId(userIdString);
 
     const user = await userModel.findById(userId);
     if (!user) {
@@ -253,12 +251,10 @@ const acceptRejectUser = async (req, res) => {
         .json({ message: "Rejected and user successfully" });
     }
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        message: "Couldn't accept or reject user",
-        error: error.message,
-      });
+    res.status(400).json({
+      message: "Couldn't accept or reject user",
+      error: error.message,
+    });
   }
 };
 
@@ -310,12 +306,10 @@ const getPendingUsers = async (req, res) => {
       return res.status(400).json({ message: "no pending users" });
     return res.status(200).json({ pendingUsers });
   } catch (error) {
-    return res
-      .status(400)
-      .json({
-        message: "error in fetching pending users",
-        error: error.message,
-      });
+    return res.status(400).json({
+      message: "error in fetching pending users",
+      error: error.message,
+    });
   }
 };
 
