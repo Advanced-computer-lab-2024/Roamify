@@ -1,7 +1,7 @@
 import React from "react";
 import UsersTableRow from "./UsersTableRow";
 
-const UsersTable = ({ users }) => {
+const UsersTable = ({ users, pending }) => {
   return (
     <div style={{ overflowX: "auto" }}>
       <table
