@@ -6,6 +6,7 @@ const activityModel = require("../models/activityModel");
 const itineraryModel = require("../models/itineraryModel");
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
+const { name } = require('pug');
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
 const upload = multer({ storage }).single('profilePicture'); // Accept only 1 file with field name 'profilePicture'
 
@@ -13,10 +14,10 @@ const createProfile = async (req, res) => {
   try {
     const userId = req.user._id;
     const user = await userModel.findById(userId);
-    if(user.status === "pending")
+    if (user.status === "pending")
       throw Error('pending admin approval');
-    
-    if(!user.termsAndConditions)
+
+    if (!user.termsAndConditions)
       throw Error('sorry you must accept our terms and conditions in order to proceed');
     const { mobileNumber, yearsOfExperience, previousWork } = req.body;
 
@@ -49,11 +50,11 @@ const getProfile = async (req, res) => {
   try {
     const userId = req.user._id;
     const profile = await tourGuideModel.findOne({ user: userId })
-        .select('-_id -__v -createdAt -updatedAt ')
-        .populate({
-          path: "user",
-          select: "username email role -_id ",
-        });
+      .select('-_id -__v -createdAt -updatedAt ')
+      .populate({
+        path: "user",
+        select: "username email role -_id ",
+      });
 
     if (!profile) {
       return res.status(404).json({ message: "Profile not found" });
@@ -67,7 +68,7 @@ const getProfile = async (req, res) => {
       mobileNumber: profile.mobileNumber,
       yearsOfExperience: profile.yearsOfExperience,
       previousWork: profile.previousWork,
-      profilePicture:profile.picture.url
+      profilePicture: profile.picture.url
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve profile", error: error.message });
@@ -85,7 +86,7 @@ const updateProfile = async (req, res) => {
     const tourGuide = await tourGuideModel.findOne({ user: userId }).populate("user");
     if (!tourGuide) return res.status(404).json({ message: "Profile not found" });
 
-   
+
 
     if (email && email !== tourGuide.user.email) {
       if (!validator.isEmail(email)) return res.status(400).json({ message: "Invalid email format" });
@@ -110,11 +111,14 @@ const updateProfile = async (req, res) => {
 const createItinerary = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { activities, language, price, availableDates, pickUpLocation, dropOffLocation, accessibility } = req.body;
+    const { name, activities, language, price, availableDates, pickUpLocation, dropOffLocation, accessibility } = req.body;
 
-    if (!activities || !language || price == null || !availableDates || !pickUpLocation || !dropOffLocation || accessibility == null) {
+    if (!name || !activities || !language || price == null || !availableDates || !pickUpLocation || !dropOffLocation || accessibility == null) {
       return res.status(400).json({ message: "All required fields must be filled" });
     }
+
+    const itinerary = await itineraryModel.findOne({ name });
+    if (itinerary) return res.status(400).json({ message: 'this itinerary name already exists please choose another name' });
 
     const activityIds = [];
     const locations = [];
@@ -133,6 +137,7 @@ const createItinerary = async (req, res) => {
       tourGuide: userId,
       activities: activityIds,
       language,
+      name,
       price,
       availableDates,
       pickUpLocation,
@@ -209,25 +214,25 @@ const getMyItineraries = async (req, res) => {
   try {
     const tourGuideId = req.user._id;
     const itineraries = await itineraryModel
-        .find({ tourGuide: tourGuideId })
-        .select('-__v -createdAt -updatedAt')
-        .populate({
-          path: 'tourGuide',
-          select: 'username email -_id',
-          as: 'tourGuideInfo'  // Renames to tourGuideInfo
-        })
-        .populate({
-          path: 'preferenceTags',
-          select: 'name description -_id'
-        })
-        .populate({
-          path: 'activities',
-          select: 'name location bookingAvailable -_id',
-          populate: {
-            path: 'category',
-            select: 'name -_id'
-          }
-        });
+      .find({ tourGuide: tourGuideId })
+      .select('-__v -createdAt -updatedAt')
+      .populate({
+        path: 'tourGuide',
+        select: 'username email -_id',
+        as: 'tourGuideInfo'  // Renames to tourGuideInfo
+      })
+      .populate({
+        path: 'preferenceTags',
+        select: 'name description -_id'
+      })
+      .populate({
+        path: 'activities',
+        select: 'name location bookingAvailable -_id',
+        populate: {
+          path: 'category',
+          select: 'name -_id'
+        }
+      });
 
     if (!itineraries.length) {
       return res.status(404).json({ message: "No itineraries found for this tour guide." });
@@ -265,7 +270,7 @@ const uploadProfilePicture = async (req, res) => {
       uploadStream.end(file.buffer);
     });
 
-    await tourGuideModel.findOneAndUpdate({user:req.user._id},{picture:imageUrl});
+    await tourGuideModel.findOneAndUpdate({ user: req.user._id }, { picture: imageUrl });
 
     res.status(200).json({
       message: 'Profile picture uploaded successfully',
@@ -275,22 +280,24 @@ const uploadProfilePicture = async (req, res) => {
   }
 };
 
-const setStatusOfItinerary = async (req,res)=>{
-  try{
-    if(!req.body.itineraryId) throw Error('please choose an itinerary')
+const setStatusOfItinerary = async (req, res) => {
+  try {
+    if (!req.body.itineraryId) throw Error('please choose an itinerary')
     const itineraryId = new mongoose.Types.ObjectId(req.body.itineraryId);
     const status = req.body.status;
     console.log(status)
     const itinerary = await itineraryModel.findById(itineraryId);
-    if(!itinerary) throw Error('please choose a valid itinerary');
-    if(status!=="active" && status!== "inactive") throw Error('please choose to activate or deactivate your itinerary');
+    if (!itinerary) throw Error('please choose a valid itinerary');
+    if (req.user._id.toString() !== itinerary.tourGuide.toString()) return res.status(400).json({ message: 'you don\'t have the authority to do this action' })
 
-    await itineraryModel.findByIdAndUpdate(itineraryId,{status});
-    res.status(200).json({message:'changed status of itinerary to '+status})
+    if (status !== "active" && status !== "inactive") throw Error('please choose to activate or deactivate your itinerary');
+
+    await itineraryModel.findByIdAndUpdate(itineraryId, { status });
+    res.status(200).json({ message: 'changed status of itinerary to ' + status })
 
   }
-  catch(error){
-    res.status(400).json({message:'could not change status due to errors' ,error:error.message})
+  catch (error) {
+    res.status(400).json({ message: 'could not change status due to errors', error: error.message })
 
   }
 }
