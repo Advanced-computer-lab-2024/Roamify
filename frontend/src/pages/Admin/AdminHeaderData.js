@@ -9,6 +9,11 @@ export const HeaderData = [
     submenu: true,
     subMenuitem: [
       {
+        subItem: "Pending",
+        linkL: "users/pending",
+        subMenuActive: false,
+      },
+      {
         subItem: "Tourists",
         linkL: "users/tourists",
         subMenuActive: false,

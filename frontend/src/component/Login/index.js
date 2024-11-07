@@ -26,6 +26,7 @@ const LoginArea = () => {
 
       // Handle successful login
       console.log("Login successful:", response.data);
+      localStorage.setItem("role", response.data.role);
     } catch (err) {
       // Handle errors
       console.error("Error logging in:", err);

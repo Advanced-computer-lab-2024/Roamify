@@ -63,7 +63,7 @@ import Admin from "./pages/Admin/Admin";
 import ProductDetails from "./pages/Admin/Products/ProductDetails";
 import Seller from "./pages/Seller/Seller";
 import TourismGovernor from "./pages/TourismGovernor/TourismGovernor";
-
+import TourGuide from "./pages/TourGuide/TourGuide";
 const App = () => {
   return (
     <>
@@ -84,13 +84,13 @@ const App = () => {
         {/* <Route path="/faqs" element={<FaqsArea />} /> */}
         {/* <Route path="/become-expert" element={<BecomeExpert />} /> */}
         {/* <Route path="/login" element={<Login />} /> */}
-        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/tourist/*" element={<Tourist />} />
         <Route path="/admin/*" element={<Admin />} />
         <Route path="/advertisor/*" element={<Tourist />} />
         <Route path="/tourism-governor/*" element={<TourismGovernor />} />
-        <Route path="/tour-guide/*" element={<Tourist />} />
+        <Route path="/tour-guide/*" element={<TourGuide />} />
         <Route path="/seller/*" element={<Seller />} />
         <Route path="/product-details/:id" element={<ProductDetails />} />
         <Route path="/settings/*" element={<Settings />} />

@@ -10,29 +10,37 @@ const AccoutPreferences = () => {
   const [error, setError] = useState(null);
   const [editFields, setEditFields] = useState({});
   const [isEditing, setIsEditing] = useState({});
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/tourist/get-profile",
+          `http://localhost:3000/api/${role}/get-profile`,
           { withCredentials: true }
         );
         const data = response.data;
-
+        let formattedData;
         // Format date fields for input
-        const formattedData = {
-          ...data,
-          dateOfBirth: new Date(data.dateOfBirth).toISOString().split("T")[0],
-          cardValidUntil: new Date(data.cardValidUntil)
-            .toISOString()
-            .split("T")[0],
-        };
+        if (role === "tourist") {
+          formattedData = {
+            ...data,
+            dateOfBirth: new Date(data.dateOfBirth).toISOString().split("T")[0],
+            cardValidUntil: new Date(data.cardValidUntil)
+              .toISOString()
+              .split("T")[0],
+          };
+        } else {
+          formattedData = {
+            ...data,
+          };
+        }
 
         setProfile(formattedData);
         setEditFields(formattedData);
       } catch (err) {
         setError(err.message);
+        // console.log(err);
       } finally {
         setLoading(false);
       }
@@ -52,7 +60,7 @@ const AccoutPreferences = () => {
   const handleUpdateProfile = async () => {
     try {
       await axios.put(
-        "http://localhost:3000/api/tourist/update-profile",
+        `http://localhost:3000/api/${role}/update-profile`,
         editFields,
         { withCredentials: true }
       );
@@ -93,6 +101,10 @@ const AccoutPreferences = () => {
                 key === "role"
               )
                 return null;
+
+              if (key === "logo") {
+                return <img src={value} />;
+              }
 
               return (
                 <li
@@ -175,39 +187,45 @@ const AccoutPreferences = () => {
           </ul>
 
           {/* Wallet Details Section */}
-          <h3 style={{ marginTop: "30px", color: "#333" }}>Wallet Details</h3>
-          <ul style={{ listStyle: "none", padding: "0" }}>
-            <li
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "10px",
-              }}
-            >
-              <span style={{ fontWeight: "bold", color: "#333" }}>
-                Card Number:
-              </span>
-              <span style={{ color: "#555", textAlign: "center", flex: 1 }}>
-                {editFields.cardNumber}
-              </span>
-            </li>
-            <li
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "10px",
-              }}
-            >
-              <span style={{ fontWeight: "bold", color: "#333" }}>
-                Card Valid Until:
-              </span>
-              <span style={{ color: "#555", textAlign: "center", flex: 1 }}>
-                {editFields.cardValidUntil}
-              </span>
-            </li>
-          </ul>
+          {role === "tourist" && (
+            <div>
+              <h3 style={{ marginTop: "30px", color: "#333" }}>
+                Wallet Details
+              </h3>
+              <ul style={{ listStyle: "none", padding: "0" }}>
+                <li
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <span style={{ fontWeight: "bold", color: "#333" }}>
+                    Card Number:
+                  </span>
+                  <span style={{ color: "#555", textAlign: "center", flex: 1 }}>
+                    {editFields.cardNumber}
+                  </span>
+                </li>
+                <li
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <span style={{ fontWeight: "bold", color: "#333" }}>
+                    Card Valid Until:
+                  </span>
+                  <span style={{ color: "#555", textAlign: "center", flex: 1 }}>
+                    {editFields.cardValidUntil}
+                  </span>
+                </li>
+              </ul>
+            </div>
+          )}
 
           <button
             type="button"
