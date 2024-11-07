@@ -17,6 +17,8 @@ import CopyRight from "../../layout/CopyRight";
 import { HeaderData } from "./TouristHeaderData.js";
 import TouristProfile from "./TouristProfile.js";
 import TouristItinerary from "./TouristItinerary.js";
+import TouristComplain from "./TouristComplain.js";
+import TouristView from "./TouristView.js";
 const Tourist = () => {
   return (
     <>
@@ -29,6 +31,8 @@ const Tourist = () => {
         <Route path="/activity-booking/:id" element={<ActivityBooking />} />
         <Route path="/tourist-places" element={<TouristPlaces />} />
         <Route path="/tourist-activities" element={<TouristActivities />} />
+        <Route path="/tourist-complain" element={<TouristComplain />} />
+        <Route path="/tourist-view" element={<TouristView/>} />
       </Routes>
       <CopyRight />
     </>
