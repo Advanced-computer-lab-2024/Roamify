@@ -195,7 +195,7 @@ const acceptRejectUser = async (req, res) => {
   try {
     const { userIdString, approved } = req.body;
 
-    if (!userId) {
+    if (!userIdString) {
       return res.status(400).json({ message: 'select a user' });
     }
     if (approved === null || approved === '')
@@ -266,7 +266,8 @@ const unflagItinerary = async (req, res) => {
 const getPendingUsers = async (req, res) => {
   try {
     const pendingUsers = await userModel.find({ status: 'pending' }).select('username _id email role');
-    if (!pendingUsers) return res.status(400).json({ message: 'no pending users' });
+    if (!pendingUsers || pendingUsers.length === 0) return res.status(400).json({ message: 'no pending users' });
+
     return res.status(200).json({ pendingUsers });
 
   }
