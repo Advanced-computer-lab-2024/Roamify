@@ -23,15 +23,14 @@ const placesRoutes = require("./routes/placesRoutes");
 const complaintRoutes = require("./routes/complaintRoutes");
 // Initialize app
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Database connection
+const PORT = 3000;
+// Database connections
 connectDB();
 
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "http://localhost:3001",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
