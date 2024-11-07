@@ -12,13 +12,10 @@ const DateFilter = ({ date, setdate, onApply }) => {
           selected={date}
           onChange={(date) => setdate(date)}
           selectsStart
-          date={date}
-          
+          date={date}  
         />
       </div>
-      <button className="apply" type="button" onClick={onApply}>
-        Apply
-      </button>
+
     </div>
   );
 };
