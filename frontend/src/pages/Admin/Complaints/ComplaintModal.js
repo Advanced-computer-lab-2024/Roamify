@@ -1,9 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
-const ComplaintModal = ({ isOpen, onClose, description }) => {
+const ComplaintModal = ({
+  isOpen,
+  onClose,
+  description,
+  isReplied,
+  reply,
+  complaintId,
+}) => {
   const modalRef = useRef(null);
-  const [reply, setReply] = useState("");
+  const [replyText, setReplyText] = useState(reply);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -36,13 +45,22 @@ const ComplaintModal = ({ isOpen, onClose, description }) => {
   if (!isOpen) return null;
 
   const handleReplyChange = (e) => {
-    setReply(e.target.value);
+    setReplyText(e.target.value);
   };
 
-  const handleReplySubmit = () => {
-    console.log("Reply:", reply);
-    setReply(""); // Clear the reply input after submission
-    onClose();
+  const handleReplySubmit = async () => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3000/api/complaint/reply/${complaintId}`,
+        { message: replyText },
+        { withCredentials: true }
+      );
+      toast.success("Reply sent successfully!");
+      onClose(); // Close the modal after successful reply
+    } catch (error) {
+      toast.error("Error sending reply.");
+      console.error("Error sending reply:", error);
+    }
   };
 
   return ReactDOM.createPortal(
@@ -109,31 +127,35 @@ const ComplaintModal = ({ isOpen, onClose, description }) => {
         <div style={{ display: "flex", marginTop: "2vh" }}>
           <input
             type="text"
-            value={reply}
+            value={replyText}
             onChange={handleReplyChange}
             placeholder="Write a reply..."
+            disabled={isReplied}
             style={{
               flex: "1",
               padding: "10px",
               borderRadius: "4px",
               border: "1px solid #ccc",
               marginRight: "10px",
+              backgroundColor: isReplied ? "#e9ecef" : "white",
             }}
           />
           <button
             onClick={handleReplySubmit}
+            disabled={isReplied}
             style={{
               padding: "10px 15px",
-              backgroundColor: "#007bff",
+              backgroundColor: isReplied ? "#6c757d" : "#007bff",
               color: "#fff",
               border: "none",
               borderRadius: "4px",
-              cursor: "pointer",
+              cursor: isReplied ? "not-allowed" : "pointer",
             }}
           >
             Reply
           </button>
         </div>
+        <Toaster position="bottom-center" reverseOrder={false} />
       </div>
     </div>,
     document.body

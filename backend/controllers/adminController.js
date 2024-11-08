@@ -222,13 +222,6 @@ const acceptRejectUser = async (req, res) => {
     }
     if (approved === null || approved === "")
       throw Error("please accept or reject");
-    const lastPart = url.split("/").pop(); // Get the last part after splitting by '/'
-
-    const result = lastPart.replace(/ID\.pdf$/, ""); // Matches "ID.pdf" at the end and removes it
-
-    if (!mongoose.Types.ObjectId.isValid(result)) {
-      return res.status(400).json({ message: "Invalid user ID in URL" });
-    }
 
     const userId = new mongoose.Types.ObjectId(userIdString);
 

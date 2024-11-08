@@ -5,7 +5,6 @@ const preferenceTagController = require("../controllers/preferenceTagController"
 const historicalTagController = require("../controllers/historicalTagController");
 const productController = require("../controllers/productController");
 const userController = require("../controllers/userController");
-const userController = require("../controllers/userController");
 const router = express.Router();
 
 router.post("/add-tourism-governor", adminController.addTourismGovernor);
