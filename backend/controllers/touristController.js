@@ -8,6 +8,7 @@ const preferenceTagModel = require("../models/preferenceTagModel");
 const receiptModel = require("../models/receiptModel");
 const activityModel = require("../models/activityModel");
 const itineraryModel = require("../models/itineraryModel");
+const activityTicketModel = require("../models/activityTicket");
 
 // Helper function to check if a user is an adult based on date of birth
 function isAdult(dateOfBirth) {
@@ -168,27 +169,33 @@ const bookActivity = async (req, res) => {
 
     const activityId = new mongoose.Types.ObjectId(activity);
     const bookingDate = new Date(date);
+    const activityObject = await activityModel.findById(activityId);
 
-    // Check if the activity with the same date already exists in bookedActivities
-    const exists = tourist.bookedActivities.some(
-      (entry) =>
-        entry.activity.equals(activityId) &&
-        entry.date.getTime() === bookingDate.getTime()
-    );
 
-    if (exists) {
+    const today = new Date();
+    //checking that this is the correct dater for this activity
+    if (new Date(activityObject.date).toISOString().split('T')[0] !== new Date(bookingDate).toISOString().split('T')[0]) {
+      return res.status(400).json({ message: 'Please choose a valid date for this activity' });
+    }
+    today.setHours(0, 0, 0, 0);
+    bookingDate.setHours(0, 0, 0, 0);
+
+    //checking that date has not passed yet
+    if (today > bookingDate) {
+      return res.status(400).json({ message: 'Sorry, this activity is no longer available' });
+    }
+
+
+    const ticket = await activityTicketModel.findOne({ tourist: req.user._id, activity: activityId });
+
+    //checking if user already has a ticket for this activity that is active
+    if (ticket && ticket.status === 'active') {
       return res.status(400).json({ message: "Activity already booked for this date" });
     }
 
     let receipt = null;
 
-    const activityObject = await activityModel.findById(activityId);
-
-    console.log(bookingDate, activityObject.date)
-    if (new Date(activityObject.date).toISOString().split('T')[0] !== new Date(bookingDate).toISOString().split('T')[0]) {
-      return res.status(400).json({ message: 'Please choose a valid date for this activity' });
-    }
-
+    //checking if tourist has available credit
     if (tourist.wallet.availableCredit < activityObject.price) {
       receipt = new receiptModel({
         type: 'activity',
@@ -200,17 +207,24 @@ const bookActivity = async (req, res) => {
       return res.status(400).json({ message: 'insufficient funds' })
     }
 
-    const activityEntry = {
-      activity: activityId,
-      date: bookingDate,
-    };
+    //check if ticket was already made but refunded change it toactive
+    if (ticket && ticket.status === 'refunded') {
+      await activityTicketModel.updateOne({
+        tourist: req.user._id,
+        activity: activityId
+      }, { status: 'active' });
 
-    // Add the activity to bookedActivities if it doesn't exist
-    await touristModel.updateOne(
-      { user: req.user._id },
-      { $addToSet: { bookedActivities: activityEntry } }
-    );
-
+    }
+    //create a new ticket of does not exist
+    else {
+      const activityTicket = new activityTicketModel({
+        tourist: req.user._id,
+        activity: activityId,
+        status: 'active'
+      })
+      await activityTicket.save();
+    }
+    //create receipt for the transaction
     receipt = new receiptModel({
       type: 'activity',
       status: 'successfull',
@@ -218,9 +232,9 @@ const bookActivity = async (req, res) => {
       price: activityObject.price
     })
     await receipt.save();
-
     return res.status(200).json({ message: "Activity booked successfully" });
   } catch (error) {
+    console.log(error)
     res.status(400).json({ message: "Error booking activity", error: error.message });
   }
 };
