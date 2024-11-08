@@ -16,6 +16,10 @@ const ticket = new mongoose.Schema({
     receipt: {
         type: mongoose.Types.ObjectId,
         ref: 'receipt'
+    },
+    pointsRedeemed: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 

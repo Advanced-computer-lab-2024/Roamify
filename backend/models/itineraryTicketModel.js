@@ -19,6 +19,10 @@ const ticket = new mongoose.Schema({
     },
     date: {
         type: Date
+    },
+    pointsRedeemed: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 

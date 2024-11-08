@@ -8,8 +8,8 @@ const preferenceTagModel = require("../models/preferenceTagModel");
 const receiptModel = require("../models/receiptModel");
 const activityModel = require("../models/activityModel");
 const itineraryModel = require("../models/itineraryModel");
-const activityTicketModel = require("../models/activityTicket");
-const itineraryTicketModel = require("../models/itineraryTicket");
+const activityTicketModel = require("../models/activityTicketModel");
+const itineraryTicketModel = require("../models/itineraryTicketModel");
 
 // Helper function to check if a user is an adult based on date of birth
 function isAdult(dateOfBirth) {
@@ -735,5 +735,47 @@ const getAllUpcomingBookedItineraries = async (req, res) => {
   }
 };
 
+const viewPointsLevel = async (req, res) => {
+  try {
+    const tourist = await touristModel.findOne({ user: req.user._id })
+    if (!tourist) return res.status(400).json({ message: 'user doesn\'t exist' })
 
-module.exports = { createProfile, getProfile, updateProfile, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations };
+    return res.status(200).json({ level: tourist.level, points: tourist.points })
+
+  }
+  catch (error) {
+    return res.status(400).json({ message: 'couldn\'t retrieve points and level' })
+
+  }
+}
+
+const redeemPoints = async (req, res) => {
+  try {
+    const tourist = await touristModel.findOne({ user: req.user._id });
+    if (!tourist) return res.status(400).json({ message: 'user doesn\'t exist' })
+    const ammount = req.body.ammount;
+    if (!ammount) return res.status(400).json({ message: 'please select ammount to redeem' })
+
+    const points = tourist.points;
+    if (points === 0) return res.status(400).json({ message: 'sorry you doesn\'t have points' })
+
+    const pointsRequired = ammount * 100;
+    console.log(pointsRequired)
+    if (points < pointsRequired) return res.status(400).json({ message: 'not enough points' });
+
+    tourist.points -= pointsRequired;
+    await tourist.save();
+
+    const wallet = await walletModel.findOne({ tourist: req.user._id });
+    wallet.availableCredit += ammount;
+    await wallet.save();
+    return res.status(200).json({ message: 'redeemed points successfully' })
+
+  }
+  catch (error) {
+    return res.status(400).json({ message: 'error in redeeming points', error: error.message })
+
+  }
+}
+
+module.exports = { createProfile, getProfile, updateProfile, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations, viewPointsLevel, redeemPoints };
