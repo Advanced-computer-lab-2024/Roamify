@@ -391,15 +391,15 @@ const uploadLogo = async (req, res) => {
 
 const createTransportation = async (req, res) => {
   try {
-    const { name, time, date, type, pickupLocation, dropOffLocation } = req.body;
+    const { name, time, date, type, pickupLocation, dropOffLocation, price } = req.body;
 
     // Validate required fields
-    if (!name || !time || !date || !type || !pickupLocation || !dropOffLocation) {
+    if (!name || !time || !date || !type || !pickupLocation || !dropOffLocation || !price) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const exists = await transportationModel.findOne({ name });
-    if (exists) throw Error('this name already exists')
+    if (exists) return res.status(400).json({ messagea: 'this name already exists' })
     // Create a new transportation entry
     const newTransportation = new transportationModel({
       advertiser: req.user._id,
@@ -407,6 +407,7 @@ const createTransportation = async (req, res) => {
       time,
       date,
       type,
+      price,
       pickupLocation: pickupLocation,
       dropOffLocation: dropOffLocation
     });
@@ -493,7 +494,7 @@ const editTransportation = async (req, res) => {
     }
 
     // Define the fields that can be updated
-    const { name, dropOffLocation, pickupLocation, time, type } = req.body;
+    const { name, dropOffLocation, pickupLocation, time, type, cost } = req.body;
 
     // Update only the allowed fields if they are provided
     if (name) transportation.name = name;
@@ -501,6 +502,7 @@ const editTransportation = async (req, res) => {
     if (pickupLocation) transportation.pickupLocation = pickupLocation;
     if (time) transportation.time = time;
     if (type) transportation.type = type;
+    if (cost) transportation.cost = cost;
 
     // Save the updated transportation document
     await transportation.save();

@@ -4,6 +4,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const { authenticate } = require("./middleware/authMiddleware");
+const { updatePoints, setLevel } = require("./jobs/pointsUpdater"); // Import the job
 
 // Route Imports
 const userRoutes = require("./routes/userRoutes");
@@ -21,6 +22,7 @@ const historicalTagRoutes = require("./routes/historicalTagRoutes");
 const preferenceTagRoutes = require("./routes/preferenceTagRoutes");
 const placesRoutes = require("./routes/placesRoutes");
 const complaintRoutes = require("./routes/complaintRoutes");
+const cartRoutes = require("./routes/cartRoute");
 // Initialize app
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,6 +41,9 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
+//job
+updatePoints(); // Start the cron job
+setLevel();
 //routes
 
 app.use("/api/user", userRoutes);
@@ -60,6 +65,7 @@ app.use("/api/preference-tag", preferenceTagRoutes);
 app.use("/api/historical-tag", historicalTagRoutes);
 app.use("/api/places", placesRoutes);
 app.use("/api/complaint", complaintRoutes);
+app.use("/api/cart", authenticate(["tourist"]), cartRoutes);
 
 // Start server
 app.listen(PORT, () => {

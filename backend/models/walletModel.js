@@ -1,12 +1,17 @@
- const mongoose = require('mongoose');
-const walletSchema=new mongoose.Schema({
-    cardNumber:{
-        type:String,
-        
+const mongoose = require('mongoose');
+const walletSchema = new mongoose.Schema({
+    card: {
+        type: [mongoose.Types.ObjectId],
+        ref: 'card'
     },
-    cardValidUntil:{
-        type:Date,
-        
+    availableCredit: {
+        type: Number,
+        default: 0
+
+    },
+    tourist: {
+        type: mongoose.Types.ObjectId,
+        ref: 'user'
     }
 })
 
