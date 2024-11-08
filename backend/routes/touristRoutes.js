@@ -23,6 +23,7 @@ router.get('/get-all-upcoming-booked-activities', touristController.getAllUpcomi
 router.get('/get-all-transportation', touristController.getFilteredTransportations);
 router.get('/view-points-level', touristController.viewPointsLevel);
 router.put('/redeem-points', touristController.redeemPoints);
+router.get('/get-upcoming-booked-transportations', touristController.getBookedFutureTransportations);
 
 
 
