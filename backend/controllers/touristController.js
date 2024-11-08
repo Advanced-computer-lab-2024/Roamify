@@ -9,6 +9,7 @@ const receiptModel = require("../models/receiptModel");
 const activityModel = require("../models/activityModel");
 const itineraryModel = require("../models/itineraryModel");
 const activityTicketModel = require("../models/activityTicket");
+const itineraryTicketModel = require("../models/itineraryTicket");
 
 // Helper function to check if a user is an adult based on date of birth
 function isAdult(dateOfBirth) {
@@ -247,57 +248,154 @@ const bookActivity = async (req, res) => {
     res.status(400).json({ message: "Error booking activity", error: error.message });
   }
 };
-
-
-//repeat
 const bookItinerary = async (req, res) => {
   try {
+    // Find the tourist by the user's ID
     const tourist = await touristModel.findOne({ user: req.user._id })
       .populate('wallet');
     if (!tourist) return res.status(404).json({ message: "Tourist does not exist" });
 
+
     const { itinerary, date } = req.body;
-    if (!itinerary) return res.status(400).json({ message: "Itinerary is required" });
+    if (!itinerary) return res.status(400).json({ message: "Please choose an itinerary to book" });
     if (!date) return res.status(400).json({ message: "Date is required" });
 
     const itineraryId = new mongoose.Types.ObjectId(itinerary);
-
     const bookingDate = new Date(date);
-    if (isNaN(bookingDate)) return res.status(400).json({ message: "Invalid date format" });
-
-    const exists = tourist.bookedItineraries.some(
-      (entry) =>
-        entry.itinerary.equals(itineraryId) &&
-        entry.date.getTime() === bookingDate.getTime()
-    );
-
-    const itineraryObject = await itineraryModel.findById(itineraryId).select('price');
-
-    console.log(tourist)
-    console.log(itineraryObject.price)
+    const itineraryObject = await itineraryModel.findById(itineraryId);
 
 
-    if (tourist.wallet.availableCredit < itineraryObject.price) return res.status(400).json({ message: 'insufficient funds' })
+    const today = new Date();
+    //checking that this is the correct dater for this activity
+    console.log(itineraryObject)
+    const isDateValid = itineraryObject.availableDates.some(date => {
+      const itineraryDateString = new Date(date).toISOString().split('T')[0];
+      return itineraryDateString === new Date(bookingDate).toISOString().split('T')[0];
+    });
+    if (!isDateValid) {
+      return res.status(400).json({ message: 'Please choose a valid date for this itinerary' });
+    }
 
-    if (exists) {
+
+    //checking that date has not passed yet
+    if (new Date(today).toISOString().split('T')[0] > new Date(bookingDate).toISOString().split('T')[0]) {
+      return res.status(400).json({ message: 'Sorry, this activity is no longer available' });
+    }
+
+
+    const ticket = await itineraryTicketModel.findOne({ tourist: req.user._id, itinerary: itineraryId });
+
+    //checking if user already has a ticket for this activity that is active
+    if (ticket && ticket.status === 'active') {
       return res.status(400).json({ message: "Itinerary already booked for this date" });
     }
 
-    const itineraryEntry = {
-      itinerary: itineraryId,
-      date: bookingDate,
-    };
+    let receipt = null;
 
-    await touristModel.updateOne(
-      { user: req.user._id },
-      { $addToSet: { bookedItineraries: itineraryEntry } }
-    );
+    //checking if tourist has available credit
+    if (tourist.wallet.availableCredit < itinerary.price) {
+      receipt = new receiptModel({
+        type: 'itinerary',
+        status: 'failed',
+        tourist: req.user._id,
+        price: itineraryObject.price,
+        receiptType: 'payment'
+      })
+      await receipt.save();
+      return res.status(400).json({ message: 'insufficient funds' })
+    }
 
+    //create receipt for the transaction
+    receipt = new receiptModel({
+      type: 'itinerary',
+      status: 'successfull',
+      tourist: req.user._id,
+      price: itineraryObject.price,
+      receiptType: 'payment'
+    })
+    await receipt.save();
+
+    const availableCredit = tourist.wallet.availableCredit - itineraryObject.price;
+    await walletModel.findByIdAndUpdate(tourist.wallet._id, { availableCredit })
+
+    //check if ticket was already made but refunded change it toactive
+    if (ticket && ticket.status === 'refunded') {
+      await itineraryTicketModel.updateOne({
+        tourist: req.user._id,
+        itinerary: itineraryId,
+      }, {
+        status: 'active', receipt: receipt._id, date: bookingDate
+      });
+
+    }
+    //create a new ticket of does not exist
+    else {
+      const itineraryTicket = new itineraryTicketModel({
+        tourist: req.user._id,
+        itinerary: itineraryId,
+        status: 'active',
+        receipt: receipt._id,
+        date: bookingDate
+      })
+      await itineraryTicket.save();
+    }
     return res.status(200).json({ message: "Itinerary booked successfully" });
   } catch (error) {
+    console.log(error)
     res.status(400).json({ message: "Error booking itinerary", error: error.message });
   }
 };
+
+
+//repeat
+// const bookItinerary = async (req, res) => {
+//   try {
+//     const tourist = await touristModel.findOne({ user: req.user._id })
+//       .populate('wallet');
+//     if (!tourist) return res.status(404).json({ message: "Tourist does not exist" });
+
+//     const { itinerary, date } = req.body;
+//     if (!itinerary) return res.status(400).json({ message: "Itinerary is required" });
+//     if (!date) return res.status(400).json({ message: "Date is required" });
+
+//     const itineraryId = new mongoose.Types.ObjectId(itinerary);
+
+//     const bookingDate = new Date(date);
+//     if (isNaN(bookingDate)) return res.status(400).json({ message: "Invalid date format" });
+
+//     const exists = tourist.bookedItineraries.some(
+//       (entry) =>
+//         entry.itinerary.equals(itineraryId) &&
+//         entry.date.getTime() === bookingDate.getTime()
+//     );
+
+//     const itineraryObject = await itineraryModel.findById(itineraryId).select('price');
+
+//     console.log(tourist)
+//     console.log(itineraryObject.price)
+
+
+//     if (tourist.wallet.availableCredit < itineraryObject.price) return res.status(400).json({ message: 'insufficient funds' })
+
+//     if (exists) {
+//       return res.status(400).json({ message: "Itinerary already booked for this date" });
+//     }
+
+//     const itineraryEntry = {
+//       itinerary: itineraryId,
+//       date: bookingDate,
+//     };
+
+//     await touristModel.updateOne(
+//       { user: req.user._id },
+//       { $addToSet: { bookedItineraries: itineraryEntry } }
+//     );
+
+//     return res.status(200).json({ message: "Itinerary booked successfully" });
+//   } catch (error) {
+//     res.status(400).json({ message: "Error booking itinerary", error: error.message });
+//   }
+// };
 
 //repeat
 const cancelItinerary = async (req, res) => {
