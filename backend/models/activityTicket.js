@@ -13,9 +13,6 @@ const ticket = new mongoose.Schema({
         type: String,
         enum: ['active', 'refunded']
     },
-    date: {
-        type: Date
-    },
     receipt: {
         type: mongoose.Types.ObjectId,
         ref: 'receipt'
