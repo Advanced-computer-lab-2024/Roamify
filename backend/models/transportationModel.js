@@ -24,6 +24,11 @@ const transportationSchema = new mongoose.Schema(
             enum: ["bus", "train", "taxi", "shuttle", "metro", "private car"],
             required: true
         },
+        pointsRedeemed: {
+            type: Boolean,
+            default: false
+
+        },
         pickupLocation: {
 
             type: String,
