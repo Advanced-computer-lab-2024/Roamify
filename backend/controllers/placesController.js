@@ -3,6 +3,7 @@ const Place = require("../models/placeModel");
 const getFilteredPlaces = async (req, res) => {
     try {
         const {
+            name,
             minTicketPrice,
             maxTicketPrice,
             type,
@@ -18,7 +19,7 @@ const getFilteredPlaces = async (req, res) => {
         // Conditional filter for ticket price based on priceType (Native, Foreigner, Student)
         if (["Native", "Foreigner", "Student"].includes(priceType)) {
             const priceField = `ticketPrice.${priceType}`;
-            
+
             if (minTicketPrice || maxTicketPrice) {
                 filter[priceField] = {};
                 if (minTicketPrice) filter[priceField].$gte = parseFloat(minTicketPrice);
@@ -34,6 +35,7 @@ const getFilteredPlaces = async (req, res) => {
             filter.type = type;
         }
 
+        if (name) filter.name = name
         // Filter by tags (assumes tags are comma-separated in the query string)
         if (tags) {
             const tagIds = tags.split(",").map(id => id.trim());

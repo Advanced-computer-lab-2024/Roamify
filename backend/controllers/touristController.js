@@ -522,16 +522,22 @@ const cancelTransportationBooking = async (req, res) => {
     // Find the transportation with the provided ID and check if the user has booked it
     const transportation = await transportationModel.findOne({
       _id: transportationId,
-      touristsBooked: req.user._id,
+      touristsBooked: req.user._id
     });
 
     // If the transportation is not found or the user has not booked it, return an error
     if (!transportation) {
-      return res
-        .status(400)
-        .json({
-          message: "Please choose a valid booked transportation to cancel.",
-        });
+      return res.status(400).json({ message: 'Please choose a valid booked transportation to cancel.' });
+    }
+
+    // Calculate the time difference between now and the transportation date
+    const now = new Date();
+    const transportationDate = new Date(transportation.date);
+    const hoursUntilTransportation = (transportationDate - now) / (1000 * 60 * 60);
+
+    // Check if the transportation is more than 48 hours away
+    if (hoursUntilTransportation <= 48) {
+      return res.status(400).json({ message: 'Cancellations are only allowed more than 48 hours before the scheduled transportation.' });
     }
 
     // Remove the user from the touristsBooked array
@@ -539,6 +545,14 @@ const cancelTransportationBooking = async (req, res) => {
       { _id: transportationId },
       { $pull: { touristsBooked: req.user._id } }
     );
+    const receipt = new receiptModel({
+      type: 'transportation',
+      status: 'successfull',
+      receiptType: 'refund',
+      tourist: req.user._id,
+      price: transportation.price
+    })
+    await receipt.save()
 
     return res
       .status(200)
@@ -554,6 +568,7 @@ const cancelTransportationBooking = async (req, res) => {
 };
 
 
+
 const getBookedTransportations = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -563,20 +578,37 @@ const getBookedTransportations = async (req, res) => {
       touristsBooked: userId,
     });
 
-    if (!transportations)
-      return res
-        .status(400)
-        .json({ message: "you have not booked any transportations yet" });
+    if (!transportations) return res.status(400).json({ message: 'you have not booked any transportations yet' });
     return res.status(200).json({ transportations });
   } catch (error) {
-    return res
-      .status(400)
-      .json({
-        message: "Error fetching booked transportations",
-        error: error.message,
-      });
+    return res.status(400).json({ message: 'Error fetching booked transportations', error: error.message });
   }
 };
+
+const getBookedFutureTransportations = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Get the current date and set time to midnight for a clean comparison
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Find all transportations where the user's ID is in touristsBooked and date is in the future
+    const transportations = await transportationModel.find({
+      touristsBooked: userId,
+      date: { $gt: today }
+    });
+
+    if (!transportations || transportations.length === 0) {
+      return res.status(400).json({ message: 'You have no future transportation bookings.' });
+    }
+
+    return res.status(200).json({ transportations });
+  } catch (error) {
+    return res.status(400).json({ message: 'Error fetching future booked transportations', error: error.message });
+  }
+};
+
 
 const getFilteredTransportations = async (req, res) => {
   try {
@@ -655,9 +687,27 @@ const bookTransportation = async (req, res) => {
         .status(400)
         .json({ message: "You have already booked this transportation" });
     }
-    if (tourist.wallet.availableCredit < transportation.price) return res.status(400).json({ message: 'insufficient funds' })
+    if (tourist.wallet.availableCredit < transportation.price) {
+      const receipt = new receiptModel({
+        type: 'transportation',
+        status: 'failed',
+        tourist: req.user._id,
+        price: transportation.price,
+        receiptType: 'payment'
+      });
+      await receipt.save();
+      return res.status(400).json({ message: 'insufficient funds' })
+    }
     transportation.touristsBooked.push(req.user._id);
     await transportation.save();
+    const receipt = new receiptModel({
+      type: 'transportation',
+      status: 'successfull',
+      tourist: req.user._id,
+      price: transportation.price,
+      receiptType: 'payment'
+    });
+    await receipt.save()
 
     return res.status(200).json({
       message: "Transportation booked successfully",
@@ -712,7 +762,7 @@ const getAllBookedItineraries = async (req, res) => {
   }
 }
 
-//   try {
+
 //     const tourist = await touristModel
 //       .findOne({ user: req.user._id })
 //       .populate('bookedItineraries.itinerary');
@@ -835,4 +885,4 @@ const redeemPoints = async (req, res) => {
   }
 }
 
-module.exports = { createProfile, getProfile, updateProfile, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations, viewPointsLevel, redeemPoints };
+module.exports = { createProfile, getProfile, updateProfile, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations, viewPointsLevel, redeemPoints, getBookedFutureTransportations };
