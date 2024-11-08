@@ -345,62 +345,22 @@ const bookItinerary = async (req, res) => {
   }
 };
 
-
-
-
-//repeat
-// const cancelItinerary = async (req, res) => {
-//   try {
-//     const tourist = await touristModel.findOne({ user: req.user._id });
-//     const itineraryIdString = req.body.itineraryId;
-//     if (!itineraryIdString) return res.status(400).json({ message: 'please select an itinerary to cancel' });
-
-//     const date = new Date();
-//     for (itinerary of tourist.bookedItineraries) {
-//       if (itinerary.itinerary.toString() === itineraryIdString) {
-//         const timeDifference = itinerary.date.getTime() - date.getTime();
-//         const hoursDifference = timeDifference / (1000 * 60 * 60);
-//         if (hoursDifference <= 48) {
-//           return res.status(400).json({ message: "Unable to cancel booking as it must be done at least 48 hours in advance." });
-//         }
-//         else {
-//           await touristModel.updateOne(
-//             { user: req.user._id },
-//             { $pull: { bookedItineraries: { itinerary: itinerary.itinerary } } }
-//           );
-
-//           return res.status(200).json({ message: "Itinerary cancelled successfully." });
-//         }
-//       }
-//     }
-
-//     return res.status(404).json({ message: "Itinerary not found in bookings." });
-
-
-//   }
-//   catch (error) {
-//     return res.status(400).json({ message: 'error in cancelling itinerary', error: error.message })
-
-//   }
-// }
-
-
 const cancelActivity = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id }).populate('wallet');
-    const activityIdString = req.body.activityId;
+    const ticketIdString = req.body.ticketId;
 
 
 
-    if (!activityIdString) {
+    if (!ticketIdString) {
       return res.status(400).json({ message: 'Please select an activity to cancel' });
     }
 
     const date = new Date();
 
-    const activityId = new mongoose.Types.ObjectId(activityIdString);
+    const ticketId = new mongoose.Types.ObjectId(ticketIdString);
 
-    const ticket = await activityTicketModel.findOne({ tourist: req.user._id, activity: activityId }).populate('receipt').populate('activity');
+    const ticket = await activityTicketModel.findById(ticketId).populate('receipt').populate('activity');
     if (!ticket || ticket.status === 'refunded') return res.status(400).json({ message: 'please choose a valid activity to cancel' });
     console.log(ticket)
 
@@ -439,20 +399,17 @@ const cancelActivity = async (req, res) => {
 const cancelItinerary = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id }).populate('wallet');
-    const itineraryIdString = req.body.itineraryId;
+    const ticketIdString = req.body.ticketId;
 
-    if (!req.body.date) return res.status(400).json({ message: 'please choose a date' })
-
-
-    if (!itineraryIdString) {
+    if (!ticketIdString) {
       return res.status(400).json({ message: 'Please select an itinerary to cancel' });
     }
 
     const date = new Date();
 
-    const itineraryId = new mongoose.Types.ObjectId(itineraryIdString);
+    const ticketId = new mongoose.Types.ObjectId(ticketIdString);
 
-    const ticket = await itineraryTicketModel.findOne({ tourist: req.user._id, itinerary: itineraryId, date: req.body.date }).populate('receipt').populate('itinerary');
+    const ticket = await itineraryTicketModel.findById(ticketId).populate('receipt').populate('itinerary');
     if (!ticket || ticket.status === 'refunded') return res.status(400).json({ message: 'please choose a valid itinerary to cancel' });
     console.log(ticket)
 
@@ -657,23 +614,8 @@ const bookTransportation = async (req, res) => {
   }
 }
 
-const getAllBookedItineraries = async (req, res) => {
-  try {
 
-    const tourist = await touristModel.findOne({ user: req.user._id }).populate('bookedItineraries.itinerary');
-    if (!tourist) return res.status(400).json({ message: 'user does not exist' });
 
-    if (tourist.bookedItineraries.length === 0) return res.status(400).json({ message: 'you have no itineraries booked yet' });
-
-    return res.status(200).json(tourist.bookedItineraries);
-
-  }
-  catch (error) {
-    return res.status(400).json({ message: 'couldn\'t retrieve booked itineraries', error: error.message });
-
-  }
-}
-//pending
 const getAllBookedActivities = async (req, res) => {
   try {
 
@@ -693,31 +635,49 @@ const getAllBookedActivities = async (req, res) => {
 
   }
 }
-
-const getAllUpcomingBookedItineraries = async (req, res) => {
+const getAllBookedItineraries = async (req, res) => {
   try {
-    const tourist = await touristModel
-      .findOne({ user: req.user._id })
-      .populate('bookedItineraries.itinerary');
 
-    if (!tourist) return res.status(400).json({ message: 'User does not exist' });
+    const tourist = await touristModel.findOne({ user: req.user._id });
 
-    const currentDate = new Date();
+    if (!tourist) return res.status(400).json({ message: 'user does not exist' });
 
-    // Filter bookedActivities for future dates
-    const upcomingItineraries = tourist.bookedItineraries.filter(itinerary =>
-      itinerary.date && itinerary.date > currentDate
-    );
+    const itineraryTickets = await itineraryTicketModel
+      .find({ tourist: req.user._id, status: 'active' })
+      .populate('itinerary'); // Specify the fields you want to include
+    if (itineraryTickets.length === 0) return res.status(400).json({ message: 'no booked itineraries yet' })
+    return res.status(200).json(itineraryTickets);
 
-    if (upcomingItineraries.length === 0) {
-      return res.status(200).json({ message: 'No upcoming booked itineraries' });
-    }
-
-    return res.status(200).json(upcomingItineraries);
-  } catch (error) {
-    return res.status(400).json({ message: "Couldn't retrieve booked itineraries", error: error.message });
   }
-};
+  catch (error) {
+    return res.status(400).json({ message: 'couldn\'t retrieve booked activities', error: error.message });
+
+  }
+}
+
+//   try {
+//     const tourist = await touristModel
+//       .findOne({ user: req.user._id })
+//       .populate('bookedItineraries.itinerary');
+
+//     if (!tourist) return res.status(400).json({ message: 'User does not exist' });
+
+//     const currentDate = new Date();
+
+//     // Filter bookedActivities for future dates
+//     const upcomingItineraries = tourist.bookedItineraries.filter(itinerary =>
+//       itinerary.date && itinerary.date > currentDate
+//     );
+
+//     if (upcomingItineraries.length === 0) {
+//       return res.status(200).json({ message: 'No upcoming booked itineraries' });
+//     }
+
+//     return res.status(200).json(upcomingItineraries);
+//   } catch (error) {
+//     return res.status(400).json({ message: "Couldn't retrieve booked itineraries", error: error.message });
+//   }
+// };
 const getAllUpcomingBookedActivities = async (req, res) => {
   try {
     const tourist = await touristModel
@@ -744,6 +704,34 @@ const getAllUpcomingBookedActivities = async (req, res) => {
     return res.status(200).json(upcomingActivities);
   } catch (error) {
     return res.status(400).json({ message: "Couldn't retrieve booked activities", error: error.message });
+  }
+};
+const getAllUpcomingBookedItineraries = async (req, res) => {
+  try {
+    const tourist = await touristModel
+      .findOne({ user: req.user._id })
+
+    if (!tourist) return res.status(400).json({ message: 'User does not exist' });
+
+    const currentDate = new Date();
+
+    const itineraryTickets = await itineraryTicketModel
+      .find({ tourist: req.user._id, status: 'active' })
+      .populate('itinerary'); // Specify the fields you want to include
+
+
+    // Filter bookedActivities for future dates
+    const upcomingItineraries = itineraryTickets.filter(ticket =>
+      ticket.date && ticket.date > currentDate
+    );
+
+    if (upcomingItineraries.length === 0) {
+      return res.status(200).json({ message: 'No upcoming booked itineraries' });
+    }
+
+    return res.status(200).json(upcomingItineraries);
+  } catch (error) {
+    return res.status(400).json({ message: "Couldn't retrieve booked itineraries", error: error.message });
   }
 };
 
