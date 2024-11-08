@@ -23,9 +23,8 @@ const cartRoutes = require("./routes/cartRoute");
 const complaintRoutes = require("./routes/complaintRoutes");
 // Initialize app
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Database connection
+const PORT = 3000;
+// Database connections
 connectDB();
 
 // Middleware

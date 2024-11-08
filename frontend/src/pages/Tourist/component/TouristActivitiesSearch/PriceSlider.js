@@ -16,7 +16,6 @@ const PriceSlider = ({ onApply }) => {
 
   return (
     <div>
-      <h4>Price Range</h4>
       <p>
         {priceRange[0]} EGP - {priceRange[1]} EGP
       </p>
@@ -30,9 +29,6 @@ const PriceSlider = ({ onApply }) => {
         trackStyle={[{ backgroundColor: "#52c41a" }]}
         handleStyle={[{ borderColor: "#52c41a" }, { borderColor: "#52c41a" }]}
       />
-      <button className="apply" type="button" onClick={handleApplyClick}>
-        Apply
-      </button>
     </div>
   );
 };
