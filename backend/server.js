@@ -3,6 +3,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const { authenticate } = require("./middleware/authMiddleware");
+const { updatePoints, setLevel } = require("./jobs/pointsUpdater"); // Import the job
 
 // Route Imports
 const userRoutes = require("./routes/userRoutes");
