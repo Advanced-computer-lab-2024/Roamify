@@ -1,10 +1,13 @@
 const touristModel = require("../models/touristModel");
 const transportationModel = require("../models/transportationModel");
 const userModel = require("../models/userModel");
-const walletModel = require("../models/cardModel");
+const walletModel = require("../models/walletModel");
 const validator = require("validator");
 const mongoose = require('mongoose');
 const preferenceTagModel = require("../models/preferenceTagModel");
+const receiptModel = require("../models/receiptModel");
+const activityModel = require("../models/activityModel");
+const itineraryModel = require("../models/itineraryModel");
 
 // Helper function to check if a user is an adult based on date of birth
 function isAdult(dateOfBirth) {
@@ -35,6 +38,15 @@ const createProfile = async (req, res) => {
   try {
     const adult = isAdult(dateOfBirth);
 
+    let wallet = null;
+    if (adult) {
+      wallet = new walletModel({
+        tourist: req.user._id
+      })
+      await wallet.save();
+    }
+    console.log(wallet)
+
     // Create and save a new tourist profile
     const tourist = new touristModel({
       user: id,
@@ -45,7 +57,7 @@ const createProfile = async (req, res) => {
       dateOfBirth,
       occupation,
       adult,
-      wallet: null, // Setting wallet to null initially
+      wallet: wallet, // Setting wallet to null initially
     });
     await tourist.save();
     res.status(201).json({ message: "Created tourist successfully" });
@@ -64,10 +76,9 @@ const getProfile = async (req, res) => {
         path: "user",
         select: "username email role status", // Only include these fields from user
       })
-      .populate({
-        path: "wallet",
-        select: "cardNumber cardValidUntil", // Only specific wallet fields
-      })
+      .populate(
+        "wallet",
+      )
       .select("-__v"); // Exclude Mongoose version key
 
     if (!details) {
@@ -140,43 +151,16 @@ const updateProfile = async (req, res) => {
   }
 };
 
-// Add Wallet
-const addWallet = async (req, res) => {
-  try {
-    const id = req.user._id;
-    const { cardNumber, cardValidUntil } = req.body;
-    const tourist = await touristModel.findOne({ user: id });
-
-    if (!tourist.adult) throw Error("Tourist must be an adult to add a wallet.");
-    if (tourist.wallet) throw Error("A wallet already exists, remove it first.");
-
-    if (!cardNumber || !cardValidUntil) throw Error("Please provide card details.");
-
-    const currentDate = new Date();
-    const validUntilDate = new Date(cardValidUntil);
-
-    if (validUntilDate < currentDate) throw Error("Card is expired.");
-    if (cardNumber.length !== 14) throw Error("Card number must be 14 digits.");
-
-    // Create and save the wallet
-    const wallet = new walletModel({ cardNumber, cardValidUntil });
-    const savedWallet = await wallet.save();
-
-    // Update tourist profile with wallet
-    await touristModel.findByIdAndUpdate(tourist._id, { wallet: savedWallet._id });
-
-    return res.status(201).json({ message: "Card added successfully" });
-  } catch (e) {
-    return res.status(401).json({ message: e.message });
-  }
-};
 
 
+//repeat
 const bookActivity = async (req, res) => {
   try {
     // Find the tourist by the user's ID
-    const tourist = await touristModel.findOne({ user: req.user._id });
+    const tourist = await touristModel.findOne({ user: req.user._id })
+      .populate('wallet');
     if (!tourist) return res.status(404).json({ message: "Tourist does not exist" });
+
 
     const { activity, date } = req.body;
     if (!activity) return res.status(400).json({ message: "Please choose an activity to book" });
@@ -196,6 +180,26 @@ const bookActivity = async (req, res) => {
       return res.status(400).json({ message: "Activity already booked for this date" });
     }
 
+    let receipt = null;
+
+    const activityObject = await activityModel.findById(activityId);
+
+    console.log(bookingDate, activityObject.date)
+    if (new Date(activityObject.date).toISOString().split('T')[0] !== new Date(bookingDate).toISOString().split('T')[0]) {
+      return res.status(400).json({ message: 'Please choose a valid date for this activity' });
+    }
+
+    if (tourist.wallet.availableCredit < activityObject.price) {
+      receipt = new receiptModel({
+        type: 'activity',
+        status: 'failed',
+        tourist: req.user._id,
+        price: activityObject.price
+      })
+      await receipt.save();
+      return res.status(400).json({ message: 'insufficient funds' })
+    }
+
     const activityEntry = {
       activity: activityId,
       date: bookingDate,
@@ -207,6 +211,14 @@ const bookActivity = async (req, res) => {
       { $addToSet: { bookedActivities: activityEntry } }
     );
 
+    receipt = new receiptModel({
+      type: 'activity',
+      status: 'successfull',
+      tourist: req.user._id,
+      price: activityObject.price
+    })
+    await receipt.save();
+
     return res.status(200).json({ message: "Activity booked successfully" });
   } catch (error) {
     res.status(400).json({ message: "Error booking activity", error: error.message });
@@ -214,10 +226,11 @@ const bookActivity = async (req, res) => {
 };
 
 
-
+//repeat
 const bookItinerary = async (req, res) => {
   try {
-    const tourist = await touristModel.findOne({ user: req.user._id });
+    const tourist = await touristModel.findOne({ user: req.user._id })
+      .populate('wallet');
     if (!tourist) return res.status(404).json({ message: "Tourist does not exist" });
 
     const { itinerary, date } = req.body;
@@ -234,6 +247,14 @@ const bookItinerary = async (req, res) => {
         entry.itinerary.equals(itineraryId) &&
         entry.date.getTime() === bookingDate.getTime()
     );
+
+    const itineraryObject = await itineraryModel.findById(itineraryId).select('price');
+
+    console.log(tourist)
+    console.log(itineraryObject.price)
+
+
+    if (tourist.wallet.availableCredit < itineraryObject.price) return res.status(400).json({ message: 'insufficient funds' })
 
     if (exists) {
       return res.status(400).json({ message: "Itinerary already booked for this date" });
@@ -255,6 +276,7 @@ const bookItinerary = async (req, res) => {
   }
 };
 
+//repeat
 const cancelItinerary = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
@@ -290,6 +312,7 @@ const cancelItinerary = async (req, res) => {
   }
 }
 
+//repeat
 const cancelActivity = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
@@ -327,6 +350,7 @@ const cancelActivity = async (req, res) => {
   }
 };
 
+
 const selectPreferenceTag = async (req, res) => {
   try {
     const preferences = req.body.preferences;
@@ -357,6 +381,7 @@ const selectPreferenceTag = async (req, res) => {
     res.status(400).json({ message: 'error in choosing preferences ', error: error.message });
   }
 }
+
 
 const cancelTransportationBooking = async (req, res) => {
   try {
@@ -389,6 +414,7 @@ const cancelTransportationBooking = async (req, res) => {
     return res.status(500).json({ message: 'Error cancelling transportation booking', error: error.message });
   }
 };
+
 
 const getBookedTransportations = async (req, res) => {
   try {
@@ -464,6 +490,9 @@ const getFilteredTransportations = async (req, res) => {
 const bookTransportation = async (req, res) => {
   try {
 
+    const tourist = await touristModel.findOne({ user: req.user._id })
+      .populate('wallet');
+
     const transportationIdString = req.body.transportationIdString;
     if (!transportationIdString) throw Error('please pick a transportation');
 
@@ -474,6 +503,7 @@ const bookTransportation = async (req, res) => {
     if (transportation.touristsBooked.includes(req.user._id)) {
       return res.status(400).json({ message: "You have already booked this transportation" });
     }
+    if (tourist.wallet.availableCredit < transportation.price) return res.status(400).json({ message: 'insufficient funds' })
     transportation.touristsBooked.push(req.user._id);
     await transportation.save();
 
@@ -572,4 +602,4 @@ const getAllUpcomingBookedActivities = async (req, res) => {
 };
 
 
-module.exports = { createProfile, getProfile, updateProfile, addWallet, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations };
+module.exports = { createProfile, getProfile, updateProfile, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations };

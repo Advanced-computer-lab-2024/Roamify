@@ -391,15 +391,15 @@ const uploadLogo = async (req, res) => {
 
 const createTransportation = async (req, res) => {
   try {
-    const { name, time, date, type, pickupLocation, dropOffLocation, cost } = req.body;
+    const { name, time, date, type, pickupLocation, dropOffLocation, price } = req.body;
 
     // Validate required fields
-    if (!name || !time || !date || !type || !pickupLocation || !dropOffLocation || !cost) {
+    if (!name || !time || !date || !type || !pickupLocation || !dropOffLocation || !price) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const exists = await transportationModel.findOne({ name });
-    if (exists) throw Error('this name already exists')
+    if (exists) return res.status(400).json({ messagea: 'this name already exists' })
     // Create a new transportation entry
     const newTransportation = new transportationModel({
       advertiser: req.user._id,
@@ -407,7 +407,7 @@ const createTransportation = async (req, res) => {
       time,
       date,
       type,
-      cost,
+      price,
       pickupLocation: pickupLocation,
       dropOffLocation: dropOffLocation
     });

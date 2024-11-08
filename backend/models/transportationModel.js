@@ -40,12 +40,12 @@ const transportationSchema = new mongoose.Schema(
             type: [mongoose.Types.ObjectId],
             ref: 'user'
         },
-        cost: {
+        price: {
             type: Number
         }
     },
     { timestamps: true }
 );
 
-const Transportation = mongoose.model("Transportation", transportationSchema);
-module.exports = Transportation;
+const transportation = mongoose.model("transportation", transportationSchema);
+module.exports = transportation;
