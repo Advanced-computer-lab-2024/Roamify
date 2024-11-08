@@ -3,13 +3,13 @@ import axios from "axios";
 
 const Form = () => {
   const [title, setTitle] = useState("");
-  const [body, setBody] = useState(""); // Renamed to `body` to match API requirement
+  const [body, setBody] = useState("");
   const [errors, setErrors] = useState({});
-  const [apiData, setApiData] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     let formErrors = {};
 
     if (Object.keys(formErrors).length > 0) {
@@ -17,22 +17,21 @@ const Form = () => {
     } else {
       setErrors({});
       try {
-        const response = await axios.post(
+        await axios.post(
           "http://localhost:3000/api/complaint/create",
-          { title, body }, // Updated to use `body` instead of `description`
+          { title, body }, 
           {
-            withCredentials: true, // Include HTTP-only cookies
+            withCredentials: true,
           }
         );
-        setApiData(response.data);
         setShowPopup(true); // Show success popup
         setTimeout(() => setShowPopup(false), 3000); // Hide popup after 3 seconds
-        console.log("Complaint Submitted:", response.data);
+        setTitle(""); // Clear the form fields after submission
+        setBody("");
       } catch (error) {
         console.error("Error submitting complaint:", error);
         
         if (error.response) {
-          console.log("Error response data:", error.response.data);
           setErrors({ apiError: error.response.data.message || "Submission failed. Please check your input." });
         } else {
           setErrors({ apiError: "An unknown error occurred. Please try again." });
@@ -61,11 +60,11 @@ const Form = () => {
               />
             </div>
             <div className="form-group">
-              <label htmlFor="complaintBody" className="form-label">Body</label> {/* Renamed to match backend field */}
+              <label htmlFor="complaintBody" className="form-label">Body</label>
               <textarea
                 id="complaintBody"
                 className="form-control"
-                value={body} // Updated to use `body`
+                value={body}
                 onChange={(e) => setBody(e.target.value)}
                 required
               />
@@ -78,26 +77,41 @@ const Form = () => {
             )}
           </form>
         </div>
-        {apiData && (
-          <div className="api_data_section" style={{ marginTop: "20px" }}>
-            <h5>Submitted Complaint</h5>
-            <p>Title: {apiData.title}</p>
-            <p>Body: {apiData.body}</p> {/* Updated to show `body` */}
-          </div>
-        )}
+
+        {/* Popup as a mini modal */}
         {showPopup && (
           <div style={{
             position: "fixed",
-            bottom: "20px",
-            right: "20px",
-            padding: "10px 20px",
-            backgroundColor: "green",
-            color: "white",
-            borderRadius: "5px",
-            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)"
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "#fff",
+            padding: "20px",
+            borderRadius: "8px",
+            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+            zIndex: 1000,
+            minWidth: "300px",
+            textAlign: "center"
           }}>
-            Submitted successfully!
+            <h4 style={{ color: "green", marginBottom: "10px" }}>Submitted Successfully!</h4>
+            <p>Your complaint has been filed.</p>
+            <button onClick={() => setShowPopup(false)} className="btn btn_theme" style={{ marginTop: "10px" }}>
+              Close
+            </button>
           </div>
+        )}
+
+        {/* Optional: A semi-transparent overlay for the modal */}
+        {showPopup && (
+          <div style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 999
+          }} onClick={() => setShowPopup(false)}></div>
         )}
       </div>
     </div>

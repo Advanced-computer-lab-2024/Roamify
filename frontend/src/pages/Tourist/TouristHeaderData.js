@@ -26,7 +26,6 @@ export const HeaderData = [
   },
   {
     menu: "Complain",
-    link: "/#",
     submenu:true,
     subMenuitem:[
        {

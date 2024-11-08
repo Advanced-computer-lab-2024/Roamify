@@ -8,7 +8,6 @@ const ComplaintSearchWrapper = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Define the API endpoint based on the selected filter
     const fetchComplaints = async () => {
       setLoading(true);
       setError(null);
@@ -28,7 +27,13 @@ const ComplaintSearchWrapper = () => {
     };
 
     fetchComplaints();
-  }, [filter]); // Fetch data every time `filter` changes
+  }, [filter]);
+
+  // Helper function to convert date format
+  const formatDate = (dateString) => {
+    const [year, month, day] = dateString.split("-"); // Assuming dateString is in "yyyy-mm-dd"
+    return `${day}/${month}/${year}`;
+  };
 
   return (
     <section id="explore_area" className="section_padding">
@@ -84,10 +89,12 @@ const ComplaintSearchWrapper = () => {
                     }}
                   >
                     <h3 style={{ marginBottom: "10px" }}>{data.title}</h3>
-                    <h5>Body: {data.body}</h5>
-                    <h5>Date: {data.date}</h5>
+                    <h5>Body: {typeof data.body === "object" ? JSON.stringify(data.body) : data.body}</h5>
+                    <h5>Date: {formatDate(data.date)}</h5> {/* Format the date here */}
                     <h5>Status: {data.status}</h5>
-                    <h5>Reply: {data.reply}</h5>
+                    {data.isReplied && data.reply && (
+                      <h5>Reply: {typeof data.reply === "object" ? JSON.stringify(data.reply) : data.reply}</h5>
+                    )}
                   </div>
                 ))}
               </div>
