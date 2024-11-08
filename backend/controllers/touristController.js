@@ -267,7 +267,6 @@ const bookItinerary = async (req, res) => {
 
     const today = new Date();
     //checking that this is the correct dater for this activity
-    console.log(itineraryObject)
     const isDateValid = itineraryObject.availableDates.some(date => {
       const itineraryDateString = new Date(date).toISOString().split('T')[0];
       return itineraryDateString === new Date(bookingDate).toISOString().split('T')[0];
@@ -347,91 +346,43 @@ const bookItinerary = async (req, res) => {
 };
 
 
+
+
 //repeat
-// const bookItinerary = async (req, res) => {
+// const cancelItinerary = async (req, res) => {
 //   try {
-//     const tourist = await touristModel.findOne({ user: req.user._id })
-//       .populate('wallet');
-//     if (!tourist) return res.status(404).json({ message: "Tourist does not exist" });
+//     const tourist = await touristModel.findOne({ user: req.user._id });
+//     const itineraryIdString = req.body.itineraryId;
+//     if (!itineraryIdString) return res.status(400).json({ message: 'please select an itinerary to cancel' });
 
-//     const { itinerary, date } = req.body;
-//     if (!itinerary) return res.status(400).json({ message: "Itinerary is required" });
-//     if (!date) return res.status(400).json({ message: "Date is required" });
+//     const date = new Date();
+//     for (itinerary of tourist.bookedItineraries) {
+//       if (itinerary.itinerary.toString() === itineraryIdString) {
+//         const timeDifference = itinerary.date.getTime() - date.getTime();
+//         const hoursDifference = timeDifference / (1000 * 60 * 60);
+//         if (hoursDifference <= 48) {
+//           return res.status(400).json({ message: "Unable to cancel booking as it must be done at least 48 hours in advance." });
+//         }
+//         else {
+//           await touristModel.updateOne(
+//             { user: req.user._id },
+//             { $pull: { bookedItineraries: { itinerary: itinerary.itinerary } } }
+//           );
 
-//     const itineraryId = new mongoose.Types.ObjectId(itinerary);
-
-//     const bookingDate = new Date(date);
-//     if (isNaN(bookingDate)) return res.status(400).json({ message: "Invalid date format" });
-
-//     const exists = tourist.bookedItineraries.some(
-//       (entry) =>
-//         entry.itinerary.equals(itineraryId) &&
-//         entry.date.getTime() === bookingDate.getTime()
-//     );
-
-//     const itineraryObject = await itineraryModel.findById(itineraryId).select('price');
-
-//     console.log(tourist)
-//     console.log(itineraryObject.price)
-
-
-//     if (tourist.wallet.availableCredit < itineraryObject.price) return res.status(400).json({ message: 'insufficient funds' })
-
-//     if (exists) {
-//       return res.status(400).json({ message: "Itinerary already booked for this date" });
+//           return res.status(200).json({ message: "Itinerary cancelled successfully." });
+//         }
+//       }
 //     }
 
-//     const itineraryEntry = {
-//       itinerary: itineraryId,
-//       date: bookingDate,
-//     };
+//     return res.status(404).json({ message: "Itinerary not found in bookings." });
 
-//     await touristModel.updateOne(
-//       { user: req.user._id },
-//       { $addToSet: { bookedItineraries: itineraryEntry } }
-//     );
 
-//     return res.status(200).json({ message: "Itinerary booked successfully" });
-//   } catch (error) {
-//     res.status(400).json({ message: "Error booking itinerary", error: error.message });
 //   }
-// };
+//   catch (error) {
+//     return res.status(400).json({ message: 'error in cancelling itinerary', error: error.message })
 
-//repeat
-const cancelItinerary = async (req, res) => {
-  try {
-    const tourist = await touristModel.findOne({ user: req.user._id });
-    const itineraryIdString = req.body.itineraryId;
-    if (!itineraryIdString) return res.status(400).json({ message: 'please select an itinerary to cancel' });
-
-    const date = new Date();
-    for (itinerary of tourist.bookedItineraries) {
-      if (itinerary.itinerary.toString() === itineraryIdString) {
-        const timeDifference = itinerary.date.getTime() - date.getTime();
-        const hoursDifference = timeDifference / (1000 * 60 * 60);
-        if (hoursDifference <= 48) {
-          return res.status(400).json({ message: "Unable to cancel booking as it must be done at least 48 hours in advance." });
-        }
-        else {
-          await touristModel.updateOne(
-            { user: req.user._id },
-            { $pull: { bookedItineraries: { itinerary: itinerary.itinerary } } }
-          );
-
-          return res.status(200).json({ message: "Itinerary cancelled successfully." });
-        }
-      }
-    }
-
-    return res.status(404).json({ message: "Itinerary not found in bookings." });
-
-
-  }
-  catch (error) {
-    return res.status(400).json({ message: 'error in cancelling itinerary', error: error.message })
-
-  }
-}
+//   }
+// }
 
 
 const cancelActivity = async (req, res) => {
@@ -439,7 +390,6 @@ const cancelActivity = async (req, res) => {
     const tourist = await touristModel.findOne({ user: req.user._id }).populate('wallet');
     const activityIdString = req.body.activityId;
 
-    if (!req.body.date) return res.status(400).json({ message: 'please choose a date' })
 
 
     if (!activityIdString) {
@@ -476,6 +426,58 @@ const cancelActivity = async (req, res) => {
       await walletModel.findByIdAndUpdate(tourist.wallet._id, { availableCredit: tourist.wallet.availableCredit })
 
       return res.status(200).json({ message: "Activity cancelled successfully." });
+    }
+
+
+
+    return res.status(404).json({ message: "Activity not found in bookings." });
+
+  } catch (error) {
+    return res.status(400).json({ message: 'Error in cancelling activity', error: error.message });
+  }
+};
+const cancelItinerary = async (req, res) => {
+  try {
+    const tourist = await touristModel.findOne({ user: req.user._id }).populate('wallet');
+    const itineraryIdString = req.body.itineraryId;
+
+    if (!req.body.date) return res.status(400).json({ message: 'please choose a date' })
+
+
+    if (!itineraryIdString) {
+      return res.status(400).json({ message: 'Please select an itinerary to cancel' });
+    }
+
+    const date = new Date();
+
+    const itineraryId = new mongoose.Types.ObjectId(itineraryIdString);
+
+    const ticket = await itineraryTicketModel.findOne({ tourist: req.user._id, itinerary: itineraryId, date: req.body.date }).populate('receipt').populate('itinerary');
+    if (!ticket || ticket.status === 'refunded') return res.status(400).json({ message: 'please choose a valid itinerary to cancel' });
+    console.log(ticket)
+
+    const timeDifference = ticket.date.getTime() - date.getTime();
+    const hoursDifference = timeDifference / (1000 * 60 * 60);
+
+
+    if (hoursDifference <= 48) {
+      return res.status(400).json({ message: "Unable to cancel booking as it must be done at least 48 hours in advance." });
+    } else {
+      const receipt = new receiptModel({
+        type: 'itinerary',
+        status: 'successfull',
+        tourist: req.user._id,
+        price: ticket.receipt.price,
+        receiptType: 'refund'
+      })
+      await receipt.save();
+      await itineraryTicketModel.findByIdAndUpdate(ticket._id, { status: 'refunded', receipt: receipt._id });
+      console.log(tourist.wallet.availableCredit, ticket.receipt.price);
+      tourist.wallet.availableCredit += ticket.receipt.price;
+      console.log(tourist.wallet.availableCredit)
+      await walletModel.findByIdAndUpdate(tourist.wallet._id, { availableCredit: tourist.wallet.availableCredit })
+
+      return res.status(200).json({ message: "Itinerary cancelled successfully." });
     }
 
 
