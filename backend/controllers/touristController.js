@@ -483,6 +483,8 @@ const cancelTransportationBooking = async (req, res) => {
   try {
     const transportationIdString = req.body.transportationId;
 
+
+
     // Check if transportation ID is provided
     if (!transportationIdString) {
       return res.status(400).json({ message: 'Please select one of your booked transportations to cancel.' });
@@ -524,6 +526,9 @@ const cancelTransportationBooking = async (req, res) => {
       price: transportation.price
     })
     await receipt.save()
+    const wallet = await walletModel.findOne({ tourist: req.user._id });
+    wallet.availableCredit += transportation.price
+    await wallet.save();
 
     return res.status(200).json({ message: 'Transportation booking cancelled successfully.' });
 
@@ -667,6 +672,11 @@ const bookTransportation = async (req, res) => {
       receiptType: 'payment'
     });
     await receipt.save()
+    const wallet = await walletModel.findById(tourist.wallet._id);
+
+    wallet.availableCredit -= transportation.price
+    await tourist.save()
+    await wallet.save();
 
     return res.status(200).json({
       message: "Transportation booked successfully"
