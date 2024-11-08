@@ -177,11 +177,11 @@ const bookActivity = async (req, res) => {
     if (new Date(activityObject.date).toISOString().split('T')[0] !== new Date(bookingDate).toISOString().split('T')[0]) {
       return res.status(400).json({ message: 'Please choose a valid date for this activity' });
     }
-    today.setHours(0, 0, 0, 0);
-    bookingDate.setHours(0, 0, 0, 0);
+
+
 
     //checking that date has not passed yet
-    if (today > bookingDate) {
+    if (new Date(today).toISOString().split('T')[0] > new Date(bookingDate).toISOString().split('T')[0]) {
       return res.status(400).json({ message: 'Sorry, this activity is no longer available' });
     }
 
@@ -220,7 +220,8 @@ const bookActivity = async (req, res) => {
       const activityTicket = new activityTicketModel({
         tourist: req.user._id,
         activity: activityId,
-        status: 'active'
+        status: 'active',
+        date: bookingDate
       })
       await activityTicket.save();
     }

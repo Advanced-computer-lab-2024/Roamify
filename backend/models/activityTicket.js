@@ -12,6 +12,9 @@ const ticket = new mongoose.Schema({
     status: {
         type: String,
         enum: ['active', 'refunded']
+    },
+    date: {
+        type: Date
     }
 }, { timestamps: true })
 
