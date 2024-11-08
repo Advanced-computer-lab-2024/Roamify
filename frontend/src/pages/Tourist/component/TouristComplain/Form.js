@@ -3,21 +3,15 @@ import axios from "axios";
 
 const Form = () => {
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState("");
+  const [body, setBody] = useState(""); // Renamed to `body` to match API requirement
   const [errors, setErrors] = useState({});
   const [apiData, setApiData] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     let formErrors = {};
 
-    // Validation: Check if date is in the future
-    if (new Date(date) > new Date()) {
-      formErrors.date = "Invalid Date";
-    }
-
-    // Set errors or submit the form
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
     } else {
@@ -25,15 +19,24 @@ const Form = () => {
       try {
         const response = await axios.post(
           "http://localhost:3000/api/complaint/create",
-          { title, description, date },
+          { title, body }, // Updated to use `body` instead of `description`
           {
             withCredentials: true, // Include HTTP-only cookies
           }
         );
         setApiData(response.data);
+        setShowPopup(true); // Show success popup
+        setTimeout(() => setShowPopup(false), 3000); // Hide popup after 3 seconds
         console.log("Complaint Submitted:", response.data);
       } catch (error) {
         console.error("Error submitting complaint:", error);
+        
+        if (error.response) {
+          console.log("Error response data:", error.response.data);
+          setErrors({ apiError: error.response.data.message || "Submission failed. Please check your input." });
+        } else {
+          setErrors({ apiError: "An unknown error occurred. Please try again." });
+        }
       }
     }
   };
@@ -58,25 +61,42 @@ const Form = () => {
               />
             </div>
             <div className="form-group">
-              <label htmlFor="complaintDescription" className="form-label">Description</label>
+              <label htmlFor="complaintBody" className="form-label">Body</label> {/* Renamed to match backend field */}
               <textarea
-                id="complaintDescription"
+                id="complaintBody"
                 className="form-control"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={body} // Updated to use `body`
+                onChange={(e) => setBody(e.target.value)}
                 required
               />
             </div>
             <button type="submit" className="btn btn_theme btn_sm" style={{ marginTop: "15px" }}>
               Submit Complaint
             </button>
+            {errors.apiError && (
+              <p style={{ color: "red", marginTop: "10px" }}>{errors.apiError}</p>
+            )}
           </form>
         </div>
         {apiData && (
           <div className="api_data_section" style={{ marginTop: "20px" }}>
             <h5>Submitted Complaint</h5>
             <p>Title: {apiData.title}</p>
-            <p>Description: {apiData.description}</p>
+            <p>Body: {apiData.body}</p> {/* Updated to show `body` */}
+          </div>
+        )}
+        {showPopup && (
+          <div style={{
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            padding: "10px 20px",
+            backgroundColor: "green",
+            color: "white",
+            borderRadius: "5px",
+            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)"
+          }}>
+            Submitted successfully!
           </div>
         )}
       </div>
