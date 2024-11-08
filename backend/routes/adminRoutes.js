@@ -5,11 +5,13 @@ const preferenceTagController = require("../controllers/preferenceTagController"
 const historicalTagController = require("../controllers/historicalTagController");
 const productController = require("../controllers/productController");
 const userController = require("../controllers/userController");
+const userController = require("../controllers/userController");
 const router = express.Router();
 
 router.post("/add-tourism-governor", adminController.addTourismGovernor);
 router.delete("/delete-account/:id", adminController.deleteUser);
 router.post("/add-admin", adminController.addAdmin);
+router.get("/get-users/:role", userController.getUsersByRole);
 router.get("/get-users/:role", userController.getUsersByRole);
 
 router.post("/create-category", categoryController.createCategory);
