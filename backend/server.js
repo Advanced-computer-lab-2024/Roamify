@@ -39,6 +39,9 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
+//job
+updatePoints(); // Start the cron job
+setLevel();
 //routes
 
 app.use("/api/user", userRoutes);
