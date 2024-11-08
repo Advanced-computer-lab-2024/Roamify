@@ -15,6 +15,10 @@ const receiptSchema = new mongoose.Schema({
     },
     price: {
         type: Number
+    },
+    receiptType: {
+        type: String,
+        enum: ['payment', 'refund']
     }
 }, { timestamps: true })
 

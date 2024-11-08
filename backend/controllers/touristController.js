@@ -154,7 +154,7 @@ const updateProfile = async (req, res) => {
 
 
 
-//repeat
+
 const bookActivity = async (req, res) => {
   try {
     // Find the tourist by the user's ID
@@ -201,17 +201,32 @@ const bookActivity = async (req, res) => {
         type: 'activity',
         status: 'failed',
         tourist: req.user._id,
-        price: activityObject.price
+        price: activityObject.price,
+        receiptType: 'payment'
       })
       await receipt.save();
       return res.status(400).json({ message: 'insufficient funds' })
     }
 
+    //create receipt for the transaction
+    receipt = new receiptModel({
+      type: 'activity',
+      status: 'successfull',
+      tourist: req.user._id,
+      price: activityObject.price,
+      receiptType: 'payment'
+    })
+    await receipt.save();
+
+    const availableCredit = tourist.wallet.availableCredit - activityObject.price;
+    await walletModel.findByIdAndUpdate(tourist.wallet._id, { availableCredit })
+
     //check if ticket was already made but refunded change it toactive
     if (ticket && ticket.status === 'refunded') {
       await activityTicketModel.updateOne({
         tourist: req.user._id,
-        activity: activityId
+        activity: activityId,
+        receipt: receipt._id
       }, { status: 'active' });
 
     }
@@ -221,18 +236,11 @@ const bookActivity = async (req, res) => {
         tourist: req.user._id,
         activity: activityId,
         status: 'active',
-        date: bookingDate
+        date: bookingDate,
+        receipt: receipt._id
       })
       await activityTicket.save();
     }
-    //create receipt for the transaction
-    receipt = new receiptModel({
-      type: 'activity',
-      status: 'successfull',
-      tourist: req.user._id,
-      price: activityObject.price
-    })
-    await receipt.save();
     return res.status(200).json({ message: "Activity booked successfully" });
   } catch (error) {
     console.log(error)
@@ -327,11 +335,12 @@ const cancelItinerary = async (req, res) => {
   }
 }
 
-//repeat
+
 const cancelActivity = async (req, res) => {
   try {
-    const tourist = await touristModel.findOne({ user: req.user._id });
+    const tourist = await touristModel.findOne({ user: req.user._id }).populate('wallet');
     const activityIdString = req.body.activityId;
+
 
     if (!activityIdString) {
       return res.status(400).json({ message: 'Please select an activity to cancel' });
@@ -339,24 +348,36 @@ const cancelActivity = async (req, res) => {
 
     const date = new Date();
 
-    for (const activity of tourist.bookedActivities) {
-      if (activity.activity.toString() === activityIdString) {
-        const timeDifference = activity.date.getTime() - date.getTime();
-        const hoursDifference = timeDifference / (1000 * 60 * 60);
+    const activityId = new mongoose.Types.ObjectId(activityIdString);
+
+    const ticket = await activityTicketModel.findOne({ tourist: req.user._id, activity: activityId, date: req.body.date }).populate('receipt');
+    if (!ticket || ticket.status === 'refunded') return res.status(400).json({ message: 'please choose a valid activity to cancel' });
+
+    const timeDifference = ticket.date.getTime() - date.getTime();
+    const hoursDifference = timeDifference / (1000 * 60 * 60);
 
 
-        if (hoursDifference <= 48) {
-          return res.status(400).json({ message: "Unable to cancel booking as it must be done at least 48 hours in advance." });
-        } else {
-          await touristModel.updateOne(
-            { user: req.user._id },
-            { $pull: { bookedActivities: { activity: activity.activity } } }
-          );
+    if (hoursDifference <= 48) {
+      return res.status(400).json({ message: "Unable to cancel booking as it must be done at least 48 hours in advance." });
+    } else {
+      const receipt = new receiptModel({
+        type: 'activity',
+        status: 'successfull',
+        tourist: req.user._id,
+        price: ticket.receipt.price,
+        receiptType: 'refund'
+      })
+      await receipt.save();
+      await activityTicketModel.findByIdAndUpdate(ticket._id, { status: 'refunded', receipt: receipt._id });
+      console.log(tourist.wallet.availableCredit, ticket.receipt.price);
+      tourist.wallet.availableCredit += ticket.receipt.price;
+      console.log(tourist.wallet.availableCredit)
+      await walletModel.findByIdAndUpdate(tourist.wallet._id, { availableCredit: tourist.wallet.availableCredit })
 
-          return res.status(200).json({ message: "Activity cancelled successfully." });
-        }
-      }
+      return res.status(200).json({ message: "Activity cancelled successfully." });
     }
+
+
 
     return res.status(404).json({ message: "Activity not found in bookings." });
 

@@ -15,6 +15,10 @@ const ticket = new mongoose.Schema({
     },
     date: {
         type: Date
+    },
+    receipt: {
+        type: mongoose.Types.ObjectId,
+        ref: 'receipt'
     }
 }, { timestamps: true })
 
