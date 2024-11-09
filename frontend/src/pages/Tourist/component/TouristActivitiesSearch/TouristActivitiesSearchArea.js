@@ -85,6 +85,24 @@ const TouristActivitiesWrapper = () => {
     }
   };
 
+  // Function to copy activity link
+  const handleCopyLink = (activityId) => {
+    const activityUrl = `${window.location.origin}/activity-details/${activityId}`;
+    navigator.clipboard.writeText(activityUrl).then(() => {
+      alert("Link copied to clipboard!");
+    }).catch(err => {
+      console.error("Failed to copy: ", err);
+    });
+  };
+
+  // Function to send activity details via email
+  const handleEmailShare = (activity) => {
+    const subject = `Check out this activity: ${activity.name}`;
+    const body = `I thought you'd be interested in this activity: ${activity.name}\n\nLocation: ${activity.location.name}\nDate: ${new Date(activity.date).toLocaleDateString()}\nPrice: ${activity.price} EGP\n\n${activity.category.description}\n\nCheck it out: ${window.location.origin}/activity-details/${activity._id}`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+  };
+
   return (
     <section id="explore_area" className="section_padding">
       <div className="container">
@@ -153,6 +171,23 @@ const TouristActivitiesWrapper = () => {
                           Book now
                         </button>
                         {activity.discounts ? <p>*Discount available</p> : ""}
+
+                        {/* Share Button */}
+                        <div>
+                          <button
+                            onClick={() => handleCopyLink(activity._id)}
+                            className="btn btn-secondary btn-sm me-2"
+                          >
+                            Copy Link
+                          </button>
+                          <button
+                            onClick={() => handleEmailShare(activity)}
+                            className="btn btn-primary btn-sm"
+                          >
+                            Share via Email
+                          </button>
+                        </div>
+
                         <div
                           data-bs-toggle="collapse"
                           data-bs-target={`#collapseExample${activity._id}`}

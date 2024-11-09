@@ -1,4 +1,3 @@
-// TouristProfileArea.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ProfileSidebar from "./ProfileSideBar";
@@ -6,6 +5,7 @@ import AccoutPreferences from "./AccountPreferences";
 import { Routes, Route } from "react-router-dom";
 import SignInAndSecurity from "./SignInAndSecurity";
 import SelectPreference from "./SelectPreference";
+
 const Settings = () => {
   const [fields, setFields] = useState({});
   const [loading, setLoading] = useState(true);
@@ -19,23 +19,29 @@ const Settings = () => {
           `http://localhost:3000/api/${role}/get-profile`,
           { withCredentials: true }
         );
-        const data = response.data;
+
+        const data = response.data; // Log the raw data
+        console.log("Raw profile data:", data);
+
         let formattedData;
 
-        // Format date fields for input
+        // Format date fields for input if role is tourist
         if (role === "tourist") {
           formattedData = {
             ...data,
-            dateOfBirth: new Date(data.dateOfBirth).toISOString().split("T")[0],
-            cardValidUntil: new Date(data.cardValidUntil)
-              .toISOString()
-              .split("T")[0],
+            dateOfBirth: data.dateOfBirth
+              ? new Date(data.dateOfBirth).toISOString().split("T")[0]
+              : null,
+            cardValidUntil: data.cardValidUntil
+              ? new Date(data.cardValidUntil).toISOString().split("T")[0]
+              : null,
           };
         } else {
           formattedData = { ...data };
         }
 
-        setFields(formattedData);
+        console.log("Formatted data:", formattedData);
+        setFields(formattedData); // Update state with formatted data
       } catch (err) {
         setError(err.message);
       } finally {
@@ -45,6 +51,10 @@ const Settings = () => {
 
     fetchProfile();
   }, [role]);
+
+  useEffect(() => {
+    console.log("Fields after setting:", fields); // Log `fields` to see if it's updating correctly
+  }, [fields]);
 
   // Determine the profile picture or logo field based on the role
   const profilePicture =

@@ -9,6 +9,8 @@ router.put('/update-profile', touristController.updateProfile);
 
 router.get('/products/')
 router.post('/book-itinerary', touristController.bookItinerary);
+router.post('/book-place', touristController.bookPlace);
+router.delete('/cancel-place', touristController.cancelPlace);
 router.post('/book-activity', touristController.bookActivity);
 router.put('/select-preferences', touristController.selectPreferenceTag);
 router.put('/book-transportation', touristController.bookTransportation);
@@ -17,6 +19,7 @@ router.delete('/cancel-activity-booking', touristController.cancelActivity);
 router.delete('/cancel-transportation-booking', touristController.cancelTransportationBooking);
 router.get('/get-booked-transportations', touristController.getBookedTransportations);
 router.get('/get-all-booked-activities', touristController.getAllBookedActivities);
+router.get('/get-all-booked-places', touristController.getAllBookedPlaces);
 router.get('/get-all-booked-itineraries', touristController.getAllBookedItineraries);
 router.get('/get-all-upcoming-booked-itineraries', touristController.getAllUpcomingBookedItineraries);
 router.get('/get-all-upcoming-booked-activities', touristController.getAllUpcomingBookedActivities);

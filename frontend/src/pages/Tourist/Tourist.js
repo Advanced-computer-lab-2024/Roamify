@@ -16,6 +16,7 @@ import TouristComplain from "./TouristComplain.js";
 import TouristView from "./TouristView.js";
 import ActivityBooking from "./ActivityBooking.js";
 import ItineraryBooking from "./ItineraryBooking.js"
+import Transportations from "./Transportations/Transportations.js";
 const Tourist = () => {
   return (
     <>
@@ -28,11 +29,11 @@ const Tourist = () => {
         <Route path="/tourist-places" element={<TouristPlaces />} />
         <Route path="/tourist-activities" element={<TouristActivities />} />
         <Route path="/tourist-complain" element={<TouristComplain />} />
-        <Route path="/tourist-view" element={<TouristView/>} />
-        <Route path="/activity-booking" element={<ActivityBooking/>} />
-        <Route path="/itinerary-booking" element={<ItineraryBooking/>} />
+        <Route path="/tourist-view" element={<TouristView />} />
+        <Route path="/tourist-booking" element={<TouristBooking />} />
+        <Route path="/transportations" element={<Transportations />} />
       </Routes>
-      <CopyRight /> 
+      <CopyRight />
     </>
   );
 };
