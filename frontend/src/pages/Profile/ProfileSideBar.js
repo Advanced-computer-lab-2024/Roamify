@@ -130,6 +130,20 @@ const ProfileSidebar = ({ profilePicture }) => {
             Sign In and Security
           </Link>
         </li>
+        {role === "tourist" && (
+          <li style={{ marginTop: "15px" }}>
+            <Link
+              to="select-preference"
+              style={{
+                textDecoration: "none",
+                color: "#007bff",
+                fontWeight: "bold",
+              }}
+            >
+              Select Preference
+            </Link>
+          </li>
+        )}
       </ul>
 
       {/* Modal for Uploading Profile Picture */}

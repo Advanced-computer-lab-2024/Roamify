@@ -5,7 +5,7 @@ import ProfileSidebar from "./ProfileSideBar";
 import AccoutPreferences from "./AccountPreferences";
 import { Routes, Route } from "react-router-dom";
 import SignInAndSecurity from "./SignInAndSecurity";
-
+import SelectPreference from "./SelectPreference";
 const Settings = () => {
   const [fields, setFields] = useState({});
   const [loading, setLoading] = useState(true);
@@ -63,6 +63,7 @@ const Settings = () => {
           <Routes>
             <Route path="/" element={<AccoutPreferences fields={fields} />} />
             <Route path="/sign-in-security" element={<SignInAndSecurity />} />
+            <Route path="/select-preference" element={<SelectPreference />} />
           </Routes>
         </div>
       </div>

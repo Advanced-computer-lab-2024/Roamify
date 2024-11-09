@@ -102,7 +102,9 @@ const viewMyComplaints = async (req, res) => {
             query.status = status.toLowerCase();
         }
 
-        const complaints = await complaintModel.find(query).select("title createdAt status reply isReplied");
+        // Select additional fields, including body and reply
+        const complaints = await complaintModel.find(query).select("title body createdAt status reply isReplied");
+
         if (complaints.length === 0) {
             return res.status(404).json({ message: "No complaints found" });
         }
@@ -110,10 +112,11 @@ const viewMyComplaints = async (req, res) => {
         const formattedComplaints = complaints.map(complaint => ({
             _id: complaint._id,
             title: complaint.title,
+            body: complaint.body, // Include the body of the complaint
             date: complaint.createdAt,
             status: complaint.status,
             isReplied: complaint.isReplied,
-            reply: complaint.reply ? complaint.reply.message : ""
+            reply: complaint.reply ? complaint.reply : {} // Return the full reply object if present
         }));
 
         res.status(200).json({

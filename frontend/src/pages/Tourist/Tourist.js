@@ -19,6 +19,7 @@ import TouristProfile from "./TouristProfile.js";
 import TouristItinerary from "./TouristItinerary.js";
 import TouristComplain from "./TouristComplain.js";
 import TouristView from "./TouristView.js";
+import TouristBooking from "./TouristBooking.js";
 const Tourist = () => {
   return (
     <>
@@ -28,13 +29,13 @@ const Tourist = () => {
         <Route path="/tourist-products" element={<TouristProducts />} />
         <Route path="/tourist-itinerary" element={<TouristItinerary />} />
         <Route path="/tour-details/:id" element={<TourDetails />} />
-        <Route path="/activity-booking/:id" element={<ActivityBooking />} />
         <Route path="/tourist-places" element={<TouristPlaces />} />
         <Route path="/tourist-activities" element={<TouristActivities />} />
         <Route path="/tourist-complain" element={<TouristComplain />} />
         <Route path="/tourist-view" element={<TouristView/>} />
+        <Route path="/tourist-booking" element={<TouristBooking/>} />
       </Routes>
-      <CopyRight />
+      <CopyRight /> 
     </>
   );
 };

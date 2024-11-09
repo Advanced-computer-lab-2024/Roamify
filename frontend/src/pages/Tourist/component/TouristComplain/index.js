@@ -1,17 +1,39 @@
-import React, { useState } from "react";
-
-
-const ComplaintData = [
-  { title: "Complaint 1", description: "This is a description for Complaint 1.", date: "2024-10-05", status: "Pending" },
-  { title: "Complaint 2", description: "This is a description for Complaint 2.", date: "2024-10-12", status: "Resolved" },
-  { title: "Complaint 3", description: "This is a description for Complaint 3.", date: "2024-10-20", status: "Pending" },
-];
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const ComplaintSearchWrapper = () => {
+  const [complaints, setComplaints] = useState([]);
   const [filter, setFilter] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Filter complaints based on selected status
-  const filteredComplaints = filter === "All" ? ComplaintData : ComplaintData.filter((data) => data.status === filter);
+  useEffect(() => {
+    const fetchComplaints = async () => {
+      setLoading(true);
+      setError(null);
+      
+      let statusQuery = filter === "All" ? "" : `?status=${filter.toLowerCase()}`;
+      const url = `http://localhost:3000/api/complaint/my-complaints${statusQuery}`;
+
+      try {
+        const response = await axios.get(url, { withCredentials: true });
+        setComplaints(response.data.complaints);
+      } catch (err) {
+        setError("Failed to fetch complaints. Please try again later.");
+        console.error("Error fetching complaints:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchComplaints();
+  }, [filter]);
+
+  // Helper function to convert date format
+  const formatDate = (dateString) => {
+    const [year, month, day] = dateString.split("-"); // Assuming dateString is in "yyyy-mm-dd"
+    return `${day}/${month}/${year}`;
+  };
 
   return (
     <section id="explore_area" className="section_padding">
@@ -43,30 +65,40 @@ const ComplaintSearchWrapper = () => {
               </button>
             </div>
 
-            {/* Complaint Boxes - Stacked Vertically */}
-            <div className="flight_search_result_wrapper" style={{ display: "block", gap: "20px" }}>
-              {filteredComplaints.map((data, index) => (
-                <div 
-                  className="flight_search_item_wrappper" 
-                  key={index}
-                  style={{
-                    width: "100%",                // Full width for each complaint
-                    backgroundColor: "#f9f9f9",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    padding: "20px",
-                    marginBottom: "20px",          // Space between boxes
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)"
-                  }}
-                >
-                  <h3 style={{ marginBottom: "10px" }}>{data.title}</h3>
-                  <p style={{ marginBottom: "10px" }}>{data.description}</p>
-                  <h5>Date: {data.date}</h5>
-                </div>
-              ))}
-            </div>
+            {/* Display loading, error, or complaints */}
+            {loading ? (
+              <p>Loading complaints...</p>
+            ) : error ? (
+              <p style={{ color: "red" }}>{error}</p>
+            ) : (
+              <div className="flight_search_result_wrapper" style={{ display: "block", gap: "20px" }}>
+                {complaints.map((data) => (
+                  <div 
+                    className="flight_search_item_wrappper" 
+                    key={data._id}
+                    style={{
+                      width: "100%",
+                      backgroundColor: "#f9f9f9",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      padding: "20px",
+                      marginBottom: "20px",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)"
+                    }}
+                  >
+                    <h3 style={{ marginBottom: "10px" }}>{data.title}</h3>
+                    <h5>Body: {typeof data.body === "object" ? JSON.stringify(data.body) : data.body}</h5>
+                    <h5>Date: {formatDate(data.date)}</h5> {/* Format the date here */}
+                    <h5>Status: {data.status}</h5>
+                    {data.isReplied && data.reply && (
+                      <h5>Reply: {typeof data.reply === "object" ? JSON.stringify(data.reply) : data.reply}</h5>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
