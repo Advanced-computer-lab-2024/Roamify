@@ -5,6 +5,8 @@ const touristModel = require("../models/touristModel");
 const advertiserModel = require("../models/advertiserModel");
 const tourGuideModel = require("../models/tourGuideModel");
 const sellerModel = require("../models/sellerModel");
+const activityTicketModel = require("../models/activityTicketModel");
+const itineraryTicketModel = require("../models/itineraryTicketModel");
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -314,20 +316,21 @@ const deleteAccount = async (req, res) => {
     if (user.status !== "active")
       throw Error('you must activate your account first to be able to delete');
     const role = user.role;
+    const today = new Date();
+    today.setHours(0, 0, 0);
 
     if (role === "advertiser") {
 
-      const tourists = await touristModel.find().select('bookedActivities');
-
-      const bookedActivities = tourists.flatMap(tourist => tourist.bookedActivities);
-      for (const bookedActivity of bookedActivities) {
-        const activity = await activityModel.findById(bookedActivity.activity);
-        const advertiserId = activity.advertiser;
-        if (advertiserId.toString() === req.user._id) {
-          return res.status(400).json({
-            message: 'Can\'t delete your account; some activities are booked already. Try again later.',
-          });
-        }
+      const activityTickets = await activityTicketModel.find({ status: 'active' })
+        .populate({
+          path: 'activity',
+          match: { advertiser: req.user._id } // Filter by advertiser
+        });
+      for (ticket of activityTickets) {
+        const activityDate = ticket.activity.date;
+        activityDate.setHours(0, 0, 0);
+        if (activityDate > today)
+          return res.status(400).json({ message: 'Can\'t delete your account; some activities are booked already. Try again later.' })
       }
 
       await activityModel.deleteMany({ advertiser: req.user._id });
@@ -349,17 +352,17 @@ const deleteAccount = async (req, res) => {
 
     }
     else if (role === "tourGuide") {
-      const tourists = await touristModel.find().select('bookedItineraries');
-      const bookedItineraries = tourists.flatMap(tourist => tourist.bookedItineraries);
-      for (const bookedItinerary of bookedItineraries) {
-        const itinerary = await itineraryModel.findById(bookedItinerary.itinerary);
-        const tourGuideId = itinerary.tourGuide;
-        if (tourGuideId.toString() === req.user._id) {
-          return res.status(400).json({
-            message: 'Can\'t delete your account; some itineraries are booked already. Try again later.',
-          });
-        }
-      }
+      let itineraryTickets = await itineraryTicketModel.find({ status: 'active' })
+        .populate({
+          path: 'itinerary',
+          match: { tourGuide: req.user._id }
+        });
+
+      itineraryTickets = itineraryTickets.filter(ticket => ticket.itinerary && new Date(ticket.date) >= today);
+
+      if (itineraryTickets.length > 0) return res.status(400).json({ message: 'Can\'t delete your account; some itineraies are booked already. Try again later.' })
+
+
 
       await itineraryModel.deleteMany({ tourGuide: req.user._id });
       await tourGuideModel.findOneAndDelete({ user: req.user._id });
@@ -373,25 +376,40 @@ const deleteAccount = async (req, res) => {
 
     }
     else {
-      console.log(1);
-      const tourist = await touristModel.findOne({ user: req.user._id }).select('bookedActivities bookedItineraries');
-      if (!tourist)
-        throw Error('user does not exist');
-
-      if (tourist.bookedActivities.length === 0 && tourist.bookedItineraries.length === 0) {
-        await touristModel.deleteOne({ user: req.user._id });
-        await userModel.findByIdAndDelete(req.user._id);
-        res.clearCookie('token'); // Assuming your JWT is stored in a cookie named 'token'
-        return res.status(200).json({ message: 'deleted tourist successfully' });
+      const tourist = await touristModel.findOne({ user: req.user._id })
+      if (!tourist) return res.status(400).json({ message: 'user not found' })
+      const activityTickets = await activityTicketModel.find({ tourist: req.user._id, status: 'active' })
+        .populate({
+          path: 'activity'
+        });
+      for (ticket of activityTickets) {
+        const activityDate = ticket.activity.date;
+        activityDate.setHours(0, 0, 0);
+        if (activityDate > today)
+          return res.status(400).json({ message: 'Can\'t delete your account; some activities are booked already. Try again later.' })
       }
-      else
-        return res.status(400).json({ message: 'you still have pending events finish it then delete your account' });
+
+      let itineraryTickets = await itineraryTicketModel.find({ tourist: req.user._id, status: 'active' })
+      itineraryTickets = itineraryTickets.filter(ticket => new Date(ticket.date) >= today);
+
+      if (itineraryTickets.length > 0) return res.status(400).json({ message: 'Can\'t delete your account; some itineraries are booked already. Try again later.' })
+
+
+
+      await activityTicketModel.deleteMany({ tourist: req.user._id })
+      await itineraryTicketModel.deleteMany({ tourist: req.user._id })
+      await touristModel.deleteOne({ user: req.user._id });
+      await userModel.findByIdAndDelete(req.user._id);
+      res.clearCookie('token'); // Assuming your JWT is stored in a cookie named 'token'
+      return res.status(200).json({ message: 'deleted tourist successfully' });
+
 
     }
 
   }
   catch (error) {
 
+    console.log(error)
     return res.status(400).json({ message: 'error could not delete account', error: error.message })
   }
 }
