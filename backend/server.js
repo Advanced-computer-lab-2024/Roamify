@@ -3,6 +3,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const { authenticate } = require("./middleware/authMiddleware");
+const { updatePoints, setLevel } = require("./jobs/pointsUpdater"); // Import the job
 
 // Route Imports
 const userRoutes = require("./routes/userRoutes");
@@ -38,6 +39,9 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
+//job
+updatePoints(); // Start the cron job
+setLevel();
 //routes
 
 app.use("/api/user", userRoutes);

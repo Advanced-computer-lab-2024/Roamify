@@ -33,39 +33,25 @@ const touristSchema = new mongoose.Schema(
       required: true,
     },
 
-    adult:{
-      type:Boolean,
-      required:true
+    adult: {
+      type: Boolean,
+      required: true
     },
     wallet: {
       type: mongoose.Types.ObjectId,
       ref: "wallet",
     },
-    bookedActivities:[
-      {
-        activity: {
-          type: mongoose.Types.ObjectId,
-          ref: 'activity', // Reference to the activity model
-        },
-        date: {
-          type: Date
-        }
-      }
-    ],
-    bookedItineraries: [
-      {
-        itinerary: {
-          type: mongoose.Types.ObjectId,
-          ref: 'itinerary', // Reference to the Itinerary model
-        },
-        date: {
-          type: Date
-        }
-      }
-    ],
-    preferences:{
-      type:[mongoose.Types.ObjectId],
-      ref:'preference tag'
+    preferences: {
+      type: [mongoose.Types.ObjectId],
+      ref: 'preference tag'
+    },
+    level: {
+      type: Number,
+      default: 1
+    },
+    points: {
+      type: Number,
+      default: 0
     }
 
   },
