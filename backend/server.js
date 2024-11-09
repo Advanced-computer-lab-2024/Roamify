@@ -1,8 +1,10 @@
 const express = require("express");
+const cron = require("node-cron");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const { authenticate } = require("./middleware/authMiddleware");
+require("dotenv").config();
 const { updatePoints, setLevel } = require("./jobs/pointsUpdater"); // Import the job
 
 // Route Imports
@@ -22,6 +24,8 @@ const preferenceTagRoutes = require("./routes/preferenceTagRoutes");
 const placesRoutes = require("./routes/placesRoutes");
 const cartRoutes = require("./routes/cartRoute");
 const complaintRoutes = require("./routes/complaintRoutes");
+const exchangeRateRoutes=require("./routes/exchangeRateRoutes");
+
 // Initialize app
 const app = express();
 const PORT = 3000;
@@ -42,8 +46,14 @@ app.use(express.json());
 //job
 updatePoints(); // Start the cron job
 setLevel();
-//routes
 
+// Schedule the task to run daily at midnight
+ const fetchAndUpdateExchangeRates = require("./services/exchangeRateService");
+ cron.schedule("0 0 * * *", () => {
+     console.log("Updating exchange rates...");
+    fetchAndUpdateExchangeRates();
+});
+//routes
 app.use("/api/user", userRoutes);
 app.use("/api/tourist", authenticate(["tourist"]), touristRoutes);
 app.use("/api/tourguide", authenticate(["tourGuide"]), tourGuideRoutes);
@@ -64,6 +74,7 @@ app.use("/api/historical-tag", historicalTagRoutes);
 app.use("/api/places", placesRoutes);
 app.use("/api/cart", authenticate(["tourist"]), cartRoutes);
 app.use("/api/complaint", complaintRoutes);
+app.use("/api/exchange-rate",exchangeRateRoutes);
 
 // Start server
 app.listen(PORT, () => {
