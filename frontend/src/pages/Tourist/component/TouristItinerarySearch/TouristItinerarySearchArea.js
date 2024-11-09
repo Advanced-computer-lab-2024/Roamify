@@ -20,7 +20,6 @@ const TouristItineraryWrapper = () => {
   const [showShareOptions, setShowShareOptions] = useState({});
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
-  const [showShareOptions, setShowShareOptions] = useState({});
 
   const fetchItineraries = async () => {
     setLoading(true);
@@ -51,8 +50,6 @@ const TouristItineraryWrapper = () => {
       setLoading(false);
     }
   };
-  
-  
 
   useEffect(() => {
     fetchItineraries();
@@ -84,6 +81,50 @@ const TouristItineraryWrapper = () => {
 
     fetchPreferences();
   }, []);
+
+  const handleBooking = async (itineraryId, itineraryDate) => {
+    if (!itineraryId || !itineraryDate) {
+      setPopupMessage("Booking failed: Itinerary ID and date are required.");
+      setShowPopup(true);
+      return;
+    }
+
+    try {
+      const formattedDate = new Date(itineraryDate).toISOString().split("T")[0];
+      const response = await axios.post(
+        "http://localhost:3000/api/tourist/book-itinerary",
+        { itinerary: itineraryId, date: formattedDate },
+        { withCredentials: true }
+      );
+      setPopupMessage(response.data.message || "Booked successfully");
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Failed to book itinerary.";
+      setPopupMessage(errorMessage);
+    } finally {
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+    }
+  };
+
+  const handleShareToggle = (itineraryId) => {
+    setShowShareOptions((prevState) => ({
+      ...prevState,
+      [itineraryId]: !prevState[itineraryId],
+    }));
+  };
+
+  const handleCopyLink = (itineraryId) => {
+    const itineraryUrl = `${window.location.origin}/itinerary-details/${itineraryId}`;
+    navigator.clipboard.writeText(itineraryUrl)
+      .then(() => alert("Link copied to clipboard!"))
+      .catch(err => console.error("Failed to copy: ", err));
+  };
+
+  const handleEmailShare = (itinerary) => {
+    const subject = `Check out this itinerary: ${itinerary.name}`;
+    const body = `I thought you'd be interested in this itinerary: ${itinerary.name}\n\nLocation: ${itinerary.locations.join(", ")}\nAvailable Date: ${new Date(itinerary.availableDates[0]).toLocaleDateString()}\nPrice: ${itinerary.price} EGP\n\nCheck it out: ${window.location.origin}/itinerary-details/${itinerary._id}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
 
   return (
     <section id="explore_area" className="section_padding">
@@ -125,47 +166,45 @@ const TouristItineraryWrapper = () => {
             ) : (
               <div className="flight_search_result_wrapper">
                 {itineraries.length > 0 ? (
-  itineraries.map((itinerary) => (
-    <div className="flight_search_item_wrappper" key={itinerary._id}>
-      <div className="flight_search_items">
-        <div className="multi_city_flight_lists">
-          <div className="flight_multis_area_wrapper">
-            <div className="flight_search_left">
-              <div className="flight_search_destination">
-                <p>Location</p>
-                <h3>{itinerary.locations?.join(", ")}</h3>
-              </div>
-              <p><strong>Tour Guide:</strong> {itinerary.tourGuide}</p>
-              <p><strong>Language:</strong> {itinerary.language}</p>
-              <p><strong>Accessibility:</strong> {itinerary.accessibility ? "Yes" : "No"}</p>
-            </div>
-
-            <div className="flight_search_middel">
-              <h3>{itinerary.activities[0]?.name}</h3>
-              <p><strong>Category:</strong> {itinerary.activities[0]?.category?.name || "N/A"}</p>
-              <p><strong>Price:</strong> {itinerary.activities[0]?.price} EGP</p>
-              <p><strong>Rating:</strong> {itinerary.activities[0]?.rating || 0} / 5</p>
-              <p><strong>Available Dates:</strong> {itinerary.availableDates?.join(", ")}</p>
-              <p><strong>Preference Tags:</strong> {itinerary.preferenceTags?.map(tag => tag.name).join(", ") || "None"}</p>
-              <p><strong>Pick-Up Location:</strong> {itinerary.pickUpLocation}</p>
-              <p><strong>Drop-Off Location:</strong> {itinerary.dropOffLocation}</p>
-            </div>
-          </div>
-        </div>
-        <div className="flight_search_right">
-          <h2>{itinerary.price} EGP</h2>
-          <p><strong>Booked:</strong> {itinerary.booked ? "Yes" : "No"}</p>
-          <Link to={`/itinerary-booking/${itinerary._id}`} className="btn btn_theme btn_sm">
-            Book now
-          </Link>
-        </div>
-      </div>
-    </div>
-  ))
-) : (
-  <p>No itineraries available.</p>
-)}
-
+                  itineraries.map((itinerary) => (
+                    <div className="flight_search_item_wrapper" key={itinerary._id}>
+                      <div className="flight_search_items">
+                        <h3 className="itinerary-name">{itinerary.title}</h3>
+                        <div className="itinerary-section">
+                        <p><strong>Name:</strong> {itinerary.name}</p>
+                          <p><strong>Location:</strong> {itinerary.locations?.join(", ")}</p>
+                          <p><strong>Language:</strong> {itinerary.language}</p>
+                          <p><strong>Accessibility:</strong> {itinerary.accessibility ? "Yes" : "No"}</p>
+                          <p><strong>Available Date:</strong> {Array.isArray(itinerary.availableDates) && itinerary.availableDates.length > 0 ? itinerary.availableDates[0] : "No dates available"}</p>
+                        </div>
+                        <div className="booking-section">
+                          <h2>{itinerary.price} EGP</h2>
+                          <button
+                            onClick={() => handleBooking(itinerary._id, itinerary.availableDates[0])}
+                            className="btn btn_theme btn_sm"
+                            disabled={!itinerary.availableDates || itinerary.availableDates.length === 0}
+                          >
+                            Book now
+                          </button>
+                          <button
+                            className="btn btn_theme btn_sm"
+                            onClick={() => handleShareToggle(itinerary._id)}
+                          >
+                            Share
+                          </button>
+                          {showShareOptions[itinerary._id] && (
+                            <div className="share-options">
+                              <button className="btn btn_theme btn_sm" onClick={() => handleCopyLink(itinerary._id)}>Copy Link</button>
+                              <button className="btn btn_theme btn_sm" onClick={() => handleEmailShare(itinerary)}>Share via Email</button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No itineraries available.</p>
+                )}
               </div>
             )}
           </div>

@@ -20,7 +20,7 @@ export const HeaderData = [
 
       {
         subItem: " My Booked Activities",
-        linkL: "/tourist/tourist-booking",
+        linkL: "/tourist/activity-booking",
         subMenuActive: false,
       },
     ],

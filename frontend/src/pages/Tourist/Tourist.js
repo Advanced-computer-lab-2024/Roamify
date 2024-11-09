@@ -30,7 +30,8 @@ const Tourist = () => {
         <Route path="/tourist-activities" element={<TouristActivities />} />
         <Route path="/tourist-complain" element={<TouristComplain />} />
         <Route path="/tourist-view" element={<TouristView />} />
-        <Route path="/tourist-booking" element={<TouristBooking />} />
+        <Route path="/activity-booking" element={<ActivityBooking />} />
+        <Route path="/itinerary-booking" element={<ItineraryBooking />} />
         <Route path="/transportations" element={<Transportations />} />
       </Routes>
       <CopyRight />
