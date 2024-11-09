@@ -79,6 +79,8 @@ const loginUser = async (req, res) => {
 
     const { role, status, _id } = user;
 
+    if (status !== 'active')
+      return res.status(200).json({ username: user.username, status, role, idDocument: user.idDocument.url, additionalDocument: user.additionalDocument.url, termsAndConditions: user.termsAndConditions })
     // Handle tourist login
     if (role === "tourist") {
       const tourist = await touristModel.findOne({ user: _id });

@@ -787,9 +787,11 @@ const getAllBookedActivities = async (req, res) => {
     if (!tourist)
       return res.status(400).json({ message: "user does not exist" });
 
-    if (tourist.bookedActivities.length === 0) return res.status(400).json({ message: 'you have no activities booked yet' });
-
-    return res.status(200).json(tourist.bookedActivities);
+    const itineraryTickets = await itineraryTicketModel
+      .find({ tourist: req.user._id, status: 'active' })
+      .populate('itinerary'); // Specify the fields you want to include
+    if (itineraryTickets.length === 0) return res.status(400).json({ message: 'no booked itineraries yet' })
+    return res.status(200).json(itineraryTickets);
 
   }
   catch (error) {
@@ -862,7 +864,7 @@ const getAllUpcomingBookedItineraries = async (req, res) => {
 
     const itineraryTickets = await itineraryTicketModel
       .find({ tourist: req.user._id, status: 'active' })
-      .populate('itinerary'); // Specify the fields you want to include
+      .populate('itinerary', 'name locations'); // Specify the fields you want to include
 
 
     // Filter bookedActivities for future dates
@@ -876,7 +878,8 @@ const getAllUpcomingBookedItineraries = async (req, res) => {
         .json({ message: "No upcoming booked itineraries" });
     }
 
-    return res.status(200).json(upcomingItineraries);
+    console.log(upcomingItineraries)
+    return res.status(200).json({ upcomingItineraries, date: itineraryTickets.date });
   } catch (error) {
     return res
       .status(400)
