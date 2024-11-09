@@ -3,23 +3,27 @@ export const HeaderData = [
     menu: "Home",
     link: "tourist-profile",
   },
+  {
+    menu: "Transportations",
+    link: "transportations",
+  },
 
   {
     menu: "Activities",
     submenu: true,
-    subMenuitem:[
+    subMenuitem: [
       {
-          subItem:"View All",
-          linkL:"/tourist/tourist-activities",
-          subMenuActive:false,
+        subItem: "View All",
+        linkL: "/tourist/tourist-activities",
+        subMenuActive: false,
       },
-     
+
       {
-          subItem:" My Booked Activities",
-          linkL:"/tourist/tourist-booking",
-          subMenuActive:false,
+        subItem: " My Booked Activities",
+        linkL: "/tourist/tourist-booking",
+        subMenuActive: false,
       },
-   ]
+    ],
   },
   {
     menu: "Itineraries",
@@ -38,19 +42,19 @@ export const HeaderData = [
   },
   {
     menu: "Complain",
-    submenu:true,
-    subMenuitem:[
-       {
-           subItem:"File A Complain",
-           linkL:"/tourist/tourist-complain",
-           subMenuActive:false,
-       },
-      
-       {
-           subItem:"View All",
-           linkL:"/tourist/tourist-view",
-           subMenuActive:false,
-       },
-    ]
+    submenu: true,
+    subMenuitem: [
+      {
+        subItem: "File A Complain",
+        linkL: "/tourist/tourist-complain",
+        subMenuActive: false,
+      },
+
+      {
+        subItem: "View All",
+        linkL: "/tourist/tourist-view",
+        subMenuActive: false,
+      },
+    ],
   },
 ];
