@@ -8,7 +8,6 @@ const validator = require("validator");
 const bcrypt = require("bcrypt");
 const { default: mongoose } = require("mongoose");
 
-
 const addTourismGovernor = async (req, res) => {
   const { username, password } = req.body;
 
@@ -60,10 +59,6 @@ const addTourismGovernor = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-
-
 const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -120,13 +115,12 @@ const deleteUser = async (req, res) => {
     return res.status(500).json({ message: "Failed to delete user", error: error.message });
   }
 };
-
 const addAdmin = async (req, res) => {
   const { username, password } = req.body;
 
   try {
     // Check if the admin username already exists
-    const userExists = await User.findOne({ username });
+    const userExists = await userModel.findOne({ username });
     if (userExists) {
       return res.status(400).json({ message: "Admin already exists" });
     }
@@ -137,7 +131,7 @@ const addAdmin = async (req, res) => {
     }
 
     // Find the last created admin and determine the next number for email
-    const lastAdmin = await User.findOne({ role: "admin" }).sort({ createdAt: -1 });
+    const lastAdmin = await userModel.findOne({ role: "admin" }).sort({ createdAt: -1 });
     let nextAdminNumber = 1; // Default to 1 if no admin exists
 
     if (lastAdmin) {
@@ -156,7 +150,7 @@ const addAdmin = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create the new admin user
-    const newAdmin = new User({
+    const newAdmin = new userModel({
       username,
       email,
       password: hashedPassword,
@@ -174,7 +168,6 @@ const addAdmin = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 const viewUploadedDocuments = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -190,7 +183,6 @@ const viewUploadedDocuments = async (req, res) => {
     res.status(400).json({ message: 'couldn\'t get document', error: e.message })
   }
 }
-
 const acceptRejectUser = async (req, res) => {
   try {
     const { url, approved } = req.body;
@@ -231,7 +223,6 @@ const acceptRejectUser = async (req, res) => {
     res.status(400).json({ message: "Couldn't accept or reject user", error: error.message });
   }
 };
-
 const flagItinerary = async (req, res) => {
   try {
     const { itineraryIdString } = req.body;
@@ -270,7 +261,6 @@ const unflagItinerary = async (req, res) => {
     });
   }
 }
-
 const getPendingUsers = async (req, res) => {
   try {
     const pendingUsers = await userModel.find({ status: 'pending' }).select('username _id email role');
@@ -283,7 +273,5 @@ const getPendingUsers = async (req, res) => {
 
   }
 }
-
-
 
 module.exports = { addTourismGovernor, deleteUser, addAdmin, viewUploadedDocuments, acceptRejectUser, flagItinerary, unflagItinerary, getPendingUsers };
