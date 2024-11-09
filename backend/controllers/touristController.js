@@ -474,7 +474,6 @@ const cancelPlace = async (req, res) => {
       return res.status(400).json({ message: 'Please select a place to cancel' });
     }
 
-    const date = new Date();
 
     const ticketId = new mongoose.Types.ObjectId(ticketIdString);
 
@@ -504,7 +503,7 @@ const cancelPlace = async (req, res) => {
 
 
   } catch (error) {
-    return res.status(400).json({ message: 'Error in cancelling activity', error: error.message });
+    return res.status(400).json({ message: 'Error in cancelling place', error: error.message });
   }
 };
 const cancelItinerary = async (req, res) => {
@@ -821,6 +820,25 @@ const getAllBookedActivities = async (req, res) => {
 
   }
 }
+const getAllBookedPlaces = async (req, res) => {
+  try {
+
+    const tourist = await touristModel.findOne({ user: req.user._id });
+
+    if (!tourist) return res.status(400).json({ message: 'user does not exist' });
+
+    const placesTickets = await placeTicketModel
+      .find({ tourist: req.user._id, status: 'active' })
+      .populate('place'); // Specify the fields you want to include
+    if (placesTickets.length === 0) return res.status(400).json({ message: 'no booked places yet' })
+    return res.status(200).json(placesTickets);
+
+  }
+  catch (error) {
+    return res.status(400).json({ message: 'couldn\'t retrieve booked places', error: error.message });
+
+  }
+}
 const getAllBookedItineraries = async (req, res) => {
   try {
 
@@ -965,4 +983,4 @@ const redeemPoints = async (req, res) => {
   }
 }
 
-module.exports = { createProfile, getProfile, updateProfile, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations, viewPointsLevel, redeemPoints, getBookedFutureTransportations, bookPlace, cancelPlace };
+module.exports = { createProfile, getProfile, updateProfile, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations, viewPointsLevel, redeemPoints, getBookedFutureTransportations, bookPlace, cancelPlace, getAllBookedPlaces };
