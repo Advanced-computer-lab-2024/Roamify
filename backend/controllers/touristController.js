@@ -297,16 +297,16 @@ const bookPlace = async (req, res) => {
     const availableCredit = tourist.wallet.availableCredit - cost;
     await walletModel.findByIdAndUpdate(tourist.wallet._id, { availableCredit })
 
-    for (let i = 0; i < ammount; i++) {
-      const placeTicket = new placeTicketModel({
-        tourist: req.user._id,
-        place: placeId,
-        status: 'active',
-        receipt: receipt._id,
-        ammount
-      })
-      await placeTicket.save();
-    }
+
+    const placeTicket = new placeTicketModel({
+      tourist: req.user._id,
+      place: placeId,
+      status: 'active',
+      receipt: receipt._id,
+      ammount
+    })
+    await placeTicket.save();
+
 
 
     return res.status(200).json({ message: "place booked successfully" });
@@ -458,6 +458,50 @@ const cancelActivity = async (req, res) => {
 
 
     return res.status(404).json({ message: "Activity not found in bookings." });
+
+  } catch (error) {
+    return res.status(400).json({ message: 'Error in cancelling activity', error: error.message });
+  }
+};
+const cancelPlace = async (req, res) => {
+  try {
+    const tourist = await touristModel.findOne({ user: req.user._id }).populate('wallet');
+    const ticketIdString = req.body.ticketId;
+
+
+
+    if (!ticketIdString) {
+      return res.status(400).json({ message: 'Please select a place to cancel' });
+    }
+
+    const date = new Date();
+
+    const ticketId = new mongoose.Types.ObjectId(ticketIdString);
+
+    const ticket = await placeTicketModel.findById(ticketId).populate('receipt').populate('place');
+    if (!ticket || ticket.status === 'refunded') return res.status(400).json({ message: 'please choose a valid place to cancel' });
+    console.log(ticket)
+
+
+
+
+    const receipt = new receiptModel({
+      type: 'place',
+      status: 'successfull',
+      tourist: req.user._id,
+      price: ticket.receipt.price,
+      receiptType: 'refund'
+    })
+    await receipt.save();
+    await placeTicketModel.findByIdAndUpdate(ticket._id, { status: 'refunded', receipt: receipt._id });
+    tourist.wallet.availableCredit += ticket.receipt.price;
+    await walletModel.findByIdAndUpdate(tourist.wallet._id, { availableCredit: tourist.wallet.availableCredit })
+
+    return res.status(200).json({ message: "place cancelled successfully." });
+
+
+
+
 
   } catch (error) {
     return res.status(400).json({ message: 'Error in cancelling activity', error: error.message });
@@ -921,4 +965,4 @@ const redeemPoints = async (req, res) => {
   }
 }
 
-module.exports = { createProfile, getProfile, updateProfile, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations, viewPointsLevel, redeemPoints, getBookedFutureTransportations, bookPlace };
+module.exports = { createProfile, getProfile, updateProfile, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations, viewPointsLevel, redeemPoints, getBookedFutureTransportations, bookPlace, cancelPlace };
