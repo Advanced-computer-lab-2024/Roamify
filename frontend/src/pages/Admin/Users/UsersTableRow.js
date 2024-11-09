@@ -1,7 +1,6 @@
 import React from "react";
 import DeleteButton from "../Activities/DeleteButton";
-import AcceptButton from "../Activities/AcceptButton"; // Placeholder for the AcceptButton component
-import RejectButton from "../Activities/RejectButton"; // Placeholder for the RejectButton component
+ // Placeholder for the RejectButton component
 import axios from "axios";
 
 const UsersTableRow = ({ id, name, email, status, isPending }) => {
@@ -38,8 +37,8 @@ const UsersTableRow = ({ id, name, email, status, isPending }) => {
         <DeleteButton handleDelete={handleDelete} />
         {isPending && (
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <AcceptButton id={id} />
-            <RejectButton id={id} />
+            {/* <AcceptButton id={id} />
+            <RejectButton id={id} /> */}
           </div>
         )}
       </td>

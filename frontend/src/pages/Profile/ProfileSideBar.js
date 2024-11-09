@@ -1,8 +1,9 @@
-// Sidebar.js
 import React from "react";
 import { Link } from "react-router-dom"; // Assuming you're using React Router for navigation
 
 const ProfileSidebar = () => {
+  const role = localStorage.getItem("role");
+
   return (
     <div
       style={{
@@ -40,6 +41,20 @@ const ProfileSidebar = () => {
             Sign In and Security
           </Link>
         </li>
+        {role === "tourist" && (
+          <li style={{ marginTop: "15px" }}>
+            <Link
+              to="select-preference"
+              style={{
+                textDecoration: "none",
+                color: "#007bff",
+                fontWeight: "bold",
+              }}
+            >
+              Select Preference
+            </Link>
+          </li>
+        )}
       </ul>
     </div>
   );

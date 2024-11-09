@@ -6,7 +6,7 @@ import EditIcon from "../../component/Icons/EditIcon";
 import AccoutPreferences from "./AccountPreferences";
 import { Routes, Route } from "react-router-dom";
 import SignInAndSecurity from "./SignInAndSecurity";
-
+import SelectPreference from "./SelectPreference";
 const Settings = () => {
   return (
     <section
@@ -20,6 +20,7 @@ const Settings = () => {
           <Routes>
             <Route path="/" element={<AccoutPreferences />} />
             <Route path="/sign-in-security" element={<SignInAndSecurity />} />
+            <Route path="/select-preference" element={<SelectPreference />} />
           </Routes>
         </div>
       </div>
