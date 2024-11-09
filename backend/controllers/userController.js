@@ -6,21 +6,21 @@ const advertiserModel = require("../models/advertiserModel");
 const tourGuideModel = require("../models/tourGuideModel");
 const sellerModel = require("../models/sellerModel");
 
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const validator = require("validator");
-const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
-const multer = require('multer');
+const cloudinary = require("../config/cloudinary"); // Import Cloudinary config
+const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage }).fields([
-  { name: 'ID', maxCount: 1 }, // Field for YourGuide ID
-  { name: 'additionalDocument', maxCount: 1 }  // Field for Certificate
+  { name: "ID", maxCount: 1 }, // Field for YourGuide ID
+  { name: "additionalDocument", maxCount: 1 }, // Field for Certificate
 ]);
 
 // Create JWT Token
 const createToken = (_id, role) => {
-  return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: '3d' });
-}
+  return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: "3d" });
+};
 
 const setTokenCookie = (res, token) => {
   res.cookie("token", token, {
@@ -79,8 +79,17 @@ const loginUser = async (req, res) => {
 
     const { role, status, _id } = user;
 
-    if (status !== 'active')
-      return res.status(200).json({ username: user.username, status, role, idDocument: user.idDocument.url, additionalDocument: user.additionalDocument.url, termsAndConditions: user.termsAndConditions })
+    if (status !== "active")
+      return res
+        .status(200)
+        .json({
+          username: user.username,
+          status,
+          role,
+          idDocument: user.idDocument.url,
+          additionalDocument: user.additionalDocument.url,
+          termsAndConditions: user.termsAndConditions,
+        });
     // Handle tourist login
     if (role === "tourist") {
       const tourist = await touristModel.findOne({ user: _id });
@@ -101,7 +110,9 @@ const loginUser = async (req, res) => {
     // Handle advertiser, seller, tour guide login
     if (["advertiser", "seller", "tourGuide"].includes(role)) {
       if (status === "pending") {
-        return res.status(403).json({ message: "Your account is pending approval by an admin." });
+        return res
+          .status(403)
+          .json({ message: "Your account is pending approval by an admin." });
       }
 
       let model, entity;
@@ -110,7 +121,10 @@ const loginUser = async (req, res) => {
       if (role === "tourGuide") model = tourGuideModel;
 
       // Check for the specific profile unless status is "pending profile"
-      entity = status !== "pending creation" ? await model.findOne({ user: _id }) : null;
+      entity =
+        status !== "pending creation"
+          ? await model.findOne({ user: _id })
+          : null;
       if (!entity && status !== "pending creation") {
         return res.status(404).json({ message: `${role} profile not found` });
       }
@@ -127,7 +141,9 @@ const loginUser = async (req, res) => {
 
     // Handle general login for other users, including status check
     if (status === "pending") {
-      return res.status(403).json({ message: "Your account is pending approval by an admin." });
+      return res
+        .status(403)
+        .json({ message: "Your account is pending approval by an admin." });
     }
 
     // General token for other users (tourismGovernor, admin, etc.)
@@ -150,27 +166,47 @@ const changePassword = async (req, res) => {
 
     const { oldPassword, newPassword1, newPassword2 } = req.body;
 
-    if (!oldPassword) return res.status(400).json({ message: "Please enter your old password" });
-    if (!newPassword1 || !newPassword2) return res.status(400).json({ message: "Please enter your new password and confirm it" });
+    if (!oldPassword)
+      return res
+        .status(400)
+        .json({ message: "Please enter your old password" });
+    if (!newPassword1 || !newPassword2)
+      return res
+        .status(400)
+        .json({ message: "Please enter your new password and confirm it" });
 
-    if (newPassword1 !== newPassword2) return res.status(400).json({ message: "New passwords do not match" });
+    if (newPassword1 !== newPassword2)
+      return res.status(400).json({ message: "New passwords do not match" });
 
     const match = await bcrypt.compare(oldPassword, user.password);
-    if (!match) return res.status(400).json({ message: "Old password is incorrect" });
+    if (!match)
+      return res.status(400).json({ message: "Old password is incorrect" });
 
-    if (!validator.isStrongPassword(newPassword1)) return res.status(400).json({ message: "Password does not meet minimum strength requirements" });
+    if (!validator.isStrongPassword(newPassword1))
+      return res
+        .status(400)
+        .json({
+          message: "Password does not meet minimum strength requirements",
+        });
 
     const oldMatchNew = await bcrypt.compare(newPassword1, user.password);
-    if (oldMatchNew) return res.status(400).json({ message: "New password should be different from the old one" });
+    if (oldMatchNew)
+      return res
+        .status(400)
+        .json({ message: "New password should be different from the old one" });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword1, salt);
 
-    await userModel.findByIdAndUpdate(req.user._id, { password: hashedPassword });
+    await userModel.findByIdAndUpdate(req.user._id, {
+      password: hashedPassword,
+    });
 
     return res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Couldn't change password", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Couldn't change password", error: error.message });
   }
 };
 
@@ -179,57 +215,76 @@ const uploadRequiredDocuments = async (req, res) => {
     // Helper function to upload a file to Cloudinary and return its secure URL and public ID
     const uploadToCloudinary = (fileBuffer, publicId) => {
       return new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-          { folder: 'requestsDocuments', public_id: publicId, resource_type: 'auto' },
-          (error, result) => {
-            if (error) return reject(error);
-            resolve({ url: result.secure_url, public_id: result.public_id });
-          }
-        ).end(fileBuffer);
+        cloudinary.uploader
+          .upload_stream(
+            {
+              folder: "requestsDocuments",
+              public_id: publicId,
+              resource_type: "auto",
+            },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve({ url: result.secure_url, public_id: result.public_id });
+            }
+          )
+          .end(fileBuffer);
       });
     };
 
     // Check if any files were uploaded
     if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(400).json({ message: 'No files were uploaded. Please upload the required documents.' });
+      return res
+        .status(400)
+        .json({
+          message:
+            "No files were uploaded. Please upload the required documents.",
+        });
     }
 
     // Check for specific required documents
-    if (!req.files['ID']) {
-      return res.status(400).json({ message: 'ID document is required. Please upload your ID.' });
+    if (!req.files["ID"]) {
+      return res
+        .status(400)
+        .json({ message: "ID document is required. Please upload your ID." });
     }
 
-    if (!req.files['additionalDocument']) {
-      const message = req.user.role === 'tourGuide'
-        ? 'Certificate document is required. Please upload your certificate.'
-        : 'Taxation registry document is required. Please upload your taxation registry.';
+    if (!req.files["additionalDocument"]) {
+      const message =
+        req.user.role === "tourGuide"
+          ? "Certificate document is required. Please upload your certificate."
+          : "Taxation registry document is required. Please upload your taxation registry.";
       return res.status(400).json({ message });
     }
 
     // Upload ID and additional document
-    const ID = await uploadToCloudinary(req.files['ID'][0].buffer, `${req.user._id}ID`);
-    const secondDocument = await uploadToCloudinary(req.files['additionalDocument'][0].buffer, `${req.user._id}AdditionalDocuments`);
-
-    // Save URLs and public IDs in the database
-    await userModel.findByIdAndUpdate(
-      req.user._id,
-      {
-        idDocument: {
-          url: ID.url,
-          public_id: ID.public_id
-        },
-        additionalDocument: {
-          url: secondDocument.url,
-          public_id: secondDocument.public_id
-        }
-      }
+    const ID = await uploadToCloudinary(
+      req.files["ID"][0].buffer,
+      `${req.user._id}ID`
+    );
+    const secondDocument = await uploadToCloudinary(
+      req.files["additionalDocument"][0].buffer,
+      `${req.user._id}AdditionalDocuments`
     );
 
+    // Save URLs and public IDs in the database
+    await userModel.findByIdAndUpdate(req.user._id, {
+      idDocument: {
+        url: ID.url,
+        public_id: ID.public_id,
+      },
+      additionalDocument: {
+        url: secondDocument.url,
+        public_id: secondDocument.public_id,
+      },
+    });
+
     res.status(200).json({
-      message: 'Documents uploaded successfully'
+      message: "Documents uploaded successfully",
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error uploading documents', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error uploading documents", error: error.message });
   }
 };
 
@@ -285,47 +340,55 @@ const termsAndConditions = async (req, res) => {
   try {
     const userId = req.user._id;
     const user = await userModel.findById(userId);
-    if (user.status === 'pending')
-      throw Error('please wait for admin to view yur documents before you proceed');
+    if (user.status === "pending")
+      throw Error(
+        "please wait for admin to view yur documents before you proceed"
+      );
     if (user.status === "rejected")
-      throw Error('you don\'t have the privilege to do this action');
+      throw Error("you don't have the privilege to do this action");
     const accepted = req.body.accepted;
     if (accepted === null || accepted === "")
-      throw Error('please accept or reject our terms and')
+      throw Error("please accept or reject our terms and");
     if (accepted) {
       await userModel.findByIdAndUpdate(userId, { termsAndConditions: true });
-      return res.status(200).json({ message: 'accepted terms and conditions successfully' });
-    }
-    else {
+      return res
+        .status(200)
+        .json({ message: "accepted terms and conditions successfully" });
+    } else {
       await userModel.findByIdAndUpdate(userId, { termsAndConditions: false });
-      return res.status(200).json({ message: 'rejected terms and conditions' });
+      return res.status(200).json({ message: "rejected terms and conditions" });
     }
+  } catch (error) {
+    res
+      .status(400)
+      .json({
+        message: "couldn't accept or reject terms and conditions",
+        error: error.message,
+      });
   }
-  catch (error) {
-    res.status(400).json({ message: 'couldn\'t accept or reject terms and conditions', error: error.message });
-  }
-}
+};
 
 const deleteAccount = async (req, res) => {
   try {
     const user = await userModel.findById(req.user._id);
-    if (!user)
-      throw Error('user does not exist');
+    if (!user) throw Error("user does not exist");
     if (user.status !== "active")
-      throw Error('you must activate your account first to be able to delete');
+      throw Error("you must activate your account first to be able to delete");
     const role = user.role;
 
     if (role === "advertiser") {
+      const tourists = await touristModel.find().select("bookedActivities");
 
-      const tourists = await touristModel.find().select('bookedActivities');
-
-      const bookedActivities = tourists.flatMap(tourist => tourist.bookedActivities);
+      const bookedActivities = tourists.flatMap(
+        (tourist) => tourist.bookedActivities
+      );
       for (const bookedActivity of bookedActivities) {
         const activity = await activityModel.findById(bookedActivity.activity);
         const advertiserId = activity.advertiser;
         if (advertiserId.toString() === req.user._id) {
           return res.status(400).json({
-            message: 'Can\'t delete your account; some activities are booked already. Try again later.',
+            message:
+              "Can't delete your account; some activities are booked already. Try again later.",
           });
         }
       }
@@ -333,30 +396,36 @@ const deleteAccount = async (req, res) => {
       await activityModel.deleteMany({ advertiser: req.user._id });
       await advertiserModel.findOneAndDelete({ user: req.user._id });
       await userModel.findByIdAndDelete(req.user._id);
-      res.clearCookie('token'); // Assuming your JWT is stored in a cookie named 'token'
+      res.clearCookie("token"); // Assuming your JWT is stored in a cookie named 'token'
 
       return res.status(200).json({
-        message: 'Deleted advertiser and their activities successfully.',
+        message: "Deleted advertiser and their activities successfully.",
       });
-    }
-
-    else if (role === "seller") { //didnt apply any checks since seller doesnt have future things unlike advertiser and tourguide
+    } else if (role === "seller") {
+      //didnt apply any checks since seller doesnt have future things unlike advertiser and tourguide
       await productModel.deleteMany({ sellerId: req.user._id });
       await sellerModel.deleteMany({ user: req.user._id });
       await userModel.findByIdAndDelete(req.user._id);
-      res.clearCookie('token'); // Assuming your JWT is stored in a cookie named 'token'
-      return res.status(200).json({ message: 'deleted seller and his corresponding products successfully' });
-
-    }
-    else if (role === "tourGuide") {
-      const tourists = await touristModel.find().select('bookedItineraries');
-      const bookedItineraries = tourists.flatMap(tourist => tourist.bookedItineraries);
+      res.clearCookie("token"); // Assuming your JWT is stored in a cookie named 'token'
+      return res
+        .status(200)
+        .json({
+          message: "deleted seller and his corresponding products successfully",
+        });
+    } else if (role === "tourGuide") {
+      const tourists = await touristModel.find().select("bookedItineraries");
+      const bookedItineraries = tourists.flatMap(
+        (tourist) => tourist.bookedItineraries
+      );
       for (const bookedItinerary of bookedItineraries) {
-        const itinerary = await itineraryModel.findById(bookedItinerary.itinerary);
+        const itinerary = await itineraryModel.findById(
+          bookedItinerary.itinerary
+        );
         const tourGuideId = itinerary.tourGuide;
         if (tourGuideId.toString() === req.user._id) {
           return res.status(400).json({
-            message: 'Can\'t delete your account; some itineraries are booked already. Try again later.',
+            message:
+              "Can't delete your account; some itineraries are booked already. Try again later.",
           });
         }
       }
@@ -364,37 +433,45 @@ const deleteAccount = async (req, res) => {
       await itineraryModel.deleteMany({ tourGuide: req.user._id });
       await tourGuideModel.findOneAndDelete({ user: req.user._id });
       await userModel.findByIdAndDelete(req.user._id);
-      res.clearCookie('token'); // Assuming your JWT is stored in a cookie named 'token'
+      res.clearCookie("token"); // Assuming your JWT is stored in a cookie named 'token'
 
       return res.status(200).json({
-        message: 'Deleted tourGuide and their itineraries successfully.',
+        message: "Deleted tourGuide and their itineraries successfully.",
       });
-
-
-    }
-    else {
+    } else {
       console.log(1);
-      const tourist = await touristModel.findOne({ user: req.user._id }).select('bookedActivities bookedItineraries');
-      if (!tourist)
-        throw Error('user does not exist');
+      const tourist = await touristModel
+        .findOne({ user: req.user._id })
+        .select("bookedActivities bookedItineraries");
+      if (!tourist) throw Error("user does not exist");
 
-      if (tourist.bookedActivities.length === 0 && tourist.bookedItineraries.length === 0) {
+      if (
+        tourist.bookedActivities.length === 0 &&
+        tourist.bookedItineraries.length === 0
+      ) {
         await touristModel.deleteOne({ user: req.user._id });
         await userModel.findByIdAndDelete(req.user._id);
-        res.clearCookie('token'); // Assuming your JWT is stored in a cookie named 'token'
-        return res.status(200).json({ message: 'deleted tourist successfully' });
-      }
-      else
-        return res.status(400).json({ message: 'you still have pending events finish it then delete your account' });
-
+        res.clearCookie("token"); // Assuming your JWT is stored in a cookie named 'token'
+        return res
+          .status(200)
+          .json({ message: "deleted tourist successfully" });
+      } else
+        return res
+          .status(400)
+          .json({
+            message:
+              "you still have pending events finish it then delete your account",
+          });
     }
-
+  } catch (error) {
+    return res
+      .status(400)
+      .json({
+        message: "error could not delete account",
+        error: error.message,
+      });
   }
-  catch (error) {
-
-    return res.status(400).json({ message: 'error could not delete account', error: error.message })
-  }
-}
+};
 
 module.exports = {
   createUser,
@@ -405,5 +482,5 @@ module.exports = {
   uploadRequiredDocuments,
   termsAndConditions,
   deleteAccount,
-  upload
+  upload,
 };

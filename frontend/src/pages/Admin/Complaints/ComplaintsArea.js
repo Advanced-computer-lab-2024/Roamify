@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
-import ComplaintModal from "./ComplaintModal"; // Adjust path if needed
+import ComplaintModal from "./ComplaintModal";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSortAmountUpAlt,
+  faSortAmountDownAlt,
+} from "@fortawesome/free-solid-svg-icons";
 
 const ComplaintsArea = () => {
   const [complaints, setComplaints] = useState([]);
   const [filter, setFilter] = useState("All");
+  const [sortOrder, setSortOrder] = useState("desc"); // Track sorting order
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
 
-  // Fetch complaints based on the filter
+  // Fetch complaints based on the filter and sort order
   const fetchComplaints = async () => {
     try {
-      const params = {};
-
-      if (filter === "pending") {
-        params.status = "pending";
-        params.sortOrder = "desc";
-      } else if (filter === "resolved") {
-        params.status = "resolved";
-        params.sortOrder = "desc";
-      }
+      const params = {
+        sortOrder: sortOrder,
+        ...(filter !== "All" && { status: filter }),
+      };
 
       const response = await axios.get("http://localhost:3000/api/complaint", {
         withCredentials: true,
@@ -35,7 +36,7 @@ const ComplaintsArea = () => {
 
   useEffect(() => {
     fetchComplaints();
-  }, [filter]);
+  }, [filter, sortOrder]); // Refetch when filter or sortOrder changes
 
   const getComplaintDetails = async (complaintId) => {
     try {
@@ -73,13 +74,16 @@ const ComplaintsArea = () => {
         { withCredentials: true }
       );
       toast.success("Complaint resolved successfully!");
-
-      // Re-fetch the complaints list after resolving
-      fetchComplaints();
+      fetchComplaints(); // Re-fetch complaints after resolving
     } catch (error) {
       toast.error("Error resolving complaint.");
       console.error("Error resolving complaint:", error);
     }
+  };
+
+  // Toggle sort order between ascending and descending
+  const toggleSortOrder = () => {
+    setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
   };
 
   return (
@@ -115,6 +119,22 @@ const ComplaintsArea = () => {
                 onClick={() => setFilter("resolved")}
               >
                 Resolved
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={toggleSortOrder}
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                Sort{" "}
+                <FontAwesomeIcon
+                  icon={
+                    sortOrder === "asc"
+                      ? faSortAmountUpAlt
+                      : faSortAmountDownAlt
+                  }
+                  style={{ marginLeft: "5px" }}
+                />
               </button>
             </div>
 
