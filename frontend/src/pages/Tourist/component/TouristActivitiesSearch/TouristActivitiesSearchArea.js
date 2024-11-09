@@ -64,16 +64,25 @@ const TouristActivitiesWrapper = () => {
 
   const handleBooking = async (activityId, activityDate) => {
     try {
+      // Ensure date is formatted as "YYYY-MM-DD"
+      const formattedDate = new Date(activityDate).toISOString().split("T")[0];
+
       await axios.post(
         "http://localhost:3000/api/tourist/book-activity",
-        { activityId, date: activityDate }, // Send both activityId and date
+        { activity: activityId, date: formattedDate }, // Send correct JSON payload structure
         { withCredentials: true }
       );
       setPopupMessage("Booking successful!");
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
     } catch (error) {
-      setPopupMessage("Failed to book activity. Please try again.");
+      // Check if there's a specific error message from the server
+      const errorMessage =
+        error.response && error.response.data && error.response.data.message
+          ? error.response.data.message
+          : "Failed to book activity. Please try again.";
+
+      setPopupMessage(errorMessage);
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
       console.error("Error booking activity:", error);
