@@ -19,6 +19,7 @@ const TouristItineraryWrapper = () => {
   const [preferences, setPreferences] = useState([]);
   const [preference, setPreference] = useState("");
   const [language, setLanguage] = useState("");
+  const [showShareOptions, setShowShareOptions] = useState({});
 
   const fetchItineraries = async (
     minBudget,
@@ -56,8 +57,8 @@ const TouristItineraryWrapper = () => {
       setLoading(false);
     }
   };
-  
-  
+
+
 
   useEffect(() => {
     fetchItineraries(priceRange[0], priceRange[1], date, rating, preference, language);
@@ -92,6 +93,29 @@ const TouristItineraryWrapper = () => {
 
     fetchPreferences();
   }, []);
+  const handleShareToggle = (itineraryId) => {
+    setShowShareOptions((prevState) => ({
+      ...prevState,
+      [itineraryId]: !prevState[itineraryId],
+    }));
+  };
+  const handleCopyLink = (itineraryId) => {
+    const activityUrl = `${window.location.origin}/itinerary-details/${itineraryId}`;
+    navigator.clipboard.writeText(activityUrl).then(() => {
+      alert("Link copied to clipboard!");
+    }).catch(err => {
+      console.error("Failed to copy: ", err);
+    });
+  };
+
+  // Function to send activity details via email
+  const handleEmailShare = (itinerary) => {
+    const subject = `Check out this activity: ${itinerary.name}`;
+    const body = `I thought you'd be interested in this activity: ${itinerary.name}\n\nLocation: ${itinerary.location.name}\nDate: ${new Date(itinerary.date).toLocaleDateString()}\nPrice: ${itinerary.price} EGP\n\nCheck it out: ${window.location.origin}/itinerary-details/${itinerary._id}`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+  };
+
 
   return (
     <section id="explore_area" className="section_padding">
@@ -137,46 +161,117 @@ const TouristItineraryWrapper = () => {
             ) : (
               <div className="flight_search_result_wrapper">
                 {itineraries.length > 0 ? (
-  itineraries.map((itinerary) => (
-    <div className="flight_search_item_wrappper" key={itinerary._id}>
-      <div className="flight_search_items">
-        <div className="multi_city_flight_lists">
-          <div className="flight_multis_area_wrapper">
-            <div className="flight_search_left">
-              <div className="flight_search_destination">
-                <p>Location</p>
-                <h3>{itinerary.locations?.join(", ")}</h3>
-              </div>
-              <p><strong>Tour Guide:</strong> {itinerary.tourGuide}</p>
-              <p><strong>Language:</strong> {itinerary.language}</p>
-              <p><strong>Accessibility:</strong> {itinerary.accessibility ? "Yes" : "No"}</p>
-            </div>
+                  itineraries.map((itinerary, index) => (
+                    <div
+                      className="flight_search_item_wrappper"
+                      key={itinerary._id}
+                    >
+                      <div className="flight_search_items">
+                        <div className="multi_city_flight_lists">
+                          <div className="flight_multis_area_wrapper">
+                            <div className="flight_search_left">
+                              <div className="flight_search_destination">
+                                <h3>{itinerary.name}</h3>
+                              </div>
+                            </div>
+                            <div className="flight_search_middel">
+                              <div className="flight_right_arrow">
+                                <h6>{itinerary.activities[0]?.name}</h6>
+                                <p>{itinerary.activities[0]?.location?.name}</p>
+                              </div>
+                              <div className="flight_search_destination">
+                                <p>Tour Guide</p>
+                                <h3>{itinerary.tourGuide.username}</h3>
+                                <h6>{itinerary.tourGuide.email}</h6>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flight_search_right">
+                          <h2>
+                            ${itinerary.price}
+                            <sup>Special offer</sup>
+                          </h2>
+                          <Link
+                            to="/tour-booking"
+                            className="btn btn_theme btn_sm"
+                          >
+                            Book now
+                          </Link>
+                          <p>*Conditions apply</p>
+                          <button
+                              className="btn btn_theme btn_sm"
+                              onClick={() => handleShareToggle(itinerary._id)}
+                            >
+                              Share
+                            </button>
+                            {showShareOptions[itinerary._id] && (
+                              <div className="share-options">
+                                <button className="btn btn_theme btn_sm" onClick={() => handleCopyLink(itinerary._id)}>Copy Link</button>
+                                <button className="btn btn_theme btn_sm" onClick={() => handleEmailShare(itinerary._id)}>Share via Email</button>
+                              </div>
+                            )}
+                          <div
+                            data-bs-toggle="collapse"
+                            data-bs-target={`#collapseExample${index}`}
+                            aria-expanded="false"
+                            aria-controls={`collapseExample${index}`}
+                          >
+                            Show more <i className="fas fa-chevron-down"></i>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        className="flight_policy_refund collapse"
+                        id={`collapseExample${index}`}
+                      >
+                        <div className="flight_show_down_wrapper">
+                          <div className="flight-shoe_dow_item">
+                            <div className="airline-details">
+                              <span className="airlineName fw-500">
+                                {itinerary.activities[0]?.name}
+                              </span>
+                              <span className="flightNumber">
+                                {itinerary.activities[0]?.category?.name}
+                              </span>
+                            </div>
+                            <div className="flight_inner_show_component">
+                              <div className="flight_det_wrapper">
+                                <div className="flight_det">
+                                  <div className="code_time">
+                                    <span className="code">Location</span>
+                                    <span className="time">
+                                      {itinerary.pickUpLocation}
 
-            <div className="flight_search_middel">
-              <h3>{itinerary.activities[0]?.name}</h3>
-              <p><strong>Category:</strong> {itinerary.activities[0]?.category?.name || "N/A"}</p>
-              <p><strong>Price:</strong> {itinerary.activities[0]?.price} EGP</p>
-              <p><strong>Rating:</strong> {itinerary.activities[0]?.rating || 0} / 5</p>
-              <p><strong>Available Dates:</strong> {itinerary.availableDates?.join(", ")}</p>
-              <p><strong>Preference Tags:</strong> {itinerary.preferenceTags?.map(tag => tag.name).join(", ") || "None"}</p>
-              <p><strong>Pick-Up Location:</strong> {itinerary.pickUpLocation}</p>
-              <p><strong>Drop-Off Location:</strong> {itinerary.dropOffLocation}</p>
-            </div>
-          </div>
-        </div>
-        <div className="flight_search_right">
-          <h2>{itinerary.price} EGP</h2>
-          <p><strong>Booked:</strong> {itinerary.booked ? "Yes" : "No"}</p>
-          <Link to={`/itinerary-booking/${itinerary._id}`} className="btn btn_theme btn_sm">
-            Book now
-          </Link>
-        </div>
-      </div>
-    </div>
-  ))
-) : (
-  <p>No itineraries available.</p>
-)}
+                                    </span>
+                                  </div>
+                                  <p className="airport">Drop-off</p>
+                                  <p className="date">
+                                    {itinerary.dropOffLocation}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flight_duration">
+                                <span>{itinerary.language}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flight_refund_policy">
+                            <div className="TabPanelInner flex_widht_less">
+                              <h4>Details</h4>
+                              <p>Accessibility: {itinerary.accessibility ? "Yes" : "No"}</p>
+                              <p>Rating: {itinerary.rating}</p>
+                              
+                            </div>
+                          </div>
+                          
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No itineraries available.</p>
+                )}
 
               </div>
             )}

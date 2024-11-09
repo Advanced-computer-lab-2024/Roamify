@@ -10,11 +10,13 @@ import TourismGovernor from "./pages/TourismGovernor/TourismGovernor";
 import TourGuide from "./pages/TourGuide/TourGuide";
 import ProductDetails from "./pages/Admin/Products/ProductDetails";
 import Settings from "./pages/Profile/Settings";
-
+import ActivityDetails from "./pages/Tourist/component/TouristActivitiesSearch/ActivityDetails";
 import UploadDocuments from "./pages/SignUp/UploadDocuments";
 import PendingAcceptance from "./pages/SignUp/PendingAcceptance";
 import AcceptConditions from "./pages/SignUp/AcceptConditions";
 import ProfileDetails from "./pages/SignUp/ProfileDetails";
+import ItineraryDetails from "./pages/Tourist/component/TouristItinerarySearch/ItineraryDetails";
+import PlaceDetails from "./pages/Tourist/component/TouristPlaces/PlaceDetails";
 
 const App = () => {
   return (
@@ -35,6 +37,10 @@ const App = () => {
         <Route path="/pending-acceptance" element={<PendingAcceptance />} />
         <Route path="/accept-conditions" element={<AcceptConditions />} />
         <Route path="/profile-details" element={<ProfileDetails />} />
+        <Route path="/activity-details/:id" element={<ActivityDetails/>}/>
+        <Route path="/itinerary-details/:id" element={<ItineraryDetails/>}/>
+        <Route path="/place-details/:id" element={<PlaceDetails/>}/>
+
       </Routes>
     </>
   );
