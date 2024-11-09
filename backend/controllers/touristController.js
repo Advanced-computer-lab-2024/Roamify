@@ -762,11 +762,19 @@ const getAllBookedActivities = async (req, res) => {
 
     if (!tourist) return res.status(400).json({ message: 'user does not exist' });
 
+<<<<<<< HEAD
+    const itineraryTickets = await itineraryTicketModel
+      .find({ tourist: req.user._id, status: 'active' })
+      .populate('itinerary'); // Specify the fields you want to include
+    if (itineraryTickets.length === 0) return res.status(400).json({ message: 'no booked itineraries yet' })
+    return res.status(200).json(itineraryTickets);
+=======
     const activityTickets = await activityTicketModel
       .find({ tourist: req.user._id, status: 'active' })
       .populate('activity', 'date time name location.name'); // Specify the fields you want to include
     if (activityTickets.length === 0) return res.status(400).json({ message: 'no booked activities yet' })
     return res.status(200).json(activityTickets);
+>>>>>>> 7e96b58fe1ac459194131037d91a4f2aca2249ed
 
   }
   catch (error) {
@@ -855,7 +863,7 @@ const getAllUpcomingBookedItineraries = async (req, res) => {
 
     const itineraryTickets = await itineraryTicketModel
       .find({ tourist: req.user._id, status: 'active' })
-      .populate('itinerary'); // Specify the fields you want to include
+      .populate('itinerary', 'name locations'); // Specify the fields you want to include
 
 
     // Filter bookedActivities for future dates
@@ -867,7 +875,8 @@ const getAllUpcomingBookedItineraries = async (req, res) => {
       return res.status(200).json({ message: 'No upcoming booked itineraries' });
     }
 
-    return res.status(200).json(upcomingItineraries);
+    console.log(upcomingItineraries)
+    return res.status(200).json({ upcomingItineraries, date: itineraryTickets.date });
   } catch (error) {
     return res.status(400).json({ message: "Couldn't retrieve booked itineraries", error: error.message });
   }

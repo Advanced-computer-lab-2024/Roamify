@@ -36,7 +36,7 @@ const ProfileSidebar = ({ profilePicture }) => {
       const endpoint =
         role === "tourGuide"
           ? "http://localhost:3000/api/tourguide/upload-profile-picture"
-          : "http://localhost:3000/api/advertiser/upload-logo";
+          : `http://localhost:3000/api/${role}/upload-logo`;
 
       await axios.post(endpoint, formData, {
         headers: {

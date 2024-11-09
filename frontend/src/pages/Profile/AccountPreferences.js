@@ -27,7 +27,7 @@ const AccoutPreferences = ({ fields }) => {
   const handleUpdateProfile = async () => {
     try {
       await axios.put(
-        `http://localhost:3000/api/${role}/update-profile`,
+        `http://localhost:3000/api/${role.toLocaleLowerCase()}/update-profile`,
         editFields,
         { withCredentials: true }
       );
@@ -63,7 +63,8 @@ const AccoutPreferences = ({ fields }) => {
                 key === "cardNumber" ||
                 key === "cardValidUntil" ||
                 key === "role" ||
-                key === "logo"
+                key === "logo" ||
+                key === "profilePicture"
               )
                 return null;
 

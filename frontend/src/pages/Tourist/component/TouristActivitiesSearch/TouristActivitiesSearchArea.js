@@ -20,7 +20,7 @@ const TouristActivitiesWrapper = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`http://localhost:3000/api/activity`, {
+      const response = await axios.get("http://localhost:3000/api/activity", {
         withCredentials: true,
         params: {
           minBudget,
@@ -114,10 +114,11 @@ const TouristActivitiesWrapper = () => {
               setPriceRange={setPriceRange}
               date={date}
               setDate={setDate}
-              onApplyFilters={fetchActivities}
+              applyFilters={() => fetchActivities(priceRange[0], priceRange[1], date, minRating, category)}
               onCategoryApply={(selectedCategory) => setCategory(selectedCategory)}
               onSortChange={(field, order) => setSortCriteria({ field, order })}
               onRatingApply={(rating) => setMinRating(rating)}
+              fetchActivities={fetchActivities}
             />
           </div>
           <div className="col-lg-9">
@@ -227,7 +228,6 @@ const TouristActivitiesWrapper = () => {
         </div>
       </div>
 
-      {/* Popup for booking confirmation */}
       {showPopup && (
         <div
           style={{
