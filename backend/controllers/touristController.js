@@ -719,7 +719,7 @@ const getAllBookedItineraries = async (req, res) => {
 
     const itineraryTickets = await itineraryTicketModel
       .find({ tourist: req.user._id, status: 'active' })
-      .populate('itinerary'); // Specify the fields you want to include
+      .populate('itinerary', 'name locations'); // Specify the fields you want to include
     if (itineraryTickets.length === 0) return res.status(400).json({ message: 'no booked itineraries yet' })
     return res.status(200).json(itineraryTickets);
 
@@ -792,7 +792,7 @@ const getAllUpcomingBookedItineraries = async (req, res) => {
 
     const itineraryTickets = await itineraryTicketModel
       .find({ tourist: req.user._id, status: 'active' })
-      .populate('itinerary'); // Specify the fields you want to include
+      .populate('itinerary', 'name locations'); // Specify the fields you want to include
 
 
     // Filter bookedActivities for future dates
@@ -804,7 +804,8 @@ const getAllUpcomingBookedItineraries = async (req, res) => {
       return res.status(200).json({ message: 'No upcoming booked itineraries' });
     }
 
-    return res.status(200).json(upcomingItineraries);
+    console.log(upcomingItineraries)
+    return res.status(200).json({ upcomingItineraries, date: itineraryTickets.date });
   } catch (error) {
     return res.status(400).json({ message: "Couldn't retrieve booked itineraries", error: error.message });
   }
