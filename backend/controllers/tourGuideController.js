@@ -294,7 +294,6 @@ const setStatusOfItinerary = async (req, res) => {
 
     if (status !== "active" && status !== "inactive") throw Error('please choose to activate or deactivate your itinerary');
     const itineraryTicket = await itineraryTicketModel.findOne({ itinerary: itineraryId, status: 'active' })
-    console.log(itineraryTicket)
 
 
     if (!itineraryTicket) return res.status(400).json({ message: 'can\'t deactivate itinerary since it has not been booked yet' })
