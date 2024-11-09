@@ -44,7 +44,7 @@ const TouristItineraryWrapper = () => {
           language: language || undefined,
         },
       });
-      setItineraries(response.data.itineraries || []);
+      setItineraries(response.data.updatedItineraries || []);
     } catch (error) {
       setItineraries([]);
       setError(
@@ -56,6 +56,8 @@ const TouristItineraryWrapper = () => {
       setLoading(false);
     }
   };
+  
+  
 
   useEffect(() => {
     fetchItineraries(priceRange[0], priceRange[1], date, rating, preference, language);
@@ -135,46 +137,47 @@ const TouristItineraryWrapper = () => {
             ) : (
               <div className="flight_search_result_wrapper">
                 {itineraries.length > 0 ? (
-                  itineraries.map((itinerary) => (
-                    <div className="flight_search_item_wrappper" key={itinerary._id}>
-                      <div className="flight_search_items">
-                        <div className="multi_city_flight_lists">
-                          <div className="flight_multis_area_wrapper">
-                            <div className="flight_search_left">
-                              <div className="flight_search_destination">
-                                <p>Location</p>
-                                <h3>{itinerary.locations?.join(", ")}</h3>
-                              </div>
-                              <p><strong>Tour Guide:</strong> {itinerary.tourGuide}</p>
-                              <p><strong>Language:</strong> {itinerary.language}</p>
-                              <p><strong>Accessibility:</strong> {itinerary.accessibility ? "Yes" : "No"}</p>
-                            </div>
+  itineraries.map((itinerary) => (
+    <div className="flight_search_item_wrappper" key={itinerary._id}>
+      <div className="flight_search_items">
+        <div className="multi_city_flight_lists">
+          <div className="flight_multis_area_wrapper">
+            <div className="flight_search_left">
+              <div className="flight_search_destination">
+                <p>Location</p>
+                <h3>{itinerary.locations?.join(", ")}</h3>
+              </div>
+              <p><strong>Tour Guide:</strong> {itinerary.tourGuide}</p>
+              <p><strong>Language:</strong> {itinerary.language}</p>
+              <p><strong>Accessibility:</strong> {itinerary.accessibility ? "Yes" : "No"}</p>
+            </div>
 
-                            <div className="flight_search_middel">
-                              <h3>{itinerary.activities[0]?.name}</h3>
-                              <p><strong>Category:</strong> {itinerary.activities[0]?.category?.name || "N/A"}</p>
-                              <p><strong>Price:</strong> {itinerary.activities[0]?.price} EGP</p>
-                              <p><strong>Rating:</strong> {itinerary.activities[0]?.rating || 0} / 5</p>
-                              <p><strong>Available Dates:</strong> {itinerary.availableDates?.join(", ")}</p>
-                              <p><strong>Preference Tags:</strong> {itinerary.preferenceTags?.map(tag => tag.name).join(", ") || "None"}</p>
-                              <p><strong>Pick-Up Location:</strong> {itinerary.pickUpLocation}</p>
-                              <p><strong>Drop-Off Location:</strong> {itinerary.dropOffLocation}</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flight_search_right">
-                          <h2>{itinerary.price} EGP</h2>
-                          <p><strong>Booked:</strong> {itinerary.booked ? "Yes" : "No"}</p>
-                          <Link to={`/itinerary-booking/${itinerary._id}`} className="btn btn_theme btn_sm">
-                            Book now
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p>No itineraries available.</p>
-                )}
+            <div className="flight_search_middel">
+              <h3>{itinerary.activities[0]?.name}</h3>
+              <p><strong>Category:</strong> {itinerary.activities[0]?.category?.name || "N/A"}</p>
+              <p><strong>Price:</strong> {itinerary.activities[0]?.price} EGP</p>
+              <p><strong>Rating:</strong> {itinerary.activities[0]?.rating || 0} / 5</p>
+              <p><strong>Available Dates:</strong> {itinerary.availableDates?.join(", ")}</p>
+              <p><strong>Preference Tags:</strong> {itinerary.preferenceTags?.map(tag => tag.name).join(", ") || "None"}</p>
+              <p><strong>Pick-Up Location:</strong> {itinerary.pickUpLocation}</p>
+              <p><strong>Drop-Off Location:</strong> {itinerary.dropOffLocation}</p>
+            </div>
+          </div>
+        </div>
+        <div className="flight_search_right">
+          <h2>{itinerary.price} EGP</h2>
+          <p><strong>Booked:</strong> {itinerary.booked ? "Yes" : "No"}</p>
+          <Link to={`/itinerary-booking/${itinerary._id}`} className="btn btn_theme btn_sm">
+            Book now
+          </Link>
+        </div>
+      </div>
+    </div>
+  ))
+) : (
+  <p>No itineraries available.</p>
+)}
+
               </div>
             )}
           </div>

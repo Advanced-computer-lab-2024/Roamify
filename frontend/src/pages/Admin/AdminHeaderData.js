@@ -4,6 +4,10 @@ export const HeaderData = [
     link: "",
   },
   {
+    menu: "Itineraries",
+    link: "itineraries",
+  },
+  {
     menu: "Users",
     link: "/users",
     submenu: true,

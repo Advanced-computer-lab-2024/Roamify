@@ -21,6 +21,7 @@ import AdminUsers from "./Users/AdminUsers.js";
 import Products from "./Products/Products.js";
 import Complaints from "./Complaints/Complaints.js";
 import PendingUsers from "./Users/PendingUsers.js";
+import Itineraries from "./Itineraries/Itineraries.js";
 
 const Admin = () => {
   return (
@@ -31,6 +32,7 @@ const Admin = () => {
         <Route path="/about" element={<About />} />
         <Route path="/activity-categories" element={<Activities />} />
         <Route path="/preference-tags" element={<PreferenceTags />} />
+        <Route path="/itineraries" element={<Itineraries />} />
         <Route path="/users/pending" element={<PendingUsers />} />
         <Route
           path="/users/tourists"

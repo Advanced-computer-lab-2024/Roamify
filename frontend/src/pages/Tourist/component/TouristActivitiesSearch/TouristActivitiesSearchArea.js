@@ -20,7 +20,7 @@ const TouristActivitiesWrapper = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`http://localhost:3000/api/activity`, {
+      const response = await axios.get("http://localhost:3000/api/activity", {
         withCredentials: true,
         params: {
           minBudget,
@@ -64,24 +64,20 @@ const TouristActivitiesWrapper = () => {
 
   const handleBooking = async (activityId, activityDate) => {
     try {
-      // Ensure date is formatted as "YYYY-MM-DD"
       const formattedDate = new Date(activityDate).toISOString().split("T")[0];
-
       await axios.post(
         "http://localhost:3000/api/tourist/book-activity",
-        { activity: activityId, date: formattedDate }, // Send correct JSON payload structure
+        { activity: activityId, date: formattedDate },
         { withCredentials: true }
       );
       setPopupMessage("Booking successful!");
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
     } catch (error) {
-      // Check if there's a specific error message from the server
       const errorMessage =
         error.response && error.response.data && error.response.data.message
           ? error.response.data.message
           : "Failed to book activity. Please try again.";
-
       setPopupMessage(errorMessage);
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
@@ -100,10 +96,11 @@ const TouristActivitiesWrapper = () => {
               setPriceRange={setPriceRange}
               date={date}
               setDate={setDate}
-              onApplyFilters={fetchActivities}
+              applyFilters={() => fetchActivities(priceRange[0], priceRange[1], date, minRating, category)}
               onCategoryApply={(selectedCategory) => setCategory(selectedCategory)}
               onSortChange={(field, order) => setSortCriteria({ field, order })}
               onRatingApply={(rating) => setMinRating(rating)}
+              fetchActivities={fetchActivities}
             />
           </div>
           <div className="col-lg-9">
@@ -196,7 +193,6 @@ const TouristActivitiesWrapper = () => {
         </div>
       </div>
 
-      {/* Popup for booking confirmation */}
       {showPopup && (
         <div
           style={{
