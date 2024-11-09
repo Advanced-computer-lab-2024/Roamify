@@ -6,7 +6,7 @@ const BookedActivitiesWrapper = () => {
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [popupMessage, setPopupMessage] = useState(""); // State to manage popup message
+  const [popupMessage, setPopupMessage] = useState("");
 
   useEffect(() => {
     const fetchBookedActivities = async () => {
@@ -18,7 +18,11 @@ const BookedActivitiesWrapper = () => {
 
       try {
         const response = await axios.get(url, { withCredentials: true });
-        setBookedActivities(response.data || []);
+        // Filter out any bookings without a valid activity or activity ID
+        const validBookings = response.data.filter(
+          (booking) => booking.activity && booking.activity._id
+        );
+        setBookedActivities(validBookings);
       } catch (err) {
         setError("Failed to fetch booked activities. Please try again later.");
       } finally {
@@ -35,6 +39,11 @@ const BookedActivitiesWrapper = () => {
   };
 
   const handleCancelBooking = async (activityId) => {
+    if (!activityId) {
+      setPopupMessage("No activity selected to cancel.");
+      return;
+    }
+
     try {
       await axios.delete(
         "http://localhost:3000/api/tourist/cancel-activity-booking",
@@ -44,17 +53,15 @@ const BookedActivitiesWrapper = () => {
         }
       );
 
-      // Update the state to remove the canceled activity
       setBookedActivities((prevActivities) =>
-        prevActivities.filter((booking) => booking.activity._id !== activityId)
+        prevActivities.filter((booking) => booking.activity?._id !== activityId)
       );
       
-      // Set the success message in popup
       setPopupMessage("Cancelled successfully");
     } catch (err) {
       if (err.response) {
         console.error("Failed to cancel the booking:", err.response.data);
-        setPopupMessage(err.response.data.message); // Set the error message in popup
+        setPopupMessage(err.response.data.message || "Failed to cancel the booking.");
       } else if (err.request) {
         console.error("Request made but no response received:", err.request);
         setPopupMessage("Failed to cancel the booking. No response from server.");
@@ -94,60 +101,36 @@ const BookedActivitiesWrapper = () => {
                     }}
                   >
                     {/* Title Section */}
-                    <h3 style={{ marginBottom: "15px", textAlign: "center" }}>
-                      {booking.activity.name || "N/A"}
-                    </h3>
+                    {booking.activity?.name && (
+                      <h3 style={{ marginBottom: "15px", textAlign: "center" }}>
+                        {booking.activity.name}
+                      </h3>
+                    )}
                     
                     {/* Details Section */}
-                    <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "20px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: "20px" }}>
                       <div style={{ flex: "1 1 200px" }}>
-                        <p><strong>Location:</strong> {booking.activity.location.name || "N/A"}</p>
-                        <p><strong>Coordinates:</strong> {booking.activity.location.coordinates.join(", ") || "N/A"}</p>
+                        {booking.activity?.location?.name && (
+                          <p><strong>Location:</strong> {booking.activity.location.name}</p>
+                        )}
+                        {booking.activity?.price && (
+                          <p><strong>Price:</strong> {booking.activity.price} EGP</p>
+                        )}
                       </div>
                       <div style={{ flex: "1 1 200px" }}>
-                        <p><strong>Date:</strong> {booking.date ? formatDate(booking.date) : "N/A"}</p>
-                        <p><strong>Time:</strong> {booking.activity.time || "N/A"}</p>
-                        <p><strong>Price:</strong> {booking.activity.price} EGP</p>
-                      </div>
-                      <div style={{ flex: "1 1 200px" }}>
-                        <p><strong>Status:</strong> {booking.activity.bookingAvailable ? "Available" : "Unavailable"}</p>
-                        <p><strong>Rating:</strong> {booking.activity.rating || "No rating"}</p>
-                        <p><strong>Category:</strong> {booking.activity.category || "Uncategorized"}</p>
-                      </div>
-                      <div style={{ flex: "1 1 200px" }}>
-                        <p><strong>Advertiser:</strong> {booking.activity.advertiser || "Anonymous"}</p>
-                        {booking.activity.discounts > 0 && (
-                          <p><strong>Discount:</strong> {booking.activity.discounts}% off</p>
+                        {booking.date && (
+                          <p><strong>Date:</strong> {formatDate(booking.date)}</p>
+                        )}
+                        {booking.activity?.time && (
+                          <p><strong>Time:</strong> {booking.activity.time}</p>
                         )}
                       </div>
                     </div>
 
-                    {/* Tags Section */}
-                    {booking.activity.tags.length > 0 && (
-                      <div style={{ marginTop: "10px" }}>
-                        <p><strong>Tags:</strong></p>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-                          {booking.activity.tags.map((tag, index) => (
-                            <span 
-                              key={index} 
-                              style={{
-                                backgroundColor: "#e0e0e0",
-                                padding: "5px 10px",
-                                borderRadius: "5px",
-                                fontSize: "0.9em"
-                              }}
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
                     {/* Cancel Button */}
                     <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "15px" }}>
                       <button
-                        onClick={() => handleCancelBooking(booking.activity._id)}
+                        onClick={() => handleCancelBooking(booking.activity?._id)}
                         style={{
                           padding: "10px 20px",
                           backgroundColor: "#ff4d4d",

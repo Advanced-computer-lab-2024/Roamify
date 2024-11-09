@@ -14,8 +14,9 @@ const SideBar = ({
   onRatingApply,
   applyFilters,
   fetchActivities,
+  priceRange,
+  setPriceRange,
 }) => {
-  const [categoryInput, setCategoryInput] = useState("");
   const [searchType, setSearchType] = useState("name");
   const [searchInput, setSearchInput] = useState("");
   const [searchInputTag, setSearchInputTag] = useState("");
@@ -25,7 +26,6 @@ const SideBar = ({
   const [sortOrderRating, setSortOrderRating] = useState("asc");
   const [sortOrderPrice, setSortOrderPrice] = useState("asc");
   const [selectedStars, setSelectedStars] = useState([false, false, false, false, false]);
-  const [priceRange, setPriceRange] = useState([0, 1000]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
 
@@ -52,7 +52,6 @@ const SideBar = ({
     fetchTags();
   }, []);
 
-
   const handleDateApply = ({ startDate, endDate }) => {
     setStartDate(startDate);
     setEndDate(endDate);
@@ -70,20 +69,6 @@ const SideBar = ({
     setSearchInputTag("");
     setSelectedCategory("");
   };
-
-  const handleSearchInputChange = (event) => {
-    setSearchInput(event.target.value);
-  };
-
-  const handleSearchInputTagChange = (event) => {
-    setSearchInputTag(event.target.value);
-  };
-  const handlePriceApply = (priceRange) => {
-    setPriceRange(priceRange);
-    applyFilters(); // Using onApplyFilters instead of applyFilters
-  };
-  
-  
 
   const handleSearchClick = () => {
     const searchParams = {};
@@ -144,7 +129,7 @@ const SideBar = ({
             type="text"
             placeholder="Search by name..."
             value={searchInput}
-            onChange={handleSearchInputChange}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="form-control"
             style={{ marginBottom: "10px" }}
           />
@@ -155,7 +140,7 @@ const SideBar = ({
             type="text"
             placeholder="Search by tag..."
             value={searchInputTag}
-            onChange={handleSearchInputTagChange}
+            onChange={(e) => setSearchInputTag(e.target.value)}
             className="form-control"
             style={{ marginBottom: "10px" }}
           />
@@ -182,7 +167,7 @@ const SideBar = ({
         <div className="left_side_search_heading">
           <h5>Filter by Price</h5>
         </div>
-        <PriceSlider onApply={handlePriceApply} />
+        <PriceSlider min={priceRange[0]} max={priceRange[1]} onApply={setPriceRange} />
       </div>
 
       {/* Date Range Filter Section */}
@@ -190,7 +175,7 @@ const SideBar = ({
         <div className="left_side_search_heading">
           <h5>Filter by Date</h5>
         </div>
-        <DateFilter date={date} setdate={setDate} onApply={handleDateApply} />
+        <DateFilter date={date} setDate={setDate} onApply={handleDateApply} />
       </div>
 
       {/* Filter by Category Dropdown */}
@@ -198,7 +183,7 @@ const SideBar = ({
         <div className="left_side_search_heading">
           <h5>Filter by Category</h5>
         </div>
-        <select onChange={(e) => handleCategoryApply(e.target.value)}>
+        <select onChange={(e) => handleCategoryApply(e.target.value)} className="form-control" style={{ marginBottom: "10px" }}>
           <option value="">All Categories</option>
           {categories.map((cat) => (
             <option key={cat._id} value={cat._id}>
@@ -213,18 +198,18 @@ const SideBar = ({
         <div className="left_side_search_heading">
           <h5>Sort by Price</h5>
         </div>
-        <div className="name_search_form" style={{ display: "block" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>
+        <div className="name_search_form">
+          <label>
             <input
-              type="checkbox"
+              type="radio"
               checked={sortOrderPrice === "asc"}
               onChange={() => handleSortOrderPriceChange("asc")}
             />
             Ascending
           </label>
-          <label style={{ display: "block" }}>
+          <label>
             <input
-              type="checkbox"
+              type="radio"
               checked={sortOrderPrice === "desc"}
               onChange={() => handleSortOrderPriceChange("desc")}
             />
@@ -238,18 +223,18 @@ const SideBar = ({
         <div className="left_side_search_heading">
           <h5>Sort by Rating</h5>
         </div>
-        <div className="name_search_form" style={{ display: "block" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>
+        <div className="name_search_form">
+          <label>
             <input
-              type="checkbox"
+              type="radio"
               checked={sortOrderRating === "asc"}
               onChange={() => handleSortOrderRatingChange("asc")}
             />
             Ascending
           </label>
-          <label style={{ display: "block" }}>
+          <label>
             <input
-              type="checkbox"
+              type="radio"
               checked={sortOrderRating === "desc"}
               onChange={() => handleSortOrderRatingChange("desc")}
             />
@@ -264,26 +249,24 @@ const SideBar = ({
           <h5>Filter by Rating</h5>
         </div>
         <div className="filter_review">
-          <form className="review_star">
-            {selectedStars.map((isChecked, index) => (
-              <div className="form-check" key={index}>
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  checked={isChecked}
-                  onChange={() => handleRatingChange(index)}
-                />
-                <label className="form-check-label">
-                  {[...Array(index + 1)].map((_, i) => (
-                    <i key={i} className="fas fa-star color_theme"></i>
-                  ))}
-                  {[...Array(5 - (index + 1))].map((_, i) => (
-                    <i key={i} className="fas fa-star color_asse"></i>
-                  ))}
-                </label>
-              </div>
-            ))}
-          </form>
+          {selectedStars.map((isChecked, index) => (
+            <div className="form-check" key={index}>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                checked={isChecked}
+                onChange={() => handleRatingChange(index)}
+              />
+              <label className="form-check-label">
+                {[...Array(index + 1)].map((_, i) => (
+                  <i key={i} className="fas fa-star color_theme"></i>
+                ))}
+                {[...Array(5 - (index + 1))].map((_, i) => (
+                  <i key={i} className="fas fa-star color_asse"></i>
+                ))}
+              </label>
+            </div>
+          ))}
         </div>
       </div>
     </div>
