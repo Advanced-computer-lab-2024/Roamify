@@ -9,6 +9,7 @@ router.put('/update-profile', touristController.updateProfile);
 
 router.get('/products/')
 router.post('/book-itinerary', touristController.bookItinerary);
+router.post('/book-place', touristController.bookPlace);
 router.post('/book-activity', touristController.bookActivity);
 router.put('/select-preferences', touristController.selectPreferenceTag);
 router.put('/book-transportation', touristController.bookTransportation);

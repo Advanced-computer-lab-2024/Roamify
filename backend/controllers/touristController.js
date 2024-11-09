@@ -10,6 +10,8 @@ const activityModel = require("../models/activityModel");
 const itineraryModel = require("../models/itineraryModel");
 const activityTicketModel = require("../models/activityTicketModel");
 const itineraryTicketModel = require("../models/itineraryTicketModel");
+const placeTicketModel = require("../models/placeTicketModel");
+const placeModel = require("../models/placeModel");
 
 // Helper function to check if a user is an adult based on date of birth
 function isAdult(dateOfBirth) {
@@ -246,6 +248,71 @@ const bookActivity = async (req, res) => {
   } catch (error) {
     console.log(error)
     res.status(400).json({ message: "Error booking activity", error: error.message });
+  }
+};
+const bookPlace = async (req, res) => {
+  try {
+    // Find the tourist by the user's ID
+    const tourist = await touristModel.findOne({ user: req.user._id })
+      .populate('wallet');
+    if (!tourist) return res.status(404).json({ message: "Tourist does not exist" });
+
+
+    const { place, ticketType, ammount } = req.body;
+    if (!place) return res.status(400).json({ message: "Please choose a place to visit" });
+    if (!ticketType) return res.status(400).json({ message: 'Please choose a ticket type' })
+    if (!ammount) return res.status(400).json({ message: 'Please choose ammount' })
+
+    const placeId = new mongoose.Types.ObjectId(place);
+    const placeObject = await placeModel.findById(placeId);
+
+    let receipt = null;
+
+
+    let cost = placeObject.ticketPrice[ticketType];
+    cost *= ammount;
+    //checking if tourist has available credit
+    if (tourist.wallet.availableCredit < cost) {
+      receipt = new receiptModel({
+        type: 'place',
+        status: 'failed',
+        tourist: req.user._id,
+        price: cost,
+        receiptType: 'payment'
+      })
+      await receipt.save();
+      return res.status(400).json({ message: 'insufficient funds' })
+    }
+
+    //create receipt for the transaction
+    receipt = new receiptModel({
+      type: 'place',
+      status: 'successfull',
+      tourist: req.user._id,
+      price: cost,
+      receiptType: 'payment'
+    })
+    await receipt.save();
+
+    const availableCredit = tourist.wallet.availableCredit - cost;
+    await walletModel.findByIdAndUpdate(tourist.wallet._id, { availableCredit })
+
+    for (let i = 0; i < ammount; i++) {
+      const placeTicket = new placeTicketModel({
+        tourist: req.user._id,
+        place: placeId,
+        status: 'active',
+        receipt: receipt._id,
+        ammount
+      })
+      await placeTicket.save();
+    }
+
+
+    return res.status(200).json({ message: "place booked successfully" });
+  } catch (error) {
+    console.log(error)
+    res.status(400).json({ message: "Error booking place", error: error.message });
   }
 };
 const bookItinerary = async (req, res) => {
@@ -854,4 +921,4 @@ const redeemPoints = async (req, res) => {
   }
 }
 
-module.exports = { createProfile, getProfile, updateProfile, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations, viewPointsLevel, redeemPoints, getBookedFutureTransportations };
+module.exports = { createProfile, getProfile, updateProfile, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations, viewPointsLevel, redeemPoints, getBookedFutureTransportations, bookPlace };
