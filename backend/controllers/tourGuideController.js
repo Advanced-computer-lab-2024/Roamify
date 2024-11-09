@@ -4,6 +4,7 @@ const userModel = require("../models/userModel");
 const tourGuideModel = require("../models/tourGuideModel");
 const activityModel = require("../models/activityModel");
 const itineraryModel = require("../models/itineraryModel");
+const itineraryTicketModel = require("../models/itineraryTicketModel");
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
 const { name } = require('pug');
@@ -290,7 +291,12 @@ const setStatusOfItinerary = async (req, res) => {
     if (!itinerary) throw Error('please choose a valid itinerary');
     if (req.user._id.toString() !== itinerary.tourGuide.toString()) return res.status(400).json({ message: 'you don\'t have the authority to do this action' })
 
+
     if (status !== "active" && status !== "inactive") throw Error('please choose to activate or deactivate your itinerary');
+    const itineraryTicket = await itineraryTicketModel.findOne({ itinerary: itineraryId, status: 'active' })
+
+
+    if (!itineraryTicket) return res.status(400).json({ message: 'can\'t deactivate itinerary since it has not been booked yet' })
 
     await itineraryModel.findByIdAndUpdate(itineraryId, { status });
     res.status(200).json({ message: 'changed status of itinerary to ' + status })
