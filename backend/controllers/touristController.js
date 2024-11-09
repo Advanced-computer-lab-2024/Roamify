@@ -157,7 +157,6 @@ const updateProfile = async (req, res) => {
 
 
 
-
 const bookActivity = async (req, res) => {
   try {
     // Find the tourist by the user's ID

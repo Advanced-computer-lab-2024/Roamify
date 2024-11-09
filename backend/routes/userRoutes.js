@@ -10,4 +10,5 @@ router.post("/change-password", authenticate(["admin", "seller", "tourist", "tou
 router.post('/upload-documents', authenticate(["seller", "tourGuide", "advertiser"]), userController.upload, userController.uploadRequiredDocuments);
 router.put('/accept-reject-terms-and-conditions', authenticate(["seller", "tourGuide", "advertiser"]), userController.termsAndConditions);
 router.delete('/delete-account', authenticate(["seller", "tourGuide", "advertiser", "tourist"]), userController.deleteAccount);
+
 module.exports = router;
