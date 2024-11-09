@@ -4,7 +4,7 @@ import axios from "axios";
 import ProfileSidebar from "./ProfileSideBar";
 import EditIcon from "../../component/Icons/EditIcon";
 
-const AccoutPreferences = () => {
+const AccoutPreferences = ({ fields }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,41 +13,8 @@ const AccoutPreferences = () => {
   const role = localStorage.getItem("role");
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3000/api/${role}/get-profile`,
-          { withCredentials: true }
-        );
-        const data = response.data;
-        let formattedData;
-        // Format date fields for input
-        if (role === "tourist") {
-          formattedData = {
-            ...data,
-            dateOfBirth: new Date(data.dateOfBirth).toISOString().split("T")[0],
-            cardValidUntil: new Date(data.cardValidUntil)
-              .toISOString()
-              .split("T")[0],
-          };
-        } else {
-          formattedData = {
-            ...data,
-          };
-        }
-
-        setProfile(formattedData);
-        setEditFields(formattedData);
-      } catch (err) {
-        setError(err.message);
-        // console.log(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, []);
+    setEditFields(fields);
+  }, [fields]);
 
   const handleEditToggle = (field) => {
     setIsEditing((prev) => ({ ...prev, [field]: !prev[field] }));
@@ -70,9 +37,6 @@ const AccoutPreferences = () => {
       alert("Failed to update profile: " + err.message);
     }
   };
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
 
   return (
     <div style={{ display: "flex", flex: 1, margin: "0 auto", height: "80vh" }}>
@@ -98,12 +62,13 @@ const AccoutPreferences = () => {
                 key === "adult" ||
                 key === "cardNumber" ||
                 key === "cardValidUntil" ||
-                key === "role"
+                key === "role" ||
+                key === "logo"
               )
                 return null;
 
               if (key === "logo") {
-                return <img src={value} />;
+                return <img src={value} key={key} />;
               }
 
               return (
