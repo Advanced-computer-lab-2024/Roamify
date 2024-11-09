@@ -8,6 +8,7 @@ const preferenceTagModel = require('../models/preferenceTagModel');
 const categoryModel = require("../models/categoryModel");
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
+const { default: mongoose } = require('mongoose');
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
 const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
 
@@ -24,15 +25,15 @@ const createProfile = async (req, res) => {
 
     if (!user.termsAndConditions)
       throw Error('sorry you must accept our terms and conditions in order to proceed');
+    const { companyName, websiteLink, hotline, companyProfile } = req.body;
 
     if (userId) {
-      const result = await advertiserModel.findOne({ user: userId });
+      const result = await advertiserModel.findOne({ user: userId, companyName });
       if (result && userId) {
         return res.status(400).json({ error: "profile already created" });
       }
     } //check for existence of profile for this user
 
-    const { companyName, websiteLink, hotline, companyProfile } = req.body;
     if (!companyName || !websiteLink || !hotline || !companyProfile)
       throw Error('please fill all fields');
     await userModel.findByIdAndUpdate(userId, { status: "active" });
@@ -390,15 +391,15 @@ const uploadLogo = async (req, res) => {
 
 const createTransportation = async (req, res) => {
   try {
-    const { name, time, date, type, pickupLocation, dropOffLocation } = req.body;
+    const { name, time, date, type, pickupLocation, dropOffLocation, price } = req.body;
 
     // Validate required fields
-    if (!name || !time || !date || !type || !pickupLocation || !dropOffLocation) {
+    if (!name || !time || !date || !type || !pickupLocation || !dropOffLocation || !price) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const exists = await transportationModel.find({ name });
-    if (exists) throw Error('this name already exists')
+    const exists = await transportationModel.findOne({ name });
+    if (exists) return res.status(400).json({ messagea: 'this name already exists' })
     // Create a new transportation entry
     const newTransportation = new transportationModel({
       advertiser: req.user._id,
@@ -406,6 +407,7 @@ const createTransportation = async (req, res) => {
       time,
       date,
       type,
+      price,
       pickupLocation: pickupLocation,
       dropOffLocation: dropOffLocation
     });
@@ -427,8 +429,9 @@ const createTransportation = async (req, res) => {
 const getAllTransportation = async (req, res) => {
   try {
     const transportations = await transportationModel.find().populate('advertiser', 'username');
-    if (!transportations)
+    if (!transportations || transportations.length == 0)
       return res.status(400).json({ message: 'no transportation created yet' });
+
 
     return res.status(200).json({ message: 'transportations retrieved successfully', transportations })
 
@@ -437,6 +440,96 @@ const getAllTransportation = async (req, res) => {
     return res.status(400).json({ message: 'can\'t retrieve transportation', error: error.message })
   }
 }
+const deleteTransportation = async (req, res) => {
+  try {
+    const transportationIdString = req.body.transportationId;
+
+    if (!transportationIdString) {
+      return res.status(400).json({ message: 'Please choose a transportation to delete' });
+    }
+
+    const transportationId = new mongoose.Types.ObjectId(transportationIdString);
+
+    const transportation = await transportationModel.findById(transportationId);
+
+    if (!transportation) {
+      return res.status(404).json({ message: 'Transportation not found' });
+    }
+
+    if (req.user._id.toString() !== transportation.advertiser.toString()) return res.status(403).json({ message: 'sorry you dont have the authority to delete this transportation' })
+    if (transportation.touristsBooked.length > 0) return res.status(400).json({ message: 'transportation is booked by tourists can\'t delete it' })
+    await transportationModel.findByIdAndDelete(transportationId);
+    return res.status(200).json({ message: 'Deleted transportation successfully' });
+
+  } catch (error) {
+    return res.status(500).json({ message: 'Error deleting transportation', error: error.message });
+  }
+};
+
+const editTransportation = async (req, res) => {
+  try {
+    const transportationIdString = req.body.transportationId;
+
+    if (!transportationIdString) {
+      return res.status(400).json({ message: 'Please choose a transportation to edit' });
+    }
+
+    const transportationId = new mongoose.Types.ObjectId(transportationIdString);
+
+    // Find the transportation by ID
+    const transportation = await transportationModel.findById(transportationId);
+
+    if (!transportation) {
+      return res.status(404).json({ message: 'Transportation not found' });
+    }
+
+    // Check if the user is the advertiser
+    if (req.user._id.toString() !== transportation.advertiser.toString()) {
+      return res.status(403).json({ message: 'Sorry, you do not have the authority to edit this transportation' });
+    }
+
+    // Check if the transportation is booked by tourists
+    if (transportation.touristsBooked.length > 0) {
+      return res.status(400).json({ message: 'Transportation is booked by tourists and cannot be edited' });
+    }
+
+    // Define the fields that can be updated
+    const { name, dropOffLocation, pickupLocation, time, type, cost } = req.body;
+
+    // Update only the allowed fields if they are provided
+    if (name) transportation.name = name;
+    if (dropOffLocation) transportation.dropOffLocation = dropOffLocation;
+    if (pickupLocation) transportation.pickupLocation = pickupLocation;
+    if (time) transportation.time = time;
+    if (type) transportation.type = type;
+    if (cost) transportation.cost = cost;
+
+    // Save the updated transportation document
+    await transportation.save();
+
+    return res.status(200).json({ message: 'Transportation updated successfully' });
+
+  } catch (error) {
+    return res.status(500).json({ message: 'Error updating transportation', error: error.message });
+  }
+};
+
+const getMyTransportations = async (req, res) => {
+  try {
+    // Find all transportation records where the user is the advertiser
+    const transportations = await transportationModel.find({ advertiser: req.user._id });
+
+    // Check if the user has any transportations
+    if (transportations.length === 0) {
+      return res.status(404).json({ message: 'No transportations found for this user.' });
+    }
+
+    return res.status(200).json({ transportations });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error fetching transportations', error: error.message });
+  }
+};
+
 
 module.exports = {
   createProfile,
@@ -449,5 +542,8 @@ module.exports = {
   uploadLogo,
   upload,
   createTransportation,
-  getAllTransportation
+  getAllTransportation,
+  deleteTransportation,
+  editTransportation,
+  getMyTransportations
 };

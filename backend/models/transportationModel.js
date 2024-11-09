@@ -24,6 +24,11 @@ const transportationSchema = new mongoose.Schema(
             enum: ["bus", "train", "taxi", "shuttle", "metro", "private car"],
             required: true
         },
+        pointsRedeemed: {
+            type: Boolean,
+            default: false
+
+        },
         pickupLocation: {
 
             type: String,
@@ -39,10 +44,13 @@ const transportationSchema = new mongoose.Schema(
         touristsBooked: {
             type: [mongoose.Types.ObjectId],
             ref: 'user'
+        },
+        price: {
+            type: Number
         }
     },
     { timestamps: true }
 );
 
-const Transportation = mongoose.model("Transportation", transportationSchema);
-module.exports = Transportation;
+const transportation = mongoose.model("transportation", transportationSchema);
+module.exports = transportation;
