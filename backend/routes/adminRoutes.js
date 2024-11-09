@@ -11,6 +11,7 @@ router.post("/add-tourism-governor", adminController.addTourismGovernor);
 router.delete("/delete-account/:id", adminController.deleteUser);
 router.post("/add-admin", adminController.addAdmin);
 router.get("/get-users/:role", userController.getUsersByRole);
+router.get("/get-users/:role", userController.getUsersByRole);
 
 router.post("/create-category", categoryController.createCategory);
 router.put("/update-category/:id", categoryController.updateCategory);

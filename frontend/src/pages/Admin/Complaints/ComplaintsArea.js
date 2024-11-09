@@ -1,46 +1,85 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 import ComplaintModal from "./ComplaintModal"; // Adjust path if needed
 
-const ComplaintData = [
-  {
-    title: "Complaint 1",
-    description: "This is a description for Complaint 1.",
-    date: "2024-10-05",
-    status: "Pending",
-  },
-  {
-    title: "Complaint 2",
-    description: "This is a description for Complaint 2.",
-    date: "2024-10-12",
-    status: "Resolved",
-  },
-  {
-    title: "Complaint 3",
-    description: "This is a description for Complaint 3.",
-    date: "2024-10-20",
-    status: "Pending",
-  },
-];
-
 const ComplaintsArea = () => {
+  const [complaints, setComplaints] = useState([]);
   const [filter, setFilter] = useState("All");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
 
-  // Filter complaints based on selected status
-  const filteredComplaints =
-    filter === "All"
-      ? ComplaintData
-      : ComplaintData.filter((data) => data.status === filter);
+  // Fetch complaints based on the filter
+  const fetchComplaints = async () => {
+    try {
+      const params = {};
 
-  const openModal = (complaint) => {
-    setSelectedComplaint(complaint);
-    setModalOpen(true);
+      if (filter === "pending") {
+        params.status = "pending";
+        params.sortOrder = "desc";
+      } else if (filter === "resolved") {
+        params.status = "resolved";
+        params.sortOrder = "desc";
+      }
+
+      const response = await axios.get("http://localhost:3000/api/complaint", {
+        withCredentials: true,
+        params,
+      });
+
+      setComplaints(response.data.complaints || []);
+    } catch (error) {
+      console.error("Error fetching complaints:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchComplaints();
+  }, [filter]);
+
+  const getComplaintDetails = async (complaintId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/complaint/details/${complaintId}`,
+        { withCredentials: true }
+      );
+      return response.data.complaint;
+    } catch (error) {
+      console.error("Error fetching complaint details:", error);
+      throw error;
+    }
+  };
+
+  const openModal = async (complaintId) => {
+    try {
+      const complaintDetails = await getComplaintDetails(complaintId);
+      setSelectedComplaint(complaintDetails);
+      setModalOpen(true);
+    } catch (error) {
+      console.error("Failed to fetch and open complaint details:", error);
+    }
   };
 
   const closeModal = () => {
     setSelectedComplaint(null);
     setModalOpen(false);
+  };
+
+  const handleResolveComplaint = async (complaintId) => {
+    try {
+      await axios.patch(
+        `http://localhost:3000/api/complaint/resolve/${complaintId}`,
+        {},
+        { withCredentials: true }
+      );
+      toast.success("Complaint resolved successfully!");
+
+      // Re-fetch the complaints list after resolving
+      fetchComplaints();
+    } catch (error) {
+      toast.error("Error resolving complaint.");
+      console.error("Error resolving complaint:", error);
+    }
   };
 
   return (
@@ -62,48 +101,51 @@ const ComplaintsArea = () => {
               <button
                 type="button"
                 className={`btn ${
-                  filter === "Pending" ? "btn-primary" : "btn-outline-primary"
+                  filter === "pending" ? "btn-primary" : "btn-outline-primary"
                 }`}
-                onClick={() => setFilter("Pending")}
+                onClick={() => setFilter("pending")}
               >
                 Pending
               </button>
               <button
                 type="button"
                 className={`btn ${
-                  filter === "Resolved" ? "btn-success" : "btn-outline-success"
+                  filter === "resolved" ? "btn-success" : "btn-outline-success"
                 }`}
-                onClick={() => setFilter("Resolved")}
+                onClick={() => setFilter("resolved")}
               >
                 Resolved
               </button>
             </div>
 
-            {/* Complaint Boxes - Stacked Vertically */}
+            {/* Complaint Boxes */}
             <div
               className="flight_search_result_wrapper"
               style={{ display: "block", gap: "20px" }}
             >
-              {filteredComplaints.map((complaint, index) => (
+              {complaints.map((complaint, index) => (
                 <div
                   className="flight_search_item_wrappper"
                   key={index}
                   style={{
-                    width: "100%", // Full width for each complaint
+                    width: "100%",
                     backgroundColor: "#f9f9f9",
                     display: "flex",
-                    flexDirection: "row", // Align content horizontally
+                    flexDirection: "row",
                     justifyContent: "space-between",
                     alignItems: "center",
                     padding: "20px",
-                    marginBottom: "20px", // Space between boxes
+                    marginBottom: "20px",
                     borderRadius: "8px",
                     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                   }}
                 >
                   <div style={{ flex: "1" }}>
                     <h3 style={{ marginBottom: "10px" }}>{complaint.title}</h3>
-                    <h5>Date: {complaint.date}</h5>
+                    <h5>
+                      Date:{" "}
+                      {new Date(complaint.date).toISOString().split("T")[0]}
+                    </h5>
                   </div>
 
                   <div style={{ display: "flex", gap: "10px" }}>
@@ -116,12 +158,12 @@ const ComplaintsArea = () => {
                         borderRadius: "4px",
                         cursor: "pointer",
                       }}
-                      onClick={() => openModal(complaint)}
+                      onClick={() => openModal(complaint._id)}
                     >
                       View Details
                     </button>
 
-                    {complaint.status === "Pending" && (
+                    {complaint.status === "pending" && (
                       <button
                         style={{
                           padding: "10px 15px",
@@ -131,7 +173,7 @@ const ComplaintsArea = () => {
                           borderRadius: "4px",
                           cursor: "pointer",
                         }}
-                        onClick={() => {}}
+                        onClick={() => handleResolveComplaint(complaint._id)}
                       >
                         Resolve
                       </button>
@@ -144,13 +186,17 @@ const ComplaintsArea = () => {
         </div>
       </div>
 
-      {modalOpen && (
+      {modalOpen && selectedComplaint && (
         <ComplaintModal
           isOpen={modalOpen}
           onClose={closeModal}
-          description={selectedComplaint?.description}
+          description={selectedComplaint.body}
+          isReplied={selectedComplaint.isReplied}
+          reply={selectedComplaint.reply || ""}
+          complaintId={selectedComplaint._id}
         />
       )}
+      <Toaster position="bottom-center" reverseOrder={false} />
     </section>
   );
 };

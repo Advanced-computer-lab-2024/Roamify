@@ -218,17 +218,10 @@ const acceptRejectUser = async (req, res) => {
     const { userIdString, approved } = req.body;
 
     if (!userIdString) {
-      return res.status(400).json({ message: 'select a user' });
+      return res.status(400).json({ message: "select a user" });
     }
     if (approved === null || approved === "")
       throw Error("please accept or reject");
-    const lastPart = url.split("/").pop(); // Get the last part after splitting by '/'
-
-    const result = lastPart.replace(/ID\.pdf$/, ""); // Matches "ID.pdf" at the end and removes it
-
-    if (!mongoose.Types.ObjectId.isValid(result)) {
-      return res.status(400).json({ message: "Invalid user ID in URL" });
-    }
 
     const userId = new mongoose.Types.ObjectId(userIdString);
 
@@ -298,8 +291,11 @@ const unflagItinerary = async (req, res) => {
 
 const getPendingUsers = async (req, res) => {
   try {
-    const pendingUsers = await userModel.find({ status: 'pending' }).select('username _id email role');
-    if (!pendingUsers || pendingUsers.length === 0) return res.status(400).json({ message: 'no pending users' });
+    const pendingUsers = await userModel
+      .find({ status: "pending" })
+      .select("username _id email role");
+    if (!pendingUsers || pendingUsers.length === 0)
+      return res.status(400).json({ message: "no pending users" });
 
     return res.status(200).json({ pendingUsers });
   } catch (error) {

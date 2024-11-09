@@ -1,5 +1,4 @@
 const express = require("express");
-const dotenv = require("dotenv").config();
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
@@ -21,20 +20,19 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const historicalTagRoutes = require("./routes/historicalTagRoutes");
 const preferenceTagRoutes = require("./routes/preferenceTagRoutes");
 const placesRoutes = require("./routes/placesRoutes");
-const complaintRoutes = require("./routes/complaintRoutes");
 const cartRoutes = require("./routes/cartRoute");
+const complaintRoutes = require("./routes/complaintRoutes");
 // Initialize app
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Database connection
+const PORT = 3000;
+// Database connections
 connectDB();
 
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: "http://localhost:3001",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
   })
 );
@@ -64,8 +62,8 @@ app.use("/api/category", categoryRoutes);
 app.use("/api/preference-tag", preferenceTagRoutes);
 app.use("/api/historical-tag", historicalTagRoutes);
 app.use("/api/places", placesRoutes);
-app.use("/api/complaint", complaintRoutes);
 app.use("/api/cart", authenticate(["tourist"]), cartRoutes);
+app.use("/api/complaint", complaintRoutes);
 
 // Start server
 app.listen(PORT, () => {

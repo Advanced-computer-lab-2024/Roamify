@@ -2,34 +2,21 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import SectionHeading from "../../../../component/Common/SectionHeading";
 import SideBar from "./SideBar";
-import { Link } from "react-router-dom";
-import PriceSlider from "./PriceSlider";
 
 const TouristActivitiesWrapper = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [date, setdate] = useState(null);
+  const [date, setDate] = useState(null);
   const [category, setCategory] = useState("");
-  const [sortCriteria, setSortCriteria] = useState({
-    field: "price",
-    order: "asc",
-  });
-  const [error, setError] = useState(null); // Track errors
+  const [sortCriteria, setSortCriteria] = useState({ field: "price", order: "asc" });
+  const [error, setError] = useState(null);
   const [minRating, setMinRating] = useState(0);
-  const [searchQuery, setSearchQuery] = useState(""); // New: search input
-  const [categoriesSearch, setCategoriesSearch] = useState([]);
-  const [tags, setTags] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
 
-  const fetchActivities = async (
-    minBudget,
-    maxBudget,
-    date,
-    minRating,
-    category,
-    tag,
-    searchQuery
-  ) => {
+  const fetchActivities = async (minBudget, maxBudget, date, minRating, category) => {
     setLoading(true);
     setError(null);
     try {
@@ -41,8 +28,6 @@ const TouristActivitiesWrapper = () => {
           date: date ? date.toISOString().split("T")[0] : undefined,
           minRating: minRating || undefined,
           category: category || undefined,
-          tag: tag || undefined,
-          search: searchQuery || undefined,
           sortBy: sortCriteria.field,
           sortOrder: sortCriteria.order,
         },
@@ -50,11 +35,11 @@ const TouristActivitiesWrapper = () => {
       setActivities(response.data.activities);
     } catch (error) {
       if (error.response && error.response.status === 404) {
-        setActivities([]); // Set activities to empty if 404
-        setError("No activities found"); // Display error message
+        setActivities([]);
+        setError("No activities found");
       } else {
         console.error("Error fetching activities:", error);
-        setError("An error occurred while fetching activities."); // Generic error message
+        setError("An error occurred while fetching activities.");
       }
     } finally {
       setLoading(false);
@@ -65,48 +50,44 @@ const TouristActivitiesWrapper = () => {
     fetchActivities(priceRange[0], priceRange[1], date, minRating, category);
   }, [priceRange, date, minRating, category, sortCriteria]);
 
-  const applyFilters = (newPriceRange) => {
-    setPriceRange(newPriceRange); // Update price range in state
-  };
-
-  const handleCategoryApply = (selectedCategory) => {
-    setCategory(selectedCategory);
-    applyFilters(priceRange);
-    fetchActivities(
-      priceRange[0],
-      priceRange[1],
-      date,
-      minRating,
-      selectedCategory
-    );
-  };
-
-  const handleSortChange = (field, order) => {
-    setSortCriteria({ field, order });
-    // Trigger fetchActivities here to refetch with new sorting
-    fetchActivities(priceRange[0], priceRange[1], date, minRating, category);
-  };
-  const handleRatingApply = (rating) => {
-    setMinRating(rating); // Update minRating
-    fetchActivities(priceRange[0], priceRange[1], date, rating, category); // Refetch activities with new minRating
-  };
-
-  const [categories, setCategories] = useState([]);
-
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/api/category/get-all"
-        );
+        const response = await axios.get("http://localhost:3000/api/category/get-all");
         setCategories(response.data.categories);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
     };
-
     fetchCategories();
   }, []);
+
+  const handleBooking = async (activityId, activityDate) => {
+    try {
+      // Ensure date is formatted as "YYYY-MM-DD"
+      const formattedDate = new Date(activityDate).toISOString().split("T")[0];
+
+      await axios.post(
+        "http://localhost:3000/api/tourist/book-activity",
+        { activity: activityId, date: formattedDate }, // Send correct JSON payload structure
+        { withCredentials: true }
+      );
+      setPopupMessage("Booking successful!");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+    } catch (error) {
+      // Check if there's a specific error message from the server
+      const errorMessage =
+        error.response && error.response.data && error.response.data.message
+          ? error.response.data.message
+          : "Failed to book activity. Please try again.";
+
+      setPopupMessage(errorMessage);
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+      console.error("Error booking activity:", error);
+    }
+  };
 
   return (
     <section id="explore_area" className="section_padding">
@@ -114,40 +95,16 @@ const TouristActivitiesWrapper = () => {
         <SectionHeading heading={`${activities.length} activities found`} />
         <div className="row">
           <div className="col-lg-3">
-            <div className="left_side_search_boxed">
-              <div className="left_side_search_heading">
-                <h5>Filter by price</h5>
-              </div>
-              <div className="filter-price">
-                <div id="price-slider">
-                  <PriceSlider onApply={applyFilters} />
-                </div>
-              </div>
-            </div>
             <SideBar
               priceRange={priceRange}
               setPriceRange={setPriceRange}
               date={date}
-              setdate={setdate}
-              onApplyFilters={applyFilters}
-              onCategoryApply={handleCategoryApply}
-              onSortChange={handleSortChange}
-              onRatingApply={handleRatingApply}
+              setDate={setDate}
+              onApplyFilters={fetchActivities}
+              onCategoryApply={(selectedCategory) => setCategory(selectedCategory)}
+              onSortChange={(field, order) => setSortCriteria({ field, order })}
+              onRatingApply={(rating) => setMinRating(rating)}
             />
-
-            <div className="left_side_search_boxed">
-              <div className="left_side_search_heading">
-                <h5>Filter by category</h5>
-              </div>
-              <select onChange={(e) => handleCategoryApply(e.target.value)}>
-                <option value="">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat._id} value={cat._id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
           <div className="col-lg-9">
             {loading ? (
@@ -156,11 +113,8 @@ const TouristActivitiesWrapper = () => {
               <p>{error}</p>
             ) : (
               <div className="flight_search_result_wrapper">
-                {activities.map((activity, index) => (
-                  <div
-                    className="flight_search_item_wrappper"
-                    key={activity._id}
-                  >
+                {activities.map((activity) => (
+                  <div className="flight_search_item_wrappper" key={activity._id}>
                     <div className="flight_search_items">
                       <div className="multi_city_flight_lists">
                         <div className="flight_multis_area_wrapper">
@@ -168,10 +122,7 @@ const TouristActivitiesWrapper = () => {
                             <div className="flight_search_destination">
                               <p>Location</p>
                               <h3>{activity.location.name}</h3>
-                              <h6>
-                                Coordinates:{" "}
-                                {activity.location.coordinates.join(", ")}
-                              </h6>
+                              <h6>Coordinates: {activity.location.coordinates.join(", ")}</h6>
                             </div>
                           </div>
                           <div className="flight_search_middel">
@@ -181,9 +132,7 @@ const TouristActivitiesWrapper = () => {
                             </div>
                             <div className="flight_search_destination">
                               <p>Date</p>
-                              <h3>
-                                {new Date(activity.date).toLocaleDateString()}
-                              </h3>
+                              <h3>{new Date(activity.date).toLocaleDateString()}</h3>
                               <h6>Time: {activity.time}</h6>
                             </div>
                           </div>
@@ -192,55 +141,39 @@ const TouristActivitiesWrapper = () => {
                       <div className="flight_search_right">
                         <h5>
                           {activity.discounts ? (
-                            <del>
-                              {(
-                                activity.price *
-                                (1 + activity.discounts / 100)
-                              ).toFixed(2)}{" "}
-                              EGP
-                            </del>
+                            <del>{(activity.price * (1 + activity.discounts / 100)).toFixed(2)} EGP</del>
                           ) : (
                             ""
                           )}
                         </h5>
                         <h2>
                           {activity.price} EGP
-                          <sup>
-                            {activity.discounts
-                              ? `${activity.discounts}% off`
-                              : ""}
-                          </sup>
+                          <sup>{activity.discounts ? `${activity.discounts}% off` : ""}</sup>
                         </h2>
-                        <Link
-                          to={`/activity-booking/${activity._id}`}
+                        <button
+                          onClick={() => handleBooking(activity._id, activity.date)}
                           className="btn btn_theme btn_sm"
                         >
                           Book now
-                        </Link>
+                        </button>
                         {activity.discounts ? <p>*Discount available</p> : ""}
                         <div
                           data-bs-toggle="collapse"
-                          data-bs-target={`#collapseExample${index}`}
+                          data-bs-target={`#collapseExample${activity._id}`}
                           aria-expanded="false"
-                          aria-controls={`collapseExample${index}`}
+                          aria-controls={`collapseExample${activity._id}`}
                         >
                           Show more <i className="fas fa-chevron-down"></i>
                         </div>
                       </div>
                     </div>
-                    <div
-                      className="flight_policy_refund collapse"
-                      id={`collapseExample${index}`}
-                    >
+                    <div className="flight_policy_refund collapse" id={`collapseExample${activity._id}`}>
                       <div className="flight_show_down_wrapper">
                         <div className="flight-shoe_dow_item">
                           <h4>Activity Details</h4>
+                          <p className="fz12">{activity.category.description}</p>
                           <p className="fz12">
-                            {activity.category.description}
-                          </p>
-                          <p className="fz12">
-                            Advertiser: {activity.advertiser.username} (
-                            {activity.advertiser.email})
+                            Advertiser: {activity.advertiser.username} ({activity.advertiser.email})
                           </p>
                         </div>
                         <div className="flight_refund_policy">
@@ -259,16 +192,47 @@ const TouristActivitiesWrapper = () => {
                 ))}
               </div>
             )}
-            {!loading && !error && (
-              <div className="load_more_flight">
-                <button className="btn btn_md">
-                  <i className="fas fa-spinner"></i> Load more..
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
+
+      {/* Popup for booking confirmation */}
+      {showPopup && (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "#fff",
+            padding: "20px",
+            borderRadius: "8px",
+            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+            zIndex: 1000,
+            minWidth: "300px",
+            textAlign: "center",
+          }}
+        >
+          <h4 style={{ color: "green", marginBottom: "10px" }}>{popupMessage}</h4>
+          <button onClick={() => setShowPopup(false)} className="btn btn_theme" style={{ marginTop: "10px" }}>
+            Close
+          </button>
+        </div>
+      )}
+      {showPopup && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 999,
+          }}
+          onClick={() => setShowPopup(false)}
+        />
+      )}
     </section>
   );
 };

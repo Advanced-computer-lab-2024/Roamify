@@ -3,13 +3,18 @@ const touristModel = require("../models/touristModel");
 const receiptModel = require("../models/receiptModel");
 const activityTicketsModel = require("../models/activityTicketModel");
 const itineraryTicketsModel = require("../models/itineraryTicketModel");
+const transportationModel = require("../models/transportationModel");
 
 const updatePoints = () => {
-    cron.schedule("19 20 * * *", async () => {  // Runs at 7:40 PM Cairo time
-        console.log('----------------------------JOB----------------------');
+    cron.schedule("30 23 * * *", async () => {  // Runs at 7:40 PM Cairo time
+        console.log('----------------------------UPDATE-POINTS----------------------');
         try {
             const receipts = await receiptModel.find({ status: 'successfull' });
-            const today = new Date();
+            // Get the current date and time
+            const now = new Date();
+
+            // Find all transportations with a date earlier than the current date and time
+            const transportations = await transportationModel.find({ date: { $lt: now } }); const today = new Date();
             today.setHours(0, 0, 0, 0); // Set to midnight for date-only comparison
 
             for (const receipt of receipts) {
@@ -59,6 +64,23 @@ const updatePoints = () => {
                         console.log(`Updated Points for Tourist ID ${tourist._id}:`, tourist.points);
                         await itineraryTicket.save();
 
+                    }
+                }
+            }
+
+            if (transportations.length > 0) {
+                for (const transportation of transportations) {
+                    for (const touristId of transportation.touristsBooked) {
+                        const tourist = await touristModel.findOne({ user: touristId });
+                        const level = tourist.level;
+                        const addPoints = level === 1 ? 0.5 * transportation.price : level === 2 ? transportation.price : transportation.price * 1.5;
+
+                        console.log(`Old Points for Tourist ID ${tourist._id}:`, tourist.points);
+                        tourist.points += addPoints;
+                        await tourist.save();
+                        transportation.pointsRedeemed = true
+                        console.log(`Updated Points for Tourist ID ${tourist._id}:`, tourist.points);
+                        await transportation.save();
                     }
                 }
             }

@@ -6,8 +6,20 @@ export const HeaderData = [
 
   {
     menu: "Activities",
-    link: "tourist-activities",
-    submenu: false,
+    submenu: true,
+    subMenuitem:[
+      {
+          subItem:"View All",
+          linkL:"/tourist/tourist-activities",
+          subMenuActive:false,
+      },
+     
+      {
+          subItem:" My Booked Activities",
+          linkL:"/tourist/tourist-booking",
+          subMenuActive:false,
+      },
+   ]
   },
   {
     menu: "Itineraries",
@@ -26,7 +38,6 @@ export const HeaderData = [
   },
   {
     menu: "Complain",
-    link: "/#",
     submenu:true,
     subMenuitem:[
        {

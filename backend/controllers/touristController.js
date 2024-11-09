@@ -365,8 +365,8 @@ const bookItinerary = async (req, res) => {
 
 const cancelActivity = async (req, res) => {
   try {
-    const tourist = await touristModel.findOne({ user: req.user._id }).populate('wallet');
-    const ticketIdString = req.body.ticketId;
+    const tourist = await touristModel.findOne({ user: req.user._id });
+    const activityIdString = req.body.activityId;
 
 
 
@@ -376,14 +376,10 @@ const cancelActivity = async (req, res) => {
 
     const date = new Date();
 
-    const ticketId = new mongoose.Types.ObjectId(ticketIdString);
-
-    const ticket = await activityTicketModel.findById(ticketId).populate('receipt').populate('activity');
-    if (!ticket || ticket.status === 'refunded') return res.status(400).json({ message: 'please choose a valid activity to cancel' });
-    console.log(ticket)
-
-    const timeDifference = ticket.activity.date.getTime() - date.getTime();
-    const hoursDifference = timeDifference / (1000 * 60 * 60);
+    for (const activity of tourist.bookedActivities) {
+      if (activity.activity.toString() === activityIdString) {
+        const timeDifference = activity.date.getTime() - date.getTime();
+        const hoursDifference = timeDifference / (1000 * 60 * 60);
 
 
     if (hoursDifference <= 48) {
@@ -491,12 +487,10 @@ const selectPreferenceTag = async (req, res) => {
     await tourist.save();
     return res.status(200).json({ message: "added preferences successfuly" });
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        message: "error in choosing preferences ",
-        error: error.message,
-      });
+    res.status(400).json({
+      message: "error in choosing preferences ",
+      error: error.message,
+    });
   }
 }
 
@@ -505,14 +499,13 @@ const cancelTransportationBooking = async (req, res) => {
   try {
     const transportationIdString = req.body.transportationId;
 
+
+
     // Check if transportation ID is provided
     if (!transportationIdString) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Please select one of your booked transportations to cancel.",
-        });
+      return res.status(400).json({
+        message: "Please select one of your booked transportations to cancel.",
+      });
     }
 
     const transportationId = new mongoose.Types.ObjectId(
@@ -553,17 +546,18 @@ const cancelTransportationBooking = async (req, res) => {
       price: transportation.price
     })
     await receipt.save()
+    const wallet = await walletModel.findOne({ tourist: req.user._id });
+    wallet.availableCredit += transportation.price
+    await wallet.save();
 
     return res
       .status(200)
       .json({ message: "Transportation booking cancelled successfully." });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: "Error cancelling transportation booking",
-        error: error.message,
-      });
+    return res.status(500).json({
+      message: "Error cancelling transportation booking",
+      error: error.message,
+    });
   }
 };
 
@@ -612,7 +606,15 @@ const getBookedFutureTransportations = async (req, res) => {
 
 const getFilteredTransportations = async (req, res) => {
   try {
-    const { pickupLocation, dropOffLocation, date, time, type, sortBy, sortOrder = "asc" } = req.query;
+    const {
+      pickupLocation,
+      dropOffLocation,
+      date,
+      time,
+      type,
+      sortBy,
+      sortOrder = "asc",
+    } = req.query;
 
     let filter = {};
 
@@ -648,24 +650,35 @@ const getFilteredTransportations = async (req, res) => {
     }
 
     // Execute the query with the defined filters
-    const transportations = await transportationModel.find(filter)
+    const transportations = await transportationModel
+      .find(filter)
       .sort(sortOptions)
       .populate({
         path: "advertiser",
-        select: "name email" // Populate advertiser with specific fields
+        select: "name email", // Populate advertiser with specific fields
       });
 
     if (!transportations.length) {
-      return res.status(404).json({ message: "No transportations found matching your criteria" });
+      return res
+        .status(404)
+        .json({ message: "No transportations found matching your criteria" });
     }
 
-    res.status(200).json({ message: "Transportations retrieved successfully", transportations });
+    res
+      .status(200)
+      .json({
+        message: "Transportations retrieved successfully",
+        transportations,
+      });
   } catch (error) {
-    res.status(500).json({ message: "Failed to retrieve transportations", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Failed to retrieve transportations",
+        error: error.message,
+      });
   }
 };
-
-
 
 const bookTransportation = async (req, res) => {
   try {
@@ -708,6 +721,11 @@ const bookTransportation = async (req, res) => {
       receiptType: 'payment'
     });
     await receipt.save()
+    const wallet = await walletModel.findById(tourist.wallet._id);
+
+    wallet.availableCredit -= transportation.price
+    await tourist.save()
+    await wallet.save();
 
     return res.status(200).json({
       message: "Transportation booked successfully",
@@ -726,41 +744,37 @@ const bookTransportation = async (req, res) => {
 const getAllBookedActivities = async (req, res) => {
   try {
 
-    const tourist = await touristModel.findOne({ user: req.user._id });
-
+    const tourist = await touristModel.findOne({ user: req.user._id }).populate('bookedItineraries.itinerary');
     if (!tourist) return res.status(400).json({ message: 'user does not exist' });
 
-    const activityTickets = await activityTicketModel
-      .find({ tourist: req.user._id, status: 'active' })
-      .populate('activity', 'date time name location.name'); // Specify the fields you want to include
-    if (activityTickets.length === 0) return res.status(400).json({ message: 'no booked activities yet' })
-    return res.status(200).json(activityTickets);
+    if (tourist.bookedItineraries.length === 0) return res.status(400).json({ message: 'you have no itineraries booked yet' });
+
+    return res.status(200).json(tourist.bookedItineraries);
 
   }
   catch (error) {
-    return res.status(400).json({ message: 'couldn\'t retrieve booked activities', error: error.message });
+    return res.status(400).json({ message: 'couldn\'t retrieve booked itineraries', error: error.message });
 
   }
 }
-const getAllBookedItineraries = async (req, res) => {
+const getAllBookedActivities = async (req, res) => {
   try {
 
-    const tourist = await touristModel.findOne({ user: req.user._id });
+    const tourist = await touristModel.findOne({ user: req.user._id }).populate('bookedActivities.activity');
 
-    if (!tourist) return res.status(400).json({ message: 'user does not exist' });
+    if (!tourist)
+      return res.status(400).json({ message: "user does not exist" });
 
-    const itineraryTickets = await itineraryTicketModel
-      .find({ tourist: req.user._id, status: 'active' })
-      .populate('itinerary'); // Specify the fields you want to include
-    if (itineraryTickets.length === 0) return res.status(400).json({ message: 'no booked itineraries yet' })
-    return res.status(200).json(itineraryTickets);
+    if (tourist.bookedActivities.length === 0) return res.status(400).json({ message: 'you have no activities booked yet' });
+
+    return res.status(200).json(tourist.bookedActivities);
 
   }
   catch (error) {
     return res.status(400).json({ message: 'couldn\'t retrieve booked activities', error: error.message });
 
   }
-}
+};
 
 
 //     const tourist = await touristModel
@@ -817,8 +831,10 @@ const getAllUpcomingBookedItineraries = async (req, res) => {
   try {
     const tourist = await touristModel
       .findOne({ user: req.user._id })
+      .populate('bookedItineraries.itinerary');
 
-    if (!tourist) return res.status(400).json({ message: 'User does not exist' });
+    if (!tourist)
+      return res.status(400).json({ message: "User does not exist" });
 
     const currentDate = new Date();
 
@@ -828,61 +844,51 @@ const getAllUpcomingBookedItineraries = async (req, res) => {
 
 
     // Filter bookedActivities for future dates
-    const upcomingItineraries = itineraryTickets.filter(ticket =>
-      ticket.date && ticket.date > currentDate
+    const upcomingItineraries = tourist.bookedItineraries.filter(itinerary =>
+      itinerary.date && itinerary.date > currentDate
     );
 
     if (upcomingItineraries.length === 0) {
-      return res.status(200).json({ message: 'No upcoming booked itineraries' });
+      return res
+        .status(200)
+        .json({ message: "No upcoming booked itineraries" });
     }
 
     return res.status(200).json(upcomingItineraries);
   } catch (error) {
-    return res.status(400).json({ message: "Couldn't retrieve booked itineraries", error: error.message });
+    return res
+      .status(400)
+      .json({
+        message: "Couldn't retrieve booked itineraries",
+        error: error.message,
+      });
   }
 };
 
 const viewPointsLevel = async (req, res) => {
   try {
-    const tourist = await touristModel.findOne({ user: req.user._id })
-    if (!tourist) return res.status(400).json({ message: 'user doesn\'t exist' })
+    const tourist = await touristModel
+      .findOne({ user: req.user._id })
+      .populate('bookedActivities.activity'); // Populate activity details in bookedActivities
 
-    return res.status(200).json({ level: tourist.level, points: tourist.points })
+    if (!tourist) return res.status(400).json({ message: 'User does not exist' });
 
+    const currentDate = new Date();
+
+    // Filter bookedActivities for future dates
+    const upcomingActivities = tourist.bookedActivities.filter(activity =>
+      activity.date && activity.date > currentDate
+    );
+
+    if (upcomingActivities.length === 0) {
+      return res.status(200).json({ message: 'No upcoming booked activities' });
+    }
+
+    return res.status(200).json(upcomingActivities);
+  } catch (error) {
+    return res.status(400).json({ message: "Couldn't retrieve booked activities", error: error.message });
   }
-  catch (error) {
-    return res.status(400).json({ message: 'couldn\'t retrieve points and level' })
+};
 
-  }
-}
 
-const redeemPoints = async (req, res) => {
-  try {
-    const tourist = await touristModel.findOne({ user: req.user._id });
-    if (!tourist) return res.status(400).json({ message: 'user doesn\'t exist' })
-    const ammount = req.body.ammount;
-    if (!ammount) return res.status(400).json({ message: 'please select ammount to redeem' })
-
-    const points = tourist.points;
-    if (points === 0) return res.status(400).json({ message: 'sorry you doesn\'t have points' })
-
-    const pointsRequired = ammount * 100;
-    console.log(pointsRequired)
-    if (points < pointsRequired) return res.status(400).json({ message: 'not enough points' });
-
-    tourist.points -= pointsRequired;
-    await tourist.save();
-
-    const wallet = await walletModel.findOne({ tourist: req.user._id });
-    wallet.availableCredit += ammount;
-    await wallet.save();
-    return res.status(200).json({ message: 'redeemed points successfully' })
-
-  }
-  catch (error) {
-    return res.status(400).json({ message: 'error in redeeming points', error: error.message })
-
-  }
-}
-
-module.exports = { createProfile, getProfile, updateProfile, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations, viewPointsLevel, redeemPoints, getBookedFutureTransportations };
+module.exports = { createProfile, getProfile, updateProfile, addWallet, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations };
