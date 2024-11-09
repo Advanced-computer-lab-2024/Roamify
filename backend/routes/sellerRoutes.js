@@ -7,4 +7,5 @@ const router = express.Router();
 router.post('/create-profile',sellerController.createProfile);
 router.get('/get-profile',sellerController.getProfile);
 router.put('/update-profile',sellerController.updateProfile);
+router.post('/upload-logo',sellerController.upload,sellerController.uploadLogo);
 module.exports = router;

@@ -1,8 +1,10 @@
 const touristModel = require("../models/touristModel");
+const transportationModel = require("../models/transportationModel");
 const userModel = require("../models/userModel");
 const walletModel = require("../models/walletModel");
-const bcrypt = require("bcrypt");
 const validator = require("validator");
+const mongoose = require('mongoose');
+const preferenceTagModel = require("../models/preferenceTagModel");
 
 // Helper function to check if a user is an adult based on date of birth
 function isAdult(dateOfBirth) {
@@ -27,6 +29,7 @@ const createProfile = async (req, res) => {
       return res.status(400).json({ error: "Profile already created" });
     }
   }
+  await userModel.findByIdAndUpdate(req.user._id, { status: 'active' });
 
   const { firstName, lastName, mobileNumber, nationality, dateOfBirth, occupation } = req.body;
   try {
@@ -56,16 +59,16 @@ const getProfile = async (req, res) => {
   try {
     const id = req.user._id;
     const details = await touristModel
-        .findOne({ user: id })
-        .populate({
-          path: "user",
-          select: "username email role status", // Only include these fields from user
-        })
-        .populate({
-          path: "wallet",
-          select: "cardNumber cardValidUntil", // Only specific wallet fields
-        })
-        .select("-__v"); // Exclude Mongoose version key
+      .findOne({ user: id })
+      .populate({
+        path: "user",
+        select: "username email role status", // Only include these fields from user
+      })
+      .populate({
+        path: "wallet",
+        select: "cardNumber cardValidUntil", // Only specific wallet fields
+      })
+      .select("-__v"); // Exclude Mongoose version key
 
     if (!details) {
       return res.status(404).json({ message: "Profile not found" });
@@ -85,6 +88,8 @@ const getProfile = async (req, res) => {
       adult: details.adult,
       cardNumber: details.wallet?.cardNumber || "",
       cardValidUntil: details.wallet?.cardValidUntil || "",
+      bookedItineraries: details.bookedItineraries,
+      bookedActivities: details.bookedActivities
     };
 
     return res.status(200).json(responseData);
@@ -123,7 +128,7 @@ const updateProfile = async (req, res) => {
       userUpdates.email = email;
     }
 
-    
+
 
     // Perform updates
     await userModel.findByIdAndUpdate(id, userUpdates, { new: true });
@@ -166,4 +171,142 @@ const addWallet = async (req, res) => {
   }
 };
 
-module.exports = { createProfile, getProfile, updateProfile, addWallet };
+const bookActivity = async (req, res) => {
+  try {
+    // Find the tourist by the user's ID
+    const tourist = await touristModel.findOne({ user: req.user._id });
+    if (!tourist) throw new Error("Tourist does not exist");
+
+    const { activity, date } = req.body;
+    if (!activity) throw new Error("Please choose an activity to book");
+    if (!date) throw new Error("Date is required");
+
+    const activityId = new mongoose.Types.ObjectId(activity);
+    const bookingDate = new Date(date);
+
+    // Check if the activity with the same date already exists in bookedActivities
+    const exists = tourist.bookedActivities.some(
+      (entry) =>
+        entry.activity.equals(activityId) &&
+        entry.date.getTime() === bookingDate.getTime()
+    );
+
+    if (exists) {
+      return res.status(400).json({ message: "Activity already booked for this date" });
+    }
+
+    const activityEntry = {
+      activity: activityId,
+      date: bookingDate,
+    };
+
+    // Add the activity to bookedActivities if it doesn't exist
+    await touristModel.updateOne(
+      { user: req.user._id },
+      { $addToSet: { bookedActivities: activityEntry } }
+    );
+
+    return res.status(200).json({ message: "Activity booked successfully" });
+  } catch (error) {
+    res.status(400).json({ message: "Error booking activity", error: error.message });
+  }
+};
+
+const bookItinerary = async (req, res) => {
+  try {
+    const tourist = await touristModel.findOne({ user: req.user._id });
+    if (!tourist) throw new Error("Tourist does not exist");
+
+    const { itinerary, date } = req.body;
+    if (!itinerary) throw new Error("Itinerary is required");
+    if (!date) throw new Error("date is required");
+
+    const itineraryId = new mongoose.Types.ObjectId(itinerary);
+
+    const bookingDate = new Date(date);
+    if (isNaN(bookingDate)) throw new Error("Invalid date format");
+
+    const exists = tourist.bookedItineraries.some(
+      (entry) =>
+        entry.itinerary.equals(itineraryId) &&
+        entry.date.getTime() === bookingDate.getTime()
+    );
+
+    if (exists) {
+      return res.status(400).json({ message: "Itinerary already booked for this date" });
+    }
+
+    const itineraryEntry = {
+      itinerary: itineraryId,
+      date: bookingDate,
+    };
+
+    await touristModel.updateOne(
+      { user: req.user._id },
+      { $addToSet: { bookedItineraries: itineraryEntry } }
+    );
+
+    return res.status(200).json({ message: "Itinerary booked successfully" });
+  } catch (error) {
+    res.status(400).json({ message: "Error booking itinerary", error: error.message });
+  }
+};
+
+const selectPreferenceTag = async (req, res) => {
+  try {
+    const preferences = req.body.preferences;
+    const user = await userModel.findById(req.user._id);
+    if (!preferences)
+      throw Error('please select preferences');
+
+    const preferenceIds = preferences.map(preference => new mongoose.Types.ObjectId(preference));
+    const tourist = await touristModel.findOne({ user: req.user._id });
+
+    for (preferenceId of preferenceIds) {
+      const pTag = await preferenceTagModel.findById(preferenceId);
+      if (!pTag) throw Error('please choose valid preference tags');
+      else {
+        if (!tourist.preferences.includes(preferenceId))
+          tourist.preferences.push(preferenceId);
+
+        else
+          throw Error('preferenc already exists in your preferences please try again and select new preferences')
+      }
+
+    }
+    await tourist.save();
+    return res.status(200).json({ message: 'added preferences successfuly' });
+
+  }
+  catch (error) {
+    res.status(400).json({ message: 'error in choosing preferences ', error: error.message });
+  }
+}
+
+const bookTransportation = async (req, res) => {
+  try {
+
+    const transportationIdString = req.body.transportationIdString;
+    if (!transportationIdString) throw Error('please pick a transportation');
+
+    const transportationId = new mongoose.Types.ObjectId(transportationIdString);
+
+    const transportation = await transportationModel.findById(transportationId);
+    if (!transportation) throw Error("Invalid transportation");
+    if (transportation.touristsBooked.includes(req.user._id)) {
+      return res.status(400).json({ message: "You have already booked this transportation" });
+    }
+    transportation.touristsBooked.push(req.user._id);
+    await transportation.save();
+
+    return res.status(200).json({
+      message: "Transportation booked successfully"
+    });
+
+  }
+  catch (error) {
+    return res.status(400).json({ message: 'unable to book transportation', error: error.message })
+
+  }
+}
+module.exports = { createProfile, getProfile, updateProfile, addWallet, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation };

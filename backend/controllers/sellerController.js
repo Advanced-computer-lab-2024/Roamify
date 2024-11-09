@@ -2,10 +2,21 @@ const userModel = require('../models/userModel');
 const sellerModel = require('../models/sellerModel');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
+const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
+const multer = require('multer');
+const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
+const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
+
 
 const createProfile = async (req, res) => {
     try {
         const userId = req.user._id;
+        const user = await userModel.findById(userId);
+        if(user.status === "pending")
+          throw Error('pending admin approval');
+        
+    if(!user.termsAndConditions)
+      throw Error('sorry you must accept our terms and conditions in order to proceed');
 
         if (userId) {
             const result = await sellerModel.findOne({ user: userId });
@@ -46,7 +57,7 @@ const getProfile = async (req, res) => {
         });
       
         if (details)
-            res.status(200).json({username:details.user.username,email:details.user.email,firstName:details.firstName,lastName:details.lastName,description:details.description});
+            res.status(200).json({username:details.user.username,email:details.user.email,firstName:details.firstName,lastName:details.lastName,description:details.description,logo:details.logo.url});
         else {
             throw Error( "this profile does not exist" );
         }
@@ -111,4 +122,43 @@ const updateProfile = async (req, res) => {
     }
   };
   
-module.exports = {createProfile,getProfile,updateProfile};
+const uploadLogo = async (req,res)=>{
+  try{
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'Logo is required' });
+    }
+
+    const file = req.file;
+    let imageUrl;
+
+    await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { resource_type: 'image' },
+        (error, result) => {
+          if (error) {
+            reject(new Error('Upload Error'));
+          } else {
+            imageUrl = { url: result.secure_url, publicId: result.public_id };
+            resolve();
+          }
+        }
+      );
+
+      // Upload the file buffer directly to Cloudinary
+      uploadStream.end(file.buffer);
+    });
+
+    await sellerModel.findOneAndUpdate({user:req.user._id},{logo:imageUrl});
+
+    res.status(200).json({
+      message: 'Logo uploaded successfully',
+    });
+  }
+  catch(error){
+    res.status(500).json({ message: 'Error uploading logo', error: error.message });
+
+
+  }
+}
+module.exports = {createProfile,getProfile,updateProfile,upload,uploadLogo};

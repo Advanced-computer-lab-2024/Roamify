@@ -1,11 +1,12 @@
 const touristModel = require("../models/touristModel");
+const itineraryModel = require("../models/itineraryModel");
 const userModel = require("../models/userModel");
 const sellerModel = require("../models/sellerModel");
 const advertiserModel = require("../models/advertiserModel");
 const tourGuideModel = require("../models/tourGuideModel");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
-
+const { default: mongoose } = require("mongoose");
 
 const addTourismGovernor = async (req, res) => {
   const { username, password } = req.body;
@@ -58,10 +59,6 @@ const addTourismGovernor = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-
-
 const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -118,13 +115,12 @@ const deleteUser = async (req, res) => {
     return res.status(500).json({ message: "Failed to delete user", error: error.message });
   }
 };
-
 const addAdmin = async (req, res) => {
   const { username, password } = req.body;
 
   try {
     // Check if the admin username already exists
-    const userExists = await User.findOne({ username });
+    const userExists = await userModel.findOne({ username });
     if (userExists) {
       return res.status(400).json({ message: "Admin already exists" });
     }
@@ -135,7 +131,7 @@ const addAdmin = async (req, res) => {
     }
 
     // Find the last created admin and determine the next number for email
-    const lastAdmin = await User.findOne({ role: "admin" }).sort({ createdAt: -1 });
+    const lastAdmin = await userModel.findOne({ role: "admin" }).sort({ createdAt: -1 });
     let nextAdminNumber = 1; // Default to 1 if no admin exists
 
     if (lastAdmin) {
@@ -154,7 +150,7 @@ const addAdmin = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create the new admin user
-    const newAdmin = new User({
+    const newAdmin = new userModel({
       username,
       email,
       password: hashedPassword,
@@ -172,46 +168,110 @@ const addAdmin = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-// Get users by role
-const getUsersByRole = async (req, res) => {
+const viewUploadedDocuments = async (req, res) => {
   try {
-    const role = req.params.role;
+    const userId = req.params.userId;
+    if (!userId) return res.status(400).json({ message: 'please choose a user' });
 
-    // Validate the role
-    if (
-        ![
-          "admin",
-          "tourist",
-          "seller",
-          "tourGuide",
-          "advertiser",
-          "tourismGovernor",
-        ].includes(role)
-    ) {
-      return res.status(400).json({ message: "Invalid role specified." });
+    const id = new mongoose.Types.ObjectId(userId);
+
+    const userUrls = await userModel.findById(id).select('idDocument additionalDocument');
+
+    res.status(200).json({ IDs: userUrls.idDocument.url, additionalDocuments: userUrls.additionalDocument.url });
+  }
+  catch (e) {
+    res.status(400).json({ message: 'couldn\'t get document', error: e.message })
+  }
+}
+const acceptRejectUser = async (req, res) => {
+  try {
+    const { url, approved } = req.body;
+
+    if (!url) {
+      console.log('No URL provided');
+      return res.status(400).json({ message: 'URL is required' });
+    }
+    if (approved === null || approved === '')
+      throw Error('please accept or reject')
+    const lastPart = url.split('/').pop(); // Get the last part after splitting by '/'
+
+    const result = lastPart.replace(/ID\.pdf$/, ''); // Matches "ID.pdf" at the end and removes it
+
+    if (!mongoose.Types.ObjectId.isValid(result)) {
+      return res.status(400).json({ message: 'Invalid user ID in URL' });
     }
 
-    // Fetch users based on the role, selecting only specific fields
-    const users = await userModel
-        .find({ role })
-        .select("id username email status"); // Only include necessary fields
+    const userId = new mongoose.Types.ObjectId(result);
 
-    // Check if no users were found
-    if (users.length === 0) {
-      return res.status(404).json({
-        message: `No accounts found with the role: ${role}.`,
-      });
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
-    // Respond with the filtered user data
-    res.status(200).json({
-      message: `Users with role ${role} retrieved successfully.`,
-      users,
-    });
+    if (user.status !== "pending")
+      throw Error('we have responded our approval/dissaproval for this user')
+
+    if (approved === "accept") {
+      await userModel.findByIdAndUpdate(userId, { status: "pending creation" });
+      return res.status(200).json({ message: 'Accepted user successfully' });
+    } else {
+      await userModel.findByIdAndUpdate(userId, { status: "rejected" });
+      return res.status(200).json({ message: 'Rejected and user successfully' });
+    }
+
   } catch (error) {
-    console.error("Error retrieving users by role:", error);
-    res.status(500).json({ message: "An error occurred on the server." });
+    res.status(400).json({ message: "Couldn't accept or reject user", error: error.message });
   }
 };
+const flagItinerary = async (req, res) => {
+  try {
+    const { itineraryIdString } = req.body;
+    if (!itineraryIdString) throw Error("Please choose an itinerary to unflag");
 
-module.exports = { addTourismGovernor, deleteUser, addAdmin , getUsersByRole };
+    const itineraryId = new mongoose.Types.ObjectId(itineraryIdString);
+
+    await itineraryModel.findByIdAndUpdate(itineraryId, { flag: true });
+
+    return res.status(200).json({
+      message: "Itinerary flagged. It is now invisible to tourists and guests."
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Couldn't flag itinerary",
+      error: error.message
+    });
+  }
+}
+const unflagItinerary = async (req, res) => {
+  try {
+    const { itineraryIdString } = req.body;
+    if (!itineraryIdString) throw Error("Please choose an itinerary to unflag");
+
+    const itineraryId = new mongoose.Types.ObjectId(itineraryIdString);
+
+    await itineraryModel.findByIdAndUpdate(itineraryId, { flag: false });
+
+    return res.status(200).json({
+      message: "Itinerary unflagged. It is now visible to tourists and guests."
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Couldn't unflag itinerary",
+      error: error.message
+    });
+  }
+}
+const getPendingUsers = async (req, res) => {
+  try {
+    const pendingUsers = await userModel.find({ status: 'pending' }).select('username _id email role');
+    if (!pendingUsers) return res.status(400).json({ message: 'no pending users' });
+    return res.status(200).json({ pendingUsers });
+
+  }
+  catch (error) {
+    return res.status(400).json({ message: 'error in fetching pending users', error: error.message });
+
+  }
+}
+
+module.exports = { addTourismGovernor, deleteUser, addAdmin, viewUploadedDocuments, acceptRejectUser, flagItinerary, unflagItinerary, getPendingUsers };

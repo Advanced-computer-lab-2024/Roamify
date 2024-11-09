@@ -44,6 +44,11 @@ const itinerarySchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        status: {
+            type: String,
+            enum: ['active', 'inactive'], // Only allow 'active' or 'inactive' values
+            default: 'active', // Set default status to 'active'
+          },
         accessibility: {
             type: Boolean,
             required: true,
@@ -52,6 +57,10 @@ const itinerarySchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        flag:{
+            type:Boolean,
+            default:false
+        }
     },
     { timestamps: true }
 );

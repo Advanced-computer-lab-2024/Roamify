@@ -10,5 +10,6 @@ router.post('/create-itinerary', tourGuideController.createItinerary);
 router.put('/update-itinerary/:itineraryId', tourGuideController.updateItinerary);
 router.delete('/delete-itinerary/:itineraryId', tourGuideController.deleteItinerary);
 router.get('/get-my-itineraries', tourGuideController.getMyItineraries);
-
+router.post('/upload-profile-picture',tourGuideController.upload,tourGuideController.uploadProfilePicture);
+router.put('/set-status-itinerary',tourGuideController.setStatusOfItinerary);
 module.exports = router;

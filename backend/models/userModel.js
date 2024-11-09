@@ -8,6 +8,14 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    idDocument: {
+      url: String,           // Secure URL to access the file
+      public_id: String,     // Public ID needed for deletion
+    },
+    additionalDocument: {
+      url: String,           // Secure URL to access the file
+      public_id: String,     // Public ID needed for deletion
+    },
     email: {
       type: String,
       required: true,
@@ -19,7 +27,7 @@ const userSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active","pending","pending creation"],
+      enum: ["active","pending","pending creation","rejected"],
       default: "pending",
     },
     role: {
@@ -33,6 +41,9 @@ const userSchema = new mongoose.Schema(
         "admin",
       ]
     },
+    termsAndConditions:{
+      type:Boolean
+    }
   },
   { timestamps: true }
 );
@@ -62,7 +73,7 @@ userSchema.statics.signUp = async function (username,email,password,role){
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(password,salt);
   const status =
-      role === "tourist" || role === "tourismGovernor" || role==="admin" ? "active" : "pending";
+       role === "tourismGovernor" || role==="admin" ? "active" : role==="tourist"? "pending creation" :"pending";
 
   return await this.create({username, email, password: hash, status, role});
 

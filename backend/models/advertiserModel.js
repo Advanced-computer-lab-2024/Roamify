@@ -7,6 +7,14 @@ const advertiserSchema = new mongoose.Schema(
       ref: "user",
       unique: true,
     },
+    logo: {
+      url: {
+          type: String,
+      },
+      publicId: {
+          type: String,
+      }
+  },
     companyName: {
       type: String,
       required: true,
