@@ -91,8 +91,6 @@ const updatePoints = () => {
         timezone: "Africa/Cairo"
     });
 };
-
-// New method to reset points for all tourists
 const setLevel = () => {
     cron.schedule("17 20 * * *", async () => { // Runs on the first day of every month at midnight
         console.log('------------------RESETTING POINTS------------------');
@@ -117,4 +115,5 @@ const setLevel = () => {
         }
     });
 };
+
 module.exports = { updatePoints, setLevel };
