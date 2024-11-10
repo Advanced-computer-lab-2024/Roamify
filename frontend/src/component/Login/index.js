@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toKebabCase } from "../../functions/toKebabCase.js";
 
 const LoginArea = () => {
   const [username, setUsername] = useState("");
@@ -29,9 +30,6 @@ const LoginArea = () => {
 
       // Store user role in localStorage
       localStorage.setItem("role", role);
-      const toKebabCase = (str) => {
-        return str.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-      };
 
       // Determine the correct navigation route based on conditions
       if (status === "active") {

@@ -1,16 +1,19 @@
-// TouristProfileArea.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ProfileSidebar from "./ProfileSideBar";
 import EditIcon from "../../component/Icons/EditIcon";
+import { useNavigate } from "react-router-dom";
+import ConfirmModal from "../../component/Modals/ConfirmModal";
 
-const AccoutPreferences = ({ fields }) => {
+const AccountPreferences = ({ fields }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editFields, setEditFields] = useState({});
   const [isEditing, setIsEditing] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
   const role = localStorage.getItem("role");
+  const navigate = useNavigate();
 
   useEffect(() => {
     setEditFields(fields);
@@ -27,7 +30,7 @@ const AccoutPreferences = ({ fields }) => {
   const handleUpdateProfile = async () => {
     try {
       await axios.put(
-        `http://localhost:3000/api/${role.toLocaleLowerCase()}/update-profile`,
+        `http://localhost:3000/api/${role.toLowerCase()}/update-profile`,
         editFields,
         { withCredentials: true }
       );
@@ -38,11 +41,21 @@ const AccoutPreferences = ({ fields }) => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    try {
+      await axios.delete(`http://localhost:3000/api/user/delete-account`, {
+        withCredentials: true,
+      });
+      alert("Account deleted successfully.");
+      localStorage.clear();
+      navigate("/login");
+    } catch (err) {
+      alert("Failed to delete account: " + err.message);
+    }
+  };
+
   return (
     <div style={{ display: "flex", flex: 1, margin: "0 auto", height: "80vh" }}>
-      {/* Sidebar */}
-
-      {/* Profile Information */}
       <div style={{ flex: 1 }}>
         <div
           style={{
@@ -57,7 +70,6 @@ const AccoutPreferences = ({ fields }) => {
           </h3>
           <ul style={{ listStyle: "none", padding: "0" }}>
             {Object.entries(editFields).map(([key, value]) => {
-              // Skip certain fields
               if (
                 key === "adult" ||
                 key === "cardNumber" ||
@@ -67,10 +79,6 @@ const AccoutPreferences = ({ fields }) => {
                 key === "profilePicture"
               )
                 return null;
-
-              if (key === "logo") {
-                return <img src={value} key={key} />;
-              }
 
               return (
                 <li
@@ -88,7 +96,7 @@ const AccoutPreferences = ({ fields }) => {
                       color: "#333",
                       textTransform: "capitalize",
                       flex: 1,
-                      textAlign: "left", // Align label to the left
+                      textAlign: "left",
                     }}
                   >
                     {key.replace(/([A-Z])/g, " $1")}:
@@ -130,7 +138,7 @@ const AccoutPreferences = ({ fields }) => {
                       }}
                     >
                       {value}
-                    </span> // Center uneditable value
+                    </span>
                   )}
                   {key !== "username" && (
                     <button
@@ -152,7 +160,6 @@ const AccoutPreferences = ({ fields }) => {
             })}
           </ul>
 
-          {/* Wallet Details Section */}
           {role === "tourist" && (
             <div>
               <h3 style={{ marginTop: "30px", color: "#333" }}>
@@ -211,10 +218,35 @@ const AccoutPreferences = ({ fields }) => {
           >
             Confirm
           </button>
+
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)} // Open the modal
+            style={{
+              display: "block",
+              width: "100%",
+              padding: "10px 0",
+              backgroundColor: "#dc3545",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              marginTop: "20px",
+            }}
+          >
+            Delete Account
+          </button>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleDeleteAccount}
+      />
     </div>
   );
 };
 
-export default AccoutPreferences;
+export default AccountPreferences;

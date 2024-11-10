@@ -10,6 +10,9 @@ const Header = ({ HeaderData }) => {
   const [currency, setCurrency] = useState(
     localStorage.getItem("currency") || "USD"
   );
+  const [currencySymbol, setCurrencySymbol] = useState(
+    localStorage.getItem("currencySymbol") || "$"
+  );
   const [currencyOptions, setCurrencyOptions] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -17,9 +20,9 @@ const Header = ({ HeaderData }) => {
     const fetchCurrencyOptions = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/currencies"
+          "http://localhost:3000/api/exchange-rate/fetch-all"
         );
-        setCurrencyOptions(response.data.currencies);
+        setCurrencyOptions(response.data.exchangeRates);
       } catch (error) {
         console.error("Error fetching currencies:", error);
       }
@@ -30,14 +33,22 @@ const Header = ({ HeaderData }) => {
     }
   }, [role]);
 
-  const handleCurrencyChange = (selectedCurrency) => {
+  const handleCurrencyChange = (
+    selectedCurrency,
+    selectedSymbol,
+    exchangeRate
+  ) => {
     setCurrency(selectedCurrency);
+    setCurrencySymbol(selectedSymbol);
     localStorage.setItem("currency", selectedCurrency);
+    localStorage.setItem("currencySymbol", selectedSymbol);
+    localStorage.setItem("value", exchangeRate); // Save exchange rate as "value"
+    window.location.reload(); // Trigger a page reload
   };
 
   // Filtered list based on search term
   const filteredCurrencyOptions = currencyOptions.filter((currencyOption) =>
-    currencyOption.toLowerCase().includes(searchTerm.toLowerCase())
+    currencyOption.currency.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -93,7 +104,17 @@ const Header = ({ HeaderData }) => {
                     />
                     <select
                       value={currency}
-                      onChange={(e) => handleCurrencyChange(e.target.value)}
+                      onChange={(e) => {
+                        const selectedCurrency = e.target.value;
+                        const selectedOption = currencyOptions.find(
+                          (option) => option.currency === selectedCurrency
+                        );
+                        handleCurrencyChange(
+                          selectedCurrency,
+                          selectedOption ? selectedOption.symbol : "$",
+                          selectedOption ? selectedOption.value : 1 // Save exchange rate
+                        );
+                      }}
                       style={{
                         padding: "5px",
                         borderRadius: "5px",
@@ -106,8 +127,11 @@ const Header = ({ HeaderData }) => {
                       className="currency-dropdown"
                     >
                       {filteredCurrencyOptions.map((currencyOption) => (
-                        <option key={currencyOption} value={currencyOption}>
-                          {currencyOption}
+                        <option
+                          key={currencyOption.currency}
+                          value={currencyOption.currency}
+                        >
+                          {currencyOption.currency} ({currencyOption.symbol})
                         </option>
                       ))}
                     </select>

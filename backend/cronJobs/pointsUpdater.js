@@ -6,15 +6,18 @@ const itineraryTicketsModel = require("../models/itineraryTicketModel");
 const transportationModel = require("../models/transportationModel");
 
 const updatePoints = () => {
-    cron.schedule("30 23 * * *", async () => {  // Runs at 7:40 PM Cairo time
+    cron.schedule("30 12 * * *", async () => {  // Runs at 7:40 PM Cairo time
         console.log('----------------------------UPDATE-POINTS----------------------');
+        let addPoints = 0
+        let userId = null
+
         try {
             const receipts = await receiptModel.find({ status: 'successfull' });
             // Get the current date and time
             const now = new Date();
 
             // Find all transportations with a date earlier than the current date and time
-            const transportations = await transportationModel.find({ date: { $lt: now } }); const today = new Date();
+            const transportations = await transportationModel.find({ date: { $lt: now }, pointsRedeemed: false }); const today = new Date();
             today.setHours(0, 0, 0, 0); // Set to midnight for date-only comparison
 
             for (const receipt of receipts) {
@@ -30,9 +33,10 @@ const updatePoints = () => {
 
                     if (today > eventDate) {
                         console.log('updating activity Points')
+                        userId = activityTicket.tourist
                         const tourist = await touristModel.findOne({ user: activityTicket.tourist });
                         const level = tourist.level;
-                        const addPoints = level === 1 ? 0.5 * receipt.price : level === 2 ? receipt.price : receipt.price * 1.5;
+                        addPoints = level === 1 ? 0.5 * receipt.price : level === 2 ? receipt.price : receipt.price * 1.5;
 
                         console.log(`Old Points for Tourist ID ${tourist._id}:`, tourist.points);
                         tourist.points += addPoints;
@@ -40,6 +44,16 @@ const updatePoints = () => {
                         console.log(`Updated Points for Tourist ID ${tourist._id}:`, tourist.points);
                         activityTicket.pointsRedeemed = true;
                         await activityTicket.save();
+
+                        const pointsReceipt = new receiptModel({
+                            type: 'points redemption',
+                            status: 'successfull',
+                            tourist: activityTicket.tourist,
+                            price: addPoints,
+                            receiptType: 'refund'
+                        })
+
+                        await pointsReceipt.save();
                     }
                 }
 
@@ -53,9 +67,10 @@ const updatePoints = () => {
 
                     if (today > eventDate) {
                         console.log('updating itineraryPoints')
+                        userId = itineraryTicket.tourist
                         const tourist = await touristModel.findOne({ user: itineraryTicket.tourist });
                         const level = tourist.level;
-                        const addPoints = level === 1 ? 0.5 * receipt.price : level === 2 ? receipt.price : receipt.price * 1.5;
+                        addPoints = level === 1 ? 0.5 * receipt.price : level === 2 ? receipt.price : receipt.price * 1.5;
 
                         console.log(`Old Points for Tourist ID ${tourist._id}:`, tourist.points);
                         tourist.points += addPoints;
@@ -63,6 +78,15 @@ const updatePoints = () => {
                         itineraryTicket.pointsRedeemed = true
                         console.log(`Updated Points for Tourist ID ${tourist._id}:`, tourist.points);
                         await itineraryTicket.save();
+                        const pointsReceipt = new receiptModel({
+                            type: 'points redemption',
+                            status: 'successfull',
+                            tourist: itineraryTicket.tourist,
+                            price: addPoints,
+                            receiptType: 'refund'
+                        })
+
+                        await pointsReceipt.save();
 
                     }
                 }
@@ -72,8 +96,9 @@ const updatePoints = () => {
                 for (const transportation of transportations) {
                     for (const touristId of transportation.touristsBooked) {
                         const tourist = await touristModel.findOne({ user: touristId });
+                        userId = touristId
                         const level = tourist.level;
-                        const addPoints = level === 1 ? 0.5 * transportation.price : level === 2 ? transportation.price : transportation.price * 1.5;
+                        addPoints = level === 1 ? 0.5 * transportation.price : level === 2 ? transportation.price : transportation.price * 1.5;
 
                         console.log(`Old Points for Tourist ID ${tourist._id}:`, tourist.points);
                         tourist.points += addPoints;
@@ -81,18 +106,34 @@ const updatePoints = () => {
                         transportation.pointsRedeemed = true
                         console.log(`Updated Points for Tourist ID ${tourist._id}:`, tourist.points);
                         await transportation.save();
+                        const pointsReceipt = new receiptModel({
+                            type: 'points redemption',
+                            status: 'successfull',
+                            tourist: touristId,
+                            price: addPoints,
+                            receiptType: 'refund'
+                        })
+
+                        await pointsReceipt.save();
                     }
                 }
             }
         } catch (error) {
             console.error("Error updating points:", error);
+            const pointsReceipt = new receiptModel({
+                type: 'points redemption',
+                status: 'failed',
+                tourist: userId,
+                price: addPoints,
+                receiptType: 'refund'
+            })
+
+            await pointsReceipt.save();
         }
     }, {
         timezone: "Africa/Cairo"
     });
 };
-
-// New method to reset points for all tourists
 const setLevel = () => {
     cron.schedule("17 20 * * *", async () => { // Runs on the first day of every month at midnight
         console.log('------------------RESETTING POINTS------------------');
@@ -117,4 +158,5 @@ const setLevel = () => {
         }
     });
 };
+
 module.exports = { updatePoints, setLevel };
