@@ -76,8 +76,12 @@ const loginUser = async (req, res) => {
 
     const { role, status, _id } = user;
 
-    if (status !== 'active')
+    if (status !== 'active') {
+      const token = createToken(_id, role);
+      setTokenCookie(res, token);
       return res.status(200).json({ username: user.username, status, role, idDocument: user.idDocument.url, additionalDocument: user.additionalDocument.url, termsAndConditions: user.termsAndConditions })
+
+    }
     // Handle tourist login
     if (role === "tourist") {
       const tourist = await touristModel.findOne({ user: _id });
@@ -99,9 +103,6 @@ const loginUser = async (req, res) => {
 
     // Handle advertiser, seller, tour guide login
     if (["advertiser", "seller", "tourGuide"].includes(role)) {
-      if (status === "pending") {
-        return res.status(403).json({ message: "Your account is pending approval by an admin." });
-      }
 
       let model, entity;
       if (role === "advertiser") model = advertiserModel;
@@ -127,10 +128,7 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Handle general login for other users, including status check
-    if (status === "pending") {
-      return res.status(403).json({ message: "Your account is pending approval by an admin." });
-    }
+
 
     // General token for other users (tourismGovernor, admin, etc.)
     const token = createToken(_id, role);
