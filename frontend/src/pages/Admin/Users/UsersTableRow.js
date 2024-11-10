@@ -3,6 +3,7 @@ import React from "react";
 import DeleteButton from "../Activities/DeleteButton";
 import RejectButton from "./RejectButton";
 import AcceptButton from "./AcceptButton";
+import ViewDocumentsButton from "./ViewDocumentsButton";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -56,10 +57,6 @@ const UsersTableRow = ({
     }
   };
 
-  const handleViewDocuments = () => {
-    console.log("Viewing documents for user:", id);
-  };
-
   return (
     <tr
       style={{
@@ -80,26 +77,7 @@ const UsersTableRow = ({
         {!isPending && <DeleteButton handleDelete={handleDelete} />}
         {isPending && (
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <button
-              onClick={handleViewDocuments}
-              style={{
-                padding: "8px 12px",
-                backgroundColor: "#6c757d",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                transition: "background-color 0.3s",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#5a6268")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "#6c757d")
-              }
-            >
-              View Documents
-            </button>
+            <ViewDocumentsButton userId={id} />
             <AcceptButton onAccept={handleAccept} />
             <RejectButton onReject={handleReject} />
           </div>

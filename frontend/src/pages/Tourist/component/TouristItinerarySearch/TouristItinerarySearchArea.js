@@ -28,6 +28,7 @@ const TouristItineraryWrapper = () => {
     setLoading(true);
     setError(null);
     try {
+      console.log(preference);
       const response = await axios.get("http://localhost:3000/api/itinerary/", {
         withCredentials: true,
         params: {
@@ -35,13 +36,16 @@ const TouristItineraryWrapper = () => {
           maxBudget: priceRange[1],
           date: date ? date.toISOString().split("T")[0] : undefined,
           rating: rating || undefined,
-          preference: preference || undefined,
+          preferences: preference || undefined,
           sortBy: sortCriteria.field,
           sortOrder: sortCriteria.order,
           language: language || undefined,
         },
       });
       setItineraries(response.data || []);
+      console.log(priceRange[0]);
+      console.log(priceRange[1]);
+      console.log("date: " + date);
     } catch (error) {
       setItineraries([]);
       setError(
