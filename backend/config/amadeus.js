@@ -3,8 +3,9 @@ const Amadeus = require('amadeus');
 require('dotenv').config(); // Load environment variables
 
 const amadeus = new Amadeus({
-    clientId: process.env.AMADEUS_CLIENT_ID,
-    clientSecret: process.env.AMADEUS_CLIENT_SECRET,
+    clientId: "M4woZnjQpVJlMKPfjXc8rzYBIm1puX28",
+    clientSecret: "6zVI1xbyTD6n5MgD",
+    logLevel: 'debug' // Enables detailed debugging information
 });
 
 module.exports = amadeus;
