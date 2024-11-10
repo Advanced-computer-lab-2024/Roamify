@@ -69,4 +69,9 @@ export const HeaderData = [
       },
     ],
   },
+  {
+    menu: "My Points",
+    link: "/tourist/point",
+    submenu:false,
+  },
 ];

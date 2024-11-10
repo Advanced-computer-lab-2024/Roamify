@@ -38,25 +38,25 @@ const BookedActivitiesWrapper = () => {
     return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
   };
 
-  const handleCancelBooking = async (activityId) => {
-    if (!activityId) {
+  const handleCancelBooking = async (ticketId) => {
+    if (!ticketId) {
       setPopupMessage("No activity selected to cancel.");
       return;
     }
-
+  
     try {
       await axios.delete(
         "http://localhost:3000/api/tourist/cancel-activity-booking",
         {
-          data: { activityId },
+          data: { ticketId },
           withCredentials: true
         }
       );
-
+  
       setBookedActivities((prevActivities) =>
-        prevActivities.filter((booking) => booking.activity?._id !== activityId)
+        prevActivities.filter((booking) => booking._id !== ticketId)
       );
-      
+  
       setPopupMessage("Cancelled successfully");
     } catch (err) {
       if (err.response) {
@@ -71,7 +71,6 @@ const BookedActivitiesWrapper = () => {
       }
     }
   };
-
   return (
     <section id="explore_area" className="section_padding">
       <div className="container">
@@ -130,7 +129,7 @@ const BookedActivitiesWrapper = () => {
                     {/* Cancel Button */}
                     <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "15px" }}>
                       <button
-                        onClick={() => handleCancelBooking(booking.activity?._id)}
+                        onClick={() => handleCancelBooking(booking._id)}
                         style={{
                           padding: "10px 20px",
                           backgroundColor: "#ff4d4d",

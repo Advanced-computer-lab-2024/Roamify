@@ -17,6 +17,7 @@ import TouristView from "./TouristView.js";
 import ActivityBooking from "./ActivityBooking.js";
 import ItineraryBooking from "./ItineraryBooking.js"
 import Transportations from "./Transportations/Transportations.js";
+import Point from "./Point.js"
 const Tourist = () => {
   return (
     <>
@@ -33,6 +34,7 @@ const Tourist = () => {
         <Route path="/activity-booking" element={<ActivityBooking />} />
         <Route path="/itinerary-booking" element={<ItineraryBooking />} />
         <Route path="/transportations" element={<Transportations />} />
+        <Route path="/point" element={<Point />} />
       </Routes>
       <CopyRight />
     </>
