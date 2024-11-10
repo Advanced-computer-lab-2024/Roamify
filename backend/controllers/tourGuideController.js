@@ -157,15 +157,23 @@ const createItinerary = async (req, res) => {
 
 const updateItinerary = async (req, res) => {
   try {
+
     const itineraryId = req.params.itineraryId;
     const tourGuideId = req.user._id;
     const { activities, language, price, oldDate, newDate, pickUpLocation, dropOffLocation, accessibility, rating, booked } = req.body;
 
+    if (!activities && !language && price === undefined && !oldDate && !newDate && !pickUpLocation && !dropOffLocation && accessibility === undefined && rating === undefined && booked === undefined) return res.status(400).json({ message: 'no data to edit' })
     const itinerary = await itineraryModel.findById(itineraryId).populate("tourGuide");
     if (!itinerary) return res.status(404).json({ message: "Itinerary not found" });
     if (itinerary.tourGuide._id.toString() !== tourGuideId) {
       return res.status(403).json({ message: "You are not authorized to edit this itinerary" });
     }
+    const today = new Date();
+    today.setHours(0, 0, 0);
+
+    const isOld = itinerary.availableDates.filter(d => d < today)
+
+    if (isOld.length === itinerary.availableDates.length) return res.status(400).json({ message: 'this itinerary is old it can not be edited ' })
 
     const updates = { language, price, pickUpLocation, dropOffLocation, accessibility, rating, booked };
     const activityIds = [];
@@ -187,8 +195,6 @@ const updateItinerary = async (req, res) => {
     }
 
     if (oldDate && newDate) {
-      const today = new Date();
-      today.setHours(0, 0, 0);
 
       // Convert `oldDate` and `newDate` to comparable formats
       const formattedOldDate = new Date(oldDate).toISOString().split('T')[0];
@@ -221,7 +227,7 @@ const updateItinerary = async (req, res) => {
       await itinerary.save();
       const itineraryTickets = await itineraryTicketModel.find({ itinerary: itineraryId, status: 'active', date: oldDate })
       for (ticket of itineraryTickets) {
-        ticket.date = new Date(newDate)
+        ticket.date = formattedNewDate
         await ticket.save()
       }
 
