@@ -23,8 +23,6 @@ const createPreferenceTag = async (req, res) => {
     res.status(500).json({ message: "Error creating preference tag" });
   }
 };
-
-
 const getAllPreferenceTags = async (req, res) => {
   try {
     const tags = await preferenceTagModel.find();
@@ -36,10 +34,6 @@ const getAllPreferenceTags = async (req, res) => {
     res.status(500).json({ message: "Error retrieving preference tags" });
   }
 };
-
-
-
-
 const updatePreferenceTag = async (req, res) => {
   try {
     const { name, description } = req.body;

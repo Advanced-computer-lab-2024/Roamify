@@ -50,7 +50,7 @@ const addProductToCart = async (req, res) => {
 
 const removeProductFromCart = async (req, res) => {
     try {
-        if (!req.body.product) return res.status(400).json({ message: 'please chooose a product to remove from cart' });
+        if (!req.body.product) return res.status(400).json({ message: 'please choose a product to remove from cart' });
 
         const productId = new mongoose.Types.ObjectId(req.body.product);
 

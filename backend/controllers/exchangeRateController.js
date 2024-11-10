@@ -1,6 +1,5 @@
 const exchangeRateModel = require("../models/exchangeRateModel");
 
-// Fetch all currencies and their rates
 const fetchAllExchangeRates = async (req, res) => {
     try {
         // Fetch all records from the exchange rate collection

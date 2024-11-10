@@ -23,5 +23,5 @@ const ticket = new mongoose.Schema({
     }
 }, { timestamps: true })
 
-const ticketModel = mongoose.model('activityTicket', ticket);
+const ticketModel = mongoose.model('activity ticket', ticket);
 module.exports = ticketModel;

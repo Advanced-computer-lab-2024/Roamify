@@ -12,8 +12,6 @@ const { default: mongoose } = require('mongoose');
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
 const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
 
-
-
 const createProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -51,7 +49,6 @@ const createProfile = async (req, res) => {
     console.log(e);
   }
 };
-
 const getProfile = async (req, res) => {
   try {
     const id = req.user._id;
@@ -65,7 +62,6 @@ const getProfile = async (req, res) => {
     res.status(401).json({ message: "failed", error: err.message });
   }
 };
-
 const updateProfile = async (req, res) => {
   try {
     const id = req.user._id;
@@ -115,7 +111,6 @@ const updateProfile = async (req, res) => {
     return res.status(400).json({ message: "failed to update advertiser", error: e.message });
   }
 };
-
 const createActivity = async (req, res) => {
   try {
     const advertiserId = req.user._id;
@@ -201,10 +196,6 @@ const createActivity = async (req, res) => {
     }
   }
 };
-
-
-
-
 const updateActivity = async (req, res) => {
   try {
     const activityId = req.params.activityId;
@@ -290,8 +281,6 @@ const updateActivity = async (req, res) => {
     res.status(400).json({ message: e.message });
   }
 };
-
-
 const deleteActivity = async (req, res) => {
   try {
     const activityId = req.params.activityid.trim();
@@ -319,10 +308,6 @@ const deleteActivity = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
-
-
-
 const getMyActivities = async (req, res) => {
   try {
     const advertiserId = req.user._id;
@@ -348,7 +333,6 @@ const getMyActivities = async (req, res) => {
     res.status(500).json({ message: "Failed to get activities", error: err.message });
   }
 };
-
 const uploadLogo = async (req, res) => {
   try {
 
@@ -388,7 +372,6 @@ const uploadLogo = async (req, res) => {
 
   }
 }
-
 const createTransportation = async (req, res) => {
   try {
     const { name, time, date, type, pickupLocation, dropOffLocation, price } = req.body;
@@ -399,7 +382,7 @@ const createTransportation = async (req, res) => {
     }
 
     const exists = await transportationModel.findOne({ name });
-    if (exists) return res.status(400).json({ messagea: 'this name already exists' })
+    if (exists) return res.status(400).json({ message: 'this name already exists' })
     // Create a new transportation entry
     const newTransportation = new transportationModel({
       advertiser: req.user._id,
@@ -425,7 +408,6 @@ const createTransportation = async (req, res) => {
     });
   }
 };
-
 const getAllTransportation = async (req, res) => {
   try {
     const transportations = await transportationModel.find().populate('advertiser', 'username');
@@ -465,7 +447,6 @@ const deleteTransportation = async (req, res) => {
     return res.status(500).json({ message: 'Error deleting transportation', error: error.message });
   }
 };
-
 const editTransportation = async (req, res) => {
   try {
     const transportationIdString = req.body.transportationId;
@@ -513,7 +494,6 @@ const editTransportation = async (req, res) => {
     return res.status(500).json({ message: 'Error updating transportation', error: error.message });
   }
 };
-
 const getMyTransportations = async (req, res) => {
   try {
     // Find all transportation records where the user is the advertiser
@@ -529,7 +509,6 @@ const getMyTransportations = async (req, res) => {
     return res.status(500).json({ message: 'Error fetching transportations', error: error.message });
   }
 };
-
 
 module.exports = {
   createProfile,

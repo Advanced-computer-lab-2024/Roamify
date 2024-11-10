@@ -7,7 +7,7 @@ const receiptSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['failed', 'successfull']
+        enum: ['failed', 'successful']
     },
     tourist: {
         type: mongoose.Types.ObjectId,

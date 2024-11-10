@@ -43,10 +43,6 @@ const createProfile = async (req, res) => {
     res.status(500).json({ message: "Failed to create tour guide", error: error.message });
   }
 };
-
-
-
-
 const getProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -75,7 +71,6 @@ const getProfile = async (req, res) => {
     res.status(500).json({ message: "Failed to retrieve profile", error: error.message });
   }
 };
-
 const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -108,7 +103,6 @@ const updateProfile = async (req, res) => {
     res.status(500).json({ message: "Failed to update profile", error: error.message });
   }
 };
-
 const createItinerary = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -154,7 +148,6 @@ const createItinerary = async (req, res) => {
     res.status(500).json({ message: "Failed to create itinerary", error: error.message });
   }
 };
-
 const updateItinerary = async (req, res) => {
   try {
     const itineraryId = req.params.itineraryId;
@@ -192,7 +185,6 @@ const updateItinerary = async (req, res) => {
     res.status(500).json({ message: "Failed to update itinerary", error: error.message });
   }
 };
-
 const deleteItinerary = async (req, res) => {
   try {
     const tourGuideId = req.user._id;
@@ -244,7 +236,6 @@ const getMyItineraries = async (req, res) => {
     res.status(500).json({ message: "Failed to retrieve itineraries", error: error.message });
   }
 };
-
 const uploadProfilePicture = async (req, res) => {
   try {
     if (!req.file) {
@@ -280,7 +271,6 @@ const uploadProfilePicture = async (req, res) => {
     res.status(500).json({ message: 'Error uploading profile picture', error: error.message });
   }
 };
-
 const setStatusOfItinerary = async (req, res) => {
   try {
     if (!req.body.itineraryId) throw Error('please choose an itinerary')
@@ -307,7 +297,6 @@ const setStatusOfItinerary = async (req, res) => {
 
   }
 }
-
 
 module.exports = {
   createProfile,
