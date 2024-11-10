@@ -37,8 +37,8 @@ const BookedItinerariesWrapper = () => {
     return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
   };
 
-  const handleCancelItinerary = async (itineraryId) => {
-    if (!itineraryId) {
+  const handleCancelItinerary = async (ticketId) => {
+    if (!ticketId) {
       setPopupMessage("No itinerary selected to cancel.");
       return;
     }
@@ -47,13 +47,13 @@ const BookedItinerariesWrapper = () => {
       await axios.delete(
         "http://localhost:3000/api/tourist/cancel-itinerary-booking",
         {
-          data: { itineraryId },
+          data: { ticketId },
           withCredentials: true
         }
       );
 
       setBookedItineraries((prevItineraries) =>
-        prevItineraries.filter((booking) => booking.itinerary?._id !== itineraryId)
+        prevItineraries.filter((booking) => booking._id !== ticketId)
       );
       
       setPopupMessage("Itinerary cancelled successfully");
@@ -118,7 +118,7 @@ const BookedItinerariesWrapper = () => {
 
                     <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "15px" }}>
                       <button
-                        onClick={() => handleCancelItinerary(booking.itinerary?._id)}
+                        onClick={() => handleCancelItinerary(booking._id)}
                         style={{
                           padding: "10px 20px",
                           backgroundColor: "#ff4d4d",
