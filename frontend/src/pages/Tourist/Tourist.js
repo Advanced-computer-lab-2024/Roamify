@@ -18,6 +18,7 @@ import ActivityBooking from "./ActivityBooking.js";
 import ItineraryBooking from "./ItineraryBooking.js"
 import Transportations from "./Transportations/Transportations.js";
 import Point from "./Point.js"
+import Redeem from "./Redeem.js"
 const Tourist = () => {
   return (
     <>
@@ -35,6 +36,7 @@ const Tourist = () => {
         <Route path="/itinerary-booking" element={<ItineraryBooking />} />
         <Route path="/transportations" element={<Transportations />} />
         <Route path="/point" element={<Point />} />
+        <Route path="/redeem" element={<Redeem />} />
       </Routes>
       <CopyRight />
     </>
