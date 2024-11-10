@@ -4,17 +4,9 @@ const amadeus = require('../config/amadeus'); // Import the configured Amadeus c
 // Function to search for flights
 const searchFlights = async (origin, destination, departureDate, returnDate = null, adults = 1, direct = false, departureTime = null, returnTime = null) => {
     try {
-        const locationResponse1 = await amadeus.referenceData.locations.get({
-            keyword: origin,
-            subType: 'CITY'
-        });
-        const locationResponse2 = await amadeus.referenceData.locations.get({
-            keyword: destination,
-            subType: 'CITY'
-        });
         const params = {
-            originLocationCode: locationResponse1,
-            destinationLocationCode: locationResponse2,
+            originLocationCode: origin,
+            destinationLocationCode: destination,
             departureDate,
             adults,
             ...(returnDate && { returnDate }),
@@ -24,27 +16,22 @@ const searchFlights = async (origin, destination, departureDate, returnDate = nu
 
         const response = await amadeus.shopping.flightOffersSearch.get(params);
 
-        // Map over the results to extract only top-level fields, duration, and times
         const formattedFlights = response.data
             .filter(flight => {
-                // Filter based on direct or indirect trip
                 if (direct) {
-                    // For direct flights, every itinerary should have only one segment
                     return flight.itineraries.every(itinerary => itinerary.segments.length === 1);
                 }
-                return true; // Include all flights if `direct` is false
+                return true;
             })
             .map(flight => {
                 const { price, numberOfBookableSeats, itineraries } = flight;
 
-                // Calculate total duration from the itineraries
                 const totalDuration = itineraries
                     .map(itinerary => itinerary.duration)
-                    .join(" / "); // Join durations if there are multiple itineraries (e.g., for round-trip)
+                    .join(" / ");
 
-                // Extract actual departure and return times if available
-                const actualDepartureTime = itineraries[0]?.segments[0]?.departure.at; // First segment of the first itinerary
-                const actualReturnTime = itineraries[1]?.segments[0]?.departure.at; // First segment of the second itinerary (if round-trip)
+                const actualDepartureTime = itineraries[0]?.segments[0]?.departure.at;
+                const actualReturnTime = itineraries[1]?.segments[0]?.departure.at;
 
                 return {
                     price: price.total,
@@ -65,24 +52,10 @@ const searchFlights = async (origin, destination, departureDate, returnDate = nu
     }
 };
 
-const searchHotels = async (cityName) => {
+const searchHotels = async (cityCode) => {
     try {
-        // Step 1: Get the city code from the city name using the Location Search API
-        const locationResponse = await amadeus.referenceData.locations.get({
-            keyword: cityName,
-            subType: 'CITY'
-        });
-        console.log('------------------------------------------------------------------------------------------------------------------------' + locationResponse.data[0].iataCode + '----------------------------------------------------------')
 
-        // Check if any locations were found
-        if (!locationResponse.data || locationResponse.data.length === 0) {
-            throw new Error(`City code for "${cityName}" not found`);
-        }
-
-        // Get the city code from the first matching result
-        const cityCode = locationResponse.data[0].iataCode;
-
-        // Step 2: Retrieve hotels by city code
+        //retrieves hotels in city
         const response = await amadeus.referenceData.locations.hotels.byCity.get({
             cityCode: cityCode
         });
@@ -91,10 +64,6 @@ const searchHotels = async (cityName) => {
         const hotels = response.data.map(hotel => ({
             hotelId: hotel.hotelId,
             name: hotel.name,
-            address: hotel.address.lines,
-            city: cityName,
-            latitude: hotel.geoCode.latitude,
-            longitude: hotel.geoCode.longitude
         }));
 
         console.log("Hotels:", hotels);
