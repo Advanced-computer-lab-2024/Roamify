@@ -159,7 +159,7 @@ const updateItinerary = async (req, res) => {
   try {
     const itineraryId = req.params.itineraryId;
     const tourGuideId = req.user._id;
-    const { activities, language, price, availableDates, pickUpLocation, dropOffLocation, accessibility, rating, booked } = req.body;
+    const { activities, language, price, oldDate, newDate, pickUpLocation, dropOffLocation, accessibility, rating, booked } = req.body;
 
     const itinerary = await itineraryModel.findById(itineraryId).populate("tourGuide");
     if (!itinerary) return res.status(404).json({ message: "Itinerary not found" });
@@ -167,7 +167,7 @@ const updateItinerary = async (req, res) => {
       return res.status(403).json({ message: "You are not authorized to edit this itinerary" });
     }
 
-    const updates = { language, price, availableDates, pickUpLocation, dropOffLocation, accessibility, rating, booked };
+    const updates = { language, price, pickUpLocation, dropOffLocation, accessibility, rating, booked };
     const activityIds = [];
     const locations = [];
     const preferenceTags = [];
@@ -185,6 +185,48 @@ const updateItinerary = async (req, res) => {
       updates.locations = locations;
       updates.preferenceTags = preferenceTags;
     }
+
+    if (oldDate && newDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0);
+
+      // Convert `oldDate` and `newDate` to comparable formats
+      const formattedOldDate = new Date(oldDate).toISOString().split('T')[0];
+      const formattedNewDate = new Date(newDate);
+
+      console.log(formattedOldDate)
+      console.log(formattedNewDate)
+
+      // Check if `oldDate` exists in `availableDates`
+      const isDateAvailable = itinerary.availableDates
+        .some(d => new Date(d).toISOString().split('T')[0] === formattedOldDate);
+
+      if (!isDateAvailable) {
+        return res.status(400).json({ message: 'Please specify a correct date to change.' });
+      }
+      if (new Date(oldDate) < today) {
+        return res.status(400).json({ message: 'This itinerary date has passed; you cannot update it.' });
+      }
+      if (formattedNewDate < today) {
+        return res.status(400).json({ message: 'Please enter a valid future date.' });
+      }
+
+      // Update the date in `availableDates`
+      const dateIndex = itinerary.availableDates.findIndex(
+        d => new Date(d).toISOString().split('T')[0] === formattedOldDate
+      );
+
+
+      itinerary.availableDates[dateIndex] = formattedNewDate;
+      await itinerary.save();
+      const itineraryTickets = await itineraryTicketModel.find({ itinerary: itineraryId, status: 'active', date: oldDate })
+      for (ticket of itineraryTickets) {
+        ticket.date = new Date(newDate)
+        await ticket.save()
+      }
+
+    }
+
 
     await itineraryModel.findByIdAndUpdate(itineraryId, updates);
     res.status(200).json({ message: "Itinerary updated successfully" });
@@ -205,6 +247,14 @@ const deleteItinerary = async (req, res) => {
       return res.status(403).json({ message: "You are not authorized to delete this itinerary" });
     }
 
+    const today = new Date()
+    today.setHours(0, 0, 0)
+    const itineraryTickets = await itineraryTicketModel.find({
+      itinerary: itineraryId,
+      status: 'active',
+      date: { $gte: today } // Ensures the date is today or in the future
+    });
+    if (itineraryTickets.length > 0) return res.status(400).json({ message: 'sorry this itinerary is booked in the future you are not allowed to delete it' })
     await itineraryModel.findByIdAndDelete(itineraryId);
     res.status(200).json({ message: "Itinerary deleted successfully" });
   } catch (error) {
