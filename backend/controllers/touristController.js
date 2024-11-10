@@ -957,13 +957,13 @@ const redeemPoints = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
     if (!tourist) return res.status(400).json({ message: 'user doesn\'t exist' })
-    const ammount = req.body.ammount;
-    if (!ammount) return res.status(400).json({ message: 'please select ammount to redeem' })
+    const amount = req.body.ammount;
+    if (!amount) return res.status(400).json({ message: 'please select amount to redeem' })
 
     const points = tourist.points;
     if (points === 0) return res.status(400).json({ message: 'sorry you doesn\'t have points' })
 
-    const pointsRequired = ammount * 100;
+    const pointsRequired = amount * 100;
     console.log(pointsRequired)
     if (points < pointsRequired) return res.status(400).json({ message: 'not enough points' });
 
@@ -971,7 +971,7 @@ const redeemPoints = async (req, res) => {
     await tourist.save();
 
     const wallet = await walletModel.findOne({ tourist: req.user._id });
-    wallet.availableCredit += ammount;
+    wallet.availableCredit += amount;
     await wallet.save();
     return res.status(200).json({ message: 'redeemed points successfully' })
 

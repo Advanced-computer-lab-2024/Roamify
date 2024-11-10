@@ -24,7 +24,7 @@ const ticket = new mongoose.Schema({
     ticketType: {
         type: String
     },
-    ammount: {
+    amount: {
         type: Number,
         default: 1
     }

@@ -110,10 +110,10 @@ const viewMyComplaints = async (req, res) => {
         const formattedComplaints = complaints.map(complaint => ({
             _id: complaint._id,
             title: complaint.title,
-            date: complaint.createdAt,
+            date: complaint.createdAt.toLocaleDateString("en-GB"), // Format as day/month/year
             status: complaint.status,
             isReplied: complaint.isReplied,
-            reply: complaint.reply ? complaint.reply.message : ""
+            reply: complaint.isReplied ? complaint.reply.message : "" // Directly include the reply message if replied
         }));
 
         res.status(200).json({

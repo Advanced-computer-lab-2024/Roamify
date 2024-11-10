@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const historicalTag = require('./historicalTagModel');
-
 const placeSchema = new mongoose.Schema({
     type: {
         type: String,
@@ -76,7 +74,5 @@ const placeSchema = new mongoose.Schema({
         ref: "user"
     }
 }, { timestamps: true });
-
 const Place = mongoose.model('place', placeSchema);
-
 module.exports = Place;
