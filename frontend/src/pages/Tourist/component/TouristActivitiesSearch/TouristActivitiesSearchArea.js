@@ -64,26 +64,34 @@ const TouristActivitiesWrapper = () => {
 
   const handleBooking = async (activityId, activityDate) => {
     try {
+      // Format the date to "YYYY-MM-DD"
       const formattedDate = new Date(activityDate).toISOString().split("T")[0];
+      
+      // Send booking request with activityId and date
       await axios.post(
         "http://localhost:3000/api/tourist/book-activity",
         { activity: activityId, date: formattedDate },
         { withCredentials: true }
       );
+  
+      // Show success popup
       setPopupMessage("Booking successful!");
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
     } catch (error) {
+      // Handle errors
       const errorMessage =
         error.response && error.response.data && error.response.data.message
           ? error.response.data.message
           : "Failed to book activity. Please try again.";
+      
       setPopupMessage(errorMessage);
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
       console.error("Error booking activity:", error);
     }
   };
+  
 
   // Function to copy activity link
   const handleCopyLink = (activityId) => {
@@ -137,7 +145,6 @@ const TouristActivitiesWrapper = () => {
                             <div className="flight_search_destination">
                               <p>Location</p>
                               <h3>{activity.location.name}</h3>
-                              <h6>Coordinates: {activity.location.coordinates.join(", ")}</h6>
                             </div>
                           </div>
                           <div className="flight_search_middel">

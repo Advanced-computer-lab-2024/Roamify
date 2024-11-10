@@ -3,44 +3,46 @@ import axios from "axios";
 
 const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
   const modalRef = useRef(null);
-
   const [tags, setTags] = useState([]);
 
-  axios
-    .get("http://localhost:3000/api/preference-tag/get-all")
-    .then((res) => {
-      setTags(res.data.tags);
-      
-    })
-    .catch((error) => {
-      // Handle any errors
-      console.error("Error fetching tags:", error);
-    });
-
-  const [formData, setFormData] = useState(() => {
-    return {
-      placeImages: fieldsValues.placeImages || [],
-      description: fieldsValues.description || "",
-      closingHours: fieldsValues.closingHours || "",
-      openeningHours: fieldsValues.openeningHours || "",
-      tagPlace: fieldsValues.tagPlace || "",
-      ticketPrice: {
-        native: fieldsValues.ticketPrice?.native || "",
-        foreigner: fieldsValues.ticketPrice?.foreigner || "",
-        student: fieldsValues.ticketPrice?.student || "",
-      },
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:3000/api/preference-tag/get-all"
+        );
+        setTags(res.data.tags);
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
     };
+    fetchTags();
+  }, []);
+
+  const [formData, setFormData] = useState({
+    placeImages: fieldsValues.placeImages || [],
+    description: fieldsValues.description || "",
+    closingHours: fieldsValues.closingHours || "",
+    openingHours: fieldsValues.openingHours || "",
+    tagPlace: fieldsValues.tagPlace || "",
+    ticketPrice: {
+      native: fieldsValues.ticketPrice?.native || "",
+      foreigner: fieldsValues.ticketPrice?.foreigner || "",
+      student: fieldsValues.ticketPrice?.student || "",
+    },
   });
+
+  useEffect(() => {
+    setFormData(fieldsValues);
+  }, [fieldsValues]);
 
   const [imagePreviews, setImagePreviews] = useState(
     fieldsValues.placeImages?.map((img) => URL.createObjectURL(img)) || []
   );
 
-  // Handle file changes for images
   const handleImageChange = (event) => {
     const files = Array.from(event.target.files);
     const filePreviews = files.map((file) => URL.createObjectURL(file));
-
     setFormData((prev) => ({
       ...prev,
       placeImages: [...prev.placeImages, ...files],
@@ -48,7 +50,6 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     setImagePreviews((prev) => [...prev, ...filePreviews]);
   };
 
-  // Handle input changes for form fields
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -62,12 +63,10 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     }));
   };
 
-  // Modal behavior for closing on outside click or Escape key
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") onClose();
     };
-
     const handleClickOutside = (e) => {
       if (modalRef.current && !modalRef.current.contains(e.target)) onClose();
     };
@@ -87,7 +86,6 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     };
   }, [isOpen, onClose]);
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(formData);
@@ -125,10 +123,9 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
         <h2
           style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "10px" }}
         >
-          Update Place
+          {fieldsValues.description ? "Edit Place" : "Create Place"}
         </h2>
         <form onSubmit={handleSubmit}>
-          {/* Place Images */}
           <div style={{ marginBottom: "10px" }}>
             <label>Place Images</label>
             <div
@@ -151,7 +148,6 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
             </div>
           </div>
 
-          {/* Description */}
           <div style={{ marginBottom: "10px" }}>
             <label>Description</label>
             <textarea
@@ -167,7 +163,6 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
             />
           </div>
 
-          {/* Closing Hours */}
           <div style={{ marginBottom: "10px" }}>
             <label>Closing Hours</label>
             <input
@@ -184,13 +179,12 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
             />
           </div>
 
-          {/* Opening Hours */}
           <div style={{ marginBottom: "10px" }}>
             <label>Opening Hours</label>
             <input
               type="text"
-              name="openeningHours"
-              value={formData.openeningHours}
+              name="openingHours"
+              value={formData.openingHours}
               onChange={handleChange}
               style={{
                 width: "100%",
@@ -201,7 +195,6 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
             />
           </div>
 
-          {/* Tag Place */}
           <div style={{ marginBottom: "10px" }}>
             <label>Tag Place</label>
             <select
@@ -223,7 +216,6 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
             </select>
           </div>
 
-          {/* Ticket Price */}
           <div style={{ marginBottom: "10px" }}>
             <label>Ticket Price</label>
             <div>
@@ -269,7 +261,6 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
             </div>
           </div>
 
-          {/* Buttons */}
           <div
             style={{
               display: "flex",
@@ -287,12 +278,6 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
                 backgroundColor: "#E2E8F0",
                 color: "#4A5568",
               }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = "#CBD5E0")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "#E2E8F0")
-              }
             >
               Cancel
             </button>
@@ -304,12 +289,6 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
                 backgroundColor: "#2B6CB0",
                 color: "white",
               }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = "#3182CE")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "#2B6CB0")
-              }
             >
               Save
             </button>

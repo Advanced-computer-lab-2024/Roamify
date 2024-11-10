@@ -32,7 +32,7 @@ const AdminUsers = ({ usersName }) => {
       <p>{usersName}</p>
       {usersName === "Tourism Governors" && (
         <div className="flex">
-          <AddUserButton />
+          <AddUserButton userType={"Tourism Governor"} />
         </div>
       )}
       <UsersTable users={users} />
