@@ -28,12 +28,17 @@ const RedeemPointsForm = () => {
     } catch (error) {
       console.error('Error redeeming points:', error);
       if (error.response) {
-        console.error('Server response:', error.response.data);
+        // Log more detailed information from the server response
+        console.error('Status:', error.response.status);
+        console.error('Headers:', error.response.headers);
+        console.error('Data:', error.response.data);
+      } else {
+        // The request was made but no response was received
+        console.error('Error:', error.message);
       }
       alert('Failed to generate voucher.');
-    } finally {
-      setIsLoading(false);
     }
+    
   };
   
   

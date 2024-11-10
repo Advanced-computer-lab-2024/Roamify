@@ -41,7 +41,7 @@ const TouristItineraryWrapper = () => {
           language: language || undefined,
         },
       });
-      setItineraries(response.data.updatedItineraries || []);
+      setItineraries(response.data || []);
       console.log(priceRange[0]);
       console.log(priceRange[1]);
       console.log(priceRange[0]);
