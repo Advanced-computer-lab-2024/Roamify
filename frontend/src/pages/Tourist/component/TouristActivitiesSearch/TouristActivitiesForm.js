@@ -14,7 +14,7 @@ const TouristActivitiesForm = () => {
         const response = await axios.get("http://localhost:3000/api/category/get-all");
         if (response.data.categories) {
           setCategories(response.data.categories);
-          setActiveTab(response.data.categories[0]._id); // Set the first category as active by default
+          setActiveTab("view"); // Set the first category as active by default
         }
       } catch (error) {
         console.error("Error fetching categories:", error);

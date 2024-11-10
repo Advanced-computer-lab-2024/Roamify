@@ -6,28 +6,20 @@ import PriceSlider from "./PriceSlider";
 import DateFilter from "./DateFilter";
 
 const SideBar = ({
-  date,
-  setDate,
-  onDateApply,
   onCategoryApply,
   onSortChange,
   onRatingApply,
-  applyFilters,
-  fetchActivities,
+
   priceRange,
   setPriceRange,
 }) => {
-  const [searchType, setSearchType] = useState("name");
-  const [searchInput, setSearchInput] = useState("");
-  const [searchInputTag, setSearchInputTag] = useState("");
+  
   const [selectedCategory, setSelectedCategory] = useState("");
   const [tags, setTags] = useState([]);
   const [categories, setCategories] = useState([]);
   const [sortOrderRating, setSortOrderRating] = useState("asc");
   const [sortOrderPrice, setSortOrderPrice] = useState("asc");
   const [selectedStars, setSelectedStars] = useState([false, false, false, false, false]);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -52,43 +44,13 @@ const SideBar = ({
     fetchTags();
   }, []);
 
-  const handleDateApply = ({ startDate, endDate }) => {
-    setStartDate(startDate);
-    setEndDate(endDate);
-    onDateApply({ startDate, endDate });
-  };
 
   const handleCategoryApply = (selectedCategory) => {
     setSelectedCategory(selectedCategory);
     onCategoryApply(selectedCategory);
   };
 
-  const handleSearchTypeChange = (event) => {
-    setSearchType(event.target.value);
-    setSearchInput("");
-    setSearchInputTag("");
-    setSelectedCategory("");
-  };
-
-  const handleSearchClick = () => {
-    const searchParams = {};
-
-    if (searchType === "name" && searchInput) {
-      searchParams.name = searchInput;
-    } else if (searchType === "tag" && searchInputTag) {
-      const matchingTag = tags.find((tag) => tag.name.toLowerCase() === searchInputTag.toLowerCase());
-      if (matchingTag) {
-        searchParams.tags = [matchingTag._id];
-      } else {
-        toast.info("Tag not found");
-        return;
-      }
-    } else if (searchType === "category" && selectedCategory) {
-      searchParams.category = selectedCategory;
-    }
-    applyFilters();
-    fetchActivities(searchParams);
-  };
+  
 
   const handleSortOrderRatingChange = (order) => {
     setSortOrderRating(order);
@@ -102,65 +64,17 @@ const SideBar = ({
 
   const handleRatingChange = (index) => {
     const newSelectedStars = [...selectedStars];
-    newSelectedStars[index] = !newSelectedStars[index];
+    newSelectedStars[index] = !newSelectedStars[index]; // Toggle the checkbox value
     setSelectedStars(newSelectedStars);
   };
-
+  
   const handleApplyFilters = () => {
-    const selectedRating = selectedStars.lastIndexOf(true) + 1;
-    onRatingApply(selectedRating);
+    const minRating = selectedStars.filter(Boolean).length; // Count selected stars
+    onRatingApply(minRating); // Pass minRating to the parent
   };
-
   return (
     <div className="left_side_search_area">
-      {/* Search Bar Section */}
-      <div className="left_side_search_boxed">
-        <div className="left_side_search_heading">
-          <h5>Search by</h5>
-        </div>
-        <select value={searchType} onChange={handleSearchTypeChange} className="form-control" style={{ marginBottom: "10px" }}>
-          <option value="name">Name</option>
-          <option value="tag">Tag</option>
-          <option value="category">Category</option>
-        </select>
-
-        {searchType === "name" && (
-          <input
-            type="text"
-            placeholder="Search by name..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="form-control"
-            style={{ marginBottom: "10px" }}
-          />
-        )}
-
-        {searchType === "tag" && (
-          <input
-            type="text"
-            placeholder="Search by tag..."
-            value={searchInputTag}
-            onChange={(e) => setSearchInputTag(e.target.value)}
-            className="form-control"
-            style={{ marginBottom: "10px" }}
-          />
-        )}
-
-        {searchType === "category" && (
-          <select value={selectedCategory} onChange={(e) => handleCategoryApply(e.target.value)} className="form-control" style={{ marginBottom: "10px" }}>
-            <option value="">Select Category</option>
-            {categories.map((category) => (
-              <option key={category._id} value={category._id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        )}
-
-        <button onClick={handleSearchClick} className="btn btn_theme btn_sm">
-          Search
-        </button>
-      </div>
+      
 
       {/* Price Filter Section */}
       <div className="left_side_search_boxed">
@@ -171,13 +85,7 @@ const SideBar = ({
       </div>
 
       {/* Date Range Filter Section */}
-      <div className="left_side_search_boxed">
-        <div className="left_side_search_heading">
-          <h5>Filter by Date</h5>
-        </div>
-        <DateFilter date={date} setDate={setDate} onApply={handleDateApply} />
-      </div>
-
+    
       {/* Filter by Category Dropdown */}
       <div className="left_side_search_boxed">
         <div className="left_side_search_heading">
@@ -249,25 +157,30 @@ const SideBar = ({
           <h5>Filter by Rating</h5>
         </div>
         <div className="filter_review">
-          {selectedStars.map((isChecked, index) => (
-            <div className="form-check" key={index}>
-              <input
-                className="form-check-input"
-                type="checkbox"
-                checked={isChecked}
-                onChange={() => handleRatingChange(index)}
-              />
-              <label className="form-check-label">
-                {[...Array(index + 1)].map((_, i) => (
-                  <i key={i} className="fas fa-star color_theme"></i>
-                ))}
-                {[...Array(5 - (index + 1))].map((_, i) => (
-                  <i key={i} className="fas fa-star color_asse"></i>
-                ))}
-              </label>
-            </div>
-          ))}
-        </div>
+            <form className="review_star">
+              {selectedStars.map((isChecked, index) => (
+                <div className="form-check" key={index}>
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => handleRatingChange(index)}
+                  />
+                  <label className="form-check-label">
+                    {[...Array(index + 1)].map((_, i) => (
+                      <i key={i} className="fas fa-star color_theme"></i>
+                    ))}
+                    {[...Array(5 - (index + 1))].map((_, i) => (
+                      <i key={i} className="fas fa-star color_asse"></i>
+                    ))}
+                  </label>
+                </div>
+              ))}
+            </form>
+            <button onClick={handleApplyFilters} className="apply" type="button">
+              Apply Rating Filter
+            </button>
+          </div>
       </div>
     </div>
   );
