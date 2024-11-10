@@ -1,5 +1,6 @@
 const itineraryModel = require("../models/itineraryModel");
 const touristModel = require("../models/touristModel");
+const itineraryTicketModel = require("../models/itineraryTicketModel");
 const jwt = require("jsonwebtoken");
 
 const getFilteredItineraries = async (req, res) => {
@@ -9,19 +10,21 @@ const getFilteredItineraries = async (req, res) => {
             req.user = null;
         }
 
-        try {
+        else {
 
-            const verified = jwt.verify(token, process.env.SECRET); // Verify token
-            console.log("Decoded JWT:", verified);
+            try {
+
+                const verified = jwt.verify(token, process.env.SECRET); // Verify token
+                console.log("Decoded JWT:", verified);
 
 
-            req.user = verified; // Store decoded token payload in req.user
-        } catch (err) {
-            console.error("Token verification failed:", err);
-            res.status(401).json({ message: "Invalid token" });
+                req.user = verified; // Store decoded token payload in req.user
+            } catch (err) {
+                console.error("Token verification failed:", err);
+                res.status(401).json({ message: "Invalid token" });
+            }
         }
 
-        req.user = null;
         let role = "";
         if (req.user)
             role = req.user.role;
@@ -68,7 +71,7 @@ const getFilteredItineraries = async (req, res) => {
         if (role !== "admin" && role !== "")
             filter.flag = { $ne: true };
 
-        const itineraries = await itineraryModel
+        let itineraries = await itineraryModel
             .find(filter)
             .sort(sortOptions)
             .populate({ path: "activities", select: "name price rating", populate: { path: "category", select: "name" } }).populate({ path: "preferenceTags", select: "name description" });
@@ -84,30 +87,30 @@ const getFilteredItineraries = async (req, res) => {
 
 
         if (role === "tourist") {
-            const tourist = await touristModel.findOne({ user: req.user._id }).populate("bookedItineraries.itinerary");
-            const notMyInactiveItinerary = []; // array that holds all inactive itineraries that are not booked my me
-            for (itinerary of inactiveItineraries) {
+            const itineraryTickets = await itineraryTicketModel.find({ tourist: req.user._id, status: 'active' })
+            // Convert itinerary IDs from itineraryTickets to a Set for efficient lookup
+            const ticketedItineraryIds = new Set(itineraryTickets.map(ticket => ticket.itinerary.toString()));
 
-                // Check if the itinerary exists in the tourist's booked itineraries
-                const exist = tourist.bookedItineraries.some(
-                    (bookedItinerary) => bookedItinerary.itinerary._id.toString() === itinerary._id.toString())
-
-
-                console.log(exist);
-                if (!exist)
-                    notMyInactiveItinerary.push(itinerary);
-
-            } const updatedItineraries = itineraries.filter(
-                itinerary => !notMyInactiveItinerary.some(
-                    notMyItinerary => notMyItinerary._id.toString() === itinerary._id.toString()
-                )
+            const uncommonItineraries = inactiveItineraries.filter(itinerary =>
+                !ticketedItineraryIds.has(itinerary._id.toString())
             );
 
-            console.log(updatedItineraries)
-            if (!updatedItineraries.length) {
-                return res.status(404).json({ message: "No itineraries found matching your criteria" });
-            }
-            return res.status(200).json({ message: "Itineraries retrieved successfully", updatedItineraries });
+            const uncommonItinerarySet = new Set(uncommonItineraries.map(itinerary => itinerary._id.toString()));
+
+            // Step 2: Filter the itineraries array to exclude the uncommon itineraries
+            const filteredItineraries = itineraries.filter(itinerary =>
+                !uncommonItinerarySet.has(itinerary._id.toString())
+            );
+
+
+
+            if (filteredItineraries.length === 0) return res.status(400).json({ message: 'no available itineraries' })
+            return res.status(200).json(filteredItineraries)
+
+
+
+
+
 
 
         }

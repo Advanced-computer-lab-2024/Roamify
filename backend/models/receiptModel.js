@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const receiptSchema = new mongoose.Schema({
     type: {
         type: String,
-        enum: ['activity', 'itinerary', 'product', 'transportation']
+        enum: ['activity', 'itinerary', 'product', 'transportation', 'place', 'points redemption']
     },
     status: {
         type: String,
