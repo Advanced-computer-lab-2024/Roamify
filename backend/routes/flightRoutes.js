@@ -4,7 +4,6 @@ const { searchFlights } = require('../controllers/flightController');
 const router = express.Router();
 
 // Route for searching flights
-console.log('in routes')
 router.post('/search', searchFlights);
 
 // Route for booking a flight
