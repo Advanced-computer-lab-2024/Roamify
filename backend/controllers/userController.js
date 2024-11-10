@@ -19,11 +19,9 @@ const upload = multer({ storage }).fields([
   { name: "additionalDocument", maxCount: 1 }, // Field for Certificate
 ]);
 
-// Create JWT Token
 const createToken = (_id, role) => {
-  return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: "3d" });
-};
-
+  return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: '3d' });
+}
 const setTokenCookie = (res, token) => {
   res.cookie("token", token, {
     httpOnly: true,
@@ -32,8 +30,6 @@ const setTokenCookie = (res, token) => {
     maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days expiration
   });
 };
-
-// Adjusted Create User Function
 const createUser = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
@@ -63,7 +59,6 @@ const createUser = async (req, res) => {
     console.log(error);
   }
 };
-
 const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -81,15 +76,12 @@ const loginUser = async (req, res) => {
 
     const { role, status, _id } = user;
 
-    if (status !== "active")
-      return res.status(200).json({
-        username: user.username,
-        status,
-        role,
-        idDocument: user.idDocument.url,
-        additionalDocument: user.additionalDocument.url,
-        termsAndConditions: user.termsAndConditions,
-      });
+    if (status !== 'active') {
+      const token = createToken(_id, role);
+      setTokenCookie(res, token);
+      return res.status(200).json({ username: user.username, status, role, idDocument: user.idDocument.url, additionalDocument: user.additionalDocument.url, termsAndConditions: user.termsAndConditions })
+
+    }
     // Handle tourist login
     if (role === "tourist") {
       const tourist = await touristModel.findOne({ user: _id });
@@ -111,11 +103,6 @@ const loginUser = async (req, res) => {
 
     // Handle advertiser, seller, tour guide login
     if (["advertiser", "seller", "tourGuide"].includes(role)) {
-      if (status === "pending") {
-        return res
-          .status(403)
-          .json({ message: "Your account is pending approval by an admin." });
-      }
 
       let model, entity;
       if (role === "advertiser") model = advertiserModel;
@@ -144,12 +131,7 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Handle general login for other users, including status check
-    if (status === "pending") {
-      return res
-        .status(403)
-        .json({ message: "Your account is pending approval by an admin." });
-    }
+
 
     // General token for other users (tourismGovernor, admin, etc.)
     const token = createToken(_id, role);
@@ -163,7 +145,6 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 const changePassword = async (req, res) => {
   try {
     const user = await userModel.findById(req.user._id);
@@ -212,7 +193,6 @@ const changePassword = async (req, res) => {
       .json({ message: "Couldn't change password", error: error.message });
   }
 };
-
 const uploadRequiredDocuments = async (req, res) => {
   try {
     // Helper function to upload a file to Cloudinary and return its secure URL and public ID
@@ -288,8 +268,6 @@ const uploadRequiredDocuments = async (req, res) => {
       .json({ message: "Error uploading documents", error: error.message });
   }
 };
-
-// Adjusted Logout Function (clear token cookie)
 const logoutUser = (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,
@@ -299,8 +277,6 @@ const logoutUser = (req, res) => {
   });
   return res.status(200).json({ message: "Successfully logged out" });
 };
-
-// Get users by role
 const getUsersByRole = async (req, res) => {
   try {
     const role = req.params.role;
@@ -336,7 +312,6 @@ const getUsersByRole = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 const termsAndConditions = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -365,8 +340,10 @@ const termsAndConditions = async (req, res) => {
       error: error.message,
     });
   }
-};
-
+  catch (error) {
+    res.status(400).json({ message: 'couldn\'t accept or reject terms and conditions', error: error.message });
+  }
+}
 const deleteAccount = async (req, res) => {
   try {
     const user = await userModel.findById(req.user._id);

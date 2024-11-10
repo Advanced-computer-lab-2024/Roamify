@@ -227,7 +227,7 @@ const acceptRejectUser = async (req, res) => {
     }
 
     if (user.status !== "pending")
-      throw Error("we have responded our approval/dissaproval for this user");
+      throw Error("we have responded our approval/disapproval for this user");
 
     if (approved === "accept") {
       await userModel.findByIdAndUpdate(userId, { status: "pending creation" });

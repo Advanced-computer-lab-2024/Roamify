@@ -75,6 +75,4 @@ const getFilteredPlaces = async (req, res) => {
     }
 };
 
-module.exports = {
-    getFilteredPlaces
-};
+module.exports = {getFilteredPlaces}

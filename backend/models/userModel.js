@@ -79,6 +79,6 @@ userSchema.statics.signUp = async function (username, email, password, role) {
   return await this.create({ username, email, password: hash, status, role });
 
 }
-const userModel = mongoose.model('user', userSchema);
 
+const userModel = mongoose.model('user', userSchema);
 module.exports = userModel;

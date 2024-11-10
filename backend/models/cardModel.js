@@ -6,7 +6,6 @@ const cardSchema = new mongoose.Schema({
     },
     cardValidUntil: {
         type: Date,
-
     }
 })
 

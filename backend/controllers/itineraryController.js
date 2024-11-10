@@ -131,9 +131,4 @@ const getFilteredItineraries = async (req, res) => {
     }
 };
 
-
-
-
-module.exports = {
-    getFilteredItineraries
-};
+module.exports = {getFilteredItineraries}

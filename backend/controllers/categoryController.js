@@ -86,7 +86,6 @@ const chooseCategoryOfActivities = async (req, res) => {
       category,
     });
   } catch (error) {
-    console.error("Error selecting category:", error);
     res.status(500).json({ message: "An unexpected error occurred while selecting the category. Please try again later." });
   }
 };
