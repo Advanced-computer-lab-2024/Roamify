@@ -58,7 +58,6 @@ const parsedQuantity = parseInt(quantity, 10);
     res.status(500).json({ message: "Error adding product" });
   }
 };
-
 const updateProduct = async (req, res) => {
   try {
     const productId = req.params.id.trim();

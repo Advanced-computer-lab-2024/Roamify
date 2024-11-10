@@ -19,11 +19,9 @@ const upload = multer({ storage }).fields([
   { name: "additionalDocument", maxCount: 1 }, // Field for Certificate
 ]);
 
-// Create JWT Token
 const createToken = (_id, role) => {
-  return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: "3d" });
-};
-
+  return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: '3d' });
+}
 const setTokenCookie = (res, token) => {
   res.cookie("token", token, {
     httpOnly: true,
@@ -32,8 +30,6 @@ const setTokenCookie = (res, token) => {
     maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days expiration
   });
 };
-
-// Adjusted Create User Function
 const createUser = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
@@ -63,7 +59,6 @@ const createUser = async (req, res) => {
     console.log(error);
   }
 };
-
 const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -163,7 +158,6 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 const changePassword = async (req, res) => {
   try {
     const user = await userModel.findById(req.user._id);
@@ -212,7 +206,6 @@ const changePassword = async (req, res) => {
       .json({ message: "Couldn't change password", error: error.message });
   }
 };
-
 const uploadRequiredDocuments = async (req, res) => {
   try {
     // Helper function to upload a file to Cloudinary and return its secure URL and public ID
@@ -288,8 +281,6 @@ const uploadRequiredDocuments = async (req, res) => {
       .json({ message: "Error uploading documents", error: error.message });
   }
 };
-
-// Adjusted Logout Function (clear token cookie)
 const logoutUser = (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,
@@ -299,8 +290,6 @@ const logoutUser = (req, res) => {
   });
   return res.status(200).json({ message: "Successfully logged out" });
 };
-
-// Get users by role
 const getUsersByRole = async (req, res) => {
   try {
     const role = req.params.role;
@@ -336,7 +325,6 @@ const getUsersByRole = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 const termsAndConditions = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -365,8 +353,10 @@ const termsAndConditions = async (req, res) => {
       error: error.message,
     });
   }
-};
-
+  catch (error) {
+    res.status(400).json({ message: 'couldn\'t accept or reject terms and conditions', error: error.message });
+  }
+}
 const deleteAccount = async (req, res) => {
   try {
     const user = await userModel.findById(req.user._id);

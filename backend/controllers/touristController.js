@@ -14,7 +14,6 @@ const itineraryTicketModel = require("../models/itineraryTicketModel");
 const placeTicketModel = require("../models/placeTicketModel");
 const placeModel = require("../models/placeModel");
 
-// Helper function to check if a user is an adult based on date of birth
 function isAdult(dateOfBirth) {
   const today = new Date();
   const birthDate = new Date(dateOfBirth);
@@ -28,8 +27,6 @@ function isAdult(dateOfBirth) {
   }
   return age >= 18;
 }
-
-// Create Profile
 const createProfile = async (req, res) => {
   const id = req.user._id;
 
@@ -80,8 +77,6 @@ const createProfile = async (req, res) => {
     res.status(401).json({ error: e.message });
   }
 };
-
-// Get Profile
 const getProfile = async (req, res) => {
   try {
     const id = req.user._id;
@@ -125,8 +120,6 @@ const getProfile = async (req, res) => {
       .json({ message: "Failed to fetch profile", error: err.message });
   }
 };
-
-// Update Profile
 const updateProfile = async (req, res) => {
   const id = req.user._id;
   const { firstName, lastName, email, mobileNumber, nationality, occupation } =
@@ -170,7 +163,6 @@ const updateProfile = async (req, res) => {
       .json({ message: "Failed to update profile", error: e.message });
   }
 };
-
 const bookActivity = async (req, res) => {
   try {
     // Find the tourist by the user's ID
@@ -232,7 +224,7 @@ const bookActivity = async (req, res) => {
     //create receipt for the transaction
     receipt = new receiptModel({
       type: 'activity',
-      status: 'successfull',
+      status: 'successful',
       tourist: req.user._id,
       price: activityObject.price,
       receiptType: 'payment'
@@ -242,7 +234,7 @@ const bookActivity = async (req, res) => {
     const availableCredit = tourist.wallet.availableCredit - activityObject.price;
     await walletModel.findByIdAndUpdate(tourist.wallet._id, { availableCredit })
 
-    //check if ticket was already made but refunded change it toactive
+    //check if ticket was already made but refunded change it active
     if (ticket && ticket.status === 'refunded') {
       await activityTicketModel.updateOne({
         tourist: req.user._id,
@@ -280,14 +272,9 @@ const bookPlace = async (req, res) => {
       return res.status(404).json({ message: "Tourist does not exist" });
 
     const { place, ticketType, ammount } = req.body;
-    if (!place)
-      return res
-        .status(400)
-        .json({ message: "Please choose a place to visit" });
-    if (!ticketType)
-      return res.status(400).json({ message: "Please choose a ticket type" });
-    if (!ammount)
-      return res.status(400).json({ message: "Please choose ammount" });
+    if (!place) return res.status(400).json({ message: "Please choose a place to visit" });
+    if (!ticketType) return res.status(400).json({ message: 'Please choose a ticket type' })
+    if (!ammount) return res.status(400).json({ message: 'Please choose ammount' })
 
     const placeId = new mongoose.Types.ObjectId(place);
     const placeObject = await placeModel.findById(placeId);
@@ -295,7 +282,7 @@ const bookPlace = async (req, res) => {
     let receipt = null;
 
     let cost = placeObject.ticketPrice[ticketType];
-    cost *= ammount;
+    cost *= amount;
     //checking if tourist has available credit
     if (tourist.wallet.availableCredit < cost) {
       receipt = new receiptModel({
@@ -311,8 +298,8 @@ const bookPlace = async (req, res) => {
 
     //create receipt for the transaction
     receipt = new receiptModel({
-      type: "place",
-      status: "successfull",
+      type: 'place',
+      status: 'successfull',
       tourist: req.user._id,
       price: cost,
       receiptType: "payment",
@@ -329,8 +316,8 @@ const bookPlace = async (req, res) => {
       place: placeId,
       status: "active",
       receipt: receipt._id,
-      ammount,
-    });
+      ammount
+    })
     await placeTicket.save();
 
     return res.status(200).json({ message: "place booked successfully" });
@@ -405,7 +392,7 @@ const bookItinerary = async (req, res) => {
     //create receipt for the transaction
     receipt = new receiptModel({
       type: 'itinerary',
-      status: 'successfull',
+      status: 'successful',
       tourist: req.user._id,
       price: itineraryObject.price,
       receiptType: 'payment'
@@ -415,7 +402,7 @@ const bookItinerary = async (req, res) => {
     const availableCredit = tourist.wallet.availableCredit - itineraryObject.price;
     await walletModel.findByIdAndUpdate(tourist.wallet._id, { availableCredit })
 
-    //check if ticket was already made but refunded change it toactive
+    //check if ticket was already made but refunded change it active
     if (ticket && ticket.status === 'refunded') {
       await itineraryTicketModel.updateOne({
         tourist: req.user._id,
@@ -444,7 +431,6 @@ const bookItinerary = async (req, res) => {
       .json({ message: "Error booking itinerary", error: error.message });
   }
 };
-
 const cancelActivity = async (req, res) => {
   try {
     const tourist = await touristModel
@@ -483,7 +469,7 @@ const cancelActivity = async (req, res) => {
     } else {
       const receipt = new receiptModel({
         type: 'activity',
-        status: 'successfull',
+        status: 'successful',
         tourist: req.user._id,
         price: ticket.receipt.price,
         receiptType: 'refund'
@@ -533,8 +519,8 @@ const cancelPlace = async (req, res) => {
     console.log(ticket);
 
     const receipt = new receiptModel({
-      type: "place",
-      status: "successfull",
+      type: 'place',
+      status: 'successfull',
       tourist: req.user._id,
       price: ticket.receipt.price,
       receiptType: "refund",
@@ -591,8 +577,8 @@ const cancelItinerary = async (req, res) => {
       });
     } else {
       const receipt = new receiptModel({
-        type: "itinerary",
-        status: "successfull",
+        type: 'itinerary',
+        status: 'successfull',
         tourist: req.user._id,
         price: ticket.receipt.price,
         receiptType: "refund",
@@ -622,6 +608,7 @@ const cancelItinerary = async (req, res) => {
   }
 };
 
+
 const selectPreferenceTag = async (req, res) => {
   try {
     const preferences = req.body.preferences;
@@ -640,20 +627,18 @@ const selectPreferenceTag = async (req, res) => {
         if (!tourist.preferences.includes(preferenceId))
           tourist.preferences.push(preferenceId);
         else
-          throw Error(
-            "preferenc already exists in your preferences please try again and select new preferences"
-          );
+          throw Error('preferenc already exists in your preferences please try again and select new preferences')
       }
     }
     await tourist.save();
-    return res.status(200).json({ message: "added preferences successfuly" });
-  } catch (error) {
-    res.status(400).json({
-      message: "error in choosing preferences ",
-      error: error.message,
-    });
+    return res.status(200).json({ message: 'added preferences successfuly' });
+
   }
-};
+  catch (error) {
+    res.status(400).json({ message: 'error in choosing preferences ', error: error.message });
+  }
+}
+
 
 const cancelTransportationBooking = async (req, res) => {
   try {
@@ -705,7 +690,7 @@ const cancelTransportationBooking = async (req, res) => {
     );
     const receipt = new receiptModel({
       type: 'transportation',
-      status: 'successfull',
+      status: 'successful',
       receiptType: 'refund',
       tourist: req.user._id,
       price: transportation.price
@@ -725,9 +710,6 @@ const cancelTransportationBooking = async (req, res) => {
     });
   }
 };
-
-
-
 const getBookedTransportations = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -749,7 +731,6 @@ const getBookedTransportations = async (req, res) => {
     });
   }
 };
-
 const getBookedFutureTransportations = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -776,8 +757,6 @@ const getBookedFutureTransportations = async (req, res) => {
     });
   }
 };
-
-
 const getFilteredTransportations = async (req, res) => {
   try {
     const {
@@ -850,6 +829,8 @@ const getFilteredTransportations = async (req, res) => {
   }
 };
 
+
+
 const bookTransportation = async (req, res) => {
   try {
     const tourist = await touristModel
@@ -885,7 +866,7 @@ const bookTransportation = async (req, res) => {
     await transportation.save();
     const receipt = new receiptModel({
       type: 'transportation',
-      status: 'successfull',
+      status: 'successful',
       tourist: req.user._id,
       price: transportation.price,
       receiptType: 'payment'
@@ -905,7 +886,9 @@ const bookTransportation = async (req, res) => {
       .status(400)
       .json({ message: "unable to book transportation", error: error.message });
   }
-};
+}
+
+
 
 const getAllBookedActivities = async (req, res) => {
   try {
@@ -966,7 +949,8 @@ const getAllBookedItineraries = async (req, res) => {
       error: error.message,
     });
   }
-};
+}
+
 
 //     const tourist = await touristModel
 //       .findOne({ user: req.user._id })
@@ -1056,7 +1040,6 @@ const getAllUpcomingBookedItineraries = async (req, res) => {
     });
   }
 };
-
 const viewPointsLevel = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
@@ -1071,7 +1054,7 @@ const viewPointsLevel = async (req, res) => {
       .status(400)
       .json({ message: "couldn't retrieve points and level" });
   }
-};
+}
 
 const redeemPoints = async (req, res) => {
   try {
@@ -1108,27 +1091,4 @@ const redeemPoints = async (req, res) => {
   }
 };
 
-module.exports = {
-  createProfile,
-  getProfile,
-  updateProfile,
-  bookActivity,
-  bookItinerary,
-  selectPreferenceTag,
-  bookTransportation,
-  cancelItinerary,
-  cancelActivity,
-  getBookedTransportations,
-  cancelTransportationBooking,
-  getAllBookedActivities,
-  getAllBookedItineraries,
-  getAllUpcomingBookedActivities,
-  getAllUpcomingBookedItineraries,
-  getFilteredTransportations,
-  viewPointsLevel,
-  redeemPoints,
-  getBookedFutureTransportations,
-  bookPlace,
-  cancelPlace,
-  getAllBookedPlaces,
-};
+module.exports = { createProfile, getProfile, updateProfile, bookActivity, bookItinerary, selectPreferenceTag, bookTransportation, cancelItinerary, cancelActivity, getBookedTransportations, cancelTransportationBooking, getAllBookedActivities, getAllBookedItineraries, getAllUpcomingBookedActivities, getAllUpcomingBookedItineraries, getFilteredTransportations, viewPointsLevel, redeemPoints, getBookedFutureTransportations, bookPlace, cancelPlace, getAllBookedPlaces };
