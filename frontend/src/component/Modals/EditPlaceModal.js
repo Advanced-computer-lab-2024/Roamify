@@ -10,7 +10,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     .get("http://localhost:3000/api/preference-tag/get-all")
     .then((res) => {
       setTags(res.data.tags);
-      console.log("Fetched Tags:", tags);
+      
     })
     .catch((error) => {
       // Handle any errors
