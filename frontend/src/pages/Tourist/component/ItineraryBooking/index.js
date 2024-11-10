@@ -58,7 +58,7 @@ const BookedItinerariesWrapper = () => {
       
       setPopupMessage("Itinerary cancelled successfully");
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "Failed to cancel the itinerary.";
+      const errorMessage = err.response?.data?.message;
       setPopupMessage(errorMessage);
     }
   };

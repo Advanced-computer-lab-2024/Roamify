@@ -39,7 +39,7 @@ const LoyaltyLevelForm = () => {
           {renderIcon()}
         </div>
         <p>{points !== null ? `Points: ${points}` : 'Loading points...'}</p>
-        <p>Receive loyalty points upon payment for any event/itinerary!</p>
+        <p>Receive loyalty points upon payment for any activity or itinerary!</p>
       </div>
     </div>
   );
