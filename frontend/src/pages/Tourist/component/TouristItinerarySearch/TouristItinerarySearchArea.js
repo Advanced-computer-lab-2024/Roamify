@@ -42,13 +42,6 @@ const TouristItineraryWrapper = () => {
         },
       });
       setItineraries(response.data || []);
-      console.log(priceRange[0]);
-      console.log(priceRange[1]);
-      console.log(priceRange[0]);
-      console.log(priceRange[0]);
-      console.log(priceRange[0]);
-      console.log(priceRange[0]);
-      console.log(response.data.updatedItineraries);
     } catch (error) {
       setItineraries([]);
       setError(
