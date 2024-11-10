@@ -8,13 +8,16 @@ const TourGuideItineraryWrapper = () => {
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedItinerary, setSelectedItinerary] = useState(null);
-  const [activityId,setActivityId]=useState([]);
+  const [activityId, setActivityId] = useState([]);
   useEffect(() => {
     const fetchItineraries = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/tourGuide/get-my-itineraries", {
-          withCredentials: true,
-        });
+        const response = await axios.get(
+          "http://localhost:3000/api/tourGuide/get-my-itineraries",
+          {
+            withCredentials: true,
+          }
+        );
         setItineraries(response.data.itineraries);
         setLoading(false);
       } catch (error) {
@@ -24,35 +27,41 @@ const TourGuideItineraryWrapper = () => {
     };
     fetchItineraries();
   }, []);
-  
+
   const handleEdit = async (itinerary) => {
     try {
+      // Check if there is at least one activity in the itinerary
+      if (!itinerary.activities || itinerary.activities.length === 0) {
+        console.error("No activities found in this itinerary.");
+        return;
+      }
+
       // Fetch activity ID based on activity name
       const activityName = itinerary.activities[0].name;
       const activityResponse = await axios.get(
         `http://localhost:3000/api/activity?name=${activityName}`,
         { withCredentials: true }
       );
-  
+
       // Assuming the response contains a list, get the first matching activity ID
       const activityId = activityResponse.data.activities[0]._id;
-  
+
       // Set the itinerary for editing with the correct activity ID directly
       setSelectedItinerary({
         ...itinerary,
-        activities: [activityId],  // Store activity ID instead of full activity object
+        activities: [activityId], // Store activity ID instead of full activity object
       });
       setIsEditMode(true);
     } catch (error) {
       console.error("Error fetching activity ID:", error);
     }
   };
-  
+
   const handleUpdate = async (updatedItinerary) => {
     try {
       // Prepare the itinerary update payload
       const formattedItinerary = {
-        activities: updatedItinerary.activities,  // This should now be an array with the activity ID
+        activities: updatedItinerary.activities, // This should now be an array with the activity ID
         language: updatedItinerary.language,
         price: updatedItinerary.price,
         availableDates: updatedItinerary.availableDates,
@@ -60,30 +69,37 @@ const TourGuideItineraryWrapper = () => {
         dropOffLocation: updatedItinerary.dropOffLocation,
         accessibility: updatedItinerary.accessibility,
       };
-  
+
       // Send update request
       await axios.put(
         `http://localhost:3000/api/tourguide/update-itinerary/${updatedItinerary._id}`,
         formattedItinerary,
         { withCredentials: true }
       );
-  
+
       // Update state with the new itinerary data
-      setItineraries(itineraries.map((itinerary) =>
-        itinerary._id === updatedItinerary._id ? { ...itinerary, ...formattedItinerary } : itinerary
-      ));
+      setItineraries(
+        itineraries.map((itinerary) =>
+          itinerary._id === updatedItinerary._id
+            ? { ...itinerary, ...formattedItinerary }
+            : itinerary
+        )
+      );
       setIsEditMode(false);
       setSelectedItinerary(null);
     } catch (error) {
       console.error("Error updating itinerary:", error);
     }
   };
-  
+
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/api/tourguide/delete-itinerary/${id}`, {
-        withCredentials: true,
-      });
+      await axios.delete(
+        `http://localhost:3000/api/tourguide/delete-itinerary/${id}`,
+        {
+          withCredentials: true,
+        }
+      );
       setItineraries(itineraries.filter((itinerary) => itinerary._id !== id));
     } catch (error) {
       console.error("Error deleting itinerary:", error);
@@ -99,7 +115,7 @@ const TourGuideItineraryWrapper = () => {
               <div className="row">
                 <div className="col-lg-12">
                   <div className="flight_search_result_wrapper">
-                    { loading ? (
+                    {loading ? (
                       <p>Loading itineraries...</p>
                     ) : (
                       itineraries.map((itinerary, index) => (
@@ -118,7 +134,9 @@ const TourGuideItineraryWrapper = () => {
                                 <div className="flight_search_middel">
                                   <div className="flight_right_arrow">
                                     <h6>{itinerary.activities[0]?.name}</h6>
-                                    <p>{itinerary.activities[0]?.location?.name}</p>
+                                    <p>
+                                      {itinerary.activities[0]?.location?.name}
+                                    </p>
                                   </div>
                                   <div className="flight_search_destination">
                                     <p>Tour Guide</p>
@@ -146,7 +164,8 @@ const TourGuideItineraryWrapper = () => {
                                 aria-expanded="false"
                                 aria-controls={`collapseExample${index}`}
                               >
-                                Show more <i className="fas fa-chevron-down"></i>
+                                Show more{" "}
+                                <i className="fas fa-chevron-down"></i>
                               </div>
                             </div>
                           </div>
@@ -171,7 +190,6 @@ const TourGuideItineraryWrapper = () => {
                                         <span className="code">Location</span>
                                         <span className="time">
                                           {itinerary.pickUpLocation}
-                                          
                                         </span>
                                       </div>
                                       <p className="airport">Drop-off</p>
@@ -188,19 +206,32 @@ const TourGuideItineraryWrapper = () => {
                               <div className="flight_refund_policy">
                                 <div className="TabPanelInner flex_widht_less">
                                   <h4>Details</h4>
-                                  <p>Accessibility: {itinerary.accessibility ? "Yes" : "No"}</p>
+                                  <p>
+                                    Accessibility:{" "}
+                                    {itinerary.accessibility ? "Yes" : "No"}
+                                  </p>
                                   <p>Rating: {itinerary.rating}</p>
-                                              <button className="btn btn_theme btn_sm" onClick={() => handleEdit(itinerary)}>
-                                                  Edit
-                                              </button>
-                                              <button className="btn btn_theme btn_sm" onClick={() => handleDelete(itinerary._id)}>
-                                                  Delete
-                                              </button>
+                                  <button
+                                    className="btn btn_theme btn_sm"
+                                    onClick={() => handleEdit(itinerary)}
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    className="btn btn_theme btn_sm"
+                                    onClick={() => handleDelete(itinerary._id)}
+                                  >
+                                    Delete
+                                  </button>
                                 </div>
                               </div>
-                              {isEditMode && selectedItinerary?._id === itinerary._id && (
-                      <EditItineraryForm itinerary={selectedItinerary} onUpdate={handleUpdate} />
-                    )}
+                              {isEditMode &&
+                                selectedItinerary?._id === itinerary._id && (
+                                  <EditItineraryForm
+                                    itinerary={selectedItinerary}
+                                    onUpdate={handleUpdate}
+                                  />
+                                )}
                             </div>
                           </div>
                         </div>
@@ -222,121 +253,124 @@ const TourGuideItineraryWrapper = () => {
   );
 };
 const EditItineraryForm = ({ itinerary, onUpdate }) => {
-    const [formData, setFormData] = useState({
-        activities: itinerary.activities.join(", "), // Now contains only the activity ID
-        language: itinerary.language || "",
-        price: itinerary.price || 0,
-        availableDates: itinerary.availableDates.join(", "),
-        pickUpLocation: itinerary.pickUpLocation || "",
-        dropOffLocation: itinerary.dropOffLocation || "",
-        accessibility: itinerary.accessibility || false,
-      });
-      
-  
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setFormData({ ...formData, [name]: value });
-    };
-  
-    const handleCheckboxChange = (e) => {
-      setFormData({ ...formData, accessibility: e.target.checked });
-    };
-  
-    const handleSubmit = (e) => {
-      e.preventDefault();
-  
-      // Convert form data for `activities` and `availableDates` to arrays
-      const updatedItinerary = {
-        ...itinerary,
-        activities: formData.activities.split(", ").map(name => name.trim()), // Split string into array of IDs
-        availableDates: formData.availableDates.split(", ").map(date => date.trim()),
-        language: formData.language,
-        price: formData.price,
-        pickUpLocation: formData.pickUpLocation,
-        dropOffLocation: formData.dropOffLocation,
-        accessibility: formData.accessibility,
-      };
-  
-      onUpdate(updatedItinerary);
-    };
-  
-    return (
-      <form onSubmit={handleSubmit} className="edit-itinerary-form">
-        <h4>Edit Itinerary</h4>
-        
-        <label>
-          Activities:
-          <input
-            type="text"
-            name="activities"
-            value={formData.activities}
-            onChange={handleChange}
-          />
-        </label>
-  
-        <label>
-          Language:
-          <input
-            type="text"
-            name="language"
-            value={formData.language}
-            onChange={handleChange}
-          />
-        </label>
-  
-        <label>
-          Price:
-          <input
-            type="number"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-          />
-        </label>
-  
-        <label>
-          Available Dates (comma-separated):
-          <input
-            type="text"
-            name="availableDates"
-            value={formData.availableDates}
-            onChange={handleChange}
-          />
-        </label>
-  
-        <label>
-          Pick-Up Location:
-          <input
-            type="text"
-            name="pickUpLocation"
-            value={formData.pickUpLocation}
-            onChange={handleChange}
-          />
-        </label>
-  
-        <label>
-          Drop-Off Location:
-          <input
-            type="text"
-            name="dropOffLocation"
-            value={formData.dropOffLocation}
-            onChange={handleChange}
-          />
-        </label>
-  
-        <label>
-          Accessibility:
-          <input
-            type="checkbox"
-            name="accessibility"
-            checked={formData.accessibility}
-            onChange={handleCheckboxChange}
-          />
-        </label>
-  
-        <button type="submit" className="btn btn_theme btn_sm">Save Changes</button>
-      </form>
-    );
+  const [formData, setFormData] = useState({
+    activities: itinerary.activities.join(", "), // Now contains only the activity ID
+    language: itinerary.language || "",
+    price: itinerary.price || 0,
+    availableDates: itinerary.availableDates.join(", "),
+    pickUpLocation: itinerary.pickUpLocation || "",
+    dropOffLocation: itinerary.dropOffLocation || "",
+    accessibility: itinerary.accessibility || false,
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
-  
+
+  const handleCheckboxChange = (e) => {
+    setFormData({ ...formData, accessibility: e.target.checked });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Convert form data for `activities` and `availableDates` to arrays
+    const updatedItinerary = {
+      ...itinerary,
+      activities: formData.activities.split(", ").map((name) => name.trim()), // Split string into array of IDs
+      availableDates: formData.availableDates
+        .split(", ")
+        .map((date) => date.trim()),
+      language: formData.language,
+      price: formData.price,
+      pickUpLocation: formData.pickUpLocation,
+      dropOffLocation: formData.dropOffLocation,
+      accessibility: formData.accessibility,
+    };
+
+    onUpdate(updatedItinerary);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="edit-itinerary-form">
+      <h4>Edit Itinerary</h4>
+
+      <label>
+        Activities:
+        <input
+          type="text"
+          name="activities"
+          value={formData.activities}
+          onChange={handleChange}
+        />
+      </label>
+
+      <label>
+        Language:
+        <input
+          type="text"
+          name="language"
+          value={formData.language}
+          onChange={handleChange}
+        />
+      </label>
+
+      <label>
+        Price:
+        <input
+          type="number"
+          name="price"
+          value={formData.price}
+          onChange={handleChange}
+        />
+      </label>
+
+      <label>
+        Available Dates (comma-separated):
+        <input
+          type="text"
+          name="availableDates"
+          value={formData.availableDates}
+          onChange={handleChange}
+        />
+      </label>
+
+      <label>
+        Pick-Up Location:
+        <input
+          type="text"
+          name="pickUpLocation"
+          value={formData.pickUpLocation}
+          onChange={handleChange}
+        />
+      </label>
+
+      <label>
+        Drop-Off Location:
+        <input
+          type="text"
+          name="dropOffLocation"
+          value={formData.dropOffLocation}
+          onChange={handleChange}
+        />
+      </label>
+
+      <label>
+        Accessibility:
+        <input
+          type="checkbox"
+          name="accessibility"
+          checked={formData.accessibility}
+          onChange={handleCheckboxChange}
+        />
+      </label>
+
+      <button type="submit" className="btn btn_theme btn_sm">
+        Save Changes
+      </button>
+    </form>
+  );
+};
+
 export default TourGuideItineraryWrapper;

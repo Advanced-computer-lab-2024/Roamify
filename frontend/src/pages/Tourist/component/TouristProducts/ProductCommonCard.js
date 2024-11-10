@@ -10,6 +10,13 @@ const CommonCard = ({
   reviews,
   picture,
 }) => {
+  // Get currency symbol and exchange rate from localStorage
+  const currencySymbol = localStorage.getItem("currencySymbol") || "$";
+  const exchangeRate = parseFloat(localStorage.getItem("value")) || 1; // Default to 1 if not set
+
+  // Calculate the converted price
+  const convertedPrice = price * exchangeRate;
+
   return (
     <div className="card">
       <img src={picture} alt={name} className="card-img-top" />
@@ -20,7 +27,8 @@ const CommonCard = ({
           <strong>Seller:</strong> {sellerId.username}
         </p>
         <p className="card-text">
-          <strong>Price:</strong> ${price.toFixed(2)}
+          <strong>Price:</strong> {currencySymbol}
+          {convertedPrice.toFixed(2)}
         </p>
         <p className="card-text">
           <strong>Rating:</strong> {rating} ({reviews} reviews)
