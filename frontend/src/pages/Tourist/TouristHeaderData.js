@@ -71,7 +71,19 @@ export const HeaderData = [
   },
   {
     menu: "My Points",
-    link: "/tourist/point",
-    submenu:false,
+    submenu:true,
+    subMenuitem: [
+      {
+        subItem: "My Level",
+        linkL: "/tourist/point",
+        subMenuActive: false,
+      },
+
+      {
+        subItem: "View All",
+        linkL: "/tourist/redeem",
+        subMenuActive: false,
+      },
+    ],
   },
 ];
