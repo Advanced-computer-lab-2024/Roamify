@@ -11,7 +11,10 @@ const TouristItineraryWrapper = () => {
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [date, setDate] = useState(null);
-  const [sortCriteria, setSortCriteria] = useState({ field: "price", order: "asc" });
+  const [sortCriteria, setSortCriteria] = useState({
+    field: "price",
+    order: "asc",
+  });
   const [error, setError] = useState(null);
   const [rating, setRating] = useState(0);
   const [preferences, setPreferences] = useState([]);
@@ -39,6 +42,13 @@ const TouristItineraryWrapper = () => {
         },
       });
       setItineraries(response.data.updatedItineraries || []);
+      console.log(priceRange[0]);
+      console.log(priceRange[1]);
+      console.log(priceRange[0]);
+      console.log(priceRange[0]);
+      console.log(priceRange[0]);
+      console.log(priceRange[0]);
+      console.log(response.data.updatedItineraries);
     } catch (error) {
       setItineraries([]);
       setError(
@@ -72,7 +82,9 @@ const TouristItineraryWrapper = () => {
   useEffect(() => {
     const fetchPreferences = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/preference-tag/get-all");
+        const response = await axios.get(
+          "http://localhost:3000/api/preference-tag/get-all"
+        );
         setPreferences(response.data.tags || []);
       } catch (error) {
         console.error("Error fetching preferences:", error);
@@ -98,7 +110,8 @@ const TouristItineraryWrapper = () => {
       );
       setPopupMessage(response.data.message || "Booked successfully");
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Failed to book itinerary.";
+      const errorMessage =
+        error.response?.data?.message || "Failed to book itinerary.";
       setPopupMessage(errorMessage);
     } finally {
       setShowPopup(true);
@@ -115,21 +128,34 @@ const TouristItineraryWrapper = () => {
 
   const handleCopyLink = (itineraryId) => {
     const itineraryUrl = `${window.location.origin}/itinerary-details/${itineraryId}`;
-    navigator.clipboard.writeText(itineraryUrl)
+    navigator.clipboard
+      .writeText(itineraryUrl)
       .then(() => alert("Link copied to clipboard!"))
-      .catch(err => console.error("Failed to copy: ", err));
+      .catch((err) => console.error("Failed to copy: ", err));
   };
 
   const handleEmailShare = (itinerary) => {
     const subject = `Check out this itinerary: ${itinerary.name}`;
-    const body = `I thought you'd be interested in this itinerary: ${itinerary.name}\n\nLocation: ${itinerary.locations.join(", ")}\nAvailable Date: ${new Date(itinerary.availableDates[0]).toLocaleDateString()}\nPrice: ${itinerary.price} EGP\n\nCheck it out: ${window.location.origin}/itinerary-details/${itinerary._id}`;
-    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const body = `I thought you'd be interested in this itinerary: ${
+      itinerary.name
+    }\n\nLocation: ${itinerary.locations.join(
+      ", "
+    )}\nAvailable Date: ${new Date(
+      itinerary.availableDates[0]
+    ).toLocaleDateString()}\nPrice: ${itinerary.price} EGP\n\nCheck it out: ${
+      window.location.origin
+    }/itinerary-details/${itinerary._id}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
   };
 
   return (
     <section id="explore_area" className="section_padding">
       <div className="container">
-        <SectionHeading heading={`${itineraries?.length || 0} itineraries found`} />
+        <SectionHeading
+          heading={`${itineraries?.length || 0} itineraries found`}
+        />
         <div className="row">
           <div className="col-lg-3">
             <div className="left_side_search_boxed">
@@ -167,22 +193,49 @@ const TouristItineraryWrapper = () => {
               <div className="flight_search_result_wrapper">
                 {itineraries.length > 0 ? (
                   itineraries.map((itinerary) => (
-                    <div className="flight_search_item_wrapper" key={itinerary._id}>
+                    <div
+                      className="flight_search_item_wrapper"
+                      key={itinerary._id}
+                    >
                       <div className="flight_search_items">
                         <h3 className="itinerary-name">{itinerary.title}</h3>
                         <div className="itinerary-section">
-                        <p><strong>Name:</strong> {itinerary.name}</p>
-                          <p><strong>Location:</strong> {itinerary.locations?.join(", ")}</p>
-                          <p><strong>Language:</strong> {itinerary.language}</p>
-                          <p><strong>Accessibility:</strong> {itinerary.accessibility ? "Yes" : "No"}</p>
-                          <p><strong>Available Date:</strong> {Array.isArray(itinerary.availableDates) && itinerary.availableDates.length > 0 ? itinerary.availableDates[0] : "No dates available"}</p>
+                          <p>
+                            <strong>Name:</strong> {itinerary.name}
+                          </p>
+                          <p>
+                            <strong>Location:</strong>{" "}
+                            {itinerary.locations?.join(", ")}
+                          </p>
+                          <p>
+                            <strong>Language:</strong> {itinerary.language}
+                          </p>
+                          <p>
+                            <strong>Accessibility:</strong>{" "}
+                            {itinerary.accessibility ? "Yes" : "No"}
+                          </p>
+                          <p>
+                            <strong>Available Date:</strong>{" "}
+                            {Array.isArray(itinerary.availableDates) &&
+                            itinerary.availableDates.length > 0
+                              ? itinerary.availableDates[0]
+                              : "No dates available"}
+                          </p>
                         </div>
                         <div className="booking-section">
                           <h2>{itinerary.price} EGP</h2>
                           <button
-                            onClick={() => handleBooking(itinerary._id, itinerary.availableDates[0])}
+                            onClick={() =>
+                              handleBooking(
+                                itinerary._id,
+                                itinerary.availableDates[0]
+                              )
+                            }
                             className="btn btn_theme btn_sm"
-                            disabled={!itinerary.availableDates || itinerary.availableDates.length === 0}
+                            disabled={
+                              !itinerary.availableDates ||
+                              itinerary.availableDates.length === 0
+                            }
                           >
                             Book now
                           </button>
@@ -194,8 +247,18 @@ const TouristItineraryWrapper = () => {
                           </button>
                           {showShareOptions[itinerary._id] && (
                             <div className="share-options">
-                              <button className="btn btn_theme btn_sm" onClick={() => handleCopyLink(itinerary._id)}>Copy Link</button>
-                              <button className="btn btn_theme btn_sm" onClick={() => handleEmailShare(itinerary)}>Share via Email</button>
+                              <button
+                                className="btn btn_theme btn_sm"
+                                onClick={() => handleCopyLink(itinerary._id)}
+                              >
+                                Copy Link
+                              </button>
+                              <button
+                                className="btn btn_theme btn_sm"
+                                onClick={() => handleEmailShare(itinerary)}
+                              >
+                                Share via Email
+                              </button>
                             </div>
                           )}
                         </div>
@@ -225,8 +288,14 @@ const TouristItineraryWrapper = () => {
               textAlign: "center",
             }}
           >
-            <h4 style={{ color: "green", marginBottom: "10px" }}>{popupMessage}</h4>
-            <button onClick={() => setShowPopup(false)} className="btn btn_theme" style={{ marginTop: "10px" }}>
+            <h4 style={{ color: "green", marginBottom: "10px" }}>
+              {popupMessage}
+            </h4>
+            <button
+              onClick={() => setShowPopup(false)}
+              className="btn btn_theme"
+              style={{ marginTop: "10px" }}
+            >
               Close
             </button>
           </div>

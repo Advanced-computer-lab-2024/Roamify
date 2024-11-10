@@ -224,22 +224,22 @@ const RegisterArea = () => {
                       {/* Business User Registration Form */}
                       <div className="form-group">
                         <input
-                          type="email"
+                          type="text"
                           className="form-control"
-                          name="email"
-                          placeholder="Email"
-                          value={formData.email}
+                          name="username"
+                          placeholder="Username"
+                          value={formData.username}
                           onChange={handleInputChange}
                           required
                         />
                       </div>
                       <div className="form-group">
                         <input
-                          type="text"
+                          type="email"
                           className="form-control"
-                          name="username"
-                          placeholder="Username"
-                          value={formData.username}
+                          name="email"
+                          placeholder="Email"
+                          value={formData.email}
                           onChange={handleInputChange}
                           required
                         />

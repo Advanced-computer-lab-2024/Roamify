@@ -12,7 +12,7 @@ export const HeaderData = [
 
       {
         subItem: "My Places",
-        linkL: "places/my",
+        linkL: "my-places",
         subMenuActive: false,
       },
     ],

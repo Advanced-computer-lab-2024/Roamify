@@ -37,10 +37,9 @@ const App = () => {
         <Route path="/pending-acceptance" element={<PendingAcceptance />} />
         <Route path="/accept-conditions" element={<AcceptConditions />} />
         <Route path="/profile-details" element={<ProfileDetails />} />
-        <Route path="/activity-details/:id" element={<ActivityDetails/>}/>
-        <Route path="/itinerary-details/:id" element={<ItineraryDetails/>}/>
-        <Route path="/place-details/:id" element={<PlaceDetails/>}/>
-
+        <Route path="/activity-details/:id" element={<ActivityDetails />} />
+        <Route path="/itinerary-details/:id" element={<ItineraryDetails />} />
+        <Route path="/place-details/:id" element={<PlaceDetails />} />
       </Routes>
     </>
   );

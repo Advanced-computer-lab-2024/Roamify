@@ -4,6 +4,7 @@ import axios from "axios";
 const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
   const modalRef = useRef(null);
   const [tags, setTags] = useState([]);
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -19,25 +20,23 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     fetchTags();
   }, []);
 
-  const [formData, setFormData] = useState({
-    placeImages: fieldsValues.placeImages || [],
-    description: fieldsValues.description || "",
-    closingHours: fieldsValues.closingHours || "",
-    openingHours: fieldsValues.openingHours || "",
-    tagPlace: fieldsValues.tagPlace || "",
-    ticketPrice: {
-      native: fieldsValues.ticketPrice?.native || "",
-      foreigner: fieldsValues.ticketPrice?.foreigner || "",
-      student: fieldsValues.ticketPrice?.student || "",
-    },
-  });
-
   useEffect(() => {
-    setFormData(fieldsValues);
+    setFormData({
+      placeImages: fieldsValues?.placeImages || [],
+      description: fieldsValues?.description || "",
+      closingHours: fieldsValues?.closingHours || "",
+      openingHours: fieldsValues?.openingHours || "",
+      tagPlace: fieldsValues?.tagPlace || [], // Initialize as an array
+      ticketPrice: {
+        Native: fieldsValues?.ticketPrice?.Native || "",
+        Foreigner: fieldsValues?.ticketPrice?.Foreigner || "",
+        Student: fieldsValues?.ticketPrice?.Student || "",
+      },
+    });
   }, [fieldsValues]);
 
   const [imagePreviews, setImagePreviews] = useState(
-    fieldsValues.placeImages?.map((img) => URL.createObjectURL(img)) || []
+    fieldsValues?.placeImages?.map((img) => URL.createObjectURL(img)) || []
   );
 
   const handleImageChange = (event) => {
@@ -55,12 +54,44 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleTicketPriceChange = (e) => {
-    const { name, value } = e.target;
+  const handleNativeChange = (e) => {
     setFormData((prev) => ({
       ...prev,
-      ticketPrice: { ...prev.ticketPrice, [name]: value },
+      ticketPrice: {
+        ...prev.ticketPrice,
+        Native: e.target.value,
+      },
     }));
+  };
+
+  const handleForeignerChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      ticketPrice: {
+        ...prev.ticketPrice,
+        Foreigner: e.target.value,
+      },
+    }));
+  };
+
+  const handleStudentChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      ticketPrice: {
+        ...prev.ticketPrice,
+        Student: e.target.value,
+      },
+    }));
+  };
+
+  const handleTagPlaceChange = (tagId) => {
+    setFormData((prev) => {
+      const tagPlace = prev.tagPlace.includes(tagId)
+        ? prev.tagPlace.filter((id) => id !== tagId) // Remove tag if already selected
+        : [...prev.tagPlace, tagId]; // Add tag if not selected
+
+      return { ...prev, tagPlace };
+    });
   };
 
   useEffect(() => {
@@ -88,6 +119,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log(formData);
     onSubmit(formData);
   };
 
@@ -123,7 +155,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
         <h2
           style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "10px" }}
         >
-          {fieldsValues.description ? "Edit Place" : "Create Place"}
+          {fieldsValues?.description ? "Edit Place" : "Create Place"}
         </h2>
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: "10px" }}>
@@ -152,7 +184,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
             <label>Description</label>
             <textarea
               name="description"
-              value={formData.description}
+              value={formData.description ?? ""}
               onChange={handleChange}
               style={{
                 width: "100%",
@@ -168,7 +200,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
             <input
               type="text"
               name="closingHours"
-              value={formData.closingHours}
+              value={formData.closingHours ?? ""}
               onChange={handleChange}
               style={{
                 width: "100%",
@@ -184,7 +216,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
             <input
               type="text"
               name="openingHours"
-              value={formData.openingHours}
+              value={formData.openingHours ?? ""}
               onChange={handleChange}
               style={{
                 width: "100%",
@@ -196,24 +228,19 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
           </div>
 
           <div style={{ marginBottom: "10px" }}>
-            <label>Tag Place</label>
-            <select
-              name="tagPlace"
-              value={formData.tagPlace}
-              onChange={handleChange}
-              style={{
-                width: "100%",
-                padding: "4px 8px",
-                border: "1px solid #D2D6DC",
-                borderRadius: "4px",
-              }}
-            >
-              {tags.map((tag, index) => (
-                <option key={index} value={tag._id}>
-                  {tag.name}
-                </option>
+            <label>Tag Places</label>
+            <div>
+              {tags.map((tag) => (
+                <div key={tag._id} style={{ marginBottom: "5px" }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.tagPlace.includes(tag._id)}
+                    onChange={() => handleTagPlaceChange(tag._id)}
+                  />
+                  <label style={{ marginLeft: "8px" }}>{tag.name}</label>
+                </div>
               ))}
-            </select>
+            </div>
           </div>
 
           <div style={{ marginBottom: "10px" }}>
@@ -222,9 +249,9 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               <label>Native</label>
               <input
                 type="number"
-                name="native"
-                value={formData.ticketPrice.native}
-                onChange={handleTicketPriceChange}
+                name="Native"
+                value={formData.ticketPrice.Native ?? ""}
+                onChange={handleNativeChange}
                 style={{
                   width: "100%",
                   padding: "4px 8px",
@@ -235,9 +262,9 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               <label>Foreigner</label>
               <input
                 type="number"
-                name="foreigner"
-                value={formData.ticketPrice.foreigner}
-                onChange={handleTicketPriceChange}
+                name="Foreigner"
+                value={formData.ticketPrice.Foreigner ?? ""}
+                onChange={handleForeignerChange}
                 style={{
                   width: "100%",
                   padding: "4px 8px",
@@ -248,9 +275,9 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               <label>Student</label>
               <input
                 type="number"
-                name="student"
-                value={formData.ticketPrice.student}
-                onChange={handleTicketPriceChange}
+                name="Student"
+                value={formData.ticketPrice.Student ?? ""}
+                onChange={handleStudentChange}
                 style={{
                   width: "100%",
                   padding: "4px 8px",

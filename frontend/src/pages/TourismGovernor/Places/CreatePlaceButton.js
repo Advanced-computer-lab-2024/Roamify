@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import EditIcon from "../../../component/Icons/EditIcon";
 import DynamicEditModal from "../../../component/Modals/DynamicEditModal";
+import EditPlaceModal from "../../../component/Modals/EditPlaceModal";
 
 const CreatePlaceButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,20 +51,11 @@ const CreatePlaceButton = () => {
         <EditIcon /> Create Place
       </button>
 
-      {/* Use DynamicEditModal for form fields */}
-      <DynamicEditModal
+      <EditPlaceModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleSubmit}
-        fields={[
-          { name: "name", label: "Name", type: "text" },
-          { name: "description", label: "Description", type: "textarea" },
-          { name: "placeImages", label: "Place Images (URL)", type: "text" },
-          { name: "openingHours", label: "Opening Hours", type: "text" },
-          { name: "closingHours", label: "Closing Hours", type: "text" },
-          { name: "tagPlace", label: "Tag Place", type: "text" },
-          { name: "ticketPrice", label: "Ticket Price", type: "number" },
-        ]}
+        fieldsValues={{}}
       />
     </>
   );

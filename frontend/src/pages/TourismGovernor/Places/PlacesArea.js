@@ -9,15 +9,18 @@ import axios from "axios";
 import EditPlaceButton from "./EditPlaceButton";
 import CreatePlaceButton from "./CreatePlaceButton"; // Import CreatePlaceButton
 
-const PlacesArea = () => {
+const PlacesArea = ({ myPlaces }) => {
   const [places, setPlaces] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const endpoint = myPlaces
+    ? "http://localhost:3000/api/tourismgovernor/get-my-places"
+    : "http://localhost:3000/api/places";
 
   useEffect(() => {
     const fetchPlaces = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/places");
-        setPlaces(response.data.places);
+        const response = await axios.get(endpoint, { withCredentials: true });
+        setPlaces(myPlaces ? response.data : response.data.places);
         setIsLoading(false);
       } catch (err) {
         console.error(err);

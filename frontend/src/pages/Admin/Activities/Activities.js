@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import ActivitiesTable from "./ActivitiesTable.js";
 import CommonBanner from "../../../component/Common/CommonBanner.js";
 import axios from "axios";
+import CreateTagButton from "./CreateTagButton.js";
 
 const Activities = () => {
   const [categories, setCategories] = useState([]);
@@ -29,7 +30,7 @@ const Activities = () => {
       >
         {/* <CreateActivityButton type={"category"} /> */}
       </div>
-
+      <CreateTagButton type={"category"} />
       <ActivitiesTable
         columns={[{ name: "name" }, { name: "description" }]}
         categories={categories}
