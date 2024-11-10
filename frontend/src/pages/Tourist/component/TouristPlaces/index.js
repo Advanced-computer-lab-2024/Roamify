@@ -13,7 +13,7 @@ const TouristPlacesArea = () => {
   const [searchInputTag, setSearchInputTag] = useState("");
   const [tags, setTags] = useState([]);
   const [selectedTag, setSelectedTag] = useState("");
-
+  const [showShareOptions, setShowShareOptions] = useState({});
   // Fetch places based on search criteria
   const fetchPlaces = async (searchParams = {}) => {
     setLoading(true);
@@ -98,6 +98,29 @@ const TouristPlacesArea = () => {
     setSelectedTag(tagId);
     fetchPlaces({ tags: tagId ? [tagId] : [] });
   };
+  const handleShareToggle = (placesId) => {
+    setShowShareOptions((prevState) => ({
+      ...prevState,
+      [placesId]: !prevState[placesId],
+    }));
+  };
+  const handleCopyLink = (placesId) => {
+    const activityUrl = `${window.location.origin}/place-details/${placesId}`;
+    navigator.clipboard.writeText(activityUrl).then(() => {
+      alert("Link copied to clipboard!");
+    }).catch(err => {
+      console.error("Failed to copy: ", err);
+    });
+  };
+
+  // Function to send activity details via email
+  const handleEmailShare = (place) => {
+    const subject = `Check out this activity: ${place.name}`;
+    const body = `I thought you'd be interested in this activity: ${place.name}\n\nLocation: ${place.location.name}\n\nPrice: ${place.price} EGP\n\nCheck it out: ${window.location.origin}/place-details/${place._id}`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+  };
+
 
   return (
     <section id="top_destinations" className="section_padding">
@@ -199,7 +222,7 @@ const TouristPlacesArea = () => {
                       <div className="top_destinations_box_content">
                         <h4 style={{ fontSize: "1.2em", marginBottom: "10px" }}>
                           <Link
-                            to={`/destinations-details/${data._id}`}
+                            to={`/place-details/${data._id}`}
                             style={{ color: "purple", textDecoration: "none" }}
                           >
                             {data.name}
@@ -226,6 +249,18 @@ const TouristPlacesArea = () => {
                             ? ` ${data.ticketPrice.Native} (Native), ${data.ticketPrice.Foreigner} (Foreigner)`
                             : " Not available"}
                         </p>
+                        <button
+                              className="btn btn_theme btn_sm"
+                              onClick={() => handleShareToggle(data._id)}
+                            >
+                              Share
+                            </button>
+                            {showShareOptions[data._id] && (
+                              <div className="share-options">
+                                <button className="btn btn_theme btn_sm" onClick={() => handleCopyLink(data._id)}>Copy Link</button>
+                                <button className="btn btn_theme btn_sm" onClick={() => handleEmailShare(data._id)}>Share via Email</button>
+                              </div>
+                            )}
                       </div>
                     </div>
                   </div>

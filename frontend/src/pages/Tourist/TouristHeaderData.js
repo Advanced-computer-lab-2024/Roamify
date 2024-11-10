@@ -20,15 +20,27 @@ export const HeaderData = [
 
       {
         subItem: " My Booked Activities",
-        linkL: "/tourist/tourist-booking",
+        linkL: "/tourist/activity-booking",
         subMenuActive: false,
       },
     ],
   },
   {
     menu: "Itineraries",
-    link: "tourist-itinerary",
-    submenu: false,
+    submenu: true,
+    subMenuitem: [
+      {
+          subItem:"View All",
+          linkL:"/tourist/tourist-itinerary",
+          subMenuActive:false,
+      },
+
+      {
+          subItem:" My Booked Itineraries",
+          linkL:"/tourist/itinerary-booking",
+          subMenuActive:false,
+      },
+    ],
   },
   {
     menu: "Products",
@@ -56,5 +68,10 @@ export const HeaderData = [
         subMenuActive: false,
       },
     ],
+  },
+  {
+    menu: "My Points",
+    link: "/tourist/point",
+    submenu:false,
   },
 ];

@@ -64,25 +64,51 @@ const TouristActivitiesWrapper = () => {
 
   const handleBooking = async (activityId, activityDate) => {
     try {
+      // Format the date to "YYYY-MM-DD"
       const formattedDate = new Date(activityDate).toISOString().split("T")[0];
+      
+      // Send booking request with activityId and date
       await axios.post(
         "http://localhost:3000/api/tourist/book-activity",
         { activity: activityId, date: formattedDate },
         { withCredentials: true }
       );
+  
+      // Show success popup
       setPopupMessage("Booking successful!");
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
     } catch (error) {
+      // Handle errors
       const errorMessage =
         error.response && error.response.data && error.response.data.message
           ? error.response.data.message
           : "Failed to book activity. Please try again.";
+      
       setPopupMessage(errorMessage);
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
       console.error("Error booking activity:", error);
     }
+  };
+  
+
+  // Function to copy activity link
+  const handleCopyLink = (activityId) => {
+    const activityUrl = `${window.location.origin}/activity-details/${activityId}`;
+    navigator.clipboard.writeText(activityUrl).then(() => {
+      alert("Link copied to clipboard!");
+    }).catch(err => {
+      console.error("Failed to copy: ", err);
+    });
+  };
+
+  // Function to send activity details via email
+  const handleEmailShare = (activity) => {
+    const subject = `Check out this activity: ${activity.name}`;
+    const body = `I thought you'd be interested in this activity: ${activity.name}\n\nLocation: ${activity.location.name}\nDate: ${new Date(activity.date).toLocaleDateString()}\nPrice: ${activity.price} EGP\n\n${activity.category.description}\n\nCheck it out: ${window.location.origin}/activity-details/${activity._id}`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
   };
 
   return (
@@ -119,7 +145,6 @@ const TouristActivitiesWrapper = () => {
                             <div className="flight_search_destination">
                               <p>Location</p>
                               <h3>{activity.location.name}</h3>
-                              <h6>Coordinates: {activity.location.coordinates.join(", ")}</h6>
                             </div>
                           </div>
                           <div className="flight_search_middel">
@@ -154,6 +179,23 @@ const TouristActivitiesWrapper = () => {
                           Book now
                         </button>
                         {activity.discounts ? <p>*Discount available</p> : ""}
+
+                        {/* Share Button */}
+                        <div>
+                          <button
+                            onClick={() => handleCopyLink(activity._id)}
+                            className="btn btn-secondary btn-sm me-2"
+                          >
+                            Copy Link
+                          </button>
+                          <button
+                            onClick={() => handleEmailShare(activity)}
+                            className="btn btn-primary btn-sm"
+                          >
+                            Share via Email
+                          </button>
+                        </div>
+
                         <div
                           data-bs-toggle="collapse"
                           data-bs-target={`#collapseExample${activity._id}`}

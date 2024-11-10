@@ -1,11 +1,11 @@
 import React from "react";
 import CommonBanner from "../../component/Common/CommonBanner";
-import BookedActivitiesWrapper from "./component/TouristBooking";
+import BookedItinerariesWrapper from "./component/ItineraryBooking";
 const TouristBooking = () => {
   return (
     <>
       <CommonBanner heading="Booking" pagination="Booking" />
-      <BookedActivitiesWrapper/>
+      <BookedItinerariesWrapper/>
     </>
   );
 };

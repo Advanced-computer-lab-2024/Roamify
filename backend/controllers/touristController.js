@@ -605,8 +605,6 @@ const cancelItinerary = async (req, res) => {
         .json({ message: "Please select an itinerary to cancel" });
     }
 
-    const date = new Date();
-
     const ticketId = new mongoose.Types.ObjectId(ticketIdString);
 
     const ticket = await itineraryTicketModel
@@ -977,12 +975,10 @@ const getAllBookedPlaces = async (req, res) => {
       return res.status(400).json({ message: "no booked places yet" });
     return res.status(200).json(placesTickets);
   } catch (error) {
-    return res
-      .status(400)
-      .json({
-        message: "couldn't retrieve booked places",
-        error: error.message,
-      });
+    return res.status(400).json({
+      message: "couldn't retrieve booked places",
+      error: error.message,
+    });
   }
 };
 const getAllBookedItineraries = async (req, res) => {
