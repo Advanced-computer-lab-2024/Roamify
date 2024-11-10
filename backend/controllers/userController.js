@@ -92,6 +92,8 @@ const loginUser = async (req, res) => {
         email: user.email,
         username: user.username,
         role: user.role,
+        status,
+        idDocument: user.idDocument.url, additionalDocument: user.additionalDocument.url, termsAndConditions: user.termsAndConditions
       });
     }
 
@@ -119,6 +121,9 @@ const loginUser = async (req, res) => {
         email: user.email,
         username: user.username,
         role: user.role,
+        status,
+        idDocument: user.idDocument.url, additionalDocument: user.additionalDocument.url, termsAndConditions: user.termsAndConditions
+
       });
     }
 

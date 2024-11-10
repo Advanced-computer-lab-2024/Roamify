@@ -15,6 +15,8 @@ const preferenceTagRoutes = require("./preferenceTagRoutes");
 const placesRoutes = require("./placesRoutes");
 const complaintRoutes = require("./complaintRoutes");
 const exchangeRateRoutes = require("./exchangeRateRoutes");
+const flightRoutes = require("./flightRoutes");
+const hotelRoutes = require("./hotelRoutes");
 
 module.exports = [
     { path: "/api/user", route: userRoutes },
@@ -34,4 +36,6 @@ module.exports = [
     { path: "/api/places", route: placesRoutes },
     { path: "/api/complaint", route: complaintRoutes },
     { path: "/api/exchange-rate", route: exchangeRateRoutes },
+    { path: "/api/flights", route: flightRoutes, role: ['tourist'] },
+    { path: "/api/hotels", route: hotelRoutes, role: ['tourist'] }
 ];

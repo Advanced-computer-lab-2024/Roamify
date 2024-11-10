@@ -904,23 +904,22 @@ const redeemPoints = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
     if (!tourist) return res.status(400).json({ message: 'user doesn\'t exist' })
-    const amount = req.body.ammount;
-    if (!amount) return res.status(400).json({ message: 'please select amount to redeem' })
+    const points = req.body.points;
+    if (!points) return res.status(400).json({ message: 'please select points to redeem' })
 
-    const points = tourist.points;
-    if (points === 0) return res.status(400).json({ message: 'sorry you doesn\'t have points' })
+    if (points < 100) return res.status(400).json({ message: 'sorry 100 you must redeem atleast 100 points' })
+    const touristPoints = tourist.points;
+    if (touristPoints < points) return res.status(400).json({ message: 'sorry you don\'t have points' })
 
-    const pointsRequired = amount * 100;
-    console.log(pointsRequired)
-    if (points < pointsRequired) return res.status(400).json({ message: 'not enough points' });
+    const cach = points / 100;
 
-    tourist.points -= pointsRequired;
+    tourist.points -= points;
     await tourist.save();
 
     const wallet = await walletModel.findOne({ tourist: req.user._id });
-    wallet.availableCredit += amount;
+    wallet.availableCredit += cach;
     await wallet.save();
-    return res.status(200).json({ message: 'redeemed points successfully' })
+    return res.status(200).json({ message: `redeemed ${points} successfully` })
 
   }
   catch (error) {
