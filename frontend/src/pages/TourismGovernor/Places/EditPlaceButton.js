@@ -15,9 +15,21 @@ const EditPlaceButton = ({
 }) => {
   const handleSubmit = (formData) => {
     // console.log(categoryId);
-    const data = {
-      ...formData,
-    };
+    const data = new FormData();
+
+    // Loop through formData keys and append them to FormData
+    for (let key in formData) {
+      if (key === "placeImages" && Array.isArray(formData[key])) {
+        // If images are an array, append each image file
+        formData[key].forEach((file) => data.append("placeImages", file));
+      } else {
+        data.append(key, formData[key]);
+      }
+    }
+
+    for (let pair of data.entries()) {
+      console.log(`${pair[0]}: ${pair[1].toString()}`);
+    }
 
     axios
       .put(
@@ -25,6 +37,7 @@ const EditPlaceButton = ({
         data,
         {
           withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
         }
       )
       .then((result) => {
