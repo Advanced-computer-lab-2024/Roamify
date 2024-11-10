@@ -6,6 +6,7 @@ const userModel = require("../models/userModel");
 const activityModel = require("../models/activityModel");
 const preferenceTagModel = require('../models/preferenceTagModel');
 const categoryModel = require("../models/categoryModel");
+const activityTicketModel = require("../models/activityTicketModel");
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
 const { default: mongoose } = require('mongoose');
@@ -226,7 +227,11 @@ const updateActivity = async (req, res) => {
         .status(403)
         .json({ message: "You are not allowed to edit others' activities" });
     }
+    const today = new Date();
+    today.setHours(0, 0, 0);
+    const activityDate = activity.date.setHours(0, 0, 0);
 
+    if (today > activityDate) return res.status(400).json({ message: 'this activity is old you are not allowed to edit it' })
     // Extract fields from the request body
     const {
       name,
@@ -309,6 +314,14 @@ const deleteActivity = async (req, res) => {
     if (activity.advertiser && activity.advertiser._id.toString() !== advertiserId) {
       return res.status(403).json({ message: "You are not authorized to delete this activity" });
     }
+    const activityTickets = await activityTicketModel.find({ activity: activityId, status: 'active' })
+
+    const today = new Date();
+    today.setHours(0, 0, 0);
+    const activityDate = new Date(activity.date)
+    activityDate.setHours(0, 0, 0)
+
+    if (today < activityDate && activityTickets.length > 0) return res.status(400).json({ message: 'this activity is booked from other users you are not allowed to delete it' })
 
     // Delete the activity if checks pass
     await activityModel.findByIdAndDelete(activityId);
