@@ -68,6 +68,13 @@ const itinerarySchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
-
+itinerarySchema.pre('remove', async function(next) {
+    try {
+        await mongoose.model('itinerary review').deleteMany({ itinerary: this._id });
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 const Itinerary = mongoose.model('itinerary', itinerarySchema);
 module.exports = Itinerary;

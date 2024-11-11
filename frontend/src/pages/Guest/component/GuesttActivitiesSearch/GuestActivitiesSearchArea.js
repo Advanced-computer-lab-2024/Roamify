@@ -5,7 +5,7 @@ import SideBar from "./SideBar";
 import DateFilter from "./DateFilter";
 import { ToastContainer, toast } from "react-toastify";
 
-const TouristActivitiesWrapper = () => {
+const GuestActivitiesWrapper = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState([0, 1000]);
@@ -27,7 +27,7 @@ const TouristActivitiesWrapper = () => {
     setError(null);
     try {
       const response = await axios.get(`http://localhost:3000/api/activity`, {
-        withCredentials: true,
+        
         params: {
           minBudget,
           maxBudget,
@@ -80,114 +80,9 @@ const TouristActivitiesWrapper = () => {
     }; fetchTags();
 
   }, []);
-  const handleSearchTypeChange = (event) => {
-    setSearchType(event.target.value);
-    setSearchInput("");
-  };
-
-  const handleSearchInputChange = (event) => {
-    setSearchInput(event.target.value);
-  };
-
-  const handleSearchInputTagChange = (event) => {
-    setSearchInputTag(event.target.value);
-  };
-  const handleSearchInputCategoryChange = (event) => {
-    setSearchInputCategory(event.target.value);
-  };
-  const handleSearchClick = async () => {
-    const searchParams = {};
-
-    // Handle search by name
-    if (searchType === "name" && searchInput) {
-      searchParams.name = searchInput;
-    } else if (searchType === "tag" && searchInputTag) {
-      // Find the tag ID by matching the tag name
-      const matchingTag = tags.find((tag) => tag.name.toLowerCase() === searchInputTag.toLowerCase());
-
-      if (matchingTag) {
-        searchParams.tags = [matchingTag._id]; // Use the ID for the search
-      } else {
-        toast.info("Tag not found");
-        return;
-      }
-    } else if (searchType === "category" && searchInputCategory) {
-      // Find the category ID by matching the category name
-      const matchingCategory = categories.find(
-        (cat) => cat.name.toLowerCase() === searchInputCategory.toLowerCase()
-      );
-
-      if (matchingCategory) {
-        searchParams.category = matchingCategory._id; // Use the ID for the search
-        console.log(matchingCategory._id);
-      } else {
-        toast.info("Category not found");
-        return;
-      }
-    }
-
-    // Fetch activities with the search parameters
-    await fetchActivities(
-      priceRange[0],
-      priceRange[1],
-      date,
-      minRating,
-      searchParams.category,
-      searchParams.tags
-    );
-
-    // Apply search filter locally for "name" search
-    if (searchType === "name" && searchInput) {
-      setActivities((prevActivities) =>
-        prevActivities.filter((activity) =>
-          activity.name.toLowerCase().includes(searchInput.toLowerCase())
-        )
-      );
-    }
-  };
 
 
-
-  const handleBooking = async (activityId, activityDate) => {
-    try {
-      const formattedDate = new Date(activityDate).toISOString().split("T")[0];
-      await axios.post(
-        "http://localhost:3000/api/tourist/book-activity",
-        { activity: activityId, date: formattedDate },
-        { withCredentials: true }
-      );
-      setPopupMessage("Booking successful!");
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 3000);
-    } catch (error) {
-      const errorMessage =
-        error.response && error.response.data && error.response.data.message
-          ? error.response.data.message
-          : "Failed to book activity. Please try again.";
-      setPopupMessage(errorMessage);
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 3000);
-      console.error("Error booking activity:", error);
-    }
-  };
-
-  // Function to copy activity link
-  const handleCopyLink = (activityId) => {
-    const activityUrl = `${window.location.origin}/activity-details/${activityId}`;
-    navigator.clipboard.writeText(activityUrl).then(() => {
-      alert("Link copied to clipboard!");
-    }).catch(err => {
-      console.error("Failed to copy: ", err);
-    });
-  };
-
-  // Function to send activity details via email
-  const handleEmailShare = (activity) => {
-    const subject = `Check out this activity: ${activity.name}`;
-    const body = `I thought you'd be interested in this activity: ${activity.name}\n\nLocation: ${activity.location.name}\nDate: ${new Date(activity.date).toLocaleDateString()}\nPrice: ${activity.price} EGP\n\n${activity.category.description}\n\nCheck it out: ${window.location.origin}/activity-details/${activity._id}`;
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoLink;
-  };
+  
   const handleDateApply = (selectedDate) => {
     setDate(selectedDate); // Update the date state with selected date
   };
@@ -213,37 +108,8 @@ const TouristActivitiesWrapper = () => {
               />
             </div>
             {/* Search Bar Section */}
-            <div className="left_side_search_boxed">
-              <div className="left_side_search_heading">
-                <h5>Search by</h5>
-              </div>
-              <div className="name_search_form" style={{ display: "block" }}>
-                <select
-                  className="form-control"
-                  value={searchType}
-                  onChange={handleSearchTypeChange}
-                  style={{ marginBottom: "10px" }}
-                >
-                  <option value="name">Name</option>
-                  <option value="tag">Tag</option>
-                  <option value="category">Category</option>
-                </select>
-                <input
-                  className="form-control"
-                  type="text"
-                  placeholder={`Search by ${searchType} or category...`}
-                  value={searchType === "tag" ? searchInputTag : searchType === "category" ? searchInputCategory : searchInput}
-                  onChange={searchType === "tag" ? handleSearchInputTagChange
-                    : searchType === "category" ? handleSearchInputCategoryChange
-                      : handleSearchInputChange}
-                  style={{ marginBottom: "10px" }}
-                />
-
-                <button onClick={handleSearchClick} className="btn btn_theme btn_sm">
-                  Apply
-                </button>
-              </div>
-            </div>
+            
+            
             <SideBar
               priceRange={priceRange}
               setPriceRange={setPriceRange}
@@ -270,6 +136,7 @@ const TouristActivitiesWrapper = () => {
                             <div className="flight_search_destination">
                               <p>Location</p>
                               <h3>{activity.location.name}</h3>
+                              <h6>Coordinates: {activity.location.coordinates.join(", ")}</h6>
                             </div>
                           </div>
                           <div className="flight_search_middel">
@@ -297,29 +164,7 @@ const TouristActivitiesWrapper = () => {
                           {activity.price} EGP
                           <sup>{activity.discounts ? `${activity.discounts}% off` : ""}</sup>
                         </h2>
-                        <button
-                          onClick={() => handleBooking(activity._id, activity.date)}
-                          className="btn btn_theme btn_sm"
-                        >
-                          Book now
-                        </button>
-                        {activity.discounts ? <p>*Discount available</p> : ""}
-
-                        {/* Share Button */}
-                        <div>
-                          <button
-                            onClick={() => handleCopyLink(activity._id)}
-                            className="btn btn-secondary btn-sm me-2"
-                          >
-                            Copy Link
-                          </button>
-                          <button
-                            onClick={() => handleEmailShare(activity)}
-                            className="btn btn-primary btn-sm"
-                          >
-                            Share via Email
-                          </button>
-                        </div>
+                       
 
                         <div
                           data-bs-toggle="collapse"
@@ -360,45 +205,9 @@ const TouristActivitiesWrapper = () => {
         </div>
       </div>
 
-      {/* Popup for booking confirmation */}
-      {showPopup && (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            backgroundColor: "#fff",
-            padding: "20px",
-            borderRadius: "8px",
-            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-            zIndex: 1000,
-            minWidth: "300px",
-            textAlign: "center",
-          }}
-        >
-          <h4 style={{ color: "green", marginBottom: "10px" }}>{popupMessage}</h4>
-          <button onClick={() => setShowPopup(false)} className="btn btn_theme" style={{ marginTop: "10px" }}>
-            Close
-          </button>
-        </div>
-      )}
-      {showPopup && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 999,
-          }}
-          onClick={() => setShowPopup(false)}
-        />
-      )}
+     
     </section>
   );
 };
 
-export default TouristActivitiesWrapper;
+export default GuestActivitiesWrapper;

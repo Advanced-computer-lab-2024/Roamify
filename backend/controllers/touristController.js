@@ -12,6 +12,7 @@ const activityTicketModel = require("../models/activityTicketModel");
 const itineraryTicketModel = require("../models/itineraryTicketModel");
 const placeTicketModel = require("../models/placeTicketModel");
 const placeModel = require("../models/placeModel");
+const tourGuideReviewModel = require("../models/tourGuideReviewModel");
 
 function isAdult(dateOfBirth) {
   const today = new Date();
@@ -498,10 +499,12 @@ const cancelActivity = async (req, res) => {
     const hoursDifference = timeDifference / (1000 * 60 * 60);
 
     if (hoursDifference <= 48) {
-      return res.status(400).json({
-        message:
-          "Unable to cancel booking as it must be done at least 48 hours in advance.",
-      });
+      return res
+        .status(400)
+        .json({
+          message:
+            "Unable to cancel booking as it must be done at least 48 hours in advance.",
+        });
     } else {
       const receipt = new receiptModel({
         type: "activity",
@@ -596,6 +599,8 @@ const cancelItinerary = async (req, res) => {
         .json({ message: "Please select an itinerary to cancel" });
     }
 
+    const date = new Date();
+
     const ticketId = new mongoose.Types.ObjectId(ticketIdString);
 
     const ticket = await itineraryTicketModel
@@ -612,10 +617,12 @@ const cancelItinerary = async (req, res) => {
     const hoursDifference = timeDifference / (1000 * 60 * 60);
 
     if (hoursDifference <= 48) {
-      return res.status(400).json({
-        message:
-          "Unable to cancel booking as it must be done at least 48 hours in advance.",
-      });
+      return res
+        .status(400)
+        .json({
+          message:
+            "Unable to cancel booking as it must be done at least 48 hours in advance.",
+        });
     } else {
       const receipt = new receiptModel({
         type: "itinerary",
@@ -688,9 +695,12 @@ const cancelTransportationBooking = async (req, res) => {
 
     // Check if transportation ID is provided
     if (!transportationIdString) {
-      return res.status(400).json({
-        message: "Please select one of your booked transportations to cancel.",
-      });
+      return res
+        .status(400)
+        .json({
+          message:
+            "Please select one of your booked transportations to cancel.",
+        });
     }
 
     const transportationId = new mongoose.Types.ObjectId(
@@ -705,9 +715,11 @@ const cancelTransportationBooking = async (req, res) => {
 
     // If the transportation is not found or the user has not booked it, return an error
     if (!transportation) {
-      return res.status(400).json({
-        message: "Please choose a valid booked transportation to cancel.",
-      });
+      return res
+        .status(400)
+        .json({
+          message: "Please choose a valid booked transportation to cancel.",
+        });
     }
 
     // Calculate the time difference between now and the transportation date
@@ -718,10 +730,12 @@ const cancelTransportationBooking = async (req, res) => {
 
     // Check if the transportation is more than 48 hours away
     if (hoursUntilTransportation <= 48) {
-      return res.status(400).json({
-        message:
-          "Cancellations are only allowed more than 48 hours before the scheduled transportation.",
-      });
+      return res
+        .status(400)
+        .json({
+          message:
+            "Cancellations are only allowed more than 48 hours before the scheduled transportation.",
+        });
     }
 
     // Remove the user from the touristsBooked array
@@ -745,10 +759,12 @@ const cancelTransportationBooking = async (req, res) => {
       .status(200)
       .json({ message: "Transportation booking cancelled successfully." });
   } catch (error) {
-    return res.status(500).json({
-      message: "Error cancelling transportation booking",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        message: "Error cancelling transportation booking",
+        error: error.message,
+      });
   }
 };
 const getBookedTransportations = async (req, res) => {
@@ -766,10 +782,12 @@ const getBookedTransportations = async (req, res) => {
         .json({ message: "you have not booked any transportations yet" });
     return res.status(200).json({ transportations });
   } catch (error) {
-    return res.status(400).json({
-      message: "Error fetching booked transportations",
-      error: error.message,
-    });
+    return res
+      .status(400)
+      .json({
+        message: "Error fetching booked transportations",
+        error: error.message,
+      });
   }
 };
 const getBookedFutureTransportations = async (req, res) => {
@@ -794,10 +812,12 @@ const getBookedFutureTransportations = async (req, res) => {
 
     return res.status(200).json({ transportations });
   } catch (error) {
-    return res.status(400).json({
-      message: "Error fetching future booked transportations",
-      error: error.message,
-    });
+    return res
+      .status(400)
+      .json({
+        message: "Error fetching future booked transportations",
+        error: error.message,
+      });
   }
 };
 const getFilteredTransportations = async (req, res) => {
@@ -860,15 +880,19 @@ const getFilteredTransportations = async (req, res) => {
         .json({ message: "No transportations found matching your criteria" });
     }
 
-    res.status(200).json({
-      message: "Transportations retrieved successfully",
-      transportations,
-    });
+    res
+      .status(200)
+      .json({
+        message: "Transportations retrieved successfully",
+        transportations,
+      });
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to retrieve transportations",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({
+        message: "Failed to retrieve transportations",
+        error: error.message,
+      });
   }
 };
 const bookTransportation = async (req, res) => {
@@ -941,10 +965,12 @@ const getAllBookedActivities = async (req, res) => {
       return res.status(400).json({ message: "no booked activities yet" });
     return res.status(200).json(activityTickets);
   } catch (error) {
-    return res.status(400).json({
-      message: "couldn't retrieve booked activities",
-      error: error.message,
-    });
+    return res
+      .status(400)
+      .json({
+        message: "couldn't retrieve booked activities",
+        error: error.message,
+      });
   }
 };
 const getAllBookedPlaces = async (req, res) => {
@@ -961,10 +987,12 @@ const getAllBookedPlaces = async (req, res) => {
       return res.status(400).json({ message: "no booked places yet" });
     return res.status(200).json(placesTickets);
   } catch (error) {
-    return res.status(400).json({
-      message: "couldn't retrieve booked places",
-      error: error.message,
-    });
+    return res
+      .status(400)
+      .json({
+        message: "couldn't retrieve booked places",
+        error: error.message,
+      });
   }
 };
 const getAllBookedItineraries = async (req, res) => {
@@ -976,15 +1004,17 @@ const getAllBookedItineraries = async (req, res) => {
 
     const itineraryTickets = await itineraryTicketModel
       .find({ tourist: req.user._id, status: "active" })
-      .populate("itinerary"); // Specify the fields you want to include
+      .populate("itinerary", "name locations"); // Specify the fields you want to include
     if (itineraryTickets.length === 0)
       return res.status(400).json({ message: "no booked itineraries yet" });
     return res.status(200).json(itineraryTickets);
   } catch (error) {
-    return res.status(400).json({
-      message: "couldn't retrieve booked activities",
-      error: error.message,
-    });
+    return res
+      .status(400)
+      .json({
+        message: "couldn't retrieve booked activities",
+        error: error.message,
+      });
   }
 };
 const getAllUpcomingBookedActivities = async (req, res) => {
@@ -1011,10 +1041,12 @@ const getAllUpcomingBookedActivities = async (req, res) => {
 
     return res.status(200).json(upcomingActivities);
   } catch (error) {
-    return res.status(400).json({
-      message: "Couldn't retrieve booked activities",
-      error: error.message,
-    });
+    return res
+      .status(400)
+      .json({
+        message: "Couldn't retrieve booked activities",
+        error: error.message,
+      });
   }
 };
 const getAllUpcomingBookedItineraries = async (req, res) => {
@@ -1046,10 +1078,12 @@ const getAllUpcomingBookedItineraries = async (req, res) => {
       .status(200)
       .json({ upcomingItineraries, date: itineraryTickets.date });
   } catch (error) {
-    return res.status(400).json({
-      message: "Couldn't retrieve booked itineraries",
-      error: error.message,
-    });
+    return res
+      .status(400)
+      .json({
+        message: "Couldn't retrieve booked itineraries",
+        error: error.message,
+      });
   }
 };
 const viewPointsLevel = async (req, res) => {

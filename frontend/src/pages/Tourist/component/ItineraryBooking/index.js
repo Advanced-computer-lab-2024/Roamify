@@ -42,7 +42,7 @@ const BookedItinerariesWrapper = () => {
       setPopupMessage("No itinerary selected to cancel.");
       return;
     }
-
+  
     try {
       await axios.delete(
         "http://localhost:3000/api/tourist/cancel-itinerary-booking",
@@ -51,17 +51,26 @@ const BookedItinerariesWrapper = () => {
           withCredentials: true
         }
       );
-
+  
       setBookedItineraries((prevItineraries) =>
         prevItineraries.filter((booking) => booking._id !== ticketId)
       );
       
       setPopupMessage("Itinerary cancelled successfully");
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "Failed to cancel the itinerary.";
-      setPopupMessage(errorMessage);
+      if (err.response) {
+        console.error("Failed to cancel the itinerary:", err.response.data);
+        setPopupMessage(err.response.data.message || "Failed to cancel the itinerary.");
+      } else if (err.request) {
+        console.error("Request made but no response received:", err.request);
+        setPopupMessage("Failed to cancel the itinerary. No response from server.");
+      } else {
+        console.error("Error setting up request:", err.message);
+        setPopupMessage("Failed to cancel the itinerary due to an unknown error.");
+      }
     }
   };
+  
 
   return (
     <section id="explore_area" className="section_padding">

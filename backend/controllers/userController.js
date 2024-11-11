@@ -177,9 +177,11 @@ const changePassword = async (req, res) => {
       return res.status(400).json({ message: "Old password is incorrect" });
 
     if (!validator.isStrongPassword(newPassword1))
-      return res.status(400).json({
-        message: "Password does not meet minimum strength requirements",
-      });
+      return res
+        .status(400)
+        .json({
+          message: "Password does not meet minimum strength requirements",
+        });
 
     const oldMatchNew = await bcrypt.compare(newPassword1, user.password);
     if (oldMatchNew)
@@ -224,10 +226,12 @@ const uploadRequiredDocuments = async (req, res) => {
 
     // Check if any files were uploaded
     if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(400).json({
-        message:
-          "No files were uploaded. Please upload the required documents.",
-      });
+      return res
+        .status(400)
+        .json({
+          message:
+            "No files were uploaded. Please upload the required documents.",
+        });
     }
 
     // Check for specific required documents
@@ -343,10 +347,12 @@ const termsAndConditions = async (req, res) => {
       return res.status(200).json({ message: "rejected terms and conditions" });
     }
   } catch (error) {
-    res.status(400).json({
-      message: "couldn't accept or reject terms and conditions",
-      error: error.message,
-    });
+    res
+      .status(400)
+      .json({
+        message: "couldn't accept or reject terms and conditions",
+        error: error.message,
+      });
   }
 };
 const deleteAccount = async (req, res) => {
@@ -370,10 +376,12 @@ const deleteAccount = async (req, res) => {
         const activityDate = ticket.activity.date;
         activityDate.setHours(0, 0, 0);
         if (activityDate > today)
-          return res.status(400).json({
-            message:
-              "Can't delete your account; some activities are booked already. Try again later.",
-          });
+          return res
+            .status(400)
+            .json({
+              message:
+                "Can't delete your account; some activities are booked already. Try again later.",
+            });
       }
 
       await activityModel.deleteMany({ advertiser: req.user._id });
@@ -390,9 +398,11 @@ const deleteAccount = async (req, res) => {
       await sellerModel.deleteMany({ user: req.user._id });
       await userModel.findByIdAndDelete(req.user._id);
       res.clearCookie("token"); // Assuming your JWT is stored in a cookie named 'token'
-      return res.status(200).json({
-        message: "deleted seller and his corresponding products successfully",
-      });
+      return res
+        .status(200)
+        .json({
+          message: "deleted seller and his corresponding products successfully",
+        });
     } else if (role === "tourGuide") {
       let itineraryTickets = await itineraryTicketModel
         .find({ status: "active" })
@@ -406,10 +416,12 @@ const deleteAccount = async (req, res) => {
       );
 
       if (itineraryTickets.length > 0)
-        return res.status(400).json({
-          message:
-            "Can't delete your account; some itineraies are booked already. Try again later.",
-        });
+        return res
+          .status(400)
+          .json({
+            message:
+              "Can't delete your account; some itineraies are booked already. Try again later.",
+          });
 
       await itineraryModel.deleteMany({ tourGuide: req.user._id });
       await tourGuideModel.findOneAndDelete({ user: req.user._id });
@@ -431,10 +443,12 @@ const deleteAccount = async (req, res) => {
         const activityDate = ticket.activity.date;
         activityDate.setHours(0, 0, 0);
         if (activityDate > today)
-          return res.status(400).json({
-            message:
-              "Can't delete your account; some activities are booked already. Try again later.",
-          });
+          return res
+            .status(400)
+            .json({
+              message:
+                "Can't delete your account; some activities are booked already. Try again later.",
+            });
       }
 
       let itineraryTickets = await itineraryTicketModel.find({
@@ -446,10 +460,12 @@ const deleteAccount = async (req, res) => {
       );
 
       if (itineraryTickets.length > 0)
-        return res.status(400).json({
-          message:
-            "Can't delete your account; some itineraries are booked already. Try again later.",
-        });
+        return res
+          .status(400)
+          .json({
+            message:
+              "Can't delete your account; some itineraries are booked already. Try again later.",
+          });
 
       await activityTicketModel.deleteMany({ tourist: req.user._id });
       await itineraryTicketModel.deleteMany({ tourist: req.user._id });
@@ -460,10 +476,12 @@ const deleteAccount = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return res.status(400).json({
-      message: "error could not delete account",
-      error: error.message,
-    });
+    return res
+      .status(400)
+      .json({
+        message: "error could not delete account",
+        error: error.message,
+      });
   }
 };
 
