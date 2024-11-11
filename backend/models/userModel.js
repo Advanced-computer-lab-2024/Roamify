@@ -48,6 +48,24 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Pre-remove hook to delete related reviews when a user is deleted
+userSchema.pre('remove', async function(next) {
+    try {
+        if (this.role === 'tourGuide')  //when i delete a tour guide-->delete his reviews
+        {
+            await mongoose.model('tour guide review').deleteMany({ tourGuide: this._id });
+        }
+        if (this.role === 'tourist') {
+            await mongoose.model('tour guide review').deleteMany({ tourist: this._id });
+            await mongoose.model('activity review').deleteMany({ tourist: this._id });
+            await mongoose.model('itinerary review').deleteMany({ tourist: this._id });
+        }
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 userSchema.statics.signUp = async function (username, email, password, role) {
 
   if (!email || !password) {
