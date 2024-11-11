@@ -6,28 +6,38 @@ const LoyaltyLevelForm = () => {
   const [level, setLevel] = useState(null);
   const [points, setPoints] = useState(null);
 
+  // Define level details
+  const levelDetails = {
+    1: { icon: FaMedal, color: 'bronze', name: 'Level 1' },
+    2: { icon: FaStar, color: 'silver', name: 'Level 2' },
+    3: { icon: FaCrown, color: 'gold', name: 'Level 3 ' }
+  };
+
   useEffect(() => {
     fetch('http://localhost:3000/api/tourist/view-points-level', {
       credentials: 'include'
     })
-      .then((response) => response.json())
-      .then((data) => {
+      .then(response => response.json())
+      .then(data => {
         setLevel(data.level);
-        setPoints(data.points); // Assuming the API returns 'points'
+        setPoints(data.points);
       })
-      .catch((error) => console.error('Error fetching level and points:', error));
+      .catch(error => console.error('Error fetching level and points:', error));
   }, []);
 
-  const renderIcon = () => {
-    switch (level) {
-      case 1:
-        return <FaMedal style={{ color: 'bronze', fontSize: '2em' }} />;
-      case 2:
-        return <FaStar style={{ color: 'silver', fontSize: '2.5em' }} />;
-      case 3:
-        return <FaCrown style={{ color: 'gold', fontSize: '3em' }} />;
-      default:
-        return <p>Loading...</p>;
+  // Render the icon and the level name based on the current level
+  const renderLevelInfo = () => {
+    const details = levelDetails[level];
+    if (details) {
+      const Icon = details.icon; // Dynamically select the correct icon
+      return (
+        <>
+          <Icon style={{ color: details.color, fontSize: '3em' }} />
+          <p>{details.name}</p>
+        </>
+      );
+    } else {
+      return <p>Loading...</p>; // Show loading message if level is null
     }
   };
 
@@ -36,10 +46,10 @@ const LoyaltyLevelForm = () => {
       <div className="loyalty-level-form">
         <h3>Your Loyalty Level</h3>
         <div className="level-icons">
-          {renderIcon()}
+          {renderLevelInfo()}
         </div>
         <p>{points !== null ? `Points: ${points}` : 'Loading points...'}</p>
-        <p>Receive loyalty points upon payment for any activity or itinerary!</p>
+        <p>Receive loyalty points upon payment for any activity, itinerary, or transportation!</p>
       </div>
     </div>
   );

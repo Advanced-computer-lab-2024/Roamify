@@ -1,11 +1,11 @@
 import React from "react";
 import CommonBanner from "../../component/Common/CommonBanner";
-import LoyaltyLevelForm from "./component/PointLevel";
+import RedeemAndLoyalty from "./component/PointLevel";
 const TouristBooking = () => {
   return (
     <>
       <CommonBanner heading="Point" pagination="Level" />
-      <LoyaltyLevelForm/>
+      <RedeemAndLoyalty/>
     </>
   );
 };
