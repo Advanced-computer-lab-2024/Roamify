@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const authenticate = (allowedRoles = []) => (req, res, next) => {
+const authenticate = (allowedRoles = [], promise) => (req, res, next) => {
   const token = req.cookies?.token; // Get token from cookies
   if (!token) {
     return res.status(403).json({ message: "Access denied. No token provided." });

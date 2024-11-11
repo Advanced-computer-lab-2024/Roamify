@@ -4,7 +4,6 @@ const multer = require('multer');
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
 const upload = multer({ storage }).array('productImages', 2); // Accept up to 2 images
 
-
 const addProduct = async (req, res) => {
   try {
     const sellerId = req.user._id;
@@ -143,11 +142,23 @@ const updateProduct = async (req, res) => {
 };
 const getFilteredProducts = async (req, res) => {
   try {
-    const { minPrice = 0, maxPrice = Infinity, name, order = 'desc' } = req.query;
+    const {
+      minPrice = 0,
+      maxPrice = Infinity,
+      name,
+      order = 'desc',
+      page = 1,
+      limit = 10
+    } = req.query;
 
-    // Build filter object for price range
+    // Validate and parse price range
+    const min = parseFloat(minPrice);
+    const max = parseFloat(maxPrice);
+
+    // Build filter object
     const filter = {
-      price: { $gte: parseFloat(minPrice), $lte: parseFloat(maxPrice) },
+      price: { $gte: isNaN(min) ? 0 : min, $lte: isNaN(max) ? Infinity : max },
+      isArchived: false // Filter out archived products
     };
 
     // Add name filter if provided
@@ -159,21 +170,112 @@ const getFilteredProducts = async (req, res) => {
     // Determine sort order for rating
     const sortOrder = order.toLowerCase() === 'asc' ? 1 : -1;
 
-    // Fetch products with filters and sorting applied
-    const products = await productModel
-    .find(filter)
-    .sort({ rating: sortOrder })
-    .populate('sellerId' , 'username _id'); // Populates the seller details
+    // Calculate skip value for pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
 
-  
+    // Fetch products with filters, sorting, and pagination
+    const products = await productModel
+        .find(filter)
+        .sort({ rating: sortOrder })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .populate('sellerId', 'username _id'); // Populate seller details
+
+    // Check if products exist
     if (!products || products.length === 0) {
       return res.status(404).json({ message: "No products found" });
     }
 
-    res.status(200).json({ message: "Filtered products", products });
+    res.status(200).json({
+      message: "Filtered products",
+      products,
+      currentPage: parseInt(page),
+      totalItems: await productModel.countDocuments(filter),
+      itemsPerPage: parseInt(limit)
+    });
   } catch (error) {
     console.error("Error fetching filtered products:", error);
     res.status(500).json({ message: "Error fetching filtered products" });
+  }
+};
+const getMyProducts = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const sellerId = req.user._id; // Assuming `req.user` contains the authenticated user's ID
+
+    // Calculate skip value for pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Fetch products created by the seller
+    const products = await productModel
+        .find({ sellerId })
+        .skip(skip)
+        .limit(parseInt(limit));
+
+    if (!products || products.length === 0) {
+      return res.status(404).json({ message: "No products found" });
+    }
+
+    res.status(200).json({
+      message: "Products retrieved successfully",
+      products,
+      currentPage: parseInt(page),
+      totalItems: await productModel.countDocuments({ sellerId }),
+      itemsPerPage: parseInt(limit),
+    });
+  } catch (error) {
+    console.error("Error fetching seller's products:", error);
+    res.status(500).json({ message: "Error fetching products" });
+  }
+};
+const archiveProduct = async (req, res) => {
+  try {
+    const productId  = req.params.id;
+
+    // Find the product and check if the user is the owner
+    const product = await productModel.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Check if the user is a seller and only allow if they own the product
+    if (req.user.role === 'seller' && product.sellerId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "You do not have permission to archive this product" });
+    }
+
+    // Archive the product
+    product.isArchived = true;
+    await product.save();
+
+    res.status(200).json({ message: "Product archived successfully", product });
+  } catch (error) {
+    console.error("Error archiving product:", error);
+    res.status(500).json({ message: "Couldn't archive product" });
+  }
+};
+const unarchiveProduct = async (req, res) => {
+  try {
+    const productId  = req.params.id;
+
+    // Find the product and check if the user is the owner
+    const product = await productModel.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Check if the user is a seller and only allow if they own the product
+    if (req.user.role === 'seller' && product.sellerId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "You do not have permission to unarchive this product" });
+    }
+
+    // Unarchive the product
+    product.isArchived = false;
+    await product.save();
+
+    res.status(200).json({ message: "Product unarchived successfully", product });
+  } catch (error) {
+    console.error("Error unarchiving product:", error);
+    res.status(500).json({ message: "Couldn't unarchive product" });
   }
 };
 
@@ -181,5 +283,8 @@ module.exports = {
   addProduct,
   updateProduct,
   getFilteredProducts,
+  getMyProducts,
+  unarchiveProduct,
+  archiveProduct,
   upload
 };
