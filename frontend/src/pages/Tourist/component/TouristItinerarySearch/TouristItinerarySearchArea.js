@@ -20,6 +20,15 @@ const TouristItineraryWrapper = () => {
   const [rating, setRating] = useState(0);
   const [preferences, setPreferences] = useState([]);
   const [preference, setPreference] = useState("");
+
+  // Hardcoded languages array
+  const languages = [
+    { _id: 'en', name: 'English' },
+    { _id: 'de', name: 'German' },
+    { _id: 'es', name: 'Spanish' },
+    { _id: 'ar', name: 'Arabic' }
+  ];
+  
   const [language, setLanguage] = useState("");
   const [showShareOptions, setShowShareOptions] = useState({});
   const [showPopup, setShowPopup] = useState(false);
@@ -179,9 +188,9 @@ const TouristItineraryWrapper = () => {
               <select onChange={(e) => handlePreferenceApply(e.target.value)}>
                 <option value="">All Preferences</option>
                 {preferences.length > 0 ? (
-                  preferences.map((cat) => (
-                    <option key={cat._id} value={cat._id}>
-                      {cat.name}
+                  preferences.map((preference) => (
+                    <option key={preference._id} value={preference._id}>
+                      {preference.name}
                     </option>
                   ))
                 ) : (
@@ -193,15 +202,11 @@ const TouristItineraryWrapper = () => {
               <h5>Filter by Language</h5>
               <select onChange={(e) => handleLanguageApply(e.target.value)}>
                 <option value="">All Languages</option>
-                {language.length > 0 ? (
-                  language.map((cat) => (
-                    <option key={cat._id} value={cat._id}>
-                      {cat.name}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>Loading Language...</option>
-                )}
+                {languages.map((lang) => (
+                  <option key={lang._id} value={lang._id}>
+                    {lang.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
