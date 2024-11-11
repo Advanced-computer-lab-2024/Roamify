@@ -342,7 +342,7 @@ const setStatusOfItinerary = async (req, res) => {
     const itineraryTicket = await itineraryTicketModel.findOne({ itinerary: itineraryId, status: 'active' })
 
 
-    if (!itineraryTicket) return res.status(400).json({ message: 'can\'t deactivate itinerary since it has not been booked yet' })
+    if (!itineraryTicket && status === 'inactive') return res.status(400).json({ message: 'can\'t deactivate itinerary since it has not been booked yet' })
 
     await itineraryModel.findByIdAndUpdate(itineraryId, { status });
     res.status(200).json({ message: 'changed status of itinerary to ' + status })
