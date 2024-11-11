@@ -41,7 +41,7 @@ const GuestItineraryWrapper = () => {
           language: language || undefined,
         },
       });
-      setItineraries(response.data.updatedItineraries || []);
+      setItineraries(response.data || []);
     } catch (error) {
       setItineraries([]);
       setError(

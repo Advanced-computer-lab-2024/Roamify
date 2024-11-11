@@ -19,6 +19,9 @@ import ItineraryBooking from "./ItineraryBooking.js"
 import Transportations from "./Transportations/Transportations.js";
 import Point from "./Point.js"
 import Redeem from "./Redeem.js"
+import CompletedItinerary from "./component/TouristItinerarySearch/CompletedItinerary.js";
+import ReviewTourGuide from "./component/TouristItinerarySearch/ReviewTourGuide.js";
+import CompletedActivity from "./component/TouristActivitiesSearch/CompletedActivity.js";
 const Tourist = () => {
   return (
     <>
@@ -37,6 +40,9 @@ const Tourist = () => {
         <Route path="/transportations" element={<Transportations />} />
         <Route path="/point" element={<Point />} />
         <Route path="/redeem" element={<Redeem />} />
+        <Route path="/completed-itinerary" element={<CompletedItinerary/>}/>
+        <Route path="/tour-guides" element={<ReviewTourGuide/>}/>
+        <Route path="/completed-activity" element={<CompletedActivity/>}/>
       </Routes>
       <CopyRight />
     </>
