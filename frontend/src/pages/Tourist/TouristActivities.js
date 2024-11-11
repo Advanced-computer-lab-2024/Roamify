@@ -3,7 +3,7 @@ import React from "react";
 import CommonBanner from "../../component/Common/CommonBanner";
 // import FlightSearchArea
 import TouristActivitiesArea from "./component/TouristActivitiesSearch/index.js";
-import TouristActivitiesForm from "./component/TouristActivitiesSearch/TouristActivitiesForm.js"
+import TouristActivitiesForm from "./component/TouristActivitiesSearch/TouristActivitiesForm.js";
 const TouristActivities = () => {
   return (
     <>
@@ -11,8 +11,8 @@ const TouristActivities = () => {
         heading="Tourist Activities"
         pagination="Tourist Activities"
       />
-      <TouristActivitiesForm/>
-      {/* <TouristActivitiesArea /> */}
+      <TouristActivitiesForm />
+      <TouristActivitiesArea />
     </>
   );
 };

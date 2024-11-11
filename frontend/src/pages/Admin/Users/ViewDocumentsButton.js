@@ -2,10 +2,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { camelToReg } from "../../../functions/camelToReg";
 
 const ViewDocumentsButton = ({ userId }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [documents, setDocuments] = useState([]);
+  const [documents, setDocuments] = useState({});
   const [loading, setLoading] = useState(false);
 
   const handleOpenModal = async () => {
@@ -16,10 +17,12 @@ const ViewDocumentsButton = ({ userId }) => {
         `http://localhost:3000/api/admin/view-uploaded-docs/${userId}`,
         { withCredentials: true }
       );
-      const docs = response.data.documents || []; // Ensure docs is an array
+      const docs = response.data || {}; // Set as an empty object if response is null
+      console.log(response.data);
       setDocuments(docs);
       setLoading(false);
-      if (docs.length > 0) {
+
+      if (Object.keys(docs).length > 0) {
         toast.success("Documents loaded successfully!");
       } else {
         toast("No documents available for this user.");
@@ -33,7 +36,7 @@ const ViewDocumentsButton = ({ userId }) => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setDocuments([]);
+    setDocuments({});
   };
 
   return (
@@ -88,16 +91,19 @@ const ViewDocumentsButton = ({ userId }) => {
 
             {loading ? (
               <p>Loading documents...</p>
-            ) : documents.length > 0 ? (
+            ) : Object.keys(documents).length > 0 ? (
               <ul>
-                {documents.map((doc, index) => (
+                {Object.entries(documents).map(([docType, url], index) => (
                   <li key={index}>
+                    <strong>
+                      {docType !== "IDs" ? camelToReg(docType) : docType}:
+                    </strong>{" "}
                     <a
-                      href={doc.url} // Assuming each document object has a `url` property
+                      href={url} // Direct link to the document URL
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Document {index + 1}
+                      View Document
                     </a>
                   </li>
                 ))}

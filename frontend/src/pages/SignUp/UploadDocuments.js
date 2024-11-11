@@ -3,20 +3,18 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const UploadDocuments = () => {
-  const role = localStorage.getItem("role"); // Get the role from local storage
-  const token = localStorage.getItem("token"); // Retrieve token from localStorage if stored
+  const role = localStorage.getItem("role");
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
   const documentRequirements = {
-    tourGuide: ["ID", "Certificates"],
-    advertiser: ["ID", "Taxation Registry Card"],
-    seller: ["ID", "Taxation Registry Card"],
+    tourGuide: ["ID", "additionalDocument"], // Updated field names to match API requirements
+    advertiser: ["ID", "additionalDocument"],
+    seller: ["ID", "additionalDocument"],
   };
 
-  // Initialize state to hold files for each required document
   const [files, setFiles] = useState({});
 
-  // Handle file selection
   const handleFileChange = (e, docType) => {
     setFiles((prevFiles) => ({
       ...prevFiles,
@@ -24,27 +22,32 @@ const UploadDocuments = () => {
     }));
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formData = new FormData();
-    // Append each file to the formData
     Object.keys(files).forEach((docType) => {
       formData.append(docType, files[docType]);
     });
 
+    // Log formData content for debugging
+    for (let pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
     try {
-      // Send the formData to the backend
       await axios.post(
         "http://localhost:3000/api/user/upload-documents",
         formData,
         {
-          withCredentials: true, // Include cookies if needed
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
         }
       );
 
-      // Navigate to pending-acceptance route upon successful upload
       navigate("/pending-acceptance");
     } catch (error) {
       console.error("Error uploading documents:", error);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CommonBanner from "../../../../component/Common/CommonBanner";
 import { useParams } from "react-router-dom";
-import ReviewArea from "../../../../component/TourDetails/ReviewArea";
+import ReviewArea from "./ReviewArea.js";
 import Header from "../../../../layout/Header.js";
 import { HeaderData } from "../../TouristHeaderData.js"
 const ItineraryDetails = ({ itineraryId }) => {
@@ -15,7 +15,7 @@ const ItineraryDetails = ({ itineraryId }) => {
         const response = await axios.get("http://localhost:3000/api/itinerary", {
           withCredentials: true, // Include credentials with the request
         });
-        const foundItinerary = response.data.updatedItineraries.find(
+        const foundItinerary = response.data.find(
           (itinerary) => itinerary._id === id
         );
         setItinerary(foundItinerary);
@@ -51,7 +51,7 @@ const ItineraryDetails = ({ itineraryId }) => {
             </div>
           </div>
         </div>
-        <ReviewArea reviews={itinerary.reviews} />
+        <ReviewArea reviews={id} />
       </section>
     </>
   );

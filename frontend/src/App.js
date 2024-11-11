@@ -17,7 +17,8 @@ import AcceptConditions from "./pages/SignUp/AcceptConditions";
 import ProfileDetails from "./pages/SignUp/ProfileDetails";
 import ItineraryDetails from "./pages/Tourist/component/TouristItinerarySearch/ItineraryDetails";
 import PlaceDetails from "./pages/Tourist/component/TouristPlaces/PlaceDetails";
-import Guest from "../src/pages/Guest/Guest"
+import Advertiser from "./pages/Advertiser/Advertiser";
+import Guest from "../src/pages/Guest/Guest";
 const App = () => {
   return (
     <>
@@ -27,7 +28,7 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/tourist/*" element={<Tourist />} />
         <Route path="/admin/*" element={<Admin />} />
-        <Route path="/advertisor/*" element={<Tourist />} />
+        <Route path="/advertiser/*" element={<Advertiser />} />
         <Route path="/tourism-governor/*" element={<TourismGovernor />} />
         <Route path="/tour-guide/*" element={<TourGuide />} />
         <Route path="/seller/*" element={<Seller />} />
@@ -40,7 +41,7 @@ const App = () => {
         <Route path="/activity-details/:id" element={<ActivityDetails />} />
         <Route path="/itinerary-details/:id" element={<ItineraryDetails />} />
         <Route path="/place-details/:id" element={<PlaceDetails />} />
-        <Route path="/guest/*" element={<Guest/>}/>
+        <Route path="/guest/*" element={<Guest />} />
       </Routes>
     </>
   );

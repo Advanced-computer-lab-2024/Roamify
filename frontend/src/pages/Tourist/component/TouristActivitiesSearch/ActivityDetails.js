@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import CommonBanner from "../../../../component/Common/CommonBanner";
-import ReviewArea from "../../../../component/TourDetails/ReviewArea";
+import ReviewArea from "./ReviewArea.js";
 import Header from "../../../../layout/Header.js";
 import { HeaderData } from "../../TouristHeaderData.js"
 const ActivityDetails = () => {
@@ -78,7 +78,7 @@ const ActivityDetails = () => {
             </div>
           </div>
         </div>
-        <ReviewArea reviews={activity.reviews} />
+        <ReviewArea reviews={id} />
       </section>
 
       {/* Popup for booking confirmation */}

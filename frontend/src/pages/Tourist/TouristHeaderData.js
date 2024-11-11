@@ -23,6 +23,11 @@ export const HeaderData = [
         linkL: "/tourist/activity-booking",
         subMenuActive: false,
       },
+      {
+        subItem: " My Completed Activities",
+        linkL: "/tourist/completed-activity",
+        subMenuActive: false,
+      },
     ],
   },
   {
@@ -39,6 +44,15 @@ export const HeaderData = [
           subItem:" My Booked Itineraries",
           linkL:"/tourist/itinerary-booking",
           subMenuActive:false,
+      },{
+        subItem: " My Completed Itineraries",
+        linkL: "/tourist/completed-itinerary",
+        subMenuActive: false,
+      },
+      {
+        subItem: "Previous Tour Guides",
+        linkL: "/tourist/tour-guides",
+        subMenuActive: false,
       },
     ],
   },
