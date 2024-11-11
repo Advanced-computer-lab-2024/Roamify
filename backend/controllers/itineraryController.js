@@ -1,7 +1,7 @@
 const itineraryModel = require("../models/itineraryModel");
 const userModel = require("../models/userModel");
 const itineraryTicketModel = require("../models/itineraryTicketModel");
-const itineraryReviewModel= require("../models/itineraryReviewModel");
+const itineraryReviewModel = require("../models/itineraryReviewModel");
 const jwt = require("jsonwebtoken");
 
 const getFilteredItineraries = async (req, res) => {
@@ -51,8 +51,9 @@ const getFilteredItineraries = async (req, res) => {
         }
 
         if (date) {
-            filter.availableDates = { $gte: new Date(date) };
+            filter.availableDates = { $elemMatch: { $gte: new Date(date) } };
         }
+
 
         if (preferences) {
             const preferenceTagIds = preferences.split(",").map(id => id.trim()); // Remove whitespace from each ID
@@ -175,4 +176,4 @@ const getUnratedCompletedItineraries = async (req, res) => {
 
 
 
-module.exports = {getFilteredItineraries,getUnratedCompletedItineraries}
+module.exports = { getFilteredItineraries, getUnratedCompletedItineraries }
