@@ -43,9 +43,6 @@ const CommonCard = ({
         <a href={`/product-details/${id}`} className="btn custom-btn mr-2">
           View Details
         </a>
-        <button onClick={handlePurchase} className="btn custom-btn">
-          Purchase
-        </button>
       </div>
     </div>
   );

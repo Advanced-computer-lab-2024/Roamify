@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import DateFilter from "../TouristActivitiesSearch/DateFilter";
+import DateFilter from "./DateFilter";
 
 const SideBar = ({
   date,

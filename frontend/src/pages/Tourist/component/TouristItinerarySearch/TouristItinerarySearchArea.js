@@ -4,6 +4,7 @@ import SectionHeading from "../../../../component/Common/SectionHeading";
 import SideBar from "./SideBar";
 import PriceSlider from "../TouristActivitiesSearch/PriceSlider";
 import { Link } from "react-router-dom";
+import "./DateFilter";
 import "./TouristItinerary.css";
 
 const TouristItineraryWrapper = () => {
@@ -24,11 +25,24 @@ const TouristItineraryWrapper = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
 
+  const formatDate = (dateString) => {
+    if (!dateString) return 'No dates available';
+    
+    const date = new Date(dateString);
+    let day = date.getDate();
+    let month = date.getMonth() + 1; // getMonth() is zero-indexed
+    let year = date.getFullYear();
+  
+    day = day < 10 ? '0' + day : day;
+    month = month < 10 ? '0' + month : month;
+  
+    return `${day}/${month}/${year}`;
+  };
+
   const fetchItineraries = async () => {
     setLoading(true);
     setError(null);
     try {
-      console.log(preference);
       const response = await axios.get("http://localhost:3000/api/itinerary/", {
         withCredentials: true,
         params: {
@@ -43,9 +57,6 @@ const TouristItineraryWrapper = () => {
         },
       });
       setItineraries(response.data || []);
-      console.log(priceRange[0]);
-      console.log(priceRange[1]);
-      console.log("date: " + date);
     } catch (error) {
       setItineraries([]);
       setError(
@@ -67,13 +78,22 @@ const TouristItineraryWrapper = () => {
   const handlePreferenceApply = (selectedPreference) => {
     setPreference(selectedPreference);
   };
-
+  
+  const handleLanguageApply = (selectedLanguage) => {
+    setLanguage(selectedLanguage);
+    fetchItineraries();
+  };
   const handleSortChange = (field, order) => {
     setSortCriteria({ field, order });
   };
 
   const handleRatingApply = (selectedRating) => {
     setRating(selectedRating);
+  };
+
+  const handleDateApply = (selectedDate) => {
+    setDate(selectedDate);
+    fetchItineraries();
   };
 
   useEffect(() => {
@@ -133,26 +153,14 @@ const TouristItineraryWrapper = () => {
 
   const handleEmailShare = (itinerary) => {
     const subject = `Check out this itinerary: ${itinerary.name}`;
-    const body = `I thought you'd be interested in this itinerary: ${
-      itinerary.name
-    }\n\nLocation: ${itinerary.locations.join(
-      ", "
-    )}\nAvailable Date: ${new Date(
-      itinerary.availableDates[0]
-    ).toLocaleDateString()}\nPrice: ${itinerary.price} EGP\n\nCheck it out: ${
-      window.location.origin
-    }/itinerary-details/${itinerary._id}`;
-    window.location.href = `mailto:?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
+    const body = `I thought you'd be interested in this itinerary: ${itinerary.name}\n\nLocation: ${itinerary.locations.join(", ")}\nAvailable Date: ${formatDate(itinerary.availableDates[0])}\nPrice: ${itinerary.price} EGP\n\nCheck it out: ${window.location.origin}/itinerary-details/${itinerary._id}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   return (
     <section id="explore_area" className="section_padding">
       <div className="container">
-        <SectionHeading
-          heading={`${itineraries?.length || 0} itineraries found`}
-        />
+        <SectionHeading heading={`${itineraries.length || 0} itineraries found`} />
         <div className="row">
           <div className="col-lg-3">
             <div className="left_side_search_boxed">
@@ -162,6 +170,7 @@ const TouristItineraryWrapper = () => {
             <SideBar
               date={date}
               setDate={setDate}
+              onDateApply={handleDateApply}
               onSortChange={handleSortChange}
               onRatingApply={handleRatingApply}
             />
@@ -177,6 +186,21 @@ const TouristItineraryWrapper = () => {
                   ))
                 ) : (
                   <option disabled>Loading preferences...</option>
+                )}
+              </select>
+            </div>
+            <div className="left_side_search_boxed">
+              <h5>Filter by Language</h5>
+              <select onChange={(e) => handleLanguageApply(e.target.value)}>
+                <option value="">All Languages</option>
+                {language.length > 0 ? (
+                  language.map((cat) => (
+                    <option key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>Loading Language...</option>
                 )}
               </select>
             </div>
@@ -197,63 +221,26 @@ const TouristItineraryWrapper = () => {
                       <div className="flight_search_items">
                         <h3 className="itinerary-name">{itinerary.title}</h3>
                         <div className="itinerary-section">
-                          <p>
-                            <strong>Name:</strong> {itinerary.name}
-                          </p>
-                          <p>
-                            <strong>Location:</strong>{" "}
-                            {itinerary.locations?.join(", ")}
-                          </p>
-                          <p>
-                            <strong>Language:</strong> {itinerary.language}
-                          </p>
-                          <p>
-                            <strong>Accessibility:</strong>{" "}
-                            {itinerary.accessibility ? "Yes" : "No"}
-                          </p>
-                          <p>
-                            <strong>Available Date:</strong>{" "}
-                            {Array.isArray(itinerary.availableDates) &&
-                            itinerary.availableDates.length > 0
-                              ? itinerary.availableDates[0]
-                              : "No dates available"}
-                          </p>
+                          <p><strong>Name:</strong> {itinerary.name}</p>
+                          <p><strong>Location:</strong> {itinerary.locations.join(", ")}</p>
+                          <p><strong>Language:</strong> {itinerary.language}</p>
+                          <p><strong>Accessibility:</strong> {itinerary.accessibility ? "Yes" : "No"}</p>
+                          <p><strong>Available Date:</strong> {itinerary.availableDates && itinerary.availableDates.length > 0 ? formatDate(itinerary.availableDates[0]) : "No dates available"}</p>
                         </div>
                         <div className="booking-section">
                           <h2>{itinerary.price} EGP</h2>
-                          <button
-                            onClick={() =>
-                              handleBooking(
-                                itinerary._id,
-                                itinerary.availableDates[0]
-                              )
-                            }
-                            className="btn btn_theme btn_sm"
-                            disabled={
-                              !itinerary.availableDates ||
-                              itinerary.availableDates.length === 0
-                            }
-                          >
+                          <button onClick={() => handleBooking(itinerary._id, itinerary.availableDates[0])} className="btn btn_theme btn_sm" disabled={!itinerary.availableDates || itinerary.availableDates.length === 0}>
                             Book now
                           </button>
-                          <button
-                            className="btn btn_theme btn_sm"
-                            onClick={() => handleShareToggle(itinerary._id)}
-                          >
+                          <button className="btn btn_theme btn_sm" onClick={() => handleShareToggle(itinerary._id)}>
                             Share
                           </button>
                           {showShareOptions[itinerary._id] && (
                             <div className="share-options">
-                              <button
-                                className="btn btn_theme btn_sm"
-                                onClick={() => handleCopyLink(itinerary._id)}
-                              >
+                              <button className="btn btn_theme btn_sm" onClick={() => handleCopyLink(itinerary._id)}>
                                 Copy Link
                               </button>
-                              <button
-                                className="btn btn_theme btn_sm"
-                                onClick={() => handleEmailShare(itinerary)}
-                              >
+                              <button className="btn btn_theme btn_sm" onClick={() => handleEmailShare(itinerary)}>
                                 Share via Email
                               </button>
                             </div>
@@ -294,7 +281,8 @@ const TouristItineraryWrapper = () => {
               style={{ marginTop: "10px" }}
             >
               Close
-            </button>
+            </button
+          >
           </div>
         )}
         {showPopup && (
