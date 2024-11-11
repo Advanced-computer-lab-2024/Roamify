@@ -81,7 +81,7 @@ const BookedActivitiesWrapper = () => {
             ) : error ? (
               <p style={{ color: "red" }}>{error}</p>
             ) : bookedActivities.length === 0 ? (
-              <p>No booked activities found.</p>
+              <p>No Booked Activities</p>  // Changed text here
             ) : (
               <div className="flight_search_result_wrapper" style={{ display: "grid", gap: "20px" }}>
                 {bookedActivities.map((booking) => (

@@ -1,0 +1,10 @@
+.custom-btn {
+    background-color: #8b3eea;  /* Purple color */
+    color: white;  /* White text color */
+    margin-right: 10px;
+  }
+  
+  .custom-btn:hover {
+    background-color: #7329d6; /* Slightly darker purple on hover */
+  }
+   

@@ -58,8 +58,20 @@ export const HeaderData = [
   },
   {
     menu: "Products",
-    link: "tourist-products",
-    submenu: false,
+    submenu: true,
+    subMenuitem: [
+      {
+        subItem: "View All",
+        linkL: "/tourist/tourist-products",
+        subMenuActive: false,
+      },
+
+      {
+        subItem: "My Purchased Products",
+        linkL: "/tourist/tourist-view",
+        subMenuActive: false,
+      },
+    ],
   },
   {
     menu: "Places",
@@ -84,11 +96,11 @@ export const HeaderData = [
     ],
   },
   {
-    menu: "My Points",
+    menu: "Points",
     submenu:true,
     subMenuitem: [
       {
-        subItem: "My Level",
+        subItem: "View My Level",
         linkL: "/tourist/point",
         subMenuActive: false,
       },
