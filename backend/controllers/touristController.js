@@ -12,6 +12,7 @@ const activityTicketModel = require("../models/activityTicketModel");
 const itineraryTicketModel = require("../models/itineraryTicketModel");
 const placeTicketModel = require("../models/placeTicketModel");
 const placeModel = require("../models/placeModel");
+const tourGuideReviewModel= require('../models/tourGuideReviewModel');
 
 function isAdult(dateOfBirth) {
   const today = new Date();
@@ -43,10 +44,10 @@ const createProfile = async (req, res) => {
     if (adult) {
       wallet = new walletModel({
         tourist: req.user._id
-      })
+      });
       await wallet.save();
     }
-    console.log(wallet)
+    console.log(wallet);
 
     // Create and save a new tourist profile
     const tourist = new touristModel({
