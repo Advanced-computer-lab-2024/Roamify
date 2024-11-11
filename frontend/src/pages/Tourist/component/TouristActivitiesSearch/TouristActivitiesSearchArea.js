@@ -270,7 +270,6 @@ const TouristActivitiesWrapper = () => {
                             <div className="flight_search_destination">
                               <p>Location</p>
                               <h3>{activity.location.name}</h3>
-                              <h6>Coordinates: {activity.location.coordinates.join(", ")}</h6>
                             </div>
                           </div>
                           <div className="flight_search_middel">
