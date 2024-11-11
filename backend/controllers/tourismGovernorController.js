@@ -3,13 +3,10 @@ const historicalTagModel = require("../models/historicalTagModel");
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
 const mongoose = require('mongoose');
+
 // Configure multer to store files in memory
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
 const upload = multer({ storage }).array('placesImages', 2); // Accept up to 2 images
-
-
-
-
 const createPlace = async (req, res) => {
   try {
     const tourismGovernorId = req.user._id;
@@ -89,10 +86,6 @@ for (const file of req.files) {
     res.status(400).json({ message: 'Failed to create place', error: error.message });
   }
 };
-
-
-
-
 const getPlaces = async (req, res) => {
   try {
     const historicalPlaces = await placeModel
@@ -117,9 +110,6 @@ const getPlaces = async (req, res) => {
     return res.status(401).json({ message: "Failed", error: e.message });
   }
 };
-
-
-
 const updatePlace = async (req, res) => {
   try {
     console.log(req.files);
@@ -226,7 +216,6 @@ const updatePlace = async (req, res) => {
       .json({ error: e.message, message: "Could not update place" }); // Use 500 for server errors
   }
 };
-
 const deletePlace = async (req, res) => {
   try {
     const tourismGovernorId = req.user._id;
@@ -258,9 +247,6 @@ const deletePlace = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-
-
 const getMyPlaces = async (req, res) => {
   try {
     const tourismGovernorId = req.user._id;
@@ -280,11 +266,6 @@ const getMyPlaces = async (req, res) => {
     res.status(401).json({ message: err.message });
   }
 };
-
-
-
-
-
 
 module.exports = {
   createPlace,

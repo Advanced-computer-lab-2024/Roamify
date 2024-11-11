@@ -1,7 +1,8 @@
+// UsersTable.js
 import React from "react";
 import UsersTableRow from "./UsersTableRow";
 
-const UsersTable = ({ users }) => {
+const UsersTable = ({ users, isPending, fetchPendingUsers }) => {
   return (
     <div style={{ overflowX: "auto" }}>
       <table
@@ -75,6 +76,8 @@ const UsersTable = ({ users }) => {
               name={user.username}
               email={user.email}
               status={user.status}
+              isPending={isPending}
+              fetchPendingUsers={fetchPendingUsers}
             />
           ))}
         </tbody>

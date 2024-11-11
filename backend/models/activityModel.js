@@ -84,8 +84,14 @@ const activitySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Geospatial index
 activitySchema.index({ location: "2dsphere" });
-
+activitySchema.pre('remove', async function(next) {
+    try {
+        await mongoose.model('activity review').deleteMany({ activity: this._id });
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 const activityModel = mongoose.model("activity", activitySchema);
 module.exports = activityModel;

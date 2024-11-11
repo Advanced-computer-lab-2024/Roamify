@@ -33,13 +33,25 @@ const touristSchema = new mongoose.Schema(
       required: true,
     },
 
-    adult:{
-      type:Boolean,
-      required:true
+    adult: {
+      type: Boolean,
+      required: true
     },
     wallet: {
       type: mongoose.Types.ObjectId,
       ref: "wallet",
+    },
+    preferences: {
+      type: [mongoose.Types.ObjectId],
+      ref: 'preference tag'
+    },
+    level: {
+      type: Number,
+      default: 1
+    },
+    points: {
+      type: Number,
+      default: 0
     }
 
   },

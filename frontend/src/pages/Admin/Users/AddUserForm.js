@@ -4,7 +4,6 @@ import axios from "axios";
 const CreateUserSignUpForm = ({ onClose, newUserType }) => {
   const [formData, setFormData] = useState({
     username: "",
-    email: "",
     password: "",
   });
 
@@ -20,7 +19,6 @@ const CreateUserSignUpForm = ({ onClose, newUserType }) => {
     e.preventDefault();
     const data = {
       username: formData.username,
-      email: formData.email,
       password: formData.password,
     };
 
@@ -36,9 +34,7 @@ const CreateUserSignUpForm = ({ onClose, newUserType }) => {
       .catch((err) => {
         if (err.response && err.response.status === 400) {
           const errorMessage = err.response.data.message;
-          if (errorMessage === "Email already exists") {
-            alert("Error: Email already exists. Please use a different email.");
-          } else if (errorMessage === "Username already Exists") {
+          if (errorMessage === "Username already Exists") {
             alert(
               "Error: Username already exists. Please choose a different username."
             );

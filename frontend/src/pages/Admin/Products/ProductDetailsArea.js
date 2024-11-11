@@ -40,7 +40,7 @@ const ProductDetailsArea = ({ name, price, rating, description, reviews }) => {
               </div>
             </div>
             <div className="col-lg-4">
-              <ProductDetailsSideBar name={name} price={price} />
+              <ProductDetailsSideBar name={name} price={price} rating={rating} description={description}  />
             </div>
           </div>
         </div>

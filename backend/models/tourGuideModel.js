@@ -7,6 +7,14 @@ const tourGuideSchema = new mongoose.Schema(
       ref: "user",
       unique: true,
     },
+    picture: {
+      url: {
+          type: String,
+      },
+      publicId: {
+          type: String,
+      }
+  },
     mobileNumber: {
       type: Number,
       required: true,

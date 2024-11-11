@@ -1,10 +1,18 @@
 import React, { useState } from "react";
 import Modal from "react-modal";
 import ProfileIcon from "../Icons/ProfileIcon";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import AddUserButton from "../../pages/Admin/Users/AddUserButton";
 
 function ProfileButton() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const role = localStorage.getItem("role"); // Retrieve role from localStorage
+  const navigate = useNavigate();
+
+  const handleAddAdmin = () => {
+    setModalIsOpen(false);
+    navigate("/add-admin"); // Navigate to the add admin page
+  };
 
   return (
     <div style={{ position: "relative" }}>
@@ -28,7 +36,7 @@ function ProfileButton() {
             top: "16vh",
             left: "81vw",
             width: "200px",
-            height: "200px",
+            height: role === "admin" ? "240px" : "200px", // Adjust height if admin
             padding: "10px",
             borderRadius: "8px",
             boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
@@ -36,11 +44,16 @@ function ProfileButton() {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <Link to={"/profile/1"}>
+          <Link to={""}>
             <button onClick={() => setModalIsOpen(false)}>Profile</button>
           </Link>
-          <button onClick={() => setModalIsOpen(false)}>Settings</button>
-          <button onClick={() => setModalIsOpen(false)}>Logout</button>
+          <Link to={"/settings"}>
+            <button onClick={() => setModalIsOpen(false)}>Settings</button>
+          </Link>
+          {role === "admin" && <AddUserButton userType={"admin"} />}
+          <Link to={""}>
+            <button onClick={() => setModalIsOpen(false)}>Logout</button>
+          </Link>
         </div>
       </Modal>
     </div>

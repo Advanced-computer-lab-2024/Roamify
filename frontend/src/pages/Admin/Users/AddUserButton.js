@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import AddUserModal from "../../../component/Modals/AddUserModal";
+import { toKebabCase } from "../../../functions/toKebabCase";
 
-const AddUserButton = () => {
+const AddUserButton = ({ userType }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  console.log(toKebabCase(userType));
 
   const handleAddClick = () => {
     setIsModalOpen(true);
@@ -26,12 +28,12 @@ const AddUserButton = () => {
           cursor: "pointer",
         }}
       >
-        Add Tourism Governor
+        Add {userType}
       </button>
       <AddUserModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        newUserType={"add-tourism-governor"}
+        newUserType={`add-${toKebabCase(userType)}`}
       />
     </>
   );

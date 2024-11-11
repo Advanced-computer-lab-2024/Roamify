@@ -1,0 +1,73 @@
+.redeem-points-container {
+  max-width: 400px;
+  margin: 50px auto; /* Increase the top and bottom margin as needed */
+  padding: 20px;
+  border: 1px solid #8b3eea;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+
+.points-header {
+  background-color: #f9f9f9; /* Use a more vibrant color for header */
+  color: black;
+  padding: 15px;
+  text-align: center;
+  margin-bottom: 0; /* Remove margin between the header and the form */
+}
+
+.redeem-points-form {
+  background-color: #f9f9f9;
+  padding: 10px;
+  text-align: center;
+  margin-top: 0; /* Remove any top margin to unify with the header */
+}
+
+.partner-logo img {
+  max-width: 100px;
+  margin: 10px 0;
+}
+
+.input-section label {
+  font-weight: bold;
+}
+
+.input-section p {
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.amount-inputs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.amount-inputs input {
+  width: 45%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.amount-inputs span {
+  font-size: 24px;
+  color: #555;
+}
+
+button {
+  background-color: #8b3eea; /* Matching the header color */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}

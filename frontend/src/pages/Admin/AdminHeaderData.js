@@ -4,10 +4,19 @@ export const HeaderData = [
     link: "",
   },
   {
+    menu: "Itineraries",
+    link: "itineraries",
+  },
+  {
     menu: "Users",
     link: "/users",
     submenu: true,
     subMenuitem: [
+      {
+        subItem: "Pending",
+        linkL: "users/pending",
+        subMenuActive: false,
+      },
       {
         subItem: "Tourists",
         linkL: "users/tourists",
@@ -51,6 +60,11 @@ export const HeaderData = [
   {
     menu: "Products",
     link: "products",
+    submenu: false,
+  },
+  {
+    menu: "Complaints",
+    link: "complaints",
     submenu: false,
   },
 ];

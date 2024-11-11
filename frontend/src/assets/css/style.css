@@ -66,10 +66,94 @@ Default CSS
     --transition: .4s all ease-in-out;
 }
 
+
 html,
 body {
     height: 100%;
 }
+/* Overall layout */
+#common_author_area {
+    padding: 40px;
+    background-color: #ffffff; /* White background */
+    text-align: center;
+  }
+  
+  /* Title */
+  .common_author_heading h2 {
+    color: #8b3eea; /* Purple color for the title */
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+  
+  /* Tabs */
+  .tab-container {
+    display: flex;
+    background-color: #ebe5d8;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 0 auto 20px auto;
+    width: 80%; /* Increased width for longer tabs */
+    max-width: 1000px; /* Maximum width for large screens */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .tab {
+    padding: 20px 40px; /* Padding to make the tabs taller */
+    cursor: pointer;
+    flex: 1;
+    text-align: center;
+    background-color: #ffffff;
+    color: black; /* Dark text for inactive tabs */
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .tab.active {
+    background-color: #8b3eea; /* Purple color for active tab */
+    color: #ffffff; /* White text for active tab */
+  }
+  
+  /* Form content styling */
+  .form_content {
+    padding: 20px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .form-group {
+    margin-bottom: 5px;
+    text-align: left;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .common_form_submit {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .btn_theme {
+    background-color: #4c4c66; /* Purple button */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  
+  
 
 body {
     padding: 0;

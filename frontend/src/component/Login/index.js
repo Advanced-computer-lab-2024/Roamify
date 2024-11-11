@@ -1,33 +1,49 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toKebabCase } from "../../functions/toKebabCase.js";
 
 const LoginArea = () => {
-  // Define state for form input and errors
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async (event) => {
-    event.preventDefault(); // Prevent the default form submission behavior
+    event.preventDefault();
 
     try {
-      // Make a POST request to the login API endpoint
       const response = await axios.post(
         "http://localhost:3000/api/user/login",
-        {
-          username,
-          password,
-        },
-        {
-          withCredentials: true,
-        }
+        { username: username, password: password },
+        { withCredentials: true }
       );
 
-      // Handle successful login
-      console.log("Login successful:", response.data);
+      // Extract response data
+      const {
+        status,
+        idDocument,
+        additionalDocument,
+        termsAndConditions,
+        role,
+      } = response.data;
+
+      // Store user role in localStorage
+      localStorage.setItem("role", role);
+
+      // Determine the correct navigation route based on conditions
+      if (status === "active") {
+        navigate(`/${toKebabCase(role)}`); // Navigate to stakeholder's page
+      } else if (status === "pending" && (!idDocument || !additionalDocument)) {
+        navigate("/upload-documents"); // Navigate to UploadDocuments page
+      } else if (status === "pending" && idDocument && additionalDocument) {
+        navigate("/pending-acceptance"); // Navigate to PendingAcceptance page
+      } else if (status === "pending creation" && !termsAndConditions) {
+        navigate("/accept-conditions"); // Navigate to AcceptConditions page
+      } else if (status === "pending creation" && termsAndConditions) {
+        navigate("/profile-details"); // Navigate to ProfileDetails page
+      }
     } catch (err) {
-      // Handle errors
       console.error("Error logging in:", err);
       setError("Invalid username or password. Please try again.");
     }

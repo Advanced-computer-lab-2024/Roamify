@@ -7,6 +7,10 @@ const itinerarySchema = new mongoose.Schema(
             ref: 'user',
             required: true,
         },
+        name: {
+            type: String
+
+        },
         activities: {
             type: [mongoose.Types.ObjectId],
             ref: 'activity',
@@ -44,6 +48,11 @@ const itinerarySchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        status: {
+            type: String,
+            enum: ['active', 'inactive'], // Only allow 'active' or 'inactive' values
+            default: 'active', // Set default status to 'active'
+        },
         accessibility: {
             type: Boolean,
             required: true,
@@ -52,9 +61,20 @@ const itinerarySchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        flag: {
+            type: Boolean,
+            default: false
+        }
     },
     { timestamps: true }
 );
-
+itinerarySchema.pre('remove', async function(next) {
+    try {
+        await mongoose.model('itinerary review').deleteMany({ itinerary: this._id });
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 const Itinerary = mongoose.model('itinerary', itinerarySchema);
 module.exports = Itinerary;
