@@ -17,7 +17,7 @@ import AcceptConditions from "./pages/SignUp/AcceptConditions";
 import ProfileDetails from "./pages/SignUp/ProfileDetails";
 import ItineraryDetails from "./pages/Tourist/component/TouristItinerarySearch/ItineraryDetails";
 import PlaceDetails from "./pages/Tourist/component/TouristPlaces/PlaceDetails";
-
+import Guest from "../src/pages/Guest/Guest"
 const App = () => {
   return (
     <>
