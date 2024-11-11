@@ -45,7 +45,6 @@ const createProfile = async (req, res) => {
   }
 
 };
-
 const getProfile = async (req, res) => {
   try {
     const id = req.user._id;
@@ -68,7 +67,6 @@ const getProfile = async (req, res) => {
 
   }
 }
-
 const updateProfile = async (req, res) => {
   try {
     const sellerId = req.user._id;
@@ -122,7 +120,6 @@ const updateProfile = async (req, res) => {
     return res.status(400).json({ message: 'failed', error: e.message });
   }
 };
-
 const uploadLogo = async (req, res) => {
   try {
 
@@ -162,4 +159,5 @@ const uploadLogo = async (req, res) => {
 
   }
 }
+
 module.exports = { createProfile, getProfile, updateProfile, upload, uploadLogo };

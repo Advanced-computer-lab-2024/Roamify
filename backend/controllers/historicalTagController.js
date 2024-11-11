@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
-const HistoricalTag = require("../models/historicalTagModel");
+const historicalTagModel = require("../models/historicalTagModel");
 
 const createHistoricalTag = async (req, res) => {
   try {
     const { name, description } = req.body;
-    const newTag = new HistoricalTag({
+    const newTag = new historicalTagModel({
       name: name,
       description: description,
     });
@@ -24,7 +24,7 @@ const createHistoricalTag = async (req, res) => {
 };
 const getAllHistoricalTags = async (req, res) => {
   try {
-    const tags = await HistoricalTag.find();
+    const tags = await historicalTagModel.find();
 
     if (!tags || tags.length === 0) {
       return res.status(404).json({

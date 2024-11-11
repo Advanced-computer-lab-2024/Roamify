@@ -84,7 +84,6 @@ const activitySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Geospatial index
 activitySchema.index({ location: "2dsphere" });
 
 const activityModel = mongoose.model("activity", activitySchema);

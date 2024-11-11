@@ -80,7 +80,7 @@ export const HeaderData = [
       },
 
       {
-        subItem: "View All",
+        subItem: "Redeem My Points",
         linkL: "/tourist/redeem",
         subMenuActive: false,
       },

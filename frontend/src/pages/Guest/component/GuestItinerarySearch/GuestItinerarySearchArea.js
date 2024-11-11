@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import SectionHeading from "../../../../component/Common/SectionHeading";
 import SideBar from "./SideBar";
-import PriceSlider from "../TouristActivitiesSearch/PriceSlider";
+import PriceSlider from "../GuesttActivitiesSearch/PriceSlider";
 import { Link } from "react-router-dom";
-import "./TouristItinerary.css";
+import "./GuestItinerary.css";
 
-const TouristItineraryWrapper = () => {
+const GuestItineraryWrapper = () => {
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState([0, 1000]);
@@ -28,24 +28,20 @@ const TouristItineraryWrapper = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log(preference);
       const response = await axios.get("http://localhost:3000/api/itinerary/", {
-        withCredentials: true,
+       
         params: {
           minBudget: priceRange[0],
           maxBudget: priceRange[1],
           date: date ? date.toISOString().split("T")[0] : undefined,
           rating: rating || undefined,
-          preferences: preference || undefined,
+          preference: preference || undefined,
           sortBy: sortCriteria.field,
           sortOrder: sortCriteria.order,
           language: language || undefined,
         },
       });
-      setItineraries(response.data || []);
-      console.log(priceRange[0]);
-      console.log(priceRange[1]);
-      console.log("date: " + date);
+      setItineraries(response.data.updatedItineraries || []);
     } catch (error) {
       setItineraries([]);
       setError(
@@ -91,61 +87,7 @@ const TouristItineraryWrapper = () => {
     fetchPreferences();
   }, []);
 
-  const handleBooking = async (itineraryId, itineraryDate) => {
-    if (!itineraryId || !itineraryDate) {
-      setPopupMessage("Booking failed: Itinerary ID and date are required.");
-      setShowPopup(true);
-      return;
-    }
-
-    try {
-      const formattedDate = new Date(itineraryDate).toISOString().split("T")[0];
-      const response = await axios.post(
-        "http://localhost:3000/api/tourist/book-itinerary",
-        { itinerary: itineraryId, date: formattedDate },
-        { withCredentials: true }
-      );
-      setPopupMessage(response.data.message || "Booked successfully");
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to book itinerary.";
-      setPopupMessage(errorMessage);
-    } finally {
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 3000);
-    }
-  };
-
-  const handleShareToggle = (itineraryId) => {
-    setShowShareOptions((prevState) => ({
-      ...prevState,
-      [itineraryId]: !prevState[itineraryId],
-    }));
-  };
-
-  const handleCopyLink = (itineraryId) => {
-    const itineraryUrl = `${window.location.origin}/itinerary-details/${itineraryId}`;
-    navigator.clipboard
-      .writeText(itineraryUrl)
-      .then(() => alert("Link copied to clipboard!"))
-      .catch((err) => console.error("Failed to copy: ", err));
-  };
-
-  const handleEmailShare = (itinerary) => {
-    const subject = `Check out this itinerary: ${itinerary.name}`;
-    const body = `I thought you'd be interested in this itinerary: ${
-      itinerary.name
-    }\n\nLocation: ${itinerary.locations.join(
-      ", "
-    )}\nAvailable Date: ${new Date(
-      itinerary.availableDates[0]
-    ).toLocaleDateString()}\nPrice: ${itinerary.price} EGP\n\nCheck it out: ${
-      window.location.origin
-    }/itinerary-details/${itinerary._id}`;
-    window.location.href = `mailto:?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
-  };
+  
 
   return (
     <section id="explore_area" className="section_padding">
@@ -219,46 +161,8 @@ const TouristItineraryWrapper = () => {
                               : "No dates available"}
                           </p>
                         </div>
-                        <div className="booking-section">
-                          <h2>{itinerary.price} EGP</h2>
-                          <button
-                            onClick={() =>
-                              handleBooking(
-                                itinerary._id,
-                                itinerary.availableDates[0]
-                              )
-                            }
-                            className="btn btn_theme btn_sm"
-                            disabled={
-                              !itinerary.availableDates ||
-                              itinerary.availableDates.length === 0
-                            }
-                          >
-                            Book now
-                          </button>
-                          <button
-                            className="btn btn_theme btn_sm"
-                            onClick={() => handleShareToggle(itinerary._id)}
-                          >
-                            Share
-                          </button>
-                          {showShareOptions[itinerary._id] && (
-                            <div className="share-options">
-                              <button
-                                className="btn btn_theme btn_sm"
-                                onClick={() => handleCopyLink(itinerary._id)}
-                              >
-                                Copy Link
-                              </button>
-                              <button
-                                className="btn btn_theme btn_sm"
-                                onClick={() => handleEmailShare(itinerary)}
-                              >
-                                Share via Email
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                        
+                        
                       </div>
                     </div>
                   ))
@@ -269,51 +173,10 @@ const TouristItineraryWrapper = () => {
             )}
           </div>
         </div>
-        {showPopup && (
-          <div
-            style={{
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              backgroundColor: "#fff",
-              padding: "20px",
-              borderRadius: "8px",
-              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-              zIndex: 1000,
-              minWidth: "300px",
-              textAlign: "center",
-            }}
-          >
-            <h4 style={{ color: "green", marginBottom: "10px" }}>
-              {popupMessage}
-            </h4>
-            <button
-              onClick={() => setShowPopup(false)}
-              className="btn btn_theme"
-              style={{ marginTop: "10px" }}
-            >
-              Close
-            </button>
-          </div>
-        )}
-        {showPopup && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-              zIndex: 999,
-            }}
-            onClick={() => setShowPopup(false)}
-          />
-        )}
+        
       </div>
     </section>
   );
 };
 
-export default TouristItineraryWrapper;
+export default GuestItineraryWrapper;

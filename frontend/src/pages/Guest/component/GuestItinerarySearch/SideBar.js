@@ -1,22 +1,9 @@
 import React, { useState } from "react";
-import DateFilter from "../TouristActivitiesSearch/DateFilter";
-
-const SideBar = ({
-  date,
-  setDate,
-  onDateApply,
-  onSortChange,
-  onRatingApply,
-}) => {
+import DateFilter from "../GuesttActivitiesSearch/DateFilter";
+const SideBar = ({ date, setdate, onDateApply, onSortChange, onRatingApply }) => {
   const [sortField, setSortField] = useState("price");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [selectedStars, setSelectedStars] = useState([
-    false,
-    false,
-    false,
-    false,
-    false,
-  ]);
+  const [selectedStars, setSelectedStars] = useState([false, false, false, false, false]);
 
   const handleSortChange = (field, order) => {
     setSortField(field);
@@ -42,7 +29,7 @@ const SideBar = ({
         </div>
         <div className="tour_search_type">
           <div className="filter-date">
-            <DateFilter date={date} setDate={setDate} onApply={onDateApply} />
+            <DateFilter date={date} setdate={setdate} onApply={onDateApply} />
           </div>
         </div>
       </div>
