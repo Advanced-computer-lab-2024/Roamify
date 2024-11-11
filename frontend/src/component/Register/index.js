@@ -35,10 +35,13 @@ const RegisterArea = () => {
             email: formData.email,
             password: formData.password,
             role: "tourist",
+          },
+          {
+            withCredentials: true,
           }
         );
 
-        console.log("Create User Response:", createUserResponse.data);
+        console.log(createUserResponse.data);
 
         const token = createUserResponse.data.token; // Capture token from response
         toast.success("User created successfully!");
@@ -80,13 +83,20 @@ const RegisterArea = () => {
     } else if (selectedTab === "business") {
       try {
         // Step 1: Create User
-        await axios.post("http://localhost:3000/api/user/create-user", {
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-        });
+        const businessUserResponse = await axios.post(
+          "http://localhost:3000/api/user/create-user",
+          {
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role,
+          },
+          {
+            withCredentials: true,
+          }
+        );
         toast.success("Business user created successfully!");
+        console.log(businessUserResponse.data);
 
         // Save role to localStorage and navigate to upload-documents route
         localStorage.setItem("role", formData.role);

@@ -38,9 +38,9 @@ const LoginArea = () => {
         navigate("/upload-documents"); // Navigate to UploadDocuments page
       } else if (status === "pending" && idDocument && additionalDocument) {
         navigate("/pending-acceptance"); // Navigate to PendingAcceptance page
-      } else if (status === "pendingCreation" && !termsAndConditions) {
+      } else if (status === "pending creation" && !termsAndConditions) {
         navigate("/accept-conditions"); // Navigate to AcceptConditions page
-      } else if (status === "pendingCreation" && termsAndConditions) {
+      } else if (status === "pending creation" && termsAndConditions) {
         navigate("/profile-details"); // Navigate to ProfileDetails page
       }
     } catch (err) {

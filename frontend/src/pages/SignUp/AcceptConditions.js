@@ -1,9 +1,23 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const AcceptConditions = () => {
-  const handleAccept = () => {
-    alert("You have accepted the terms and conditions.");
-    // Update the terms and conditions status in your backend or context if necessary
+  const navigate = useNavigate();
+
+  const handleAccept = async () => {
+    try {
+      await axios.put(
+        "http://localhost:3000/api/user/accept-reject-terms-and-conditions",
+        { accepted: true },
+        { withCredentials: true }
+      );
+      alert("You have accepted the terms and conditions.");
+      navigate("/profile-details");
+    } catch (error) {
+      console.error("Error accepting terms and conditions:", error);
+      alert("Failed to accept terms and conditions. Please try again.");
+    }
   };
 
   return (

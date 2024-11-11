@@ -22,7 +22,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
 
   useEffect(() => {
     setFormData({
-      placeImages: fieldsValues?.placeImages || [],
+      placesImages: fieldsValues?.placesImages || [],
       description: fieldsValues?.description || "",
       closingHours: fieldsValues?.closingHours || "",
       openingHours: fieldsValues?.openingHours || "",
@@ -44,7 +44,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     const filePreviews = files.map((file) => URL.createObjectURL(file));
     setFormData((prev) => ({
       ...prev,
-      placeImages: [...prev.placeImages, ...files],
+      placesImages: [...prev.placesImages, ...files],
     }));
     setImagePreviews((prev) => [...prev, ...filePreviews]);
   };

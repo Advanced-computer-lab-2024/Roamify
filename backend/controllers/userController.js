@@ -20,8 +20,8 @@ const upload = multer({ storage }).fields([
 ]);
 
 const createToken = (_id, role) => {
-  return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: '3d' });
-}
+  return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: "3d" });
+};
 const setTokenCookie = (res, token) => {
   res.cookie("token", token, {
     httpOnly: true,
@@ -76,11 +76,19 @@ const loginUser = async (req, res) => {
 
     const { role, status, _id } = user;
 
-    if (status !== 'active') {
+    if (status !== "active") {
       const token = createToken(_id, role);
       setTokenCookie(res, token);
-      return res.status(200).json({ username: user.username, status, role, idDocument: user.idDocument.url, additionalDocument: user.additionalDocument.url, termsAndConditions: user.termsAndConditions })
-
+      return res
+        .status(200)
+        .json({
+          username: user.username,
+          status,
+          role,
+          idDocument: user.idDocument.url,
+          additionalDocument: user.additionalDocument.url,
+          termsAndConditions: user.termsAndConditions,
+        });
     }
     // Handle tourist login
     if (role === "tourist") {
@@ -97,13 +105,14 @@ const loginUser = async (req, res) => {
         username: user.username,
         role: user.role,
         status,
-        idDocument: user.idDocument.url, additionalDocument: user.additionalDocument.url, termsAndConditions: user.termsAndConditions
+        idDocument: user.idDocument.url,
+        additionalDocument: user.additionalDocument.url,
+        termsAndConditions: user.termsAndConditions,
       });
     }
 
     // Handle advertiser, seller, tour guide login
     if (["advertiser", "seller", "tourGuide"].includes(role)) {
-
       let model, entity;
       if (role === "advertiser") model = advertiserModel;
       if (role === "seller") model = sellerModel;
@@ -126,12 +135,11 @@ const loginUser = async (req, res) => {
         username: user.username,
         role: user.role,
         status,
-        idDocument: user.idDocument.url, additionalDocument: user.additionalDocument.url, termsAndConditions: user.termsAndConditions
-
+        idDocument: user.idDocument.url,
+        additionalDocument: user.additionalDocument.url,
+        termsAndConditions: user.termsAndConditions,
       });
     }
-
-
 
     // General token for other users (tourismGovernor, admin, etc.)
     const token = createToken(_id, role);
@@ -340,10 +348,7 @@ const termsAndConditions = async (req, res) => {
       error: error.message,
     });
   }
-  catch (error) {
-    res.status(400).json({ message: 'couldn\'t accept or reject terms and conditions', error: error.message });
-  }
-}
+};
 const deleteAccount = async (req, res) => {
   try {
     const user = await userModel.findById(req.user._id);
@@ -365,12 +370,10 @@ const deleteAccount = async (req, res) => {
         const activityDate = ticket.activity.date;
         activityDate.setHours(0, 0, 0);
         if (activityDate > today)
-          return res
-            .status(400)
-            .json({
-              message:
-                "Can't delete your account; some activities are booked already. Try again later.",
-            });
+          return res.status(400).json({
+            message:
+              "Can't delete your account; some activities are booked already. Try again later.",
+          });
       }
 
       await activityModel.deleteMany({ advertiser: req.user._id });
@@ -387,11 +390,9 @@ const deleteAccount = async (req, res) => {
       await sellerModel.deleteMany({ user: req.user._id });
       await userModel.findByIdAndDelete(req.user._id);
       res.clearCookie("token"); // Assuming your JWT is stored in a cookie named 'token'
-      return res
-        .status(200)
-        .json({
-          message: "deleted seller and his corresponding products successfully",
-        });
+      return res.status(200).json({
+        message: "deleted seller and his corresponding products successfully",
+      });
     } else if (role === "tourGuide") {
       let itineraryTickets = await itineraryTicketModel
         .find({ status: "active" })
@@ -405,12 +406,10 @@ const deleteAccount = async (req, res) => {
       );
 
       if (itineraryTickets.length > 0)
-        return res
-          .status(400)
-          .json({
-            message:
-              "Can't delete your account; some itineraies are booked already. Try again later.",
-          });
+        return res.status(400).json({
+          message:
+            "Can't delete your account; some itineraies are booked already. Try again later.",
+        });
 
       await itineraryModel.deleteMany({ tourGuide: req.user._id });
       await tourGuideModel.findOneAndDelete({ user: req.user._id });
@@ -432,12 +431,10 @@ const deleteAccount = async (req, res) => {
         const activityDate = ticket.activity.date;
         activityDate.setHours(0, 0, 0);
         if (activityDate > today)
-          return res
-            .status(400)
-            .json({
-              message:
-                "Can't delete your account; some activities are booked already. Try again later.",
-            });
+          return res.status(400).json({
+            message:
+              "Can't delete your account; some activities are booked already. Try again later.",
+          });
       }
 
       let itineraryTickets = await itineraryTicketModel.find({
@@ -449,12 +446,10 @@ const deleteAccount = async (req, res) => {
       );
 
       if (itineraryTickets.length > 0)
-        return res
-          .status(400)
-          .json({
-            message:
-              "Can't delete your account; some itineraries are booked already. Try again later.",
-          });
+        return res.status(400).json({
+          message:
+            "Can't delete your account; some itineraries are booked already. Try again later.",
+        });
 
       await activityTicketModel.deleteMany({ tourist: req.user._id });
       await itineraryTicketModel.deleteMany({ tourist: req.user._id });
@@ -465,12 +460,10 @@ const deleteAccount = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return res
-      .status(400)
-      .json({
-        message: "error could not delete account",
-        error: error.message,
-      });
+    return res.status(400).json({
+      message: "error could not delete account",
+      error: error.message,
+    });
   }
 };
 
