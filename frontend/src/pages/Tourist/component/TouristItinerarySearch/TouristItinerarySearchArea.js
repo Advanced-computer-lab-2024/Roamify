@@ -3,9 +3,9 @@ import axios from "axios";
 import SectionHeading from "../../../../component/Common/SectionHeading";
 import SideBar from "./SideBar";
 import PriceSlider from "../TouristActivitiesSearch/PriceSlider";
-import { Link } from "react-router-dom";
 import "./DateFilter";
 import "./TouristItinerary.css";
+import { ToastContainer, toast } from "react-toastify";
 
 const TouristItineraryWrapper = () => {
   const [itineraries, setItineraries] = useState([]);
@@ -20,19 +20,18 @@ const TouristItineraryWrapper = () => {
   const [rating, setRating] = useState(0);
   const [preferences, setPreferences] = useState([]);
   const [preference, setPreference] = useState("");
-
-  // Hardcoded languages array
-  const languages = [
+  const [languages, setLanguages] = useState([
     { _id: 'en', name: 'English' },
     { _id: 'de', name: 'German' },
-    { _id: 'es', name: 'Spanish' },
-    { _id: 'ar', name: 'Arabic' }
-  ];
-  
+    { _id: 'es', name: 'Spanish' }
+  ]);
   const [language, setLanguage] = useState("");
   const [showShareOptions, setShowShareOptions] = useState({});
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
+
+  const [searchType, setSearchType] = useState("name");
+  const [searchInput, setSearchInput] = useState("");
 
   const formatDate = (dateString) => {
     if (!dateString) return 'No dates available';
@@ -63,6 +62,8 @@ const TouristItineraryWrapper = () => {
           sortBy: sortCriteria.field,
           sortOrder: sortCriteria.order,
           language: language || undefined,
+          searchType: searchType,
+          searchQuery: searchInput
         },
       });
       setItineraries(response.data || []);
@@ -73,6 +74,7 @@ const TouristItineraryWrapper = () => {
           ? "No itineraries found"
           : "An error occurred while fetching itineraries."
       );
+      toast.info("No itineraries found");
     } finally {
       setLoading(false);
     }
@@ -80,7 +82,7 @@ const TouristItineraryWrapper = () => {
 
   useEffect(() => {
     fetchItineraries();
-  }, [priceRange, date, rating, preference, language, sortCriteria]);
+  }, [priceRange, date, rating, preference, language, sortCriteria, searchType, searchInput]);
 
   const applyFilters = (newPriceRange) => setPriceRange(newPriceRange);
 
@@ -92,6 +94,7 @@ const TouristItineraryWrapper = () => {
     setLanguage(selectedLanguage);
     fetchItineraries();
   };
+
   const handleSortChange = (field, order) => {
     setSortCriteria({ field, order });
   };
@@ -108,9 +111,7 @@ const TouristItineraryWrapper = () => {
   useEffect(() => {
     const fetchPreferences = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/api/preference-tag/get-all"
-        );
+        const response = await axios.get("http://localhost:3000/api/preference-tag/get-all");
         setPreferences(response.data.tags || []);
       } catch (error) {
         console.error("Error fetching preferences:", error);
@@ -119,6 +120,15 @@ const TouristItineraryWrapper = () => {
 
     fetchPreferences();
   }, []);
+
+  const handleSearchTypeChange = (event) => {
+    setSearchType(event.target.value);
+    setSearchInput("");
+  };
+
+  const handleSearchInputChange = (event) => {
+    setSearchInput(event.target.value);
+  };
 
   const handleBooking = async (itineraryId, itineraryDate) => {
     if (!itineraryId || !itineraryDate) {
@@ -209,6 +219,35 @@ const TouristItineraryWrapper = () => {
                 ))}
               </select>
             </div>
+            {/* Search Bar Section */}
+            <div className="left_side_search_boxed">
+              <div className="left_side_search_heading">
+                <h5>Search by</h5>
+              </div>
+              <div className="name_search_form" style={{ display: "block" }}>
+                <select
+                  className="form-control"
+                  value={searchType}
+                  onChange={handleSearchTypeChange}
+                  style={{ marginBottom: "10px" }}
+                >
+                  <option value="name">Name</option>
+                  <option value="tag">Tag</option>
+                  <option value="category">Category</option>
+                </select>
+                <input
+                  className="form-control"
+                  type="text"
+                  placeholder={`Search by ${searchType}...`}
+                  value={searchInput}
+                  onChange={handleSearchInputChange}
+                  style={{ marginBottom: "10px" }}
+                />
+                <button onClick={fetchItineraries} className="btn btn_theme btn_sm">
+                  Apply
+                </button>
+              </div>
+            </div>
           </div>
           <div className="col-lg-9">
             {loading ? (
@@ -286,8 +325,7 @@ const TouristItineraryWrapper = () => {
               style={{ marginTop: "10px" }}
             >
               Close
-            </button
-          >
+            </button>
           </div>
         )}
         {showPopup && (
