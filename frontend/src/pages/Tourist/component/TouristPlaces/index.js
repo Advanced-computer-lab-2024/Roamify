@@ -14,7 +14,7 @@ const TouristPlacesArea = () => {
   const [tags, setTags] = useState([]);
   const [selectedTag, setSelectedTag] = useState("");
   const [showShareOptions, setShowShareOptions] = useState({});
-  // Fetch places based on search criteria
+
   const fetchPlaces = async (searchParams = {}) => {
     setLoading(true);
 
@@ -28,6 +28,8 @@ const TouristPlacesArea = () => {
         withCredentials: true,
       });
 
+      console.log("API Response:", response.data); // Added for debugging
+
       if (response.data.message === "No places found matching your criteria") {
         toast.info("No data found");
         setPlaces([]);
@@ -35,10 +37,11 @@ const TouristPlacesArea = () => {
         setPlaces(response.data.places || []);
       }
     } catch (error) {
+      console.error("Error fetching places:", error.response || error.message || error);
       if (error.response && error.response.status === 404) {
         toast.error("No data found");
       } else {
-        console.error("Error fetching places:", error);
+        toast.error("An error occurred while fetching places.");
       }
     }
     setLoading(false);
@@ -46,15 +49,17 @@ const TouristPlacesArea = () => {
 
   useEffect(() => {
     fetchPlaces();
+
     const fetchTags = async () => {
       try {
         const response = await axios.get(
           "http://localhost:3000/api/historical-tag/get-all",
           { withCredentials: true }
         );
+        console.log("Tags Response:", response.data); // Added for debugging
         setTags(response.data.data || []);
       } catch (error) {
-        console.error("Error fetching tags:", error);
+        console.error("Error fetching tags:", error.response || error.message || error);
       }
     };
     fetchTags();
@@ -79,12 +84,15 @@ const TouristPlacesArea = () => {
     if (searchType === "name" && searchInput) {
       searchParams.name = searchInput;
     } else if (searchType === "tag" && searchInputTag) {
-      // Find the tag ID by matching the tag name
-      const matchingTag = tags.find((tag) => tag.name.toLowerCase() === searchInputTag.toLowerCase());
+      const matchingTag = tags.find(
+        (tag) => tag.name.toLowerCase() === searchInputTag.toLowerCase()
+      );
 
       if (matchingTag) {
-        searchParams.tags = [matchingTag._id]; // Use the ID for the search
+        searchParams.tags = [matchingTag._id];
       } else {
+        // Clear previous results if no matching tag is found
+        setPlaces([]);
         toast.info("Tag not found");
         return;
       }
@@ -93,34 +101,42 @@ const TouristPlacesArea = () => {
     fetchPlaces(searchParams);
   };
 
+
   const handleTagChange = (event) => {
     const tagId = event.target.value;
     setSelectedTag(tagId);
-    fetchPlaces({ tags: tagId ? [tagId] : [] });
+
+    // Fetch places with the selected tag
+    fetchPlaces({ tags: tagId || undefined });
   };
+
   const handleShareToggle = (placesId) => {
     setShowShareOptions((prevState) => ({
       ...prevState,
       [placesId]: !prevState[placesId],
     }));
   };
+
   const handleCopyLink = (placesId) => {
     const activityUrl = `${window.location.origin}/place-details/${placesId}`;
-    navigator.clipboard.writeText(activityUrl).then(() => {
-      alert("Link copied to clipboard!");
-    }).catch(err => {
-      console.error("Failed to copy: ", err);
-    });
+    navigator.clipboard
+      .writeText(activityUrl)
+      .then(() => {
+        alert("Link copied to clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+      });
   };
 
-  // Function to send activity details via email
   const handleEmailShare = (place) => {
     const subject = `Check out this activity: ${place.name}`;
     const body = `I thought you'd be interested in this activity: ${place.name}\n\nLocation: ${place.location.name}\n\nPrice: ${place.price} EGP\n\nCheck it out: ${window.location.origin}/place-details/${place._id}`;
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoLink;
   };
-
 
   return (
     <section id="top_destinations" className="section_padding">
@@ -149,10 +165,17 @@ const TouristPlacesArea = () => {
                   type="text"
                   placeholder={`Search by ${searchType}...`}
                   value={searchType === "tag" ? searchInputTag : searchInput}
-                  onChange={searchType === "tag" ? handleSearchInputTagChange : handleSearchInputChange}
+                  onChange={
+                    searchType === "tag"
+                      ? handleSearchInputTagChange
+                      : handleSearchInputChange
+                  }
                   style={{ marginBottom: "10px" }}
                 />
-                <button onClick={handleSearchClick} className="btn btn_theme btn_sm">
+                <button
+                  onClick={handleSearchClick}
+                  className="btn btn_theme btn_sm"
+                >
                   Apply
                 </button>
               </div>
@@ -250,17 +273,27 @@ const TouristPlacesArea = () => {
                             : " Not available"}
                         </p>
                         <button
+                          className="btn btn_theme btn_sm"
+                          onClick={() => handleShareToggle(data._id)}
+                        >
+                          Share
+                        </button>
+                        {showShareOptions[data._id] && (
+                          <div className="share-options">
+                            <button
                               className="btn btn_theme btn_sm"
-                              onClick={() => handleShareToggle(data._id)}
+                              onClick={() => handleCopyLink(data._id)}
                             >
-                              Share
+                              Copy Link
                             </button>
-                            {showShareOptions[data._id] && (
-                              <div className="share-options">
-                                <button className="btn btn_theme btn_sm" onClick={() => handleCopyLink(data._id)}>Copy Link</button>
-                                <button className="btn btn_theme btn_sm" onClick={() => handleEmailShare(data._id)}>Share via Email</button>
-                              </div>
-                            )}
+                            <button
+                              className="btn btn_theme btn_sm"
+                              onClick={() => handleEmailShare(data)}
+                            >
+                              Share via Email
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

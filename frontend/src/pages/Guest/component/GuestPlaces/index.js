@@ -15,29 +15,24 @@ const GuestPlacesArea = () => {
   const fetchPlaces = async (searchParams = {}) => {
     setLoading(true);
 
-    if (searchParams.tags && Array.isArray(searchParams.tags)) {
-      searchParams.tags = searchParams.tags.join(",");
-    }
-
     try {
       const response = await axios.get("http://localhost:3000/api/places", {
         params: searchParams,
       });
 
-      if (response.data.message === "No places found matching your criteria") {
-        toast.info("No data found");
-        setPlaces([]);
+      if (response.data.places && response.data.places.length > 0) {
+        setPlaces(response.data.places);
       } else {
-        setPlaces(response.data.places || []);
+        toast.info("No places found matching your criteria");
+        setPlaces([]);
       }
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        toast.error("No data found");
-      } else {
-        console.error("Error fetching places:", error);
-      }
+      setPlaces([]);
+      toast.error("An error occurred while fetching data");
+      console.error("Error fetching places:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -63,7 +58,7 @@ const GuestPlacesArea = () => {
     setSelectedTag(tagId);
 
     // Fetch places with the selected tag
-    fetchPlaces({ tags: tagId ? [tagId] : [] });
+    fetchPlaces({ tags: tagId || undefined });
   };
 
   return (
@@ -84,7 +79,7 @@ const GuestPlacesArea = () => {
                 style={{ marginBottom: "10px" }}
               >
                 <option value="">All Tags</option>
-                {tags && tags.length > 0 ? (
+                {tags.length > 0 ? (
                   tags.map((tag) => (
                     <option key={tag._id} value={tag._id}>
                       {tag.name}
@@ -100,11 +95,11 @@ const GuestPlacesArea = () => {
             <div className="row">
               {loading ? (
                 <p>Loading...</p>
-              ) : (
-                places.map((data, index) => (
+              ) : places.length > 0 ? (
+                places.map((data) => (
                   <div
                     className="col-lg-4 col-md-6 col-sm-6 col-12"
-                    key={data._id || index}
+                    key={data._id}
                   >
                     <div
                       className="top_destinations_box img_hover"
@@ -167,6 +162,8 @@ const GuestPlacesArea = () => {
                     </div>
                   </div>
                 ))
+              ) : (
+                <p>No destinations available.</p>
               )}
             </div>
           </div>
