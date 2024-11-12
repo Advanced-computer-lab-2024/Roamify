@@ -189,7 +189,7 @@ const fetchAndUpdateExchangeRates = async () => {
                 { upsert: true, new: true }
             );
         }
-        console.log("Exchange rates updated successfully.");
+        console.log('------------------FETCHED-EXCHANGE-RATES------------');
     } catch (error) {
         console.error("Error fetching or updating exchange rates:", error);
     }

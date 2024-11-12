@@ -5,7 +5,7 @@ const itineraryTicketsModel = require("../models/itineraryTicketModel");
 const transportationModel = require("../models/transportationModel");
 
 const updatePoints = async () => {
-    console.log('----------------------------UPDATE-POINTS----------------------');
+    console.log('------------------UPDATE-POINTS---------------------');
     let addPoints = 0;
     let userId = null;
 
@@ -118,7 +118,7 @@ const updatePoints = async () => {
 };
 
 const setLevel = async () => {
-    console.log('------------------RESETTING POINTS------------------');
+    console.log('------------------RESETTING-POINTS------------------');
     try {
         const tourists = await touristModel.find();
         if (tourists) {
