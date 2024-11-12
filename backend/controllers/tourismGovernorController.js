@@ -42,8 +42,6 @@ if (!req.files || req.files.length === 0) {
     ? tagPlace.map(id => new mongoose.Types.ObjectId(id))
     : JSON.parse(tagPlace).map(id => new mongoose.Types.ObjectId(id));
   
-    console.log(tagIds);
-  
     // Upload images to Cloudinary and get URLs
     const imageUrls = [];
 for (const file of req.files) {

@@ -9,28 +9,18 @@ const getFilteredItineraries = async (req, res) => {
         const token = req.cookies?.token; // Get token from cookies
         if (!token) {
             req.user = null;
-        }
-
-        else {
-
+        } else {
             try {
-
                 const verified = jwt.verify(token, process.env.SECRET); // Verify token
                 console.log("Decoded JWT:", verified);
-
-
                 req.user = verified; // Store decoded token payload in req.user
             } catch (err) {
                 console.error("Token verification failed:", err);
-                res.status(401).json({ message: "Invalid token" });
+                return res.status(401).json({ message: "Invalid token" });
             }
         }
 
-        let role = "";
-        if (req.user)
-            role = req.user.role;
-
-
+        let role = req.user ? req.user.role : "";
 
         const {
             minBudget,
@@ -39,7 +29,8 @@ const getFilteredItineraries = async (req, res) => {
             preferences,
             language,
             sortBy,
-            sortOrder = "asc"
+            sortOrder = "asc",
+            name // New parameter for name search
         } = req.query;
 
         let filter = {};
@@ -54,9 +45,8 @@ const getFilteredItineraries = async (req, res) => {
             filter.availableDates = { $elemMatch: { $gte: new Date(date) } };
         }
 
-
         if (preferences) {
-            const preferenceTagIds = preferences.split(",").map(id => id.trim()); // Remove whitespace from each ID
+            const preferenceTagIds = preferences.split(",").map(id => id.trim());
             filter.preferenceTags = { $in: preferenceTagIds };
         }
 
@@ -64,35 +54,38 @@ const getFilteredItineraries = async (req, res) => {
             filter.language = language;
         }
 
+        // Add name search with partial matching
+        if (name) {
+            filter.name = { $regex: name, $options: "i" }; // Case-insensitive search
+        }
+
         let sortOptions = {};
         if (sortBy) {
             sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1;
         }
 
-        // Add the condition to exclude itineraries with flag=true
+        // Exclude itineraries with flag=true if the user is not an admin
         if (role !== "admin" && role !== "")
             filter.flag = { $ne: true };
 
         let itineraries = await itineraryModel
             .find(filter)
             .sort(sortOptions)
-            .populate({ path: "activities", select: "name price rating", populate: { path: "category", select: "name" } }).populate({ path: "preferenceTags", select: "name description" });
+            .populate({ path: "activities", select: "name price rating", populate: { path: "category", select: "name" } })
+            .populate({ path: "preferenceTags", select: "name description" });
 
-        console.log(itineraries);
+        if (role === 'admin') {
+            return res.status(200).json(itineraries);
+        }
 
-        if (role === 'admin')
-            return res.status(200).json(itineraries)
         if (!itineraries.length) {
             return res.status(404).json({ message: "No itineraries found matching your criteria" });
         }
 
-        //get all inactive itineraries
         let inactiveItineraries = itineraries.filter(itinerary => itinerary.status === "inactive");
 
-
         if (role === "tourist") {
-            const itineraryTickets = await itineraryTicketModel.find({ tourist: req.user._id, status: 'active' })
-            // Convert itinerary IDs from itineraryTickets to a Set for efficient lookup
+            const itineraryTickets = await itineraryTicketModel.find({ tourist: req.user._id, status: 'active' });
             const ticketedItineraryIds = new Set(itineraryTickets.map(ticket => ticket.itinerary.toString()));
 
             const uncommonItineraries = inactiveItineraries.filter(itinerary =>
@@ -101,23 +94,14 @@ const getFilteredItineraries = async (req, res) => {
 
             const uncommonItinerarySet = new Set(uncommonItineraries.map(itinerary => itinerary._id.toString()));
 
-            // Step 2: Filter the itineraries array to exclude the uncommon itineraries
             const filteredItineraries = itineraries.filter(itinerary =>
                 !uncommonItinerarySet.has(itinerary._id.toString())
             );
 
-
-
-            if (filteredItineraries.length === 0) return res.status(400).json({ message: 'no available itineraries' })
-            return res.status(200).json(filteredItineraries)
-
-
-
-
-
-
-
+            if (filteredItineraries.length === 0) return res.status(400).json({ message: 'No available itineraries' });
+            return res.status(200).json(filteredItineraries);
         }
+
         const updatedItineraries = itineraries.filter(
             itinerary => !inactiveItineraries.some(
                 inactiveItinerary => inactiveItinerary._id.toString() === itinerary._id.toString()
@@ -127,7 +111,6 @@ const getFilteredItineraries = async (req, res) => {
         if (!updatedItineraries.length) {
             return res.status(404).json({ message: "No itineraries found matching your criteria" });
         }
-
 
         res.status(200).json({ message: "Itineraries retrieved successfully", updatedItineraries });
     } catch (error) {
@@ -173,9 +156,6 @@ const getUnratedCompletedItineraries = async (req, res) => {
         res.status(500).json({ message: "Couldn't retrieve unrated completed itineraries" });
     }
 };
-
-
-
 
 
 module.exports = { getFilteredItineraries, getUnratedCompletedItineraries }
