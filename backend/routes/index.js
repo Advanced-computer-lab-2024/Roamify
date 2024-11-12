@@ -37,5 +37,5 @@ module.exports = [
     { path: "/api/complaint", route: complaintRoutes },
     { path: "/api/exchange-rate", route: exchangeRateRoutes },
     { path: "/api/flights", route: flightRoutes, role: ['tourist'] },
-    { path: "/api/hotels", route: hotelRoutes, role: ['tourist'] }
+    { path: "/api/hotels", route: hotelRoutes, role: ['tourist']},
 ];
