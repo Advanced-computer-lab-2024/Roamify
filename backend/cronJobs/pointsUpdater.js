@@ -6,7 +6,7 @@ const itineraryTicketsModel = require("../models/itineraryTicketModel");
 const transportationModel = require("../models/transportationModel");
 
 const updatePoints = () => {
-    cron.schedule("30 12 * * *", async () => {  // Runs at 7:40 PM Cairo time
+    cron.schedule("37 06 * * *", async () => {  // Runs at 7:40 PM Cairo time
         console.log('----------------------------UPDATE-POINTS----------------------');
         let addPoints = 0
         let userId = null
