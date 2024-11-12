@@ -1,11 +1,32 @@
-import React from "react";
-// Import Link
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import DeleteButton from "../Activities/DeleteButton";
 import EditProductButton from "./EditProductButton";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast"; // Import the toast function
 
 const ProductCard = (props) => {
+  const [isArchived, setIsArchived] = useState(props.isArchived); // State to manage archiving status
+
+  // Function to handle archiving/unarchiving
+  const handleArchiveToggle = async () => {
+    try {
+      // Decide which API to call based on current isArchived status
+      const apiUrl = isArchived
+        ? `http://localhost:3000/api/product/unarchive/${props.id}` // Unarchive API
+        : `http://localhost:3000/api/product/archive/${props.id}`; // Archive API
+
+      const response = await axios.post(apiUrl, {}, { withCredentials: true });
+
+      setIsArchived(!isArchived);
+      toast.success(response.data.message); // e.g., "Product archived successfully"
+    } catch (error) {
+      console.error("Error archiving/unarchiving product:", error);
+      // Show an error toast
+      toast.error("There was an error with archiving/unarchiving.");
+    }
+  };
+
   return (
     <>
       <div
@@ -15,6 +36,7 @@ const ProductCard = (props) => {
             : "col-lg-3 col-md-6 col-sm-6 col-12"
         }
       >
+        <Toaster />
         <div className="theme_common_box_two img_hover">
           <div className="theme_two_box_img">
             <Link to={`/product-details/${props.id}`}>
@@ -45,16 +67,31 @@ const ProductCard = (props) => {
               <h3>
                 {props.price} <span>Price starts from</span>
               </h3>
-              <div style={{ marginLeft: "auto" }}>
+              <div
+                style={{
+                  marginLeft: "auto",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
                 {props.isAdmin && (
-                  <EditProductButton
-                    itemId={props.id}
-                    name={props.name}
-                    price={props.price}
-                    quantity={props.quantity}
-                    description={props.description}
-                    img={props.img}
-                  />
+                  <>
+                    <EditProductButton
+                      itemId={props.id}
+                      name={props.name}
+                      price={props.price}
+                      quantity={props.quantity}
+                      description={props.description}
+                      img={props.img}
+                    />
+                    <button
+                      onClick={handleArchiveToggle}
+                      className="btn btn_theme btn_sm"
+                      style={{ marginLeft: "10px" }}
+                    >
+                      {isArchived ? "Unarchive" : "Archive"}
+                    </button>
+                  </>
                 )}
               </div>
             </div>

@@ -19,9 +19,12 @@ const ReviewTourGuide = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get("http://localhost:3000/api/tourist/tour-guide/unrated", {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        "http://localhost:3000/api/tourist/tour-guide/unrated",
+        {
+          withCredentials: true,
+        }
+      );
       setItineraries(response.data.tourGuides || []);
     } catch (error) {
       setItineraries([]);
@@ -45,7 +48,9 @@ const ReviewTourGuide = () => {
       <CommonBanner heading="Rate Tour Guide" pagination="tourguide" />
       <section id="explore_area" className="section_padding">
         <div className="container">
-          <SectionHeading heading={`${itineraries?.length || 0} itineraries found`} />
+          <SectionHeading
+            heading={`${itineraries?.length || 0} itineraries found`}
+          />
           <div className="row">
             <div className="col-lg-9">
               {loading ? (
@@ -56,9 +61,14 @@ const ReviewTourGuide = () => {
                 <div className="flight_search_result_wrapper">
                   {itineraries.length > 0 ? (
                     itineraries.map((itinerary) => (
-                      <div className="flight_search_item_wrapper" key={itinerary.tourGuideId}>
+                      <div
+                        className="flight_search_item_wrapper"
+                        key={itinerary.tourGuideId}
+                      >
                         <div className="flight_search_items">
-                          <h3 className="itinerary-name">{itinerary.tourGuideName}</h3>
+                          <h3 className="itinerary-name">
+                            {itinerary.tourGuideName}
+                          </h3>
                           <div className="itinerary-section">
                             <p>
                               <strong>Name:</strong> {itinerary.tourGuideName}
@@ -66,7 +76,9 @@ const ReviewTourGuide = () => {
                           </div>
                           <div className="booking-section">
                             <button
-                              onClick={() => setSelectedTourGuideId(itinerary.tourGuideId)} // Set the selected tour guide ID
+                              onClick={() =>
+                                setSelectedTourGuideId(itinerary.tourGuideId)
+                              } // Set the selected tour guide ID
                               className="btn btn_theme btn_sm"
                             >
                               Review
@@ -89,7 +101,10 @@ const ReviewTourGuide = () => {
       {selectedTourGuideId && (
         <div className="popup-container">
           <div className="popup-content">
-            <button onClick={() => setSelectedTourGuideId(null)} className="close-button">
+            <button
+              onClick={() => setSelectedTourGuideId(null)}
+              className="close-button"
+            >
               &times;
             </button>
             <ReviewArea tourGuideId={selectedTourGuideId} />

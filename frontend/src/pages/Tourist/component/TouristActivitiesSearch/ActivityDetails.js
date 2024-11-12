@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import CommonBanner from "../../../../component/Common/CommonBanner";
 import ReviewArea from "./ReviewArea.js";
 import Header from "../../../../layout/Header.js";
-import { HeaderData } from "../../TouristHeaderData.js"
+import { HeaderData } from "../../TouristHeaderData.js";
 const ActivityDetails = () => {
   const { id } = useParams();
   const [activity, setActivity] = useState(null);
@@ -15,7 +15,9 @@ const ActivityDetails = () => {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/activity",{ withCredentials: true });
+        const response = await axios.get("http://localhost:3000/api/activity", {
+          withCredentials: true,
+        });
         const foundActivity = response.data.activities.find(
           (activity) => activity._id === id
         );
@@ -49,7 +51,7 @@ const ActivityDetails = () => {
 
   return (
     <>
-    <Header HeaderData={HeaderData} />
+      <Header HeaderData={HeaderData} />
       <CommonBanner heading={activity.name} pagination="Activity Details" />
       <section className="activity_details_section">
         <div className="container">
@@ -61,7 +63,12 @@ const ActivityDetails = () => {
               <h3>{activity.price} EGP</h3>
               {activity.discounts && (
                 <h5>
-                  <del>{(activity.price * (1 + activity.discounts / 100)).toFixed(2)} EGP</del>
+                  <del>
+                    {(activity.price * (1 + activity.discounts / 100)).toFixed(
+                      2
+                    )}{" "}
+                    EGP
+                  </del>
                 </h5>
               )}
               <p>{activity.description}</p>
@@ -71,14 +78,24 @@ const ActivityDetails = () => {
             </div>
             <div className="col-lg-4">
               <h4>Details</h4>
-              <p><strong>Location:</strong> {activity.location.name}</p>
-              <p><strong>Coordinates:</strong> {activity.location.coordinates.join(", ")}</p>
-              <p><strong>Time:</strong> {activity.time}</p>
-              <p><strong>Tags:</strong> {activity.tags.map((tag) => tag.name).join(", ")}</p>
+              <p>
+                <strong>Location:</strong> {activity.location.name}
+              </p>
+              <p>
+                <strong>Coordinates:</strong>{" "}
+                {activity.location.coordinates.join(", ")}
+              </p>
+              <p>
+                <strong>Time:</strong> {activity.time}
+              </p>
+              <p>
+                <strong>Tags:</strong>{" "}
+                {activity.tags.map((tag) => tag.name).join(", ")}
+              </p>
             </div>
           </div>
         </div>
-        <ReviewArea reviews={id} />
+        <ReviewArea itineraryId={id} />
       </section>
 
       {/* Popup for booking confirmation */}
@@ -98,8 +115,14 @@ const ActivityDetails = () => {
             textAlign: "center",
           }}
         >
-          <h4 style={{ color: "green", marginBottom: "10px" }}>{popupMessage}</h4>
-          <button onClick={() => setShowPopup(false)} className="btn btn_theme" style={{ marginTop: "10px" }}>
+          <h4 style={{ color: "green", marginBottom: "10px" }}>
+            {popupMessage}
+          </h4>
+          <button
+            onClick={() => setShowPopup(false)}
+            className="btn btn_theme"
+            style={{ marginTop: "10px" }}
+          >
             Close
           </button>
         </div>

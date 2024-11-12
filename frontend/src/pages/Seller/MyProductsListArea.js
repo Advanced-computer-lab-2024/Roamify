@@ -73,6 +73,7 @@ const MyProductsListArea = () => {
                     quantity={product.quantity}
                     price={product.price}
                     isAdmin={true}
+                    isArchived={product.isArchived}
                   />
                 ))
               ) : (

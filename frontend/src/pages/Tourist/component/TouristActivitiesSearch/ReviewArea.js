@@ -42,7 +42,7 @@ const ReviewArea = ({ itineraryId }) => {
     } catch (error) {
       setFeedbackMessage("Failed to submit review. Please try again.");
     }
-    console.log("Activity ID:", itineraryId); 
+    console.log("Activity ID:", itineraryId);
     // Reset form fields after submission
     setRating(0);
     setComment("");
@@ -62,9 +62,14 @@ const ReviewArea = ({ itineraryId }) => {
                     {[...Array(5)].map((_, index) => (
                       <i
                         key={index}
-                        className={`fas fa-star ${index < rating ? "selected" : ""}`}
+                        className={`fas fa-star ${
+                          index < rating ? "selected" : ""
+                        }`}
                         onClick={() => handleRatingSelect(index + 1)}
-                        style={{ color: index < rating ? "#FFD700" : "#ccc", cursor: "pointer" }} // Adds color to selected stars
+                        style={{
+                          color: index < rating ? "#FFD700" : "#ccc",
+                          cursor: "pointer",
+                        }} // Adds color to selected stars
                       />
                     ))}
                   </div>

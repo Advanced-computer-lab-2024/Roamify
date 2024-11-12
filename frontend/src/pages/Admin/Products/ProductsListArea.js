@@ -205,6 +205,7 @@ const ProductsListArea = ({ isAdmin }) => {
                       reviewCount={product.reviewCount}
                       key={index}
                       isAdmin={isAdmin}
+                      isArchived={product.isArchived}
                       grid={true}
                     />
                   ))
