@@ -46,14 +46,16 @@ const ProductCard = (props) => {
                 {props.price} <span>Price starts from</span>
               </h3>
               <div style={{ marginLeft: "auto" }}>
-                <EditProductButton
-                  itemId={props.id}
-                  name={props.name}
-                  price={props.price}
-                  quantity={props.quantity}
-                  description={props.description}
-                  img={props.img}
-                />
+                {props.isAdmin && (
+                  <EditProductButton
+                    itemId={props.id}
+                    name={props.name}
+                    price={props.price}
+                    quantity={props.quantity}
+                    description={props.description}
+                    img={props.img}
+                  />
+                )}
               </div>
             </div>
           </div>

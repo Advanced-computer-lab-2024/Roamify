@@ -34,11 +34,10 @@ const UsersTableRow = ({
         { userIdString: id, approved: "accept" },
         { withCredentials: true }
       );
-      toast.success(response.data);
-      console.log(response.data);
+      toast.success(response.data.message);
       fetchPendingUsers();
     } catch (error) {
-      toast.error(error.data);
+      toast.error(error.data.message);
     }
   };
 
@@ -49,11 +48,10 @@ const UsersTableRow = ({
         { userIdString: id, approved: "reject" },
         { withCredentials: true }
       );
-      toast.success(response.data);
-      console.log(response.data);
+      toast.success(response.data.message);
       fetchPendingUsers();
     } catch (error) {
-      toast.error(error.data);
+      toast.error(error.data.message);
     }
   };
 

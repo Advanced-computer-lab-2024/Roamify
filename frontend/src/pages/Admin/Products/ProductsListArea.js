@@ -12,7 +12,7 @@ import axios from "axios";
 import ProductCard from "./ProductCard";
 import AddProductButton from "./AddProductButton";
 
-const ProductsListArea = () => {
+const ProductsListArea = ({ isAdmin }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [minPrice, setMinPrice] = useState("");
@@ -183,7 +183,7 @@ const ProductsListArea = () => {
                     </label>
                   </div>
                 </div>
-                <AddProductButton />
+                {isAdmin && <AddProductButton />}
               </div>
             </div>
             <div className="col-lg-9">
@@ -204,6 +204,7 @@ const ProductsListArea = () => {
                       reviewRating={product.reviewRating}
                       reviewCount={product.reviewCount}
                       key={index}
+                      isAdmin={isAdmin}
                       grid={true}
                     />
                   ))

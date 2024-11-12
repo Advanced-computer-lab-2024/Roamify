@@ -14,10 +14,7 @@ const TourGuide = () => {
     <>
       <Header HeaderData={HeaderData} />
       <Routes>
-          <Route path="/tour-guide-profile" element={<TourGuideProfile />} /> 
-         <Route path="/tour-guide-itinerary" element={<TourGuideItinerary />} />
-       
-        
+        <Route path="/" element={<TourGuideItinerary />} />
       </Routes>
       <CopyRight />
     </>
