@@ -8,12 +8,9 @@ import "react-toastify/dist/ReactToastify.css";
 const GuestPlacesArea = () => {
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchType, setSearchType] = useState("name");
-  const [searchInput, setSearchInput] = useState("");
-  const [searchInputTag, setSearchInputTag] = useState("");
   const [tags, setTags] = useState([]);
   const [selectedTag, setSelectedTag] = useState("");
-  const [showShareOptions, setShowShareOptions] = useState({});
+
   // Fetch places based on search criteria
   const fetchPlaces = async (searchParams = {}) => {
     setLoading(true);
@@ -25,7 +22,6 @@ const GuestPlacesArea = () => {
     try {
       const response = await axios.get("http://localhost:3000/api/places", {
         params: searchParams,
-        
       });
 
       if (response.data.message === "No places found matching your criteria") {
@@ -45,12 +41,14 @@ const GuestPlacesArea = () => {
   };
 
   useEffect(() => {
+    // Initial fetch to load all places
     fetchPlaces();
+
+    // Fetch all available tags
     const fetchTags = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/historical-tag/get-all",
-         
+          "http://localhost:3000/api/historical-tag/get-all"
         );
         setTags(response.data.data || []);
       } catch (error) {
@@ -60,25 +58,21 @@ const GuestPlacesArea = () => {
     fetchTags();
   }, []);
 
-  
-
   const handleTagChange = (event) => {
     const tagId = event.target.value;
     setSelectedTag(tagId);
+
+    // Fetch places with the selected tag
     fetchPlaces({ tags: tagId ? [tagId] : [] });
   };
- 
 
   return (
     <section id="top_destinations" className="section_padding">
       <ToastContainer />
       <div className="container">
         <SectionHeading heading={`${places.length} destinations found`} />
-
         <div className="row">
           <div className="col-lg-3">
-            
-
             <div className="left_side_search_boxed">
               <div className="left_side_search_heading">
                 <h5>Filter by Tags</h5>
@@ -102,7 +96,6 @@ const GuestPlacesArea = () => {
               </select>
             </div>
           </div>
-
           <div className="col-lg-9">
             <div className="row">
               {loading ? (
@@ -170,7 +163,6 @@ const GuestPlacesArea = () => {
                             ? ` ${data.ticketPrice.Native} (Native), ${data.ticketPrice.Foreigner} (Foreigner)`
                             : " Not available"}
                         </p>
-                        
                       </div>
                     </div>
                   </div>

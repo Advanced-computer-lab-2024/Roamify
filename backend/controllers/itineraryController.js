@@ -80,12 +80,14 @@ const getFilteredItineraries = async (req, res) => {
 
         console.log(itineraries);
 
+        if (role === 'admin')
+            return res.status(200).json(itineraries)
         if (!itineraries.length) {
             return res.status(404).json({ message: "No itineraries found matching your criteria" });
         }
 
         //get all inactive itineraries
-        const inactiveItineraries = itineraries.filter(itinerary => itinerary.status === "inactive");
+        let inactiveItineraries = itineraries.filter(itinerary => itinerary.status === "inactive");
 
 
         if (role === "tourist") {

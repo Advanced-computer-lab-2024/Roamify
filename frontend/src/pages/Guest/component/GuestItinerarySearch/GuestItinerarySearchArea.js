@@ -29,7 +29,7 @@ const GuestItineraryWrapper = () => {
     setError(null);
     try {
       const response = await axios.get("http://localhost:3000/api/itinerary/", {
-       
+
         params: {
           minBudget: priceRange[0],
           maxBudget: priceRange[1],
@@ -87,7 +87,7 @@ const GuestItineraryWrapper = () => {
     fetchPreferences();
   }, []);
 
-  
+
 
   return (
     <section id="explore_area" className="section_padding">
@@ -156,13 +156,13 @@ const GuestItineraryWrapper = () => {
                           <p>
                             <strong>Available Date:</strong>{" "}
                             {Array.isArray(itinerary.availableDates) &&
-                            itinerary.availableDates.length > 0
+                              itinerary.availableDates.length > 0
                               ? itinerary.availableDates[0]
                               : "No dates available"}
                           </p>
                         </div>
-                        
-                        
+
+
                       </div>
                     </div>
                   ))
@@ -173,7 +173,7 @@ const GuestItineraryWrapper = () => {
             )}
           </div>
         </div>
-        
+
       </div>
     </section>
   );
