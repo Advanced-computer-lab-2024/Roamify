@@ -31,14 +31,14 @@ const UsersTableRow = ({
     try {
       const response = await axios.put(
         "http://localhost:3000/api/admin/accept-reject-user",
-        { userIdString: id, approve: "accept" },
+        { userIdString: id, approved: "accept" },
         { withCredentials: true }
       );
-      toast.success(response.data.message);
+      toast.success(response.data);
       console.log(response.data);
       fetchPendingUsers();
     } catch (error) {
-      toast.error(error.data.message);
+      toast.error(error.data);
     }
   };
 
@@ -46,14 +46,14 @@ const UsersTableRow = ({
     try {
       const response = await axios.put(
         "http://localhost:3000/api/admin/accept-reject-user",
-        { userIdString: id, approve: "reject" },
+        { userIdString: id, approved: "reject" },
         { withCredentials: true }
       );
-      toast.success(response.data.message);
+      toast.success(response.data);
       console.log(response.data);
       fetchPendingUsers();
     } catch (error) {
-      toast.error(error.data.message);
+      toast.error(error.data);
     }
   };
 

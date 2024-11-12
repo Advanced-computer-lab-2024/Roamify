@@ -132,8 +132,8 @@ const deleteUser = async (req, res) => {
 };
 const addAdmin = async (req, res) => {
   const { username, password } = req.body;
-
   try {
+
     // Check if the admin username already exists
     const userExists = await userModel.findOne({ username });
     if (userExists) {

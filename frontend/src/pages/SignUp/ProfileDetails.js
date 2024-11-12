@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const ProfileDetails = () => {
-  const role = localStorage.getItem("role");
+  const role = localStorage.getItem("role")?.toLowerCase().replace(/-/g, ""); // Normalize role
   const navigate = useNavigate();
 
   // Set up the fields based on the role requirements
@@ -13,18 +13,18 @@ const ProfileDetails = () => {
       "yearsOfExperience",
       "previousWork", // Camel case for form submission
     ],
-    advertiser: ["companyWebsite", "hotline", "companyProfile"],
+    advertiser: ["companyName", "websiteLink", "hotline", "companyProfile"],
     seller: ["firstName", "lastName", "description"],
   };
 
   const [formData, setFormData] = useState(
-    profileRequirements[role.toLowerCase().replace(/-/g, "")]?.reduce(
-      (acc, field) => {
-        acc[field] = "";
-        return acc;
-      },
-      {}
-    ) || {}
+      profileRequirements[role]?.reduce(
+          (acc, field) => {
+            acc[field] = "";
+            return acc;
+          },
+          {}
+      ) || {}
   );
 
   const handleInputChange = (e) => {
@@ -39,11 +39,9 @@ const ProfileDetails = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `http://localhost:3000/api/${role
-          .toLowerCase()
-          .replace(/-/g, "")}/create-profile`,
-        formData,
-        { withCredentials: true }
+          `http://localhost:3000/api/${role}/create-profile`,
+          formData,
+          { withCredentials: true }
       );
       alert("Profile created successfully.");
       navigate(`/${role}`);
@@ -54,25 +52,25 @@ const ProfileDetails = () => {
   };
 
   return (
-    <div>
-      <h2>Profile Details</h2>
-      <p>Update your profile information:</p>
-      <form onSubmit={handleSubmit}>
-        {profileRequirements[role]?.map((field, index) => (
-          <div key={index} style={{ marginBottom: "1rem" }}>
-            <label>{field.replace(/([A-Z])/g, " $1")}</label>
-            <input
-              type="text"
-              name={field}
-              value={formData[field]}
-              onChange={handleInputChange}
-              placeholder={`Enter your ${field.replace(/([A-Z])/g, " $1")}`}
-            />
-          </div>
-        ))}
-        <button type="submit">Save Profile</button>
-      </form>
-    </div>
+      <div>
+        <h2>Profile Details</h2>
+        <p>Update your profile information:</p>
+        <form onSubmit={handleSubmit}>
+          {profileRequirements[role]?.map((field, index) => (
+              <div key={index} style={{ marginBottom: "1rem" }}>
+                <label>{field.replace(/([A-Z])/g, " $1")}</label>
+                <input
+                    type="text"
+                    name={field}
+                    value={formData[field]}
+                    onChange={handleInputChange}
+                    placeholder={`Enter your ${field.replace(/([A-Z])/g, " $1")}`}
+                />
+              </div>
+          ))}
+          <button type="submit">Save Profile</button>
+        </form>
+      </div>
   );
 };
 

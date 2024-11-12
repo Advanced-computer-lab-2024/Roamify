@@ -27,7 +27,7 @@ const LoginArea = () => {
         termsAndConditions,
         role,
       } = response.data;
-
+      console.log(response.data);
       // Store user role in localStorage
       localStorage.setItem("role", role);
 
