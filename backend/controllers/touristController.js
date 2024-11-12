@@ -405,7 +405,7 @@ const bookItinerary = async (req, res) => {
     let receipt = null;
 
     //checking if tourist has available credit
-    if (tourist.wallet.availableCredit < itinerary.price) {
+    if (tourist.wallet.availableCredit < itineraryObject.price) {
       receipt = new receiptModel({
         type: "itinerary",
         status: "failed",
