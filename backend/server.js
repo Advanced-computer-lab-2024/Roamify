@@ -3,9 +3,9 @@ require("dotenv").config();
 
 // Import modules
 const express = require("express");
-const connectDB = require("./config/db");                 // Database connection
+const connectDB = require("./config/db"); // Database connection
 const setupMiddlewares = require("./config/middleware"); // General middlewares (CORS, cookieParser, etc.)
-const setupRoutes = require("./config/setupRoutes");      // API route setup with role-based checks
+const setupRoutes = require("./config/setupRoutes"); // API route setup with role-based checks
 const setupCronJobs = require("./cronJobs/cronScheduler"); // Cron job scheduler
 
 // Initialize app
@@ -26,5 +26,5 @@ setupCronJobs();
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`✅ Server is running on http://localhost:${PORT}`);
+  console.log(`✅ Server is running on http://localhost:${PORT}`);
 });

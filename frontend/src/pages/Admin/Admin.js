@@ -55,7 +55,7 @@ const Admin = () => {
           element={<AdminUsers usersName="Advertisers" />}
         />
         <Route path="/tour-guids" element={<TourGuides />} />
-        <Route path="/products" element={<Products />} />
+        <Route path="/products" element={<Products isAdmin={true} />} />
         <Route path="/tour-details/:id" element={<TourDetails />} />
         <Route path="/activity-booking/:id" element={<ActivityBooking />} />
         <Route path="/tourist-places" element={<TouristPlaces />} />

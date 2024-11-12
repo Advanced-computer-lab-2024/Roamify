@@ -7,14 +7,16 @@ import Profile from "../../page/Profile";
 import CopyRight from "../../layout/CopyRight";
 import { HeaderData } from "./SellerHeaderData.js";
 import Products from "../Admin/Products/Products.js";
+import MyProducts from "./MyProducts.js";
 
 const Seller = () => {
   return (
     <>
       <Header HeaderData={HeaderData} />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/products" element={<Products />} />
+        {/* <Route path="/" element={<Home />} /> */}
+        <Route path="/" element={<Products isAdmin={false} />} />
+        <Route path="/my-products" element={<MyProducts />} />
         <Route path="/profile/:id" element={<Profile />} />
       </Routes>
       <CopyRight />

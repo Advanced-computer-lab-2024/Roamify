@@ -5,12 +5,12 @@ import CommonBanner from "../../../component/Common/CommonBanner";
 // import Tour Search Area
 import ProductsListArea from "./ProductsListArea";
 
-const Products = () => {
+const Products = ({ isAdmin }) => {
   return (
     <>
       <CommonBanner heading="Tour search result" pagination="Tour" />
       {/* <SearchForm /> */}
-      <ProductsListArea />
+      <ProductsListArea isAdmin={isAdmin} />
     </>
   );
 };

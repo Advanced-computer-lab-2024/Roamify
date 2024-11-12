@@ -23,7 +23,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
 
   useEffect(() => {
     setFormData({
-      type: "museum", // Default type for museum
+      type: fieldsValues?.trpe || "", // Default type for museum
       name: fieldsValues?.name || "",
       description: fieldsValues?.description || "",
       location: fieldsValues?.location || "", // Location in JSON format if available
@@ -108,19 +108,21 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     submissionData.append("openingHours", formData.openingHours);
     submissionData.append("closingHours", formData.closingHours);
     submissionData.append("ticketPrice", JSON.stringify(formData.ticketPrice));
-    formData.tagPlace.forEach((tagId) => submissionData.append("tagPlace", tagId));
+    formData.tagPlace.forEach((tagId) =>
+      submissionData.append("tagPlace", tagId)
+    );
 
     // Append image files
-    formData.placesImages.forEach((file) => submissionData.append("placesImages", file));
+    formData.placesImages.forEach((file) =>
+      submissionData.append("placesImages", file)
+    );
 
     try {
       const response = await axios.post(
         "http://localhost:3000/api/tourismgovernor/create-place",
         submissionData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          withCredentials: true,
         }
       );
       onSubmit(response.data); // Callback with the API response
@@ -182,15 +184,22 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
           height: "fit-content",
         }}
       >
-        <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "10px" }}>
+        <h2
+          style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "10px" }}
+        >
           {fieldsValues?.description ? "Edit Place" : "Create Place"}
         </h2>
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={handleSubmit}
+          style={{ height: "80vh", overflowY: "auto" }}
+        >
           {/* Form fields */}
           {/* Place Images */}
           <div style={{ marginBottom: "10px" }}>
             <label>Place Images</label>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1vh" }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "1vh" }}
+            >
               {imagePreviews.map((src, index) => (
                 <img
                   key={index}
@@ -199,11 +208,44 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
                   style={{ maxWidth: "100px", marginBottom: "5px" }}
                 />
               ))}
-              <input type="file" accept="image/*" multiple onChange={handleImageChange} />
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
+              />
             </div>
           </div>
           {/* Additional fields for description, opening hours, etc. */}
           {/* Description */}
+          <div style={{ marginBottom: "10px" }}>
+            <label>Type</label>
+            <textarea
+              name="type"
+              value={formData.type ?? ""}
+              onChange={handleChange}
+              style={{
+                width: "100%",
+                padding: "4px 8px",
+                border: "1px solid #D2D6DC",
+                borderRadius: "4px",
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: "10px" }}>
+            <label>Name</label>
+            <textarea
+              name="name"
+              value={formData.name ?? ""}
+              onChange={handleChange}
+              style={{
+                width: "100%",
+                padding: "4px 8px",
+                border: "1px solid #D2D6DC",
+                borderRadius: "4px",
+              }}
+            />
+          </div>
           <div style={{ marginBottom: "10px" }}>
             <label>Description</label>
             <textarea
