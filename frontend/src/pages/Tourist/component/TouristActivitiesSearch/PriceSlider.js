@@ -4,7 +4,7 @@ import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 
 const PriceSlider = ({ onApply }) => {
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, 10000]);
 
   const handleSliderChange = (value) => {
     setPriceRange(value);
@@ -22,7 +22,7 @@ const PriceSlider = ({ onApply }) => {
       <Slider
         range
         min={0}
-        max={1000}
+        max={10000}
         defaultValue={[100, 500]}
         onChange={handleSliderChange}
         value={priceRange}

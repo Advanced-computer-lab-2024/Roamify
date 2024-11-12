@@ -9,30 +9,32 @@ const TouristProductsArea = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchName, setSearchName] = useState(""); // State to hold the search input
-  const [minPrice, setMinPrice] = useState(10); // Default minimum price
-  const [maxPrice, setMaxPrice] = useState(1000); // Default maximum price
-  const [order, setOrder] = useState("asc"); // Default sorting order
+  const [searchName, setSearchName] = useState("");
+  const [minPrice, setMinPrice] = useState(10);
+  const [maxPrice, setMaxPrice] = useState(100000);
+  const [order, setOrder] = useState("asc");
+  const [selectedRating, setSelectedRating] = useState(null); // State to track selected rating
 
   const fetchProducts = async () => {
+    setLoading(true);
+    setError(""); // Reset error when fetching
     try {
       const response = await axios.get("http://localhost:3000/api/product", {
         params: {
           minPrice: minPrice || 0,
           maxPrice: maxPrice || Infinity,
-          name: searchName, // Use search name for filtering
+          name: searchName,
           order: order,
+          rating: selectedRating || undefined, // Include rating if one is selected
         },
         withCredentials: true,
       });
       setProducts(response.data.products || []);
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        setProducts([]); // Set activities to empty if 404
-        setError("No products found"); // Display error message
-      } else {
-        setError("Failed to fetch products");
+      if (response.data.products.length === 0) {
+        setError("No products found for the selected rating.");
       }
+    } catch (error) {
+      setError("Failed to fetch products");
     } finally {
       setLoading(false);
     }
@@ -40,18 +42,26 @@ const TouristProductsArea = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [minPrice, maxPrice, searchName, order]); // Fetch products when dependencies change
+  }, [minPrice, maxPrice, searchName, order, selectedRating]); // Include selectedRating as dependency
 
   const handleSearch = (event) => {
     event.preventDefault();
-    setSearchName(event.target.elements.productName.value); // Update search name based on input
+    setSearchName(event.target.elements.productName.value);
   };
+
   const handlePriceRangeApply = (range) => {
     setMinPrice(range[0]);
     setMaxPrice(range[1]);
   };
+
   const handleOrderChange = (event) => {
-    setOrder(event.target.value); // Update sorting order
+    setOrder(event.target.value);
+  };
+
+  const handleRatingChange = (rating) => {
+    setSelectedRating(rating); // Update selected rating
+    setError(""); // Clear any existing error when changing rating
+    setLoading(true); // Set loading state to show fetching in progress
   };
 
   return (
@@ -101,93 +111,27 @@ const TouristProductsArea = () => {
                   <h5>Filter by Review</h5>
                 </div>
                 <div className="filter_review">
-                  <form className="review_star">
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="flexCheckDefault"
-                      />
-                      <label
-                        className="form-check-label"
-                        htmlFor="flexCheckDefault"
-                      >
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_theme"></i>
-                      </label>
-                    </div>
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="flexCheckDefault1"
-                      />
-                      <label
-                        className="form-check-label"
-                        htmlFor="flexCheckDefault1"
-                      >
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_asse"></i>
-                      </label>
-                    </div>
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="flexCheckDefault2"
-                      />
-                      <label
-                        className="form-check-label"
-                        htmlFor="flexCheckDefault2"
-                      >
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_asse"></i>
-                        <i className="fas fa-star color_asse"></i>
-                      </label>
-                    </div>
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="flexCheckDefault3"
-                      />
-                      <label
-                        className="form-check-label"
-                        htmlFor="flexCheckDefault3"
-                      >
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_asse"></i>
-                        <i className="fas fa-star color_asse"></i>
-                        <i className="fas fa-star color_asse"></i>
-                      </label>
-                    </div>
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="flexCheckDefault5"
-                      />
-                      <label
-                        className="form-check-label"
-                        htmlFor="flexCheckDefault5"
-                      >
-                        <i className="fas fa-star color_theme"></i>
-                        <i className="fas fa-star color_asse"></i>
-                        <i className="fas fa-star color_asse"></i>
-                        <i className="fas fa-star color_asse"></i>
-                        <i className="fas fa-star color_asse"></i>
-                      </label>
-                    </div>
-                  </form>
+                  <div className="review_star">
+                    {[5, 4, 3, 2, 1].map((rating) => (
+                      <div className="form-check" key={rating}>
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="rating"
+                          checked={selectedRating === rating}
+                          onChange={() => handleRatingChange(rating)}
+                        />
+                        <label className="form-check-label">
+                          {[...Array(rating)].map((_, i) => (
+                            <i key={i} className="fas fa-star color_theme"></i>
+                          ))}
+                          {[...Array(5 - rating)].map((_, i) => (
+                            <i key={i} className="fas fa-star color_asse"></i>
+                          ))}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -209,11 +153,11 @@ const TouristProductsArea = () => {
                           : productDefault
                       }
                       name={product.name}
-                      sellerId={product.sellerId} // Assuming sellerId is the seller's name; change as needed
+                      sellerId={product.sellerId}
                       price={product.price}
                       rating={product.rating}
                       reviewCount={product.reviews.length}
-                      description={product.description} // Added description
+                      description={product.description}
                       grid={true}
                     />
                   </div>

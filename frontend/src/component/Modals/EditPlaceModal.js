@@ -5,6 +5,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
   const modalRef = useRef(null);
   const [tags, setTags] = useState([]);
   const [formData, setFormData] = useState({});
+  const [imagePreviews, setImagePreviews] = useState([]);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -22,22 +23,24 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
 
   useEffect(() => {
     setFormData({
-      placesImages: fieldsValues?.placesImages || [],
+      type: "museum", // Default type for museum
+      name: fieldsValues?.name || "",
       description: fieldsValues?.description || "",
-      closingHours: fieldsValues?.closingHours || "",
+      location: fieldsValues?.location || "", // Location in JSON format if available
+      tagPlace: fieldsValues?.tagPlace || [],
       openingHours: fieldsValues?.openingHours || "",
-      tagPlace: fieldsValues?.tagPlace || [], // Initialize as an array
+      closingHours: fieldsValues?.closingHours || "",
       ticketPrice: {
         Native: fieldsValues?.ticketPrice?.Native || "",
         Foreigner: fieldsValues?.ticketPrice?.Foreigner || "",
         Student: fieldsValues?.ticketPrice?.Student || "",
       },
+      placesImages: fieldsValues?.placesImages || [],
     });
+    setImagePreviews(
+      fieldsValues?.placesImages?.map((img) => URL.createObjectURL(img)) || []
+    );
   }, [fieldsValues]);
-
-  const [imagePreviews, setImagePreviews] = useState(
-    fieldsValues?.placeImages?.map((img) => URL.createObjectURL(img)) || []
-  );
 
   const handleImageChange = (event) => {
     const files = Array.from(event.target.files);
@@ -87,11 +90,44 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
   const handleTagPlaceChange = (tagId) => {
     setFormData((prev) => {
       const tagPlace = prev.tagPlace.includes(tagId)
-        ? prev.tagPlace.filter((id) => id !== tagId) // Remove tag if already selected
-        : [...prev.tagPlace, tagId]; // Add tag if not selected
-
+        ? prev.tagPlace.filter((id) => id !== tagId)
+        : [...prev.tagPlace, tagId];
       return { ...prev, tagPlace };
     });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const submissionData = new FormData();
+
+    // Append non-file fields to FormData
+    submissionData.append("type", formData.type);
+    submissionData.append("name", formData.name);
+    submissionData.append("description", formData.description);
+    submissionData.append("location", JSON.stringify(formData.location));
+    submissionData.append("openingHours", formData.openingHours);
+    submissionData.append("closingHours", formData.closingHours);
+    submissionData.append("ticketPrice", JSON.stringify(formData.ticketPrice));
+    formData.tagPlace.forEach((tagId) => submissionData.append("tagPlace", tagId));
+
+    // Append image files
+    formData.placesImages.forEach((file) => submissionData.append("placesImages", file));
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/tourismgovernor/create-place",
+        submissionData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      onSubmit(response.data); // Callback with the API response
+      onClose(); // Close modal
+    } catch (error) {
+      console.error("Error creating place:", error);
+    }
   };
 
   useEffect(() => {
@@ -116,12 +152,6 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData);
-    onSubmit(formData);
-  };
 
   if (!isOpen) return null;
 
@@ -152,17 +182,15 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
           height: "fit-content",
         }}
       >
-        <h2
-          style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "10px" }}
-        >
+        <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "10px" }}>
           {fieldsValues?.description ? "Edit Place" : "Create Place"}
         </h2>
         <form onSubmit={handleSubmit}>
+          {/* Form fields */}
+          {/* Place Images */}
           <div style={{ marginBottom: "10px" }}>
             <label>Place Images</label>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "1vh" }}
-            >
+            <div style={{ display: "flex", flexDirection: "column", gap: "1vh" }}>
               {imagePreviews.map((src, index) => (
                 <img
                   key={index}
@@ -171,15 +199,11 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
                   style={{ maxWidth: "100px", marginBottom: "5px" }}
                 />
               ))}
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageChange}
-              />
+              <input type="file" accept="image/*" multiple onChange={handleImageChange} />
             </div>
           </div>
-
+          {/* Additional fields for description, opening hours, etc. */}
+          {/* Description */}
           <div style={{ marginBottom: "10px" }}>
             <label>Description</label>
             <textarea
@@ -194,7 +218,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               }}
             />
           </div>
-
+          {/* Closing Hours */}
           <div style={{ marginBottom: "10px" }}>
             <label>Closing Hours</label>
             <input
@@ -210,7 +234,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               }}
             />
           </div>
-
+          {/* Opening Hours */}
           <div style={{ marginBottom: "10px" }}>
             <label>Opening Hours</label>
             <input
@@ -226,7 +250,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               }}
             />
           </div>
-
+          {/* Tag Places */}
           <div style={{ marginBottom: "10px" }}>
             <label>Tag Places</label>
             <div>
@@ -242,7 +266,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               ))}
             </div>
           </div>
-
+          {/* Ticket Prices */}
           <div style={{ marginBottom: "10px" }}>
             <label>Ticket Price</label>
             <div>
@@ -287,7 +311,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               />
             </div>
           </div>
-
+          {/* Action buttons */}
           <div
             style={{
               display: "flex",

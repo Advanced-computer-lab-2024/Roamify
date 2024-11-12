@@ -16,38 +16,38 @@ const addProduct = async (req, res) => {
     }
 
 
-    if(!req.files)
+    if (!req.files)
       throw Error('please insert pictures for your product');
     const imageUrls = [];
-for (const file of req.files) {
-  await new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      { resource_type: 'image' },
-      (error, result) => {
-        if (error) {
-          reject(new Error('Upload Error'));
-        } else {
-          imageUrls.push({ url: result.secure_url, publicId: result.public_id });     
-           resolve();
-        }
-      }
-    );
+    for (const file of req.files) {
+      await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { resource_type: 'image' },
+          (error, result) => {
+            if (error) {
+              reject(new Error('Upload Error'));
+            } else {
+              imageUrls.push({ url: result.secure_url, publicId: result.public_id });
+              resolve();
+            }
+          }
+        );
 
-    // Use .end(file.buffer) to upload the buffer directly to Cloudinary
-    uploadStream.end(file.buffer);
-  });
-}
+        // Use .end(file.buffer) to upload the buffer directly to Cloudinary
+        uploadStream.end(file.buffer);
+      });
+    }
 
-const parsedPrice = parseFloat(price);
-const parsedQuantity = parseInt(quantity, 10);
+    const parsedPrice = parseFloat(price);
+    const parsedQuantity = parseInt(quantity, 10);
     // Create new product with sellerId from req.user
     const newProduct = new productModel({
       sellerId,
       name,
       description,
-      price:parsedPrice,
-      quantity:parsedQuantity,
-      picture:imageUrls
+      price: parsedPrice,
+      quantity: parsedQuantity,
+      picture: imageUrls
     });
 
     await newProduct.save();
@@ -88,7 +88,7 @@ const updateProduct = async (req, res) => {
       if (price != null) updateFields.price = parseFloat(price);
       if (quantity != null) updateFields.quantity = parseInt(quantity, 10);
 
-      if(req.files || req.files.length>0){
+      if (req.files || req.files.length > 0) {
 
         let imageUrls = [];
         const deletionPromises = product.picture.map(picture => {
@@ -97,7 +97,7 @@ const updateProduct = async (req, res) => {
         }
         );
         await Promise.all(deletionPromises);  // Wait for all Cloudinary deletions to complete
-  
+
         for (const file of req.files) {
           await new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
@@ -106,23 +106,23 @@ const updateProduct = async (req, res) => {
                 if (error) {
                   reject(new Error('Upload Error'));
                 } else {
-                  
-                  imageUrls.push({ url: result.secure_url, publicId: result.public_id });     
+
+                  imageUrls.push({ url: result.secure_url, publicId: result.public_id });
                   updateFields.picture = imageUrls;
-                   resolve();
+                  resolve();
                 }
               }
             );
-        
+
             // Use .end(file.buffer) to upload the buffer directly to Cloudinary
             uploadStream.end(file.buffer);
           });
         }
       }
       const updatedProduct = await productModel.findByIdAndUpdate(
-          productId,
-          updateFields,
-          { new: true, runValidators: true }
+        productId,
+        updateFields,
+        { new: true, runValidators: true }
       );
 
       return res.status(200).json({
@@ -147,6 +147,7 @@ const getFilteredProducts = async (req, res) => {
       maxPrice = Infinity,
       name,
       order = 'desc',
+      rating,
       page = 1,
       limit = 10
     } = req.query;
@@ -173,13 +174,15 @@ const getFilteredProducts = async (req, res) => {
     // Calculate skip value for pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
+    if (rating) filter.rating = rating
+
     // Fetch products with filters, sorting, and pagination
     const products = await productModel
-        .find(filter)
-        .sort({ rating: sortOrder })
-        .skip(skip)
-        .limit(parseInt(limit))
-        .populate('sellerId', 'username _id'); // Populate seller details
+      .find(filter)
+      .sort({ rating: sortOrder })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('sellerId', 'username _id'); // Populate seller details
 
     // Check if products exist
     if (!products || products.length === 0) {
@@ -208,9 +211,9 @@ const getMyProducts = async (req, res) => {
 
     // Fetch products created by the seller
     const products = await productModel
-        .find({ sellerId })
-        .skip(skip)
-        .limit(parseInt(limit));
+      .find({ sellerId })
+      .skip(skip)
+      .limit(parseInt(limit));
 
     if (!products || products.length === 0) {
       return res.status(404).json({ message: "No products found" });
@@ -230,7 +233,7 @@ const getMyProducts = async (req, res) => {
 };
 const archiveProduct = async (req, res) => {
   try {
-    const productId  = req.params.id;
+    const productId = req.params.id;
 
     // Find the product and check if the user is the owner
     const product = await productModel.findById(productId);
@@ -255,7 +258,7 @@ const archiveProduct = async (req, res) => {
 };
 const unarchiveProduct = async (req, res) => {
   try {
-    const productId  = req.params.id;
+    const productId = req.params.id;
 
     // Find the product and check if the user is the owner
     const product = await productModel.findById(productId);

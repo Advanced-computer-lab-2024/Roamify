@@ -1,7 +1,7 @@
 const activityModel = require("../models/activityModel");
-const activityTicketModel= require("../models/activityTicketModel");
-const userModel= require("../models/userModel");
-const activityReviewModel= require("../models/activityReviewModel");
+const activityTicketModel = require("../models/activityTicketModel");
+const userModel = require("../models/userModel");
+const activityReviewModel = require("../models/activityReviewModel");
 
 const getFilteredActivities = async (req, res) => {
     try {
