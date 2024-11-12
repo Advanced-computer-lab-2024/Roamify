@@ -105,10 +105,8 @@ const getProfile = async (req, res) => {
       dateOfBirth: details.dateOfBirth,
       occupation: details.occupation,
       adult: details.adult,
-      cardNumber: details.wallet?.cardNumber || "",
-      cardValidUntil: details.wallet?.cardValidUntil || "",
-      bookedItineraries: details.bookedItineraries,
-      bookedActivities: details.bookedActivities,
+      wallet: details.wallet
+
     };
 
     return res.status(200).json(responseData);
@@ -1136,6 +1134,21 @@ const redeemPoints = async (req, res) => {
   }
 };
 
+const getWallet = async (req, res) => {
+  try {
+
+    const tourist = await touristModel.findOne({ user: req.user._id }).populate('wallet')
+
+    if (!tourist) return res.status(400).json({ message: 'user does not exist' })
+
+    return res.status(200).json(tourist.wallet)
+
+  }
+  catch (error) {
+    return res.status(400).json({ message: 'error could not retrieve wallet' })
+  }
+}
+
 module.exports = {
   createProfile,
   getProfile,
@@ -1159,4 +1172,5 @@ module.exports = {
   bookPlace,
   cancelPlace,
   getAllBookedPlaces,
+  getWallet
 };
