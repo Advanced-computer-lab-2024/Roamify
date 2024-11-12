@@ -64,12 +64,7 @@ const PlacesArea = ({ myPlaces }) => {
                           />
                         </div>
                         <Link to="/destinations-details">
-                          <img
-                            src={
-                              "https://img.freepik.com/free-vector/flat-illustration-international-friendship-day-celebration_23-2150463971.jpg?t=st=1730318239~exp=1730321839~hmac=3e20245a98fe127802e60ac14b908ef3e8053d615192beb007ff8fd46d0a81fe&w=996"
-                            }
-                            alt="img"
-                          />
+                          <img src={place.pictures[0].url} alt="img" />
                         </Link>
                         <div className="top_destinations_box_content">
                           <h4>

@@ -32,14 +32,18 @@ const TouristPlacesArea = () => {
 
       if (response.data.message === "No places found matching your criteria") {
         toast.info("No data found");
-        setPlaces([]);
+        setPlaces([]); // Set places to empty array
       } else {
-        setPlaces(response.data.places || []);
+        setPlaces(response.data.places || []); // Populate places with data from API
       }
     } catch (error) {
-      console.error("Error fetching places:", error.response || error.message || error);
+      console.error(
+        "Error fetching places:",
+        error.response || error.message || error
+      );
       if (error.response && error.response.status === 404) {
         toast.error("No data found");
+        setPlaces([]);
       } else {
         toast.error("An error occurred while fetching places.");
       }
@@ -59,7 +63,10 @@ const TouristPlacesArea = () => {
         console.log("Tags Response:", response.data); // Added for debugging
         setTags(response.data.data || []);
       } catch (error) {
-        console.error("Error fetching tags:", error.response || error.message || error);
+        console.error(
+          "Error fetching tags:",
+          error.response || error.message || error
+        );
       }
     };
     fetchTags();
@@ -100,7 +107,6 @@ const TouristPlacesArea = () => {
 
     fetchPlaces(searchParams);
   };
-
 
   const handleTagChange = (event) => {
     const tagId = event.target.value;

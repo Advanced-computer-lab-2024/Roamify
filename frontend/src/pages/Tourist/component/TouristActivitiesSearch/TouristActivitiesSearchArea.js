@@ -11,7 +11,10 @@ const TouristActivitiesWrapper = () => {
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [date, setDate] = useState(null);
   const [category, setCategory] = useState("");
-  const [sortCriteria, setSortCriteria] = useState({ field: "price", order: "asc" });
+  const [sortCriteria, setSortCriteria] = useState({
+    field: "price",
+    order: "asc",
+  });
   const [error, setError] = useState(null);
   const [minRating, setMinRating] = useState(0);
   const [categories, setCategories] = useState([]);
@@ -22,7 +25,17 @@ const TouristActivitiesWrapper = () => {
   const [searchInputTag, setSearchInputTag] = useState("");
   const [searchInputCategory, setSearchInputCategory] = useState("");
   const [tags, setTags] = useState([]);
-  const fetchActivities = async (minBudget, maxBudget, date, minRating, category, tag) => {
+
+  const currencySymbol = localStorage.getItem("currencySymbol") || "$";
+  const exchangeRate = parseFloat(localStorage.getItem("value")) || 1;
+  const fetchActivities = async (
+    minBudget,
+    maxBudget,
+    date,
+    minRating,
+    category,
+    tag
+  ) => {
     setLoading(true);
     setError(null);
     try {
@@ -61,9 +74,11 @@ const TouristActivitiesWrapper = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/category/get-all");
+        const response = await axios.get(
+          "http://localhost:3000/api/category/get-all"
+        );
         setCategories(response.data.categories);
-        console.log(categories)
+        console.log(categories);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -71,14 +86,16 @@ const TouristActivitiesWrapper = () => {
     fetchCategories();
     const fetchTags = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/preference-tag/get-all");
+        const response = await axios.get(
+          "http://localhost:3000/api/preference-tag/get-all"
+        );
         setTags(response.data.tags);
-        console.log(tags)
+        console.log(tags);
       } catch (error) {
         console.error("Error fetching tags:", error);
       }
-    }; fetchTags();
-
+    };
+    fetchTags();
   }, []);
   const handleSearchTypeChange = (event) => {
     setSearchType(event.target.value);
@@ -103,7 +120,9 @@ const TouristActivitiesWrapper = () => {
       searchParams.name = searchInput;
     } else if (searchType === "tag" && searchInputTag) {
       // Find the tag ID by matching the tag name
-      const matchingTag = tags.find((tag) => tag.name.toLowerCase() === searchInputTag.toLowerCase());
+      const matchingTag = tags.find(
+        (tag) => tag.name.toLowerCase() === searchInputTag.toLowerCase()
+      );
 
       if (matchingTag) {
         searchParams.tags = [matchingTag._id]; // Use the ID for the search
@@ -146,8 +165,6 @@ const TouristActivitiesWrapper = () => {
     }
   };
 
-
-
   const handleBooking = async (activityId, activityDate) => {
     try {
       const formattedDate = new Date(activityDate).toISOString().split("T")[0];
@@ -174,18 +191,31 @@ const TouristActivitiesWrapper = () => {
   // Function to copy activity link
   const handleCopyLink = (activityId) => {
     const activityUrl = `${window.location.origin}/activity-details/${activityId}`;
-    navigator.clipboard.writeText(activityUrl).then(() => {
-      alert("Link copied to clipboard!");
-    }).catch(err => {
-      console.error("Failed to copy: ", err);
-    });
+    navigator.clipboard
+      .writeText(activityUrl)
+      .then(() => {
+        alert("Link copied to clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+      });
   };
 
   // Function to send activity details via email
   const handleEmailShare = (activity) => {
     const subject = `Check out this activity: ${activity.name}`;
-    const body = `I thought you'd be interested in this activity: ${activity.name}\n\nLocation: ${activity.location.name}\nDate: ${new Date(activity.date).toLocaleDateString()}\nPrice: ${activity.price} EGP\n\n${activity.category.description}\n\nCheck it out: ${window.location.origin}/activity-details/${activity._id}`;
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const body = `I thought you'd be interested in this activity: ${
+      activity.name
+    }\n\nLocation: ${activity.location.name}\nDate: ${new Date(
+      activity.date
+    ).toLocaleDateString()}\nPrice: ${activity.price} EGP\n\n${
+      activity.category.description
+    }\n\nCheck it out: ${window.location.origin}/activity-details/${
+      activity._id
+    }`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoLink;
   };
   const handleDateApply = (selectedDate) => {
@@ -232,14 +262,27 @@ const TouristActivitiesWrapper = () => {
                   className="form-control"
                   type="text"
                   placeholder={`Search by ${searchType} or category...`}
-                  value={searchType === "tag" ? searchInputTag : searchType === "category" ? searchInputCategory : searchInput}
-                  onChange={searchType === "tag" ? handleSearchInputTagChange
-                    : searchType === "category" ? handleSearchInputCategoryChange
-                      : handleSearchInputChange}
+                  value={
+                    searchType === "tag"
+                      ? searchInputTag
+                      : searchType === "category"
+                      ? searchInputCategory
+                      : searchInput
+                  }
+                  onChange={
+                    searchType === "tag"
+                      ? handleSearchInputTagChange
+                      : searchType === "category"
+                      ? handleSearchInputCategoryChange
+                      : handleSearchInputChange
+                  }
                   style={{ marginBottom: "10px" }}
                 />
 
-                <button onClick={handleSearchClick} className="btn btn_theme btn_sm">
+                <button
+                  onClick={handleSearchClick}
+                  className="btn btn_theme btn_sm"
+                >
                   Apply
                 </button>
               </div>
@@ -247,9 +290,10 @@ const TouristActivitiesWrapper = () => {
             <SideBar
               priceRange={priceRange}
               setPriceRange={setPriceRange}
-
               onApplyFilters={fetchActivities}
-              onCategoryApply={(selectedCategory) => setCategory(selectedCategory)}
+              onCategoryApply={(selectedCategory) =>
+                setCategory(selectedCategory)
+              }
               onSortChange={(field, order) => setSortCriteria({ field, order })}
               onRatingApply={handleRatingApply}
             />
@@ -262,7 +306,10 @@ const TouristActivitiesWrapper = () => {
             ) : (
               <div className="flight_search_result_wrapper">
                 {activities.map((activity) => (
-                  <div className="flight_search_item_wrappper" key={activity._id}>
+                  <div
+                    className="flight_search_item_wrappper"
+                    key={activity._id}
+                  >
                     <div className="flight_search_items">
                       <div className="multi_city_flight_lists">
                         <div className="flight_multis_area_wrapper">
@@ -279,7 +326,9 @@ const TouristActivitiesWrapper = () => {
                             </div>
                             <div className="flight_search_destination">
                               <p>Date</p>
-                              <h3>{new Date(activity.date).toLocaleDateString()}</h3>
+                              <h3>
+                                {new Date(activity.date).toLocaleDateString()}
+                              </h3>
                               <h6>Time: {activity.time}</h6>
                             </div>
                           </div>
@@ -288,17 +337,32 @@ const TouristActivitiesWrapper = () => {
                       <div className="flight_search_right">
                         <h5>
                           {activity.discounts ? (
-                            <del>{(activity.price * (1 + activity.discounts / 100)).toFixed(2)} EGP</del>
+                            <del>
+                              {(
+                                (
+                                  activity.price *
+                                  (1 + activity.discounts / 100)
+                                ).toFixed(2) * exchangeRate
+                              ).toFixed(2)}{" "}
+                              {currencySymbol}
+                            </del>
                           ) : (
                             ""
                           )}
                         </h5>
                         <h2>
-                          {activity.price} EGP
-                          <sup>{activity.discounts ? `${activity.discounts}% off` : ""}</sup>
+                          {(activity.price * exchangeRate).toFixed(2)}{" "}
+                          {currencySymbol}
+                          <sup>
+                            {activity.discounts
+                              ? `${activity.discounts}% off`
+                              : ""}
+                          </sup>
                         </h2>
                         <button
-                          onClick={() => handleBooking(activity._id, activity.date)}
+                          onClick={() =>
+                            handleBooking(activity._id, activity.date)
+                          }
                           className="btn btn_theme btn_sm"
                         >
                           Book now
@@ -331,13 +395,19 @@ const TouristActivitiesWrapper = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="flight_policy_refund collapse" id={`collapseExample${activity._id}`}>
+                    <div
+                      className="flight_policy_refund collapse"
+                      id={`collapseExample${activity._id}`}
+                    >
                       <div className="flight_show_down_wrapper">
                         <div className="flight-shoe_dow_item">
                           <h4>Activity Details</h4>
-                          <p className="fz12">{activity.category.description}</p>
                           <p className="fz12">
-                            Advertiser: {activity.advertiser.username} ({activity.advertiser.email})
+                            {activity.category.description}
+                          </p>
+                          <p className="fz12">
+                            Advertiser: {activity.advertiser.username} (
+                            {activity.advertiser.email})
                           </p>
                         </div>
                         <div className="flight_refund_policy">
@@ -377,8 +447,14 @@ const TouristActivitiesWrapper = () => {
             textAlign: "center",
           }}
         >
-          <h4 style={{ color: "green", marginBottom: "10px" }}>{popupMessage}</h4>
-          <button onClick={() => setShowPopup(false)} className="btn btn_theme" style={{ marginTop: "10px" }}>
+          <h4 style={{ color: "green", marginBottom: "10px" }}>
+            {popupMessage}
+          </h4>
+          <button
+            onClick={() => setShowPopup(false)}
+            className="btn btn_theme"
+            style={{ marginTop: "10px" }}
+          >
             Close
           </button>
         </div>

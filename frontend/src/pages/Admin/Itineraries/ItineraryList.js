@@ -8,22 +8,20 @@ const ItineraryList = () => {
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchItineraries = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/itinerary", {
+        withCredentials: true,
+      });
+      setItineraries(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching itineraries:", error);
+      setLoading(true);
+    }
+  };
+
   useEffect(() => {
-    const fetchItineraries = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:3000/api/itinerary",
-          {
-            withCredentials: true,
-          }
-        );
-        setItineraries(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching itineraries:", error);
-        setLoading(true);
-      }
-    };
     fetchItineraries();
   }, []);
 
@@ -48,7 +46,7 @@ const ItineraryList = () => {
       const response = await axios.get("http://localhost:3000/api/itinerary/", {
         withCredentials: true,
       });
-      setItineraries(response.data.updatedItineraries);
+      fetchItineraries();
     } catch (error) {
       console.error("Error toggling flag:", error);
       alert("An error occurred. Please try again.");

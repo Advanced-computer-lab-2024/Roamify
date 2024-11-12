@@ -11,9 +11,9 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     const fetchTags = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/api/preference-tag/get-all"
+          "http://localhost:3000/api/historical-tag/get-all"
         );
-        setTags(res.data.tags);
+        setTags(res.data.data);
       } catch (error) {
         console.error("Error fetching tags:", error);
       }
@@ -23,11 +23,15 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
 
   useEffect(() => {
     setFormData({
-      type: fieldsValues?.trpe || "", // Default type for museum
+      type: fieldsValues?.type || "",
       name: fieldsValues?.name || "",
       description: fieldsValues?.description || "",
-      location: fieldsValues?.location || "", // Location in JSON format if available
-      tagPlace: fieldsValues?.tagPlace || [],
+      location: fieldsValues?.location || {
+        type: "Point",
+        coordinates: [0, 0],
+        name: "",
+      },
+      tagPlace: fieldsValues?.tagPlace || [], // Ensuring tagPlace is an array of strings
       openingHours: fieldsValues?.openingHours || "",
       closingHours: fieldsValues?.closingHours || "",
       ticketPrice: {
@@ -55,6 +59,14 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleLocationChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      location: { ...prev.location, [name]: value },
+    }));
   };
 
   const handleNativeChange = (e) => {
@@ -104,10 +116,12 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     submissionData.append("type", formData.type);
     submissionData.append("name", formData.name);
     submissionData.append("description", formData.description);
-    submissionData.append("location", JSON.stringify(formData.location));
+    submissionData.append("location", JSON.stringify(formData.location)); // Location as JSON string
     submissionData.append("openingHours", formData.openingHours);
     submissionData.append("closingHours", formData.closingHours);
-    submissionData.append("ticketPrice", JSON.stringify(formData.ticketPrice));
+    submissionData.append("ticketPrice", JSON.stringify(formData.ticketPrice)); // TicketPrice JSON
+
+    // Ensure tagPlace is an array of strings
     formData.tagPlace.forEach((tagId) =>
       submissionData.append("tagPlace", tagId)
     );
@@ -117,12 +131,20 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
       submissionData.append("placesImages", file)
     );
 
+    // Log the FormData content
+    for (let pair of submissionData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
+
     try {
       const response = await axios.post(
         "http://localhost:3000/api/tourismgovernor/create-place",
         submissionData,
         {
-          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true, // Ensures cookies are sent with the request
         }
       );
       onSubmit(response.data); // Callback with the API response
@@ -193,7 +215,6 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
           onSubmit={handleSubmit}
           style={{ height: "80vh", overflowY: "auto" }}
         >
-          {/* Form fields */}
           {/* Place Images */}
           <div style={{ marginBottom: "10px" }}>
             <label>Place Images</label>
@@ -216,8 +237,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               />
             </div>
           </div>
-          {/* Additional fields for description, opening hours, etc. */}
-          {/* Description */}
+
           <div style={{ marginBottom: "10px" }}>
             <label>Type</label>
             <textarea
@@ -232,6 +252,46 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               }}
             />
           </div>
+
+          {/* Location Fields */}
+          <div style={{ marginBottom: "10px" }}>
+            <label>Location</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.location.name || ""}
+              placeholder="Location Name"
+              onChange={handleLocationChange}
+              style={{
+                width: "100%",
+                padding: "4px 8px",
+                border: "1px solid #D2D6DC",
+                borderRadius: "4px",
+              }}
+            />
+            <input
+              type="text"
+              name="coordinates"
+              value={formData.location.coordinates.join(", ") || ""}
+              placeholder="Coordinates (e.g., 10, 20)"
+              onChange={(e) =>
+                handleLocationChange({
+                  target: {
+                    name: "coordinates",
+                    value: e.target.value.split(",").map(Number),
+                  },
+                })
+              }
+              style={{
+                width: "100%",
+                padding: "4px 8px",
+                border: "1px solid #D2D6DC",
+                borderRadius: "4px",
+              }}
+            />
+          </div>
+
+          {/* Description */}
           <div style={{ marginBottom: "10px" }}>
             <label>Name</label>
             <textarea
@@ -260,13 +320,13 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               }}
             />
           </div>
-          {/* Closing Hours */}
+
           <div style={{ marginBottom: "10px" }}>
             <label>Closing Hours</label>
             <input
               type="text"
               name="closingHours"
-              value={formData.closingHours ?? ""}
+              value={formData.closingHours}
               onChange={handleChange}
               style={{
                 width: "100%",
@@ -276,13 +336,14 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               }}
             />
           </div>
+
           {/* Opening Hours */}
           <div style={{ marginBottom: "10px" }}>
             <label>Opening Hours</label>
             <input
               type="text"
               name="openingHours"
-              value={formData.openingHours ?? ""}
+              value={formData.openingHours}
               onChange={handleChange}
               style={{
                 width: "100%",
@@ -292,22 +353,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               }}
             />
           </div>
-          {/* Tag Places */}
-          <div style={{ marginBottom: "10px" }}>
-            <label>Tag Places</label>
-            <div>
-              {tags.map((tag) => (
-                <div key={tag._id} style={{ marginBottom: "5px" }}>
-                  <input
-                    type="checkbox"
-                    checked={formData.tagPlace.includes(tag._id)}
-                    onChange={() => handleTagPlaceChange(tag._id)}
-                  />
-                  <label style={{ marginLeft: "8px" }}>{tag.name}</label>
-                </div>
-              ))}
-            </div>
-          </div>
+
           {/* Ticket Prices */}
           <div style={{ marginBottom: "10px" }}>
             <label>Ticket Price</label>
@@ -353,7 +399,25 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
               />
             </div>
           </div>
-          {/* Action buttons */}
+
+          {/* Tag Places */}
+          <div style={{ marginBottom: "10px" }}>
+            <label>Tag Places</label>
+            <div>
+              {tags.map((tag) => (
+                <div key={tag._id} style={{ marginBottom: "5px" }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.tagPlace.includes(tag._id)}
+                    onChange={() => handleTagPlaceChange(tag._id)}
+                  />
+                  <label style={{ marginLeft: "8px" }}>{tag.name}</label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Submit Button */}
           <div
             style={{
               display: "flex",

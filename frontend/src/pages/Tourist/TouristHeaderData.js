@@ -35,16 +35,17 @@ export const HeaderData = [
     submenu: true,
     subMenuitem: [
       {
-          subItem:"View All",
-          linkL:"/tourist/tourist-itinerary",
-          subMenuActive:false,
+        subItem: "View All",
+        linkL: "/tourist/tourist-itinerary",
+        subMenuActive: false,
       },
 
       {
-          subItem:" My Booked Itineraries",
-          linkL:"/tourist/itinerary-booking",
-          subMenuActive:false,
-      },{
+        subItem: " My Booked Itineraries",
+        linkL: "/tourist/itinerary-booking",
+        subMenuActive: false,
+      },
+      {
         subItem: " My Completed Itineraries",
         linkL: "/tourist/completed-itinerary",
         subMenuActive: false,
@@ -62,13 +63,7 @@ export const HeaderData = [
     subMenuitem: [
       {
         subItem: "View All",
-        linkL: "/tourist/tourist-products",
-        subMenuActive: false,
-      },
-
-      {
-        subItem: "My Purchased Products",
-        linkL: "/tourist/tourist-view",
+        linkL: "",
         subMenuActive: false,
       },
     ],
@@ -97,7 +92,7 @@ export const HeaderData = [
   },
   {
     menu: "Points",
-    submenu:true,
+    submenu: true,
     subMenuitem: [
       {
         subItem: "View My Level",

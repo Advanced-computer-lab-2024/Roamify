@@ -50,7 +50,7 @@ const AccountPreferences = ({ fields }) => {
       localStorage.clear();
       navigate("/login");
     } catch (err) {
-      alert("Failed to delete account: " + err.message);
+      alert("Failed to delete account: " + err.response.data.message);
     }
   };
 
@@ -76,7 +76,8 @@ const AccountPreferences = ({ fields }) => {
                 key === "cardValidUntil" ||
                 key === "role" ||
                 key === "logo" ||
-                key === "profilePicture"
+                key === "profilePicture" ||
+                key === "wallet"
               )
                 return null;
 

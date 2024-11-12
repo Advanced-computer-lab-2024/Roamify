@@ -12,7 +12,7 @@ const TouristActivities = () => {
         pagination="Tourist Activities"
       />
       <TouristActivitiesForm />
-      <TouristActivitiesArea />
+      {/* <TouristActivitiesArea /> */}
     </>
   );
 };

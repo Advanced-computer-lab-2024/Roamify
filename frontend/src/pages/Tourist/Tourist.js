@@ -15,10 +15,10 @@ import TouristItinerary from "./TouristItinerary.js";
 import TouristComplain from "./TouristComplain.js";
 import TouristView from "./TouristView.js";
 import ActivityBooking from "./ActivityBooking.js";
-import ItineraryBooking from "./ItineraryBooking.js"
+import ItineraryBooking from "./ItineraryBooking.js";
 import Transportations from "./Transportations/Transportations.js";
-import Point from "./Point.js"
-import Redeem from "./Redeem.js"
+import Point from "./Point.js";
+import Redeem from "./Redeem.js";
 import CompletedItinerary from "./component/TouristItinerarySearch/CompletedItinerary.js";
 import ReviewTourGuide from "./component/TouristItinerarySearch/ReviewTourGuide.js";
 import CompletedActivity from "./component/TouristActivitiesSearch/CompletedActivity.js";
@@ -28,7 +28,7 @@ const Tourist = () => {
       <Header HeaderData={HeaderData} />
       <Routes>
         <Route path="/tourist-profile" element={<TouristProfile />} />
-        <Route path="/tourist-products" element={<TouristProducts />} />
+        <Route path="/" element={<TouristProducts />} />
         <Route path="/tourist-itinerary" element={<TouristItinerary />} />
         <Route path="/tour-details/:id" element={<TourDetails />} />
         <Route path="/tourist-places" element={<TouristPlaces />} />
@@ -40,9 +40,9 @@ const Tourist = () => {
         <Route path="/transportations" element={<Transportations />} />
         <Route path="/point" element={<Point />} />
         <Route path="/redeem" element={<Redeem />} />
-        <Route path="/completed-itinerary" element={<CompletedItinerary/>}/>
-        <Route path="/tour-guides" element={<ReviewTourGuide/>}/>
-        <Route path="/completed-activity" element={<CompletedActivity/>}/>
+        <Route path="/completed-itinerary" element={<CompletedItinerary />} />
+        <Route path="/tour-guides" element={<ReviewTourGuide />} />
+        <Route path="/completed-activity" element={<CompletedActivity />} />
       </Routes>
       <CopyRight />
     </>
