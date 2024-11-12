@@ -17,7 +17,7 @@ const ItineraryList = () => {
             withCredentials: true,
           }
         );
-        setItineraries(response.data.updatedItineraries);
+        setItineraries(response.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching itineraries:", error);
@@ -59,7 +59,7 @@ const ItineraryList = () => {
     <>
       <section id="explore_area" className="section_padding">
         <div className="container">
-          <SectionHeading heading={`${itineraries.length} tours found`} />
+          <SectionHeading heading={`${itineraries?.length} tours found`} />
           <div className="row">
             <div className="col-lg-9">
               <div className="row">
@@ -68,7 +68,7 @@ const ItineraryList = () => {
                     {loading ? (
                       <p>Loading itineraries...</p>
                     ) : (
-                      itineraries.map((itinerary, index) => (
+                      itineraries?.map((itinerary, index) => (
                         <div
                           className="flight_search_item_wrappper"
                           key={itinerary._id}
