@@ -5,17 +5,18 @@ const itineraryTicketsModel = require("../models/itineraryTicketModel");
 const transportationModel = require("../models/transportationModel");
 
 const updatePoints = async () => {
-    console.log('------------------UPDATE-POINTS---------------------');
-    let addPoints = 0;
-    let userId = null;
+    console.log('----------------------------UPDATE-POINTS----------------------');
+    let addPoints = 0
+    let userId = null
 
     try {
-        const receipts = await receiptModel.find({ status: 'successfull' });
+        const receipts = await receiptModel.find({ status: 'successful' });
+        console.log(receipts)
+        // Get the current date and time
         const now = new Date();
 
         // Find all transportations with a date earlier than the current date and time
-        const transportations = await transportationModel.find({ date: { $lt: now }, pointsRedeemed: false });
-        const today = new Date();
+        const transportations = await transportationModel.find({ date: { $lt: now }, pointsRedeemed: false }); const today = new Date();
         today.setHours(0, 0, 0, 0); // Set to midnight for date-only comparison
 
         for (const receipt of receipts) {
@@ -23,15 +24,19 @@ const updatePoints = async () => {
             const activityTicket = await activityTicketsModel
                 .findOne({ receipt: receipt._id, status: 'active', pointsRedeemed: false })
                 .populate('activity');
+
+
             if (activityTicket) {
                 const eventDate = new Date(activityTicket.activity.date);
                 eventDate.setHours(0, 0, 0, 0);
 
                 if (today > eventDate) {
-                    userId = activityTicket.tourist;
+                    console.log('updating activity Points')
+                    userId = activityTicket.tourist
                     const tourist = await touristModel.findOne({ user: activityTicket.tourist });
                     const level = tourist.level;
                     addPoints = level === 1 ? 0.5 * receipt.price : level === 2 ? receipt.price : receipt.price * 1.5;
+
 
                     tourist.points += addPoints;
                     await tourist.save();
@@ -40,11 +45,11 @@ const updatePoints = async () => {
 
                     const pointsReceipt = new receiptModel({
                         type: 'points redemption',
-                        status: 'successfull',
+                        status: 'successful',
                         tourist: activityTicket.tourist,
                         price: addPoints,
                         receiptType: 'refund'
-                    });
+                    })
 
                     await pointsReceipt.save();
                 }
@@ -52,29 +57,35 @@ const updatePoints = async () => {
 
             // Check itinerary tickets
             const itineraryTicket = await itineraryTicketsModel.findOne({ receipt: receipt._id, status: 'active', pointsRedeemed: false });
+
+            console.log(itineraryTicket + '----------------------')
             if (itineraryTicket) {
                 const eventDate = new Date(itineraryTicket.date);
                 eventDate.setHours(0, 0, 0, 0);
 
                 if (today > eventDate) {
-                    userId = itineraryTicket.tourist;
+                    console.log('updating itineraryPoints')
+                    userId = itineraryTicket.tourist
                     const tourist = await touristModel.findOne({ user: itineraryTicket.tourist });
                     const level = tourist.level;
                     addPoints = level === 1 ? 0.5 * receipt.price : level === 2 ? receipt.price : receipt.price * 1.5;
 
+
                     tourist.points += addPoints;
                     await tourist.save();
-                    itineraryTicket.pointsRedeemed = true;
+                    itineraryTicket.pointsRedeemed = true
+
                     await itineraryTicket.save();
                     const pointsReceipt = new receiptModel({
                         type: 'points redemption',
-                        status: 'successfull',
+                        status: 'successful',
                         tourist: itineraryTicket.tourist,
                         price: addPoints,
                         receiptType: 'refund'
-                    });
+                    })
 
                     await pointsReceipt.save();
+
                 }
             }
         }
@@ -83,27 +94,30 @@ const updatePoints = async () => {
             for (const transportation of transportations) {
                 for (const touristId of transportation.touristsBooked) {
                     const tourist = await touristModel.findOne({ user: touristId });
-                    userId = touristId;
+                    userId = touristId
                     const level = tourist.level;
                     addPoints = level === 1 ? 0.5 * transportation.price : level === 2 ? transportation.price : transportation.price * 1.5;
 
+
                     tourist.points += addPoints;
                     await tourist.save();
-                    transportation.pointsRedeemed = true;
+                    transportation.pointsRedeemed = true
+
                     await transportation.save();
                     const pointsReceipt = new receiptModel({
                         type: 'points redemption',
-                        status: 'successfull',
+                        status: 'successful',
                         tourist: touristId,
                         price: addPoints,
                         receiptType: 'refund'
-                    });
+                    })
 
                     await pointsReceipt.save();
                 }
             }
         }
-    } catch (error) {
+    }
+    catch (error) {
         console.error("Error updating points:", error);
         const pointsReceipt = new receiptModel({
             type: 'points redemption',
@@ -111,11 +125,10 @@ const updatePoints = async () => {
             tourist: userId,
             price: addPoints,
             receiptType: 'refund'
-        });
+        })
 
         await pointsReceipt.save();
-    }
-};
+}; }
 
 const setLevel = async () => {
     console.log('------------------RESETTING-POINTS------------------');
