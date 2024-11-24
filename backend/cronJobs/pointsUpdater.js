@@ -128,10 +128,11 @@ const updatePoints = async () => {
         })
 
         await pointsReceipt.save();
-}; }
+    };
+}
 
 const setLevel = async () => {
-    console.log('------------------RESETTING-POINTS------------------');
+    console.log('------------------SETTING-LEVELS------------------');
     try {
         const tourists = await touristModel.find();
         if (tourists) {
