@@ -1,4 +1,3 @@
-const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const userModel = require('../models/userModel')
 require('dotenv').config();
