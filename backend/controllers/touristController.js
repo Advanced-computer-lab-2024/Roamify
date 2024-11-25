@@ -387,7 +387,7 @@ const bookItinerary = async (req, res) => {
     ) {
       return res
         .status(400)
-        .json({ message: "Sorry, this activity is no longer available" });
+        .json({ message: "Sorry, this itinerary is no longer available" });
     }
 
     const ticket = await itineraryTicketModel.findOne({
@@ -396,7 +396,7 @@ const bookItinerary = async (req, res) => {
     });
 
     //checking if user already has a ticket for this activity that is active
-    if (ticket && ticket.status === "active") {
+    if (ticket && ticket.status === "active" && new Date(ticket.date).toISOString().split("T")[0] === new Date(bookingDate).toISOString().split("T")[0]) {
       return res
         .status(400)
         .json({ message: "Itinerary already booked for this date" });

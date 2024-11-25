@@ -11,6 +11,7 @@ const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
 const { default: mongoose } = require('mongoose');
 const receiptModel = require('../models/receiptModel');
+const { constants } = require('module');
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
 const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
 
@@ -531,6 +532,15 @@ const viewRevenue = async (req, res) => {
     const tickets = await activityTicketModel.find({ status: 'active' });
     if (tickets.length === 0) throw Error('You have no revenues yet');
 
+    let date = req.query.date;
+
+    if (date) {
+      date = new Date(date);
+
+      // Ensure the date is valid
+      if (isNaN(date.getTime()))
+        throw Error('Invalid date format');
+    }
     //get my tickets
     let myTickets = await Promise.all(
       tickets.map(async t => {
@@ -557,37 +567,48 @@ const viewRevenue = async (req, res) => {
         const activity = await activityModel.findById(ticket.activity)
         report.push({
           name: activity.name,
-          price: receipt.price
+          price: receipt.price,
+          date: activity.date
         })
-        totalRevenue += receipt.price;
       }
     }
 
     const map = new Map();
 
     for (row of report) {
-      console.log(row)
-      if (!map.has(row.name)) map.set(row.name, { count: 1, price: row.price })
+      if (!map.has(row.name)) map.set(row.name, { date: row.date, count: 1, price: row.price, })
 
       else {
         const entry = map.get(row.name)
 
-        map.set(row.name, { count: entry.count + 1, price: entry.price })
+        map.set(row.name, { date: row.date, count: entry.count + 1, price: entry.price })
       }
 
     }
 
+    console.log(date)
+
     const result = Array.from(map, ([name, data]) => ({
       name,
       count: data.count,
+      date: data.date,
       price: data.price,
     }));
 
+    // Apply filter only if `date` exists
+    const filteredResults = date
+      ? result.filter(e => new Date(e.date).toISOString() === new Date(date).toISOString())
+      : result;
+
+    filteredResults.forEach(e => totalRevenue += (e.price * e.count))
 
 
 
-    return res.status(200).json({ result, totalRevenue });
+
+
+    return res.status(200).json({ filteredResults, totalRevenue });
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ message: error.message });
   }
 };
