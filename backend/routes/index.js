@@ -17,6 +17,7 @@ const complaintRoutes = require("./complaintRoutes");
 const exchangeRateRoutes = require("./exchangeRateRoutes");
 const flightRoutes = require("./flightRoutes");
 const hotelRoutes = require("./hotelRoutes");
+const resetPasswordRoutes = require('./resetPasswordRoutes')
 
 module.exports = [
     { path: "/api/user", route: userRoutes },
@@ -37,5 +38,6 @@ module.exports = [
     { path: "/api/complaint", route: complaintRoutes },
     { path: "/api/exchange-rate", route: exchangeRateRoutes },
     { path: "/api/flights", route: flightRoutes, role: ['tourist'] },
-    { path: "/api/hotels", route: hotelRoutes, role: ['tourist']},
+    { path: "/api/hotels", route: hotelRoutes, role: ['tourist'] },
+    { path: "/api/reset-password", route: resetPasswordRoutes, role: ["admin", "seller", "tourist", "tourismGovernor", "advertiser", "tourGuide"] },
 ];

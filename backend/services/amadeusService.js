@@ -48,7 +48,7 @@ const searchHotels = async (cityCode) => {
             name: hotel.name,
         }));
 
-        console.log("Hotels:", hotels);
+
         return hotels;
     } catch (error) {
         console.error("Error in searchHotels:", error);
