@@ -547,15 +547,46 @@ const viewRevenue = async (req, res) => {
 
     let totalRevenue = 0;
 
+    let report = []
+
     //get receipt of each ticket and get its price
     for (const ticket of myTickets) {
       const receipt = await receiptModel.findById(ticket.receipt);
       if (receipt && receipt.status === 'successful') {
+
+        const activity = await activityModel.findById(ticket.activity)
+        report.push({
+          name: activity.name,
+          price: receipt.price
+        })
         totalRevenue += receipt.price;
       }
     }
 
-    return res.status(200).json({ totalRevenue });
+    const map = new Map();
+
+    for (row of report) {
+      console.log(row)
+      if (!map.has(row.name)) map.set(row.name, { count: 1, price: row.price })
+
+      else {
+        const entry = map.get(row.name)
+
+        map.set(row.name, { count: entry.count + 1, price: entry.price })
+      }
+
+    }
+
+    const result = Array.from(map, ([name, data]) => ({
+      name,
+      count: data.count,
+      price: data.price,
+    }));
+
+
+
+
+    return res.status(200).json({ result, totalRevenue });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
