@@ -527,10 +527,12 @@ const getMyTransportations = async (req, res) => {
 
 const viewRevenue = async (req, res) => {
   try {
+    //get all tickets
     const tickets = await activityTicketModel.find({ status: 'active' });
     if (tickets.length === 0) throw Error('You have no revenues yet');
 
-    const myActivities = await Promise.all(
+    //get my tickets
+    let myTickets = await Promise.all(
       tickets.map(async t => {
         const activity = await activityModel.findById(t.activity);
         if (activity.advertiser.toString() === req.user._id.toString()) {
@@ -540,12 +542,14 @@ const viewRevenue = async (req, res) => {
       })
     );
 
-    const validActivities = myActivities.filter(t => t !== null);
+    //remove null 
+    myTickets = myTickets.filter(t => t !== null);
 
     let totalRevenue = 0;
 
-    for (const activity of validActivities) {
-      const receipt = await receiptModel.findById(activity.receipt);
+    //get receipt of each ticket and get its price
+    for (const ticket of myTickets) {
+      const receipt = await receiptModel.findById(ticket.receipt);
       if (receipt && receipt.status === 'successful') {
         totalRevenue += receipt.price;
       }
