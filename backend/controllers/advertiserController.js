@@ -10,6 +10,7 @@ const activityTicketModel = require("../models/activityTicketModel");
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
 const { default: mongoose } = require('mongoose');
+const receiptModel = require('../models/receiptModel');
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
 const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
 
@@ -523,6 +524,40 @@ const getMyTransportations = async (req, res) => {
   }
 };
 
+
+const viewRevenue = async (req, res) => {
+  try {
+    const tickets = await activityTicketModel.find({ status: 'active' });
+    if (tickets.length === 0) throw Error('You have no revenues yet');
+
+    const myActivities = await Promise.all(
+      tickets.map(async t => {
+        const activity = await activityModel.findById(t.activity);
+        if (activity.advertiser.toString() === req.user._id.toString()) {
+          return t;
+        }
+        return null;
+      })
+    );
+
+    const validActivities = myActivities.filter(t => t !== null);
+
+    let totalRevenue = 0;
+
+    for (const activity of validActivities) {
+      const receipt = await receiptModel.findById(activity.receipt);
+      if (receipt && receipt.status === 'successful') {
+        totalRevenue += receipt.price;
+      }
+    }
+
+    return res.status(200).json({ totalRevenue });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+
 module.exports = {
   createProfile,
   getProfile,
@@ -537,5 +572,6 @@ module.exports = {
   getAllTransportation,
   deleteTransportation,
   editTransportation,
-  getMyTransportations
+  getMyTransportations,
+  viewRevenue
 };
