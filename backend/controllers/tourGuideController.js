@@ -444,6 +444,94 @@ const viewRevenue = async (req, res) => {
   }
 };
 
+const viewTotalTourists = async (req, res) => {
+  try {
+    //get all active tickets
+    const tickets = await itineraryTicketModel.find({ status: 'active' })
+
+    //get my tickets
+    let myTickets = await Promise.all(
+      tickets.map(async t => {
+        const itinerary = await itineraryModel.findById(t.itinerary)
+        if (itinerary.tourGuide.toString() === req.user._id.toString() &&
+          new Date(t.date) < new Date().setHours(0, 0, 0, 0)) {
+          return t;
+        }
+        return null;
+      })
+    )
+    myTickets = myTickets.filter(t => t !== null)
+
+    if (myTickets.length === 0) throw Error('No tourists used your itinerary yet')
+
+    let report = []
+
+
+    // console.log(myTickets)
+
+
+    for (const t of myTickets) {
+      const itinerary = await itineraryModel.findById(t.itinerary);
+      // console.log(activity.name)
+      report.push({
+        name: itinerary.name,
+        date: t.date
+      });
+    }
+
+    const map = new Map()
+
+    for (row of report) {
+      const key1 = row.name;
+      const key2 = row.date;
+      const compositeKey = `${key1}_${key2}`
+      if (!map.has(compositeKey)) map.set(compositeKey, { count: 1, date: row.date })
+
+      else {
+        const entry = map.get(compositeKey)
+
+        map.set(compositeKey, { count: entry.count + 1, date: row.date })
+      }
+    }
+    const result = Array.from(map, ([name, data]) => ({
+      name: name.split("_")[0],
+      date: data.date,
+      totalTourists: data.count
+
+    }))
+    function getMonthIndex(month) {
+      const months = [
+        "january", "february", "march", "april", "may", "june",
+        "july", "august", "september", "october", "november", "december"
+      ];
+
+      // Convert the input to lowercase and find the index
+      const monthIndex = months.indexOf(month.toLowerCase());
+
+      if (monthIndex === -1) {
+        throw new Error("Invalid month name");
+      }
+
+      return monthIndex; // Index is 0-based (January = 0, February = 1, etc.)
+    }
+
+    const month = req.query.month
+    let index = -1
+
+    if (month)
+      index = getMonthIndex(month)
+
+    const filteredResults = index > -1 ? result.filter(t => new Date(t.date).getMonth() === index) : result
+    if (filteredResults.length === 0) throw Error('nothing meets your search criteria')
+    return res.status(200).json(filteredResults)
+
+  }
+  catch (error) {
+
+    console.log(error)
+    return res.status(500).json({ message: error.message })
+  }
+}
 
 module.exports = {
   createProfile,
@@ -456,5 +544,6 @@ module.exports = {
   upload,
   uploadProfilePicture,
   setStatusOfItinerary,
-  viewRevenue
+  viewRevenue,
+  viewTotalTourists
 };

@@ -22,5 +22,6 @@ router.get("/get-my-transportations", advertiserController.getMyTransportations)
 router.delete("/delete-transportation", advertiserController.deleteTransportation);
 router.put("/edit-transportation", advertiserController.editTransportation);
 router.get("/view-revenue", advertiserController.viewRevenue);
+router.get("/view-tourists", advertiserController.viewTotalTourists);
 
 module.exports = router;

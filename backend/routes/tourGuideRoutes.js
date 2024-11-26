@@ -13,4 +13,5 @@ router.get('/get-my-itineraries', tourGuideController.getMyItineraries);
 router.post('/upload-profile-picture', tourGuideController.upload, tourGuideController.uploadProfilePicture);
 router.put('/set-status-itinerary', tourGuideController.setStatusOfItinerary);
 router.get('/view-revenue', tourGuideController.viewRevenue);
+router.get('/view-tourists', tourGuideController.viewTotalTourists);
 module.exports = router;
