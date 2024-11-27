@@ -400,6 +400,7 @@ const getPendingUsers = async (req, res) => {
   }
 };
 
+
 module.exports = {
   addTourismGovernor,
   deleteUser,
