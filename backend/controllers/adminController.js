@@ -5,12 +5,24 @@ const userModel = require("../models/userModel");
 const sellerModel = require("../models/sellerModel");
 const advertiserModel = require("../models/advertiserModel");
 const tourGuideModel = require("../models/tourGuideModel");
+const notificationModel = require("../models/notificationModel");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
 const nodemailer = require('nodemailer')
 const emailTemplates = require('../emailTemplate');
 const { default: mongoose } = require("mongoose");
 
+async function notifyUser(userId, type, name) {
+
+  const message = type === 'ativity' ? `Your activity "${name}" has been flagged as inappropriate by the admin.` : `Your itinerary "${name}" has been flagged as inappropriate by the admin.`;
+  const notification = new notificationModel({
+    user: userId,
+    type: `flagged-${type}`,
+    message
+  });
+
+  await notification.save();
+}
 const addTourismGovernor = async (req, res) => {
   const { username, password } = req.body;
 
@@ -287,6 +299,8 @@ const flagItinerary = async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
+    notifyUser(user._id, 'itinerary', itineraryName);
+
 
     return res.status(200).json({
       message: "Itinerary flagged. It is now invisible to tourists and guests.",
@@ -317,6 +331,7 @@ const unflagItinerary = async (req, res) => {
     });
   }
 };
+
 const flagActivity = async (req, res) => {
   try {
     const { activityIdString } = req.body;
@@ -357,6 +372,7 @@ const flagActivity = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
+    notifyUser(user._id, 'activity', activityName);
     return res.status(200).json({
       message: "Activity flagged. It is now invisible to tourists and guests.",
     });
