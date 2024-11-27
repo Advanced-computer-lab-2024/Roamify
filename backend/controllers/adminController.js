@@ -1,11 +1,14 @@
 const touristModel = require("../models/touristModel");
 const itineraryModel = require("../models/itineraryModel");
+const activityModel = require("../models/activityModel");
 const userModel = require("../models/userModel");
 const sellerModel = require("../models/sellerModel");
 const advertiserModel = require("../models/advertiserModel");
 const tourGuideModel = require("../models/tourGuideModel");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
+const nodemailer = require('nodemailer')
+const emailTemplates = require('../emailTemplate');
 const { default: mongoose } = require("mongoose");
 
 const addTourismGovernor = async (req, res) => {
@@ -252,7 +255,38 @@ const flagItinerary = async (req, res) => {
 
     const itineraryId = new mongoose.Types.ObjectId(itineraryIdString);
 
-    await itineraryModel.findByIdAndUpdate(itineraryId, { flag: true });
+    const updatedItinerary = await itineraryModel.findByIdAndUpdate(
+      itineraryId,
+      { flag: true },
+      { returnDocument: "after" } // Use { new: true } if your Mongoose version is older
+    );
+
+    const user = await userModel.findById(updatedItinerary.tourGuide)
+
+    const email = user.email
+
+    const username = user.username
+
+    const itineraryName = updatedItinerary.name
+
+    // Send the OTP via email
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const text = emailTemplates.flaggedItineraryEmail(username, itineraryName);
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Notification Regarding Your Itinerary",
+      text
+    };
+
+    await transporter.sendMail(mailOptions);
 
     return res.status(200).json({
       message: "Itinerary flagged. It is now invisible to tourists and guests.",
@@ -283,6 +317,56 @@ const unflagItinerary = async (req, res) => {
     });
   }
 };
+const flagActivity = async (req, res) => {
+  try {
+    const { activityIdString } = req.body;
+    if (!activityIdString) throw Error("Please choose an activity to unflag");
+
+    const activityId = new mongoose.Types.ObjectId(activityIdString);
+
+    const updatedActivity = await activityModel.findByIdAndUpdate(
+      activityId,
+      { flag: true },
+      { returnDocument: "after" } // Use { new: true } if your Mongoose version is older
+    );
+
+    const user = await userModel.findById(updatedActivity.advertiser)
+
+    const email = user.email
+
+    const username = user.username
+
+    const activityName = updatedActivity.name
+
+    // Send the OTP via email
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const text = emailTemplates.flaggedActivityEmail(username, activityName);
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Notification Regarding Your Activity",
+      text
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return res.status(200).json({
+      message: "Activity flagged. It is now invisible to tourists and guests.",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Couldn't flag Activity",
+      error: error.message,
+    });
+  }
+};
 const getPendingUsers = async (req, res) => {
   try {
     const pendingUsers = await userModel
@@ -309,4 +393,5 @@ module.exports = {
   flagItinerary,
   unflagItinerary,
   getPendingUsers,
+  flagActivity
 };

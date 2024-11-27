@@ -64,11 +64,16 @@ const itinerarySchema = new mongoose.Schema(
         flag: {
             type: Boolean,
             default: false
+        },
+        adminStatus: {
+            type: String,
+            enum: ['accepted', 'pending', 'rejected'],
+            default: 'pending'
         }
     },
     { timestamps: true }
 );
-itinerarySchema.pre('remove', async function(next) {
+itinerarySchema.pre('remove', async function (next) {
     try {
         await mongoose.model('itinerary review').deleteMany({ itinerary: this._id });
         next();

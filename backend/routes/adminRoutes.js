@@ -47,6 +47,7 @@ router.get(
 );
 router.put("/accept-reject-user", adminController.acceptRejectUser);
 router.put("/flag-itinerary", adminController.flagItinerary);
+router.put("/flag-activity", adminController.flagActivity);
 router.put("/unflag-itinerary", adminController.unflagItinerary);
 router.get("/get-pending-users", adminController.getPendingUsers);
 
