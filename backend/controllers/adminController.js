@@ -11,8 +11,10 @@ const bcrypt = require("bcrypt");
 const nodemailer = require('nodemailer')
 const emailTemplates = require('../emailTemplate');
 const { default: mongoose } = require("mongoose");
+const { connectedUsers } = require('../config/socket')
 
-async function notifyUser(userId, type, name) {
+
+async function notifyUser(io, userId, type, name) {
 
   const message = type === 'ativity' ? `Your activity "${name}" has been flagged as inappropriate by the admin.` : `Your itinerary "${name}" has been flagged as inappropriate by the admin.`;
   const notification = new notificationModel({
@@ -20,8 +22,19 @@ async function notifyUser(userId, type, name) {
     type: `flagged-${type}`,
     message
   });
-
   await notification.save();
+
+
+  const socketId = connectedUsers[userId.toString()];
+  if (socketId) {
+    io.to(socketId).emit("receiveNotification", message); // Send the message
+    console.log(`Notification sent to user ${userId}: ${message}`);
+  }
+  else {
+    console.log(`User ${userId} is not connected.`);
+  }
+
+
 }
 const addTourismGovernor = async (req, res) => {
   const { username, password } = req.body;
@@ -339,6 +352,8 @@ const flagActivity = async (req, res) => {
 
     const activityId = new mongoose.Types.ObjectId(activityIdString);
 
+    const activity = await activityModel.findById(activityId);
+    if (activity.flag) throw Error('activity is already flagged')
     const updatedActivity = await activityModel.findByIdAndUpdate(
       activityId,
       { flag: true },
@@ -372,14 +387,14 @@ const flagActivity = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    notifyUser(user._id, 'activity', activityName);
+    const io = req.app.get("io"); // Access io from app
+    notifyUser(io, user._id, 'activity', activityName);
     return res.status(200).json({
       message: "Activity flagged. It is now invisible to tourists and guests.",
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Couldn't flag Activity",
-      error: error.message,
+      message: error.message
     });
   }
 };
