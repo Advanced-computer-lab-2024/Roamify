@@ -8,7 +8,6 @@ import ProductsListArea from "./ProductsListArea";
 const Products = ({ isAdmin }) => {
   return (
     <>
-      <CommonBanner heading="Tour search result" pagination="Tour" />
       {/* <SearchForm /> */}
       <ProductsListArea isAdmin={isAdmin} />
     </>

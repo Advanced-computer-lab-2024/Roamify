@@ -1,16 +1,15 @@
-import React from 'react'
+import React from "react";
 // import Common Banner
-import CommonBanner from '../component/Common/CommonBanner'
-// import TourGuids 
-import TourGuidesArea from '../component/TourGuides'
+import CommonBanner from "../component/Common/CommonBanner";
+// import TourGuids
+import TourGuidesArea from "../component/TourGuides";
 
 const TourGuides = () => {
   return (
     <>
-     <CommonBanner heading="Tour guides" pagination="Tour guides"/>
-     <TourGuidesArea/>
+      <TourGuidesArea />
     </>
-  )
-}
+  );
+};
 
-export default TourGuides
+export default TourGuides;

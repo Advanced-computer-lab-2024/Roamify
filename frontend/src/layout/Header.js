@@ -88,7 +88,7 @@ const Header = ({ HeaderData }) => {
               {role === "tourist" && (
                 <div className="col-lg-3 text-end">
                   <div style={{ position: "relative" }}>
-                    <input
+                    {/* <input
                       type="text"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -101,7 +101,7 @@ const Header = ({ HeaderData }) => {
                         fontSize: "14px",
                         marginBottom: "5px",
                       }}
-                    />
+                    /> */}
                     <select
                       value={currency}
                       onChange={(e) => {
@@ -122,7 +122,7 @@ const Header = ({ HeaderData }) => {
                         backgroundColor: "#f8f8f8",
                         color: "#333",
                         fontSize: "14px",
-                        width: "100%",
+                        width: "6vw",
                       }}
                       className="currency-dropdown"
                     >
@@ -161,9 +161,16 @@ const Header = ({ HeaderData }) => {
           <div className="main-navbar">
             <div className="container">
               <nav className="navbar navbar-expand-md navbar-light">
-                <Link className="navbar-brand" to="/">
-                  <img src={logo} alt="logo" />
-                </Link>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    flex: 1,
+                  }}
+                >
+                  <img src={"/logo.svg"} alt="Logo" style={{}} />
+                </div>
                 <div
                   className="collapse navbar-collapse mean-menu"
                   id="navbarSupportedContent"

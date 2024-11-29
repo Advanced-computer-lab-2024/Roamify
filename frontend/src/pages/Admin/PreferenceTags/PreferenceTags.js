@@ -20,7 +20,6 @@ const PreferenceTags = () => {
   }, []);
   return (
     <div>
-      <CommonBanner heading="Prefernce Tags" pagination="Tags" />
       <div
         style={{
           display: "flex",

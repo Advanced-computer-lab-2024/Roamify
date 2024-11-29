@@ -4,7 +4,6 @@ import ComplaintsArea from "./ComplaintsArea";
 const Complaints = () => {
   return (
     <>
-      <CommonBanner heading="Complains" pagination="Complains" />
       <ComplaintsArea />
     </>
   );

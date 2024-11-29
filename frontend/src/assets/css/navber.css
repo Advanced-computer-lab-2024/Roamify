@@ -1,3 +1,26 @@
+/* Style the scrollbar */
+::-webkit-scrollbar {
+  width: 8px; /* Set the scrollbar width */
+  height: 8px; /* Set the scrollbar height for horizontal scroll */
+}
+
+/* The track (background of the scrollbar) */
+::-webkit-scrollbar-track {
+  background: var(--background-color); /* Match the theme */
+  border-radius: 10px; /* Rounded corners */
+}
+
+/* The thumb (scroll indicator) */
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-bar-color); /* Purple to match the theme */
+  border-radius: 10px; /* Rounded corners */
+}
+
+/* The thumb on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--main-color); /* Slightly lighter purple on hover */
+}
+
 .topbar-area {
   padding-top: 10px;
   padding-bottom: 10px;
@@ -179,7 +202,7 @@
 }
 
 .main_header_arae {
-  position: absolute;
+  /* position: fixed; */
   width: 100%;
   z-index: 9999;
 }

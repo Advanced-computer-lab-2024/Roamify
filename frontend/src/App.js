@@ -19,10 +19,12 @@ import ItineraryDetails from "./pages/Tourist/component/TouristItinerarySearch/I
 import PlaceDetails from "./pages/Tourist/component/TouristPlaces/PlaceDetails";
 import Advertiser from "./pages/Advertiser/Advertiser";
 import Guest from "../src/pages/Guest/Guest";
+import Home from "./pages/Home/Home";
 const App = () => {
   return (
     <>
       <Routes>
+        {/* <Route path="/" element={<Home />} /> */}
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

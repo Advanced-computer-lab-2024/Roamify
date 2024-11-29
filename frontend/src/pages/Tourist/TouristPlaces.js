@@ -7,7 +7,6 @@ import TouristPlacesArea from "./component/TouristPlaces";
 const TouristPlaces = () => {
   return (
     <>
-      <CommonBanner heading="Top Places" pagination="Top places" />
       <TouristPlacesArea />
     </>
   );

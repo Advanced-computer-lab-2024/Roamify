@@ -28,7 +28,6 @@ const AdminUsers = ({ usersName }) => {
 
   return (
     <div>
-      <CommonBanner heading="Users " pagination={usersName} />
       <p>{usersName}</p>
       {usersName === "Tourism Governors" && (
         <div className="flex">

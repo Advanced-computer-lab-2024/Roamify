@@ -9,7 +9,11 @@ import SectionHeading from "../../Common/SectionHeading";
 const ExploreArea = () => {
   return (
     <>
-      <section id="explore_area" className="section_padding_top">
+      <section
+        id="explore_area"
+        className="section_padding_top"
+        style={{ backgroundColor: "var(--background-color)" }}
+      >
         <div className="container">
           <SectionHeading heading="Explore our hot deals" />
           <div className="row">
@@ -81,8 +85,17 @@ const ExploreArea = () => {
                 >
                   <div className="row">
                     {ExploreData.slice(0, 8).map((data, index) => (
-                     <CommonCard img={data.img} heading={data.heading} location={data.location}
-                      discount={data.discount} discountPrice={data.discountPrice} reviewRating={data.reviewRating} reviewCount={data.reviewCount} price={data.price} key={index}  />
+                      <CommonCard
+                        img={data.img}
+                        heading={data.heading}
+                        location={data.location}
+                        discount={data.discount}
+                        discountPrice={data.discountPrice}
+                        reviewRating={data.reviewRating}
+                        reviewCount={data.reviewCount}
+                        price={data.price}
+                        key={index}
+                      />
                     ))}
                   </div>
                 </div>
@@ -92,10 +105,19 @@ const ExploreArea = () => {
                   role="tabpanel"
                   aria-labelledby="nav-tours-tab"
                 >
-                 <div className="row">
+                  <div className="row">
                     {ExploreData.slice(0, 6).map((data, index1) => (
-                      <CommonCard img={data.img} heading={data.heading} location={data.location}
-                      discount={data.discount} discountPrice={data.discountPrice} reviewRating={data.reviewRating} reviewCount={data.reviewCount} price={data.price} key={index1}  />
+                      <CommonCard
+                        img={data.img}
+                        heading={data.heading}
+                        location={data.location}
+                        discount={data.discount}
+                        discountPrice={data.discountPrice}
+                        reviewRating={data.reviewRating}
+                        reviewCount={data.reviewCount}
+                        price={data.price}
+                        key={index1}
+                      />
                     ))}
                   </div>
                 </div>
@@ -107,8 +129,17 @@ const ExploreArea = () => {
                 >
                   <div className="row">
                     {ExploreData.slice(4, 8).map((data, index2) => (
-                      <CommonCard img={data.img} heading={data.heading} location={data.location}
-                      discount={data.discount} discountPrice={data.discountPrice} reviewRating={data.reviewRating} reviewCount={data.reviewCount} price={data.price} key={index2}  />
+                      <CommonCard
+                        img={data.img}
+                        heading={data.heading}
+                        location={data.location}
+                        discount={data.discount}
+                        discountPrice={data.discountPrice}
+                        reviewRating={data.reviewRating}
+                        reviewCount={data.reviewCount}
+                        price={data.price}
+                        key={index2}
+                      />
                     ))}
                   </div>
                 </div>
@@ -120,8 +151,17 @@ const ExploreArea = () => {
                 >
                   <div className="row">
                     {ExploreData.slice(3, 8).map((data, index3) => (
-                     <CommonCard img={data.img} heading={data.heading} location={data.location}
-                     discount={data.discount} discountPrice={data.discountPrice} reviewRating={data.reviewRating} reviewCount={data.reviewCount} price={data.price} key={index3}  />
+                      <CommonCard
+                        img={data.img}
+                        heading={data.heading}
+                        location={data.location}
+                        discount={data.discount}
+                        discountPrice={data.discountPrice}
+                        reviewRating={data.reviewRating}
+                        reviewCount={data.reviewCount}
+                        price={data.price}
+                        key={index3}
+                      />
                     ))}
                   </div>
                 </div>

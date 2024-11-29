@@ -20,7 +20,6 @@ const Activities = () => {
   }, []);
   return (
     <div>
-      <CommonBanner heading="Activity Categories" pagination="Categories" />
       <div
         style={{
           display: "flex",

@@ -39,7 +39,6 @@ const PendingUsers = () => {
 
   return (
     <div>
-      <CommonBanner heading="Pending Users" pagination="Pending Users" />
       <p>Pending Users</p>
       {loading ? (
         <p>Loading...</p> // Show loading indicator

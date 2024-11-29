@@ -28,7 +28,6 @@ const TourDetails = () => {
 
   return (
     <>
-      <CommonBanner heading="Product Details" pagination="Product Details" />
       <TourDetailsArea
         price={desiredProduct.price}
         rating={desiredProduct.reviewRating}

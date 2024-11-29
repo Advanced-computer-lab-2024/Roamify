@@ -6,7 +6,6 @@ import ItineraryArea from "./ItineraryArea";
 const Itineraries = () => {
   return (
     <>
-      <CommonBanner heading="Itineraries" pagination="Itineraries" />
       <ItineraryArea />
     </>
   );

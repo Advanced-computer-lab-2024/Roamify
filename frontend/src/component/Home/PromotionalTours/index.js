@@ -27,7 +27,11 @@ const PromotionalTours = () => {
   };
   return (
     <>
-      <section id="promotional_tours" className="section_padding_top">
+      <section
+        id="promotional_tours"
+        className="section_padding_top"
+        style={{ backgroundColor: "var(--background-color)" }}
+      >
         <div className="container">
           <SectionHeading heading="Our best promotional tours" />
 

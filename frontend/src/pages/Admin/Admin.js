@@ -22,13 +22,14 @@ import Products from "./Products/Products.js";
 import Complaints from "./Complaints/Complaints.js";
 import PendingUsers from "./Users/PendingUsers.js";
 import Itineraries from "./Itineraries/Itineraries.js";
+import Dashboard from "./Dashboard/Dashboard.js";
 
 const Admin = () => {
   return (
     <>
       <Header HeaderData={HeaderData} />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Dashboard />} />
         <Route path="/about" element={<About />} />
         <Route path="/activity-categories" element={<Activities />} />
         <Route path="/preference-tags" element={<PreferenceTags />} />
