@@ -1,6 +1,6 @@
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
-const cookieParser = require("cookie-parser");
+const cookie = require("cookie"); // Use the cookie library for parsing
 
 let connectedUsers = {}; // In-memory store for userId -> socket.id mapping
 
@@ -15,9 +15,8 @@ const setupSocketIO = (server, app) => {
     io.use((socket, next) => {
         try {
             // Parse cookies from the WebSocket handshake headers
-            const cookies = cookieParser.JSONCookies(
-                cookieParser.parse(socket.handshake.headers.cookie || "")
-            );
+            const cookies = cookie.parse(socket.handshake.headers.cookie || "");
+
 
             const token = cookies.jwt; // Replace 'jwt' with your cookie name
 
