@@ -415,6 +415,41 @@ const getPendingUsers = async (req, res) => {
   }
 };
 
+const getTotalUsers = async (req, res) => {
+  try {
+
+
+
+    let users = await userModel.find({
+      status: 'active',
+      role: { $ne: 'admin' }
+    });
+
+    const map = new Map();
+
+    for (user of users) {
+      const month = new Date(user.createdAt).getMonth() + 1;
+      const entry = map.get(month);
+      if (!entry) {
+        map.set(month, { count: 1 });
+      }
+      else {
+        map.set(month, { count: entry.count + 1 })
+      }
+    }
+    const result = Array.from(map, ([name, data]) => {
+      return { month: name, count: data.count }; // Transform into an object
+    });
+    if (result === 0) throw new Error('There are no current users');
+    return res.status(200).json(result)
+
+  }
+  catch (error) {
+    console.log(error)
+    return res.status(500).json({ message: error.message })
+  }
+}
+
 
 module.exports = {
   addTourismGovernor,
@@ -425,5 +460,6 @@ module.exports = {
   flagItinerary,
   unflagItinerary,
   getPendingUsers,
-  flagActivity
+  flagActivity,
+  getTotalUsers
 };
