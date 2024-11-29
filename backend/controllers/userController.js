@@ -8,7 +8,6 @@ const sellerModel = require("../models/sellerModel");
 const activityTicketModel = require("../models/activityTicketModel");
 const itineraryTicketModel = require("../models/itineraryTicketModel");
 const productModel = require("../models/productModel");
-
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
@@ -19,6 +18,12 @@ const upload = multer({ storage }).fields([
   { name: "ID", maxCount: 1 }, // Field for YourGuide ID
   { name: "additionalDocument", maxCount: 1 }, // Field for Certificate
 ]);
+
+
+
+
+
+
 
 const createToken = (_id, role) => {
   return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: "3d" });

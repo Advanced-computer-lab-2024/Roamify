@@ -1,8 +1,7 @@
-// services/amadeusService.js
+
 const amadeus = require('../config/amadeus'); // Import the configured Amadeus client
 
-// Function to search for flights
-const searchFlights = async (origin, destination, departureDate, returnDate = null, adults = 1, direct = false, departureTime = null, returnTime = null) => {
+const searchFlights = async (origin, destination, departureDate, returnDate, adults = 1) => {
     try {
         const params = {
             originLocationCode: origin,
@@ -10,45 +9,28 @@ const searchFlights = async (origin, destination, departureDate, returnDate = nu
             departureDate,
             adults,
             ...(returnDate && { returnDate }),
-            ...(departureTime && { departureTime }), // Include departureTime if provided
-            ...(returnTime && { returnTime })       // Include returnTime if provided
+            max: 10
         };
 
+
+        //fetch flights with the specified params
         const response = await amadeus.shopping.flightOffersSearch.get(params);
+        //return only desired keys
+        const flights = response.data.map(flight => {
+            const { price, numberOfBookableSeats, itineraries } = flight;
+            return {
+                price: price.total,
+                currency: price.currency,
+                availableSeats: numberOfBookableSeats,
+                departure: itineraries[0].segments[0].departure.at,
+                arrival: itineraries[0].segments[itineraries[0].segments.length - 1].arrival.at
+            };
+        });
 
-        const formattedFlights = response.data
-            .filter(flight => {
-                if (direct) {
-                    return flight.itineraries.every(itinerary => itinerary.segments.length === 1);
-                }
-                return true;
-            })
-            .map(flight => {
-                const { price, numberOfBookableSeats, itineraries } = flight;
-
-                const totalDuration = itineraries
-                    .map(itinerary => itinerary.duration)
-                    .join(" / ");
-
-                const actualDepartureTime = itineraries[0]?.segments[0]?.departure.at;
-                const actualReturnTime = itineraries[1]?.segments[0]?.departure.at;
-
-                return {
-                    price: price.total,
-                    currency: price.currency,
-                    availableSeats: numberOfBookableSeats,
-                    duration: totalDuration,
-                    departureTime: actualDepartureTime || null,
-                    returnTime: actualReturnTime || null,
-                    isDirect: direct
-                };
-            });
-
-        console.log("Formatted flights with duration, direct filter, and times:", formattedFlights);
-        return formattedFlights;
+        return flights;
     } catch (error) {
-        console.error("Error in searchFlights:", error);
-        throw new Error("An unknown error occurred in flight search");
+        console.error("Error in searchFlights:", error.message);
+        throw new Error("Unable to fetch flight data");
     }
 };
 
@@ -66,7 +48,7 @@ const searchHotels = async (cityCode) => {
             name: hotel.name,
         }));
 
-        console.log("Hotels:", hotels);
+
         return hotels;
     } catch (error) {
         console.error("Error in searchHotels:", error);
@@ -74,22 +56,5 @@ const searchHotels = async (cityCode) => {
     }
 };
 
-
-
-
-
-
-
-
-
-// // Function to book a flight
-// const bookFlight = async (flightOffer) => {
-//     try {
-//         const response = await amadeus.booking.flightOrders.post(JSON.stringify({ data: flightOffer }));
-//         return response.data; // Return the booking confirmation details
-//     } catch (error) {
-//         throw new Error(error.response ? error.response.data : error.message);
-//     }
-// };
 
 module.exports = { searchFlights, searchHotels };

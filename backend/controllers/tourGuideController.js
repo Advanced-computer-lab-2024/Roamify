@@ -5,9 +5,9 @@ const tourGuideModel = require("../models/tourGuideModel");
 const activityModel = require("../models/activityModel");
 const itineraryModel = require("../models/itineraryModel");
 const itineraryTicketModel = require("../models/itineraryTicketModel");
+const receiptModel = require('../models/receiptModel')
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
-const { name } = require('pug');
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
 const upload = multer({ storage }).single('profilePicture'); // Accept only 1 file with field name 'profilePicture'
 
@@ -354,6 +354,185 @@ const setStatusOfItinerary = async (req, res) => {
   }
 }
 
+
+const viewRevenue = async (req, res) => {
+  try {
+    //get all tickets
+    const tickets = await itineraryTicketModel.find({ status: 'active' });
+    if (tickets.length === 0) throw Error('You have no revenues yet');
+
+    //get my tickets
+    let myTickets = await Promise.all(
+      tickets.map(async t => {
+        const itinerary = await itineraryModel.findById(t.itinerary);
+        console.log(itinerary)
+        if (itinerary.tourGuide.toString() === req.user._id.toString()) {
+          return t;
+        }
+        return null;
+      })
+    );
+
+    //remove null 
+    myTickets = myTickets.filter(t => t !== null);
+
+    let totalRevenue = 0;
+
+    let report = []
+
+    //get receipt of each ticket and get its price
+    for (const ticket of myTickets) {
+      const receipt = await receiptModel.findById(ticket.receipt);
+      if (receipt && receipt.status === 'successful') {
+
+        const itinerary = await itineraryModel.findById(ticket.itinerary)
+        report.push({
+          name: itinerary.name,
+          price: receipt.price,
+          date: ticket.date
+        })
+      }
+    }
+
+    console.log(report)
+
+    const map = new Map();
+
+    for (row of report) {
+      const key1 = row.name;
+      const key2 = row.date;
+      const compositeKey = `${key1}_${key2}`
+      if (!map.has(compositeKey)) map.set(compositeKey, { count: 1, price: row.price, date: row.date })
+
+      else {
+        const entry = map.get(compositeKey)
+
+        map.set(compositeKey, { count: entry.count + 1, price: entry.price, date: row.date })
+      }
+
+    }
+
+    const result = Array.from(map, ([name, data]) => ({
+      name: name.split("_")[0],
+      count: data.count,
+      date: data.date,
+      price: data.price,
+    }));
+
+    let date = req.query.date;
+
+    if (date) {
+      date = new Date(date);
+
+      // Ensure the date is valid
+      if (isNaN(date.getTime()))
+        throw Error('Invalid date format');
+    }
+    const filteredResults = date
+      ? result.filter(e => new Date(e.date).toISOString() === new Date(date).toISOString())
+      : result;
+
+    filteredResults.forEach(e => totalRevenue += (e.price * e.count))
+
+
+
+
+    return res.status(200).json({ filteredResults, totalRevenue });
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const viewTotalTourists = async (req, res) => {
+  try {
+    //get all active tickets
+    const tickets = await itineraryTicketModel.find({ status: 'active' })
+
+    //get my tickets
+    let myTickets = await Promise.all(
+      tickets.map(async t => {
+        const itinerary = await itineraryModel.findById(t.itinerary)
+        if (itinerary.tourGuide.toString() === req.user._id.toString() &&
+          new Date(t.date) < new Date().setHours(0, 0, 0, 0)) {
+          return t;
+        }
+        return null;
+      })
+    )
+    myTickets = myTickets.filter(t => t !== null)
+
+    if (myTickets.length === 0) throw Error('No tourists used your itinerary yet')
+
+    let report = []
+
+
+    // console.log(myTickets)
+
+
+    for (const t of myTickets) {
+      const itinerary = await itineraryModel.findById(t.itinerary);
+      // console.log(activity.name)
+      report.push({
+        name: itinerary.name,
+        date: t.date
+      });
+    }
+
+    const map = new Map()
+
+    for (row of report) {
+      const key1 = row.name;
+      const key2 = row.date;
+      const compositeKey = `${key1}_${key2}`
+      if (!map.has(compositeKey)) map.set(compositeKey, { count: 1, date: row.date })
+
+      else {
+        const entry = map.get(compositeKey)
+
+        map.set(compositeKey, { count: entry.count + 1, date: row.date })
+      }
+    }
+    const result = Array.from(map, ([name, data]) => ({
+      name: name.split("_")[0],
+      date: data.date,
+      totalTourists: data.count
+
+    }))
+    function getMonthIndex(month) {
+      const months = [
+        "january", "february", "march", "april", "may", "june",
+        "july", "august", "september", "october", "november", "december"
+      ];
+
+      // Convert the input to lowercase and find the index
+      const monthIndex = months.indexOf(month.toLowerCase());
+
+      if (monthIndex === -1) {
+        throw new Error("Invalid month name");
+      }
+
+      return monthIndex; // Index is 0-based (January = 0, February = 1, etc.)
+    }
+
+    const month = req.query.month
+    let index = -1
+
+    if (month)
+      index = getMonthIndex(month)
+
+    const filteredResults = index > -1 ? result.filter(t => new Date(t.date).getMonth() === index) : result
+    if (filteredResults.length === 0) throw Error('nothing meets your search criteria')
+    return res.status(200).json(filteredResults)
+
+  }
+  catch (error) {
+
+    console.log(error)
+    return res.status(500).json({ message: error.message })
+  }
+}
+
 module.exports = {
   createProfile,
   getProfile,
@@ -364,5 +543,7 @@ module.exports = {
   getMyItineraries,
   upload,
   uploadProfilePicture,
-  setStatusOfItinerary
+  setStatusOfItinerary,
+  viewRevenue,
+  viewTotalTourists
 };
