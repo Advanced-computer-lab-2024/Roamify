@@ -1,6 +1,7 @@
 import React from "react";
 import StatsCard from "./StatsCard";
-import Chart from "./Chart";
+import LineChart from "./LineChart";
+import DashboardCard from "./DashboardCard";
 
 const CardsSection = () => {
   return (
@@ -17,7 +18,13 @@ const CardsSection = () => {
         <StatsCard title="Users" value="125" />
       </section>
       <section style={{ marginTop: "40px" }}>
-        <Chart />
+        <DashboardCard
+          height={"50vh"}
+          width={"50%"}
+          title={"Total Revenue"}
+          titlePosition={"left"}
+          body={<LineChart />}
+        />
       </section>
     </div>
   );

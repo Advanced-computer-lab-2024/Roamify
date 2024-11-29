@@ -8,6 +8,7 @@ const LoginArea = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [socket, setSocket] = useState(null);
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -43,6 +44,30 @@ const LoginArea = () => {
       } else if (status === "pending creation" && termsAndConditions) {
         navigate("/profile-details"); // Navigate to ProfileDetails page
       }
+
+      // Now that the user is logged in and has a JWT token stored in cookies, connect to WebSocket
+      // WebSocket connection after login
+      const socketConnection = io("http://localhost:3000", {
+        withCredentials: true, // Automatically sends cookies (including JWT)
+        transports: ["websocket"], // Use WebSocket transport
+      });
+
+      // Listen for notifications
+      socketConnection.on("notification", (notification) => {
+        toast(notification.message, {
+          duration: 4000,
+          position: "top-right",
+          style: {
+            background: "#333",
+            color: "#fff",
+            borderRadius: "10px",
+            padding: "12px 20px",
+            fontSize: "16px",
+          },
+        });
+      });
+
+      setSocket(socketConnection); // Save socket instance for further use
     } catch (err) {
       console.error("Error logging in:", err);
       setError("Invalid username or password. Please try again.");

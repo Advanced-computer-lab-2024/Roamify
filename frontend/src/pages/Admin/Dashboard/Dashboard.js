@@ -1,7 +1,6 @@
 import React from "react";
 import ApexCharts from "react-apexcharts";
 import StatsCard from "./StatsCard";
-import Chart from "./Chart";
 import CardsSection from "./CardsSection";
 
 const Dashboard = () => {

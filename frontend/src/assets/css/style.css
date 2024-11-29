@@ -73,6 +73,7 @@ Default CSS
   --white-text: #e7e9ea;
   --bg-color: #f3f6fd;
   --transition: 0.4s all ease-in-out;
+  --chart-blue: #57c3ff;
 }
 
 .dark-mode {
