@@ -13,6 +13,9 @@ const itineraryTicketModel = require("../models/itineraryTicketModel");
 const placeTicketModel = require("../models/placeTicketModel");
 const placeModel = require("../models/placeModel");
 const tourGuideReviewModel = require("../models/tourGuideReviewModel");
+const Stripe = require('stripe');
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 
 function isAdult(dateOfBirth) {
   const today = new Date();
@@ -166,14 +169,13 @@ const bookActivity = async (req, res) => {
       .findOne({ user: req.user._id })
       .populate("wallet");
     if (!tourist)
-      return res.status(404).json({ message: "Tourist does not exist" });
+      throw Error('Tourist does not exist')
 
-    const { activity, date } = req.body;
+    const { activity, date, method, paymentMethodId } = req.body;
     if (!activity)
-      return res
-        .status(400)
-        .json({ message: "Please choose an activity to book" });
-    if (!date) return res.status(400).json({ message: "Date is required" });
+      throw Error('Please choose an activity to book')
+    if (!date) throw Error('Date is required')
+    if (method !== 'availableCredit' || method !== 'card') throw Error('please specify a correct method of payment')
 
     const activityId = new mongoose.Types.ObjectId(activity);
     const bookingDate = new Date(date);
@@ -185,9 +187,7 @@ const bookActivity = async (req, res) => {
       new Date(activityObject.date).toISOString().split("T")[0] !==
       new Date(bookingDate).toISOString().split("T")[0]
     ) {
-      return res
-        .status(400)
-        .json({ message: "Please choose a valid date for this activity" });
+      throw Error('Please choose a valid date for this activity')
     }
 
     //checking that date has not passed yet
@@ -195,9 +195,7 @@ const bookActivity = async (req, res) => {
       new Date(today).toISOString().split("T")[0] >
       new Date(bookingDate).toISOString().split("T")[0]
     ) {
-      return res
-        .status(400)
-        .json({ message: "Sorry, this activity is no longer available" });
+      throw Error('Sorry, this activity is no longer available')
     }
 
     const ticket = await activityTicketModel.findOne({
@@ -207,27 +205,44 @@ const bookActivity = async (req, res) => {
 
     //checking if user already has a ticket for this activity that is active
     if (ticket && ticket.status === "active") {
-      return res
-        .status(400)
-        .json({ message: "Activity already booked for this date" });
+      throw Error('Activity already booked for this date')
     }
 
     let receipt = null;
 
-    //checking if tourist has available credit
-    if (tourist.wallet.availableCredit < activityObject.price) {
-      receipt = new receiptModel({
-        type: "activity",
-        status: "failed",
-        tourist: req.user._id,
-        price: activityObject.price,
-        receiptType: "payment",
+    if (method == 'availableCredit') {
+      if (tourist.wallet.availableCredit < activityObject.price) {
+        receipt = new receiptModel({
+          type: "activity",
+          status: "failed",
+          tourist: req.user._id,
+          price: activityObject.price,
+          receiptType: "payment",
+        });
+        await receipt.save();
+        throw Error('Insufficient funds')
+      }
+      const availableCredit =
+        tourist.wallet.availableCredit - activityObject.price;
+      await walletModel.findByIdAndUpdate(tourist.wallet._id, {
+        availableCredit,
       });
-      await receipt.save();
-      return res.status(400).json({ message: "insufficient funds" });
     }
 
-    //create receipt for the transaction
+    if (method == 'card') {
+      // Create a PaymentIntent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: activityObject.price * 100, // Amount in cents
+        currency: 'usd', // Set the currency
+        payment_method: paymentMethodId, // Pass the payment method ID from the frontend
+        confirm: true, // Automatically confirm the payment
+        return_url: 'https://yourfrontendurl.com/payment-success', // Replace with your frontend success page
+      });
+      //create receipt for the transaction
+
+
+    }
+
     receipt = new receiptModel({
       type: "activity",
       status: "successful",
@@ -236,12 +251,6 @@ const bookActivity = async (req, res) => {
       receiptType: "payment",
     });
     await receipt.save();
-
-    const availableCredit =
-      tourist.wallet.availableCredit - activityObject.price;
-    await walletModel.findByIdAndUpdate(tourist.wallet._id, {
-      availableCredit,
-    });
 
     //check if ticket was already made but refunded change it active
     if (ticket && ticket.status === "refunded") {
@@ -266,12 +275,16 @@ const bookActivity = async (req, res) => {
       });
       await activityTicket.save();
     }
+
+
+
+    //checking if tourist has available credit
     return res.status(200).json({ message: "Activity booked successfully" });
   } catch (error) {
     console.log(error);
     res
-      .status(400)
-      .json({ message: "Error booking activity", error: error.message });
+      .status(500)
+      .json({ message: error.message });
   }
 };
 const bookPlace = async (req, res) => {
@@ -281,36 +294,55 @@ const bookPlace = async (req, res) => {
       .findOne({ user: req.user._id })
       .populate("wallet");
     if (!tourist)
-      return res.status(404).json({ message: "Tourist does not exist" });
+      throw Error('Tourist does not exist')
 
-    const { place, ticketType, amount: amount } = req.body;
+    const { place, ticketType, amount, method, paymentMethodId } = req.body;
     if (!place)
-      return res
-        .status(400)
-        .json({ message: "Please choose a place to visit" });
+      throw Error('Choose a place to visit')
     if (!ticketType)
-      return res.status(400).json({ message: "Please choose a ticket type" });
+      throw Error('Choose a ticket type')
     if (!amount)
-      return res.status(400).json({ message: "Please choose amount" });
+      throw Error('Choose an amount')
+    if (method !== 'availableCredit' || method !== 'card') throw Error('please specify a correct method of payment')
 
     const placeId = new mongoose.Types.ObjectId(place);
     const placeObject = await placeModel.findById(placeId);
 
+    if (!placeObject) throw Error('Select a valid place')
     let receipt = null;
 
     let cost = placeObject.ticketPrice[ticketType];
     cost *= amount;
-    //checking if tourist has available credit
-    if (tourist.wallet.availableCredit < cost) {
-      receipt = new receiptModel({
-        type: "place",
-        status: "failed",
-        tourist: req.user._id,
-        price: cost,
-        receiptType: "payment",
+
+    if (method == 'availableCredit') {
+      //checking if tourist has available credit
+      if (tourist.wallet.availableCredit < cost) {
+        receipt = new receiptModel({
+          type: "place",
+          status: "failed",
+          tourist: req.user._id,
+          price: cost,
+          receiptType: "payment",
+        });
+        await receipt.save();
+        return res.status(400).json({ message: "insufficient funds" });
+      }
+      const availableCredit = tourist.wallet.availableCredit - cost;
+      await walletModel.findByIdAndUpdate(tourist.wallet._id, {
+        availableCredit,
       });
-      await receipt.save();
-      return res.status(400).json({ message: "insufficient funds" });
+
+    }
+
+    if (method == 'card') {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: cost * 100, // Amount in cents
+        currency: 'usd', // Set the currency
+        payment_method: paymentMethodId, // Pass the payment method ID from the frontend
+        confirm: true, // Automatically confirm the payment
+        return_url: 'https://yourfrontendurl.com/payment-success', // Replace with your frontend success page
+      });
+
     }
 
     //create receipt for the transaction
@@ -323,10 +355,7 @@ const bookPlace = async (req, res) => {
     });
     await receipt.save();
 
-    const availableCredit = tourist.wallet.availableCredit - cost;
-    await walletModel.findByIdAndUpdate(tourist.wallet._id, {
-      availableCredit,
-    });
+
 
     const placeTicket = new placeTicketModel({
       tourist: req.user._id,
@@ -339,10 +368,10 @@ const bookPlace = async (req, res) => {
 
     return res.status(200).json({ message: "place booked successfully" });
   } catch (error) {
-    console.log(error);
+    console.log(error)
     res
-      .status(400)
-      .json({ message: "Error booking place", error: error.message });
+      .status(500)
+      .json({ message: error.message });
   }
 };
 const bookItinerary = async (req, res) => {
@@ -352,15 +381,13 @@ const bookItinerary = async (req, res) => {
       .findOne({ user: req.user._id })
       .populate("wallet");
     if (!tourist)
-      return res.status(404).json({ message: "Tourist does not exist" });
+      throw Error('Tourist does not exist')
 
-    const { itinerary, date } = req.body;
+    const { itinerary, date, method, paymentMethodId } = req.body;
     if (!itinerary)
-      return res
-        .status(400)
-        .json({ message: "Please choose an itinerary to book" });
-    if (!date) return res.status(400).json({ message: "Date is required" });
-
+      throw Error('Please choose an itinerary to book')
+    if (!date) throw Error('Date is required')
+    if (method !== 'availableCredit' || method !== 'card') throw Error('please specify a correct method of payment')
     const itineraryId = new mongoose.Types.ObjectId(itinerary);
     const bookingDate = new Date(date);
     const itineraryObject = await itineraryModel.findById(itineraryId);
@@ -375,9 +402,7 @@ const bookItinerary = async (req, res) => {
       );
     });
     if (!isDateValid) {
-      return res
-        .status(400)
-        .json({ message: "Please choose a valid date for this itinerary" });
+      throw Error('Please choose a valid date for this itinerary')
     }
 
     //checking that date has not passed yet
@@ -385,9 +410,7 @@ const bookItinerary = async (req, res) => {
       new Date(today).toISOString().split("T")[0] >
       new Date(bookingDate).toISOString().split("T")[0]
     ) {
-      return res
-        .status(400)
-        .json({ message: "Sorry, this itinerary is no longer available" });
+      throw Error('Sorry, this itinerary is no longer available')
     }
 
     const ticket = await itineraryTicketModel.findOne({
@@ -397,24 +420,40 @@ const bookItinerary = async (req, res) => {
 
     //checking if user already has a ticket for this activity that is active
     if (ticket && ticket.status === "active" && new Date(ticket.date).toISOString().split("T")[0] === new Date(bookingDate).toISOString().split("T")[0]) {
-      return res
-        .status(400)
-        .json({ message: "Itinerary already booked for this date" });
+      throw Error('Itinerary already booked for this date')
     }
 
     let receipt = null;
 
-    //checking if tourist has available credit
-    if (tourist.wallet.availableCredit < itineraryObject.price) {
-      receipt = new receiptModel({
-        type: "itinerary",
-        status: "failed",
-        tourist: req.user._id,
-        price: itineraryObject.price,
-        receiptType: "payment",
+    if (method == 'availableCredit') {
+      //checking if tourist has available credit
+      if (tourist.wallet.availableCredit < itineraryObject.price) {
+        receipt = new receiptModel({
+          type: "itinerary",
+          status: "failed",
+          tourist: req.user._id,
+          price: itineraryObject.price,
+          receiptType: "payment",
+        });
+        await receipt.save();
+        throw Error('Insufficient funds')
+      }
+      const availableCredit =
+        tourist.wallet.availableCredit - itineraryObject.price;
+      await walletModel.findByIdAndUpdate(tourist.wallet._id, {
+        availableCredit,
       });
-      await receipt.save();
-      return res.status(400).json({ message: "insufficient funds" });
+      console.log(111)
+    }
+    if (method == 'card') {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: itineraryObject.price * 100, // Amount in cents
+        currency: 'usd', // Set the currency
+        payment_method: paymentMethodId, // Pass the payment method ID from the frontend
+        confirm: true, // Automatically confirm the payment
+        return_url: 'https://yourfrontendurl.com/payment-success', // Replace with your frontend success page
+      });
+
     }
 
     //create receipt for the transaction
@@ -427,11 +466,7 @@ const bookItinerary = async (req, res) => {
     });
     await receipt.save();
 
-    const availableCredit =
-      tourist.wallet.availableCredit - itineraryObject.price;
-    await walletModel.findByIdAndUpdate(tourist.wallet._id, {
-      availableCredit,
-    });
+
 
     //check if ticket was already made but refunded change it active
     if (ticket && ticket.status === "refunded") {
@@ -460,10 +495,9 @@ const bookItinerary = async (req, res) => {
     }
     return res.status(200).json({ message: "Itinerary booked successfully" });
   } catch (error) {
-    console.log(error);
     res
       .status(400)
-      .json({ message: "Error booking itinerary", error: error.message });
+      .json({ message: error.message });
   }
 };
 const cancelActivity = async (req, res) => {
@@ -528,11 +562,11 @@ const cancelActivity = async (req, res) => {
         .json({ message: "Activity cancelled successfully." });
     }
 
-    return res.status(404).json({ message: "Activity not found in bookings." });
+
   } catch (error) {
     return res
       .status(400)
-      .json({ message: "Error in cancelling activity", error: error.message });
+      .json({ message: error.message });
   }
 };
 const cancelPlace = async (req, res) => {
@@ -899,30 +933,50 @@ const bookTransportation = async (req, res) => {
       .findOne({ user: req.user._id })
       .populate("wallet");
 
-    const transportationIdString = req.body.transportationIdString;
+    const { transportationIdString, method, paymentMethodId } = req.body;
     if (!transportationIdString) throw Error("please pick a transportation");
+    if (method !== 'availableCredit' || method !== 'card') throw Error('please specify a correct method of payment')
 
     const transportationId = new mongoose.Types.ObjectId(
       transportationIdString
     );
 
+
     const transportation = await transportationModel.findById(transportationId);
     if (!transportation) throw Error("Invalid transportation");
     if (transportation.touristsBooked.includes(req.user._id)) {
-      return res
-        .status(400)
-        .json({ message: "You have already booked this transportation" });
+      throw Error('you have already booked this transportation')
     }
-    if (tourist.wallet.availableCredit < transportation.price) {
-      const receipt = new receiptModel({
-        type: "transportation",
-        status: "failed",
-        tourist: req.user._id,
-        price: transportation.price,
-        receiptType: "payment",
+
+    if (method == 'availableCredit') {
+      if (tourist.wallet.availableCredit < transportation.price) {
+        const receipt = new receiptModel({
+          type: "transportation",
+          status: "failed",
+          tourist: req.user._id,
+          price: transportation.price,
+          receiptType: "payment",
+        });
+        await receipt.save();
+        throw Error('Insufficient funds')
+      }
+      const wallet = await walletModel.findById(tourist.wallet._id);
+
+      wallet.availableCredit -= transportation.price;
+      await tourist.save();
+      await wallet.save();
+
+    }
+
+    if (method == 'card') {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: transportation.price * 100, // Amount in cents
+        currency: 'usd', // Set the currency
+        payment_method: paymentMethodId, // Pass the payment method ID from the frontend
+        confirm: true, // Automatically confirm the payment
+        return_url: 'https://yourfrontendurl.com/payment-success', // Replace with your frontend success page
       });
-      await receipt.save();
-      return res.status(400).json({ message: "insufficient funds" });
+
     }
     transportation.touristsBooked.push(req.user._id);
     await transportation.save();
@@ -934,19 +988,15 @@ const bookTransportation = async (req, res) => {
       receiptType: "payment",
     });
     await receipt.save();
-    const wallet = await walletModel.findById(tourist.wallet._id);
 
-    wallet.availableCredit -= transportation.price;
-    await tourist.save();
-    await wallet.save();
 
     return res.status(200).json({
       message: "Transportation booked successfully",
     });
   } catch (error) {
     return res
-      .status(400)
-      .json({ message: "unable to book transportation", error: error.message });
+      .status(500)
+      .json({ message: error.message });
   }
 };
 const getAllBookedActivities = async (req, res) => {

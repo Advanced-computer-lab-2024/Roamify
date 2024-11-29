@@ -16,7 +16,7 @@ router.post('/book-place', touristController.bookPlace);
 router.delete('/cancel-place', touristController.cancelPlace);
 router.post('/book-activity', touristController.bookActivity);
 router.put('/select-preferences', touristController.selectPreferenceTag);
-router.put('/book-transportation', touristController.bookTransportation);
+router.post('/book-transportation', touristController.bookTransportation);
 router.delete('/cancel-itinerary-booking', touristController.cancelItinerary);
 router.delete('/cancel-activity-booking', touristController.cancelActivity);
 router.delete('/cancel-transportation-booking', touristController.cancelTransportationBooking);
