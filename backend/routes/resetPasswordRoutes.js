@@ -5,7 +5,7 @@ const resetPasswordController = require('../controllers/resetPasswordController'
 
 
 
-router.get('/send-otp', resetPasswordController.sendOtp);
+router.post('/send-otp', resetPasswordController.sendOtp);
 router.post('/check-otp', resetPasswordController.checkOtp);
 router.post('/', resetPasswordController.changePassword);
 
