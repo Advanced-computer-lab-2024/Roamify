@@ -16,7 +16,7 @@ router.post('/book-place', touristController.bookPlace);
 router.delete('/cancel-place', touristController.cancelPlace);
 router.post('/book-activity', touristController.bookActivity);
 router.put('/select-preferences', touristController.selectPreferenceTag);
-router.put('/book-transportation', touristController.bookTransportation);
+router.post('/book-transportation', touristController.bookTransportation);
 router.delete('/cancel-itinerary-booking', touristController.cancelItinerary);
 router.delete('/cancel-activity-booking', touristController.cancelActivity);
 router.delete('/cancel-transportation-booking', touristController.cancelTransportationBooking);
@@ -28,6 +28,7 @@ router.get('/get-all-upcoming-booked-itineraries', touristController.getAllUpcom
 router.get('/get-all-upcoming-booked-activities', touristController.getAllUpcomingBookedActivities);
 router.get('/get-all-transportation', touristController.getFilteredTransportations);
 router.get('/view-points-level', touristController.viewPointsLevel);
+router.get('/view-total-refunds', touristController.viewTotalRefundedReceipts);
 router.put('/redeem-points', touristController.redeemPoints);
 router.get('/get-upcoming-booked-transportations', touristController.getBookedFutureTransportations);
 router.get('/activity/unrated', activityController.getUnratedCompletedActivities);

@@ -8,19 +8,24 @@ const validator = require('validator');
 
 const sendOtp = async (req, res) => {
     try {
-        const user = await userModel.findById(req.user._id)
+        const email = req.body.email;
+        if (!email) {
+            return res.status(400).json({ error: "Email is required" });
+        }
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ error: "User with this email does not exist" });
+        }
 
-        if (!user) throw Error('user does not exist')
 
         if (user.status !== 'active') return res.status(403).json({ message: 'you are unauthorized to do tis action' })
 
         if (user.otp && user.otpExpires > Date.now()) throw Error('OTP has been already sent please check your mail')
 
-        const email = user.email
         //3 steps to create an otp
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         user.otp = otp
-        user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes from now    
+        user.otpExpires = Date.now() + 1 * 60 * 1000; // 10 minutes from now    
         await user.save()
 
         // Send the OTP via email
@@ -41,7 +46,7 @@ const sendOtp = async (req, res) => {
 
         await transporter.sendMail(mailOptions);
 
-        return res.status(200).json({ message: 'sent otp successfully' })
+        return res.status(200).json({ message: 'sent otp successfully', userId: user._id })
 
     }
     catch (error) {
@@ -53,7 +58,7 @@ const sendOtp = async (req, res) => {
 
 const checkOtp = async (req, res) => {
     try {
-        const user = await userModel.findById(req.user._id)
+        const user = await userModel.findById(req.body.userId)
 
         if (!user) throw Error('error user does not exist')
 
@@ -94,7 +99,16 @@ const changePassword = async (req, res) => {
     try {
         if (!req.cookies.resetToken) throw Error('Access denied')
 
-        const user = await userModel.findById(req.user._id)
+        let decoded;
+        // Decode the token
+        try {
+            decoded = jwt.verify(req.cookies.resetToken, process.env.SECRET);
+
+        }
+        catch (e) {
+            return res.status(401).json({ message: 'invalid token' })
+        }
+        const user = await userModel.findById(decoded.id)
 
         const { password, confirmedPassword } = req.body
 
@@ -119,6 +133,7 @@ const changePassword = async (req, res) => {
     }
     catch (error) {
 
+        console.log(error)
         return res.status(500).json({ message: error.message })
     }
 }
