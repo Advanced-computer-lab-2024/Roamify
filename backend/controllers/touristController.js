@@ -1239,6 +1239,32 @@ const getWallet = async (req, res) => {
   }
 }
 
+const viewTotalRefundedReceipts = async (req, res) => {
+  try {
+
+    const activityTickets = await activityTicketModel.find({ tourist: req.user._id, status: 'refunded' }).populate('receipt')
+    const itineraryTickets = await itineraryTicketModel.find({ tourist: req.user._id, status: 'refunded' }).populate('receipt')
+
+    const result = {}
+    let totalActivityRefund = 0;
+    let totalItineraryRefund = 0;
+
+
+    activityTickets.forEach(t => totalActivityRefund += t.receipt.price)
+    itineraryTickets.forEach(t => totalItineraryRefund += t.receipt.price)
+
+    result.refundedActivitiesAmount = totalActivityRefund
+    result.refundedItinerariesAmount = totalItineraryRefund
+    result.total = totalActivityRefund + totalItineraryRefund
+
+    return res.status(200).json(result)
+
+  }
+  catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+}
+
 module.exports = {
   createProfile,
   getProfile,
@@ -1262,5 +1288,6 @@ module.exports = {
   bookPlace,
   cancelPlace,
   getAllBookedPlaces,
-  getWallet
+  getWallet,
+  viewTotalRefundedReceipts
 };

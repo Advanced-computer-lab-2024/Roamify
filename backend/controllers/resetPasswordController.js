@@ -8,15 +8,20 @@ const validator = require('validator');
 
 const sendOtp = async (req, res) => {
     try {
-        const user = await userModel.findById(req.user._id)
+        const email = req.body.email;
+        if (!email) {
+            return res.status(400).json({ error: "Email is required" });
+        }
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ error: "User with this email does not exist" });
+        }
 
-        if (!user) throw Error('user does not exist')
 
         if (user.status !== 'active') return res.status(403).json({ message: 'you are unauthorized to do tis action' })
 
         if (user.otp && user.otpExpires > Date.now()) throw Error('OTP has been already sent please check your mail')
 
-        const email = user.email
         //3 steps to create an otp
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         user.otp = otp
@@ -53,7 +58,7 @@ const sendOtp = async (req, res) => {
 
 const checkOtp = async (req, res) => {
     try {
-        const user = await userModel.findById(req.user._id)
+        const user = await userModel.findById(req.body.userId)
 
         if (!user) throw Error('error user does not exist')
 
@@ -94,7 +99,7 @@ const changePassword = async (req, res) => {
     try {
         if (!req.cookies.resetToken) throw Error('Access denied')
 
-        const user = await userModel.findById(req.user._id)
+        const user = await userModel.findById(req.body.userId)
 
         const { password, confirmedPassword } = req.body
 

@@ -41,5 +41,5 @@ module.exports = [
     { path: "/api/flights", route: flightRoutes, role: ['tourist'] },
     { path: "/api/notifications", route: notificationRoutes, role: ['advertiser', 'tourGuide', 'seller', 'admin'] },
     { path: "/api/hotels", route: hotelRoutes, role: ['tourist'] },
-    { path: "/api/reset-password", route: resetPasswordRoutes, role: ["admin", "seller", "tourist", "tourismGovernor", "advertiser", "tourGuide"] },
+    { path: "/api/reset-password", route: resetPasswordRoutes },
 ];

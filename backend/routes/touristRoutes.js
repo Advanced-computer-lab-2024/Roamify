@@ -28,6 +28,7 @@ router.get('/get-all-upcoming-booked-itineraries', touristController.getAllUpcom
 router.get('/get-all-upcoming-booked-activities', touristController.getAllUpcomingBookedActivities);
 router.get('/get-all-transportation', touristController.getFilteredTransportations);
 router.get('/view-points-level', touristController.viewPointsLevel);
+router.get('/view-total-refunds', touristController.viewTotalRefundedReceipts);
 router.put('/redeem-points', touristController.redeemPoints);
 router.get('/get-upcoming-booked-transportations', touristController.getBookedFutureTransportations);
 router.get('/activity/unrated', activityController.getUnratedCompletedActivities);
