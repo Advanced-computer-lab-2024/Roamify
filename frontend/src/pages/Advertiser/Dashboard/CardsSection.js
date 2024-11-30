@@ -4,16 +4,15 @@ import StatsCard from "../../Admin/Dashboard/StatsCard";
 import DashboardCard from "../../Admin/Dashboard/DashboardCard";
 import LineChart from "../../Admin/Dashboard/LineChart";
 import Table from "./Table";
+import LoadingLogo from "../../../component/LoadingLogo";
 
 const CardsSection = ({ date }) => {
   const [totalTourists, setTotalTourists] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [revenueData, setRevenueData] = useState([]);
-  const [revenueDate, setRevenueDate] = useState("");
-  const [touristsDate, setTouristsDate] = useState("");
+  const [loading, setLoading] = useState(true); // Set loading to true initially
 
   useEffect(() => {
-    // Fetching data from your APIs with date as a query parameter
     const fetchRevenueData = async () => {
       try {
         const revenueResponse = await axios.get(
@@ -29,13 +28,13 @@ const CardsSection = ({ date }) => {
             date: new Date(item.date).toISOString().split("T")[0], // Format date as yyyy-MM-dd
           })
         );
-        // setTotalTourists(salesResponse?.data?.totalTourists);
         setTotalRevenue(revenueResponse?.data?.totalRevenue);
         setRevenueData(formattedRevenueData);
       } catch (err) {
-        console.error("Error fetching data", err);
+        console.error("Error fetching revenue data", err);
       }
     };
+
     const fetchTouristsData = async () => {
       try {
         const touristsResponse = await axios.get(
@@ -45,21 +44,40 @@ const CardsSection = ({ date }) => {
             withCredentials: true,
           }
         );
-
-        setTotalTourists(salesResponse?.data?.totalTourists);
+        setTotalTourists(touristsResponse?.data?.totalTourists);
       } catch (err) {
         setTotalTourists(0);
-        console.error("Error fetching data", err);
+        console.error("Error fetching tourists data", err);
       }
     };
-    fetchTouristsData();
-    fetchRevenueData();
+
+    // Set loading to true before starting API requests
+    setLoading(true);
+    const fetchData = async () => {
+      // Wait for both API calls to finish before setting loading to false
+      await Promise.all([fetchRevenueData(), fetchTouristsData()]);
+      setLoading(false); // Now set loading to false after the data has been fetched
+    };
+
+    fetchData();
   }, [date]);
 
   console.log(totalRevenue);
   console.log(revenueData);
 
-  return (
+  return loading ? (
+    <div
+      style={{
+        flex: 1,
+        padding: "10px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <LoadingLogo isVisible={true} size="100px" />
+    </div>
+  ) : (
     <div style={{ flex: 1, padding: "10px" }}>
       <section
         style={{
@@ -81,6 +99,7 @@ const CardsSection = ({ date }) => {
           width={"100%"}
           title={""}
           titlePosition={"left"}
+          isOverflowY={true}
           body={
             <div style={{ height: "100%", width: "100%", display: "flex" }}>
               <DashboardCard
@@ -91,7 +110,7 @@ const CardsSection = ({ date }) => {
                 body={
                   <LineChart
                     seriesName={"Total Revenue"}
-                    seriesData={revenueData.map((item) => item.price)} // assuming each item has 'revenue'
+                    seriesData={revenueData.map((item) => item.price)} // assuming each item has 'price'
                     xValues={revenueData.map((item) => {
                       const date = new Date(item.date);
                       return date.toLocaleDateString("en-US"); // For American format: MM/DD/YYYY
@@ -112,26 +131,15 @@ const CardsSection = ({ date }) => {
                   width={"100%"}
                   title={"Total Sales"}
                   titlePosition={"left"}
+                  isOverflowY={true}
                   body={
                     <Table
                       fetchedData={revenueData}
                       fetchedColumns={[
-                        {
-                          Header: "Name",
-                          accessor: "name",
-                        },
-                        {
-                          Header: "Count",
-                          accessor: "count",
-                        },
-                        {
-                          Header: "Price",
-                          accessor: "price",
-                        },
-                        {
-                          Header: "Date",
-                          accessor: "date",
-                        },
+                        { Header: "Name", accessor: "name" },
+                        { Header: "Count", accessor: "count" },
+                        { Header: "Price", accessor: "price" },
+                        { Header: "Date", accessor: "date" },
                       ]}
                     />
                   }
@@ -141,26 +149,15 @@ const CardsSection = ({ date }) => {
                   width={"100%"}
                   title={"Total Sales"}
                   titlePosition={"left"}
+                  isOverflowY={true}
                   body={
                     <Table
                       fetchedData={revenueData}
                       fetchedColumns={[
-                        {
-                          Header: "Name",
-                          accessor: "name",
-                        },
-                        {
-                          Header: "Count",
-                          accessor: "count",
-                        },
-                        {
-                          Header: "Price",
-                          accessor: "price",
-                        },
-                        {
-                          Header: "Date",
-                          accessor: "date",
-                        },
+                        { Header: "Name", accessor: "name" },
+                        { Header: "Count", accessor: "count" },
+                        { Header: "Price", accessor: "price" },
+                        { Header: "Date", accessor: "date" },
                       ]}
                     />
                   }

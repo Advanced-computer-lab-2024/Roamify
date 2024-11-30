@@ -12,7 +12,11 @@ const Table = ({ fetchedData, fetchedColumns }) => {
     );
 
   return (
-    <div style={{ overflowX: "auto", padding: "20px" }}>
+    <div
+      style={{
+        padding: "20px",
+      }}
+    >
       <table
         {...getTableProps()}
         style={{

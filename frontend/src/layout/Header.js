@@ -172,6 +172,7 @@ const Header = ({ HeaderData }) => {
                     border: "1px solid rgba(255, 255, 255, 0.2)",
                     padding: "0px 1vw",
                     backgroundColor: "var(--secondary-color)",
+                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                   }}
                 >
                   <ul className="navbar-nav">

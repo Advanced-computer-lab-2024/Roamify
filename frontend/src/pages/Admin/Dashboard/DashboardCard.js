@@ -1,6 +1,13 @@
 import React from "react";
 
-const DashboardCard = ({ title, height, width, titlePosition, body }) => {
+const DashboardCard = ({
+  title,
+  height,
+  width,
+  titlePosition,
+  body,
+  isOverflowY,
+}) => {
   return (
     <div
       style={{
@@ -33,7 +40,13 @@ const DashboardCard = ({ title, height, width, titlePosition, body }) => {
           {title}
         </h3>
       </div>
-      <div style={{ marginTop: "10px", flex: 1 }}>
+      <div
+        style={{
+          marginTop: "10px",
+          flex: 1,
+          overflowY: isOverflowY ? "auto" : "",
+        }}
+      >
         {body}
         {/* This will allow the body to be dynamic (chart, text, etc.) */}
       </div>
