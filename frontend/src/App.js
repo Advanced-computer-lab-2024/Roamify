@@ -20,13 +20,18 @@ import PlaceDetails from "./pages/Tourist/component/TouristPlaces/PlaceDetails";
 import Advertiser from "./pages/Advertiser/Advertiser";
 import Guest from "../src/pages/Guest/Guest";
 import Home from "./pages/Home/Home";
+import ForgetPassword from "./page/ForgetPassword";
+import ForgotPasswordArea from "./component/ForgotPassword";
+import OTPPage from "./page/OTPPage";
 const App = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
+        {/* <Route path="/" element={<Home />} /> */}
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forget-password" element={<ForgetPassword />} />
+        <Route path="/otp-page" element={<OTPPage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/tourist/*" element={<Tourist />} />
         <Route path="/admin/*" element={<Admin />} />
