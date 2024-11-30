@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import io from "socket.io-client";
 import { toKebabCase } from "../../functions/toKebabCase.js";
 
 const LoginArea = () => {
@@ -8,7 +9,6 @@ const LoginArea = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const [socket, setSocket] = useState(null);
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -32,6 +32,7 @@ const LoginArea = () => {
       // Store user role in localStorage
       localStorage.setItem("role", role);
 
+      setupSocket();
       // Determine the correct navigation route based on conditions
       if (status === "active") {
         navigate(`/${toKebabCase(role)}`); // Navigate to stakeholder's page
@@ -44,34 +45,46 @@ const LoginArea = () => {
       } else if (status === "pending creation" && termsAndConditions) {
         navigate("/profile-details"); // Navigate to ProfileDetails page
       }
-
-      // Now that the user is logged in and has a JWT token stored in cookies, connect to WebSocket
-      // WebSocket connection after login
-      const socketConnection = io("http://localhost:3000", {
-        withCredentials: true, // Automatically sends cookies (including JWT)
-        transports: ["websocket"], // Use WebSocket transport
-      });
-
-      // Listen for notifications
-      socketConnection.on("notification", (notification) => {
-        toast(notification.message, {
-          duration: 4000,
-          position: "top-right",
-          style: {
-            background: "#333",
-            color: "#fff",
-            borderRadius: "10px",
-            padding: "12px 20px",
-            fontSize: "16px",
-          },
-        });
-      });
-
-      setSocket(socketConnection); // Save socket instance for further use
     } catch (err) {
       console.error("Error logging in:", err);
       setError("Invalid username or password. Please try again.");
     }
+  };
+
+  const setupSocket = () => {
+    // Check if token is available in cookies
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("token="))
+      ?.split("=")[1]; // Replace 'token' with the actual cookie name
+
+    console.log("Token from cookie: ", token); // Log the token from the cookies
+
+    const socket = io("http://localhost:3000", {
+      withCredentials: true, // Ensure cookies are sent with the WebSocket handshake
+    });
+
+    // Event listener for successful connection
+    socket.on("connect", () => {
+      console.log(`Connected to the server with socket ID: ${socket.id}`);
+    });
+
+    // Event listener for connection errors
+    socket.on("connect_error", (err) => {
+      console.error("Connection failed:", err.message);
+    });
+
+    // Event listener for custom server messages
+    socket.on("message", (data) => {
+      console.log("Message from server:", data);
+    });
+
+    // Event listener for disconnection
+    socket.on("disconnect", () => {
+      console.log("Disconnected from server");
+    });
+
+    return socket;
   };
 
   return (

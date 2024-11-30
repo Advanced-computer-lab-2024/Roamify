@@ -8,13 +8,14 @@ import { HeaderData } from "./AdvertiserHeaderData.js";
 import TouristActivities from "../Tourist/TouristActivities.js";
 import CopyRight from "../../layout/CopyRight.js";
 import AdvertiserActivities from "./AdvertiserActivities.js";
+import Dashboard from "./Dashboard/Dashboard.js";
 
 const Advertiser = () => {
   return (
     <>
       <Header HeaderData={HeaderData} />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Dashboard />} />
         <Route path="/activities" element={<AdvertiserActivities />} />
       </Routes>
       <CopyRight />

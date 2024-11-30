@@ -4,6 +4,9 @@ import axios from "axios";
 import logo from ".././assets/img/logo.png";
 import logoBlack from ".././assets/img/logo_black.png";
 import ProfileButton from "../component/Profile/ProfileButton";
+import ThemeToggleButton from "../pages/Home/ThemeToggleButton";
+import { useFlexLayout } from "react-table";
+import { color } from "chart.js/helpers";
 
 const Header = ({ HeaderData }) => {
   const role = localStorage.getItem("role");
@@ -85,23 +88,13 @@ const Header = ({ HeaderData }) => {
                   </li>
                 </ul>
               </div>
-              {role === "tourist" && (
-                <div className="col-lg-3 text-end">
+              <div
+                className="col-lg-3 text-end"
+                style={{ display: "flex", justifyContent: "end" }}
+              >
+                <ThemeToggleButton />
+                {role === "tourist" && (
                   <div style={{ position: "relative" }}>
-                    {/* <input
-                      type="text"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Search currency"
-                      style={{
-                        padding: "5px",
-                        width: "100%",
-                        borderRadius: "5px",
-                        border: "1px solid #ddd",
-                        fontSize: "14px",
-                        marginBottom: "5px",
-                      }}
-                    /> */}
                     <select
                       value={currency}
                       onChange={(e) => {
@@ -136,8 +129,8 @@ const Header = ({ HeaderData }) => {
                       ))}
                     </select>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -174,15 +167,26 @@ const Header = ({ HeaderData }) => {
                 <div
                   className="collapse navbar-collapse mean-menu"
                   id="navbarSupportedContent"
+                  style={{
+                    borderRadius: "50px",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    padding: "0px 1vw",
+                    backgroundColor: "var(--secondary-color)",
+                  }}
                 >
                   <ul className="navbar-nav">
                     {HeaderData.map((data, index) => (
-                      <li className="nav-item" key={index}>
+                      <li
+                        className="nav-item"
+                        key={index}
+                        style={{
+                          padding: "2vh 1vw",
+                        }}
+                      >
                         <Link to={data.link} className="nav-link active">
-                          {data.menu}
-                          {data.submenu && (
-                            <i className="fas fa-angle-down"></i>
-                          )}
+                          <p style={{ color: "var(--text-color)" }}>
+                            {data.menu}
+                          </p>
                         </Link>
                         {data.submenu && (
                           <ul className="dropdown-menu">
@@ -212,10 +216,13 @@ const Header = ({ HeaderData }) => {
                       </li>
                     ))}
                   </ul>
-                  <div className="others-options d-flex align-items-center">
-                    <div className="option-item">
-                      <ProfileButton />
-                    </div>
+                </div>
+                <div
+                  className="others-options d-flex align-items-center"
+                  style={{ flex: 1, display: "flex", justifyContent: "end" }}
+                >
+                  <div className="option-item">
+                    <ProfileButton />
                   </div>
                 </div>
               </nav>
@@ -262,13 +269,15 @@ const Header = ({ HeaderData }) => {
                                   to={data.link}
                                   className="nav-link active"
                                 >
-                                  {data.menu}
-                                  {data.submenu && (
-                                    <i className="fas fa-angle-down"></i>
-                                  )}
+                                  <p style={{ color: "var(--text-color)" }}>
+                                    {data.menu}
+                                  </p>
                                 </Link>
                                 {data.submenu && (
-                                  <div className="nav-item">
+                                  <div
+                                    className="nav-item"
+                                    style={{ position: "relative" }}
+                                  >
                                     <ul className="dropdown-menu">
                                       {data.subMenuitem.map((item, index1) => (
                                         <li className="nav-item" key={index1}>

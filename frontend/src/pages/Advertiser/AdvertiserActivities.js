@@ -5,10 +5,10 @@ import AdvertiserActivitiesArea from "./AdvertiserActivitiesArea.js";
 const AdvertiserActivities = () => {
   return (
     <>
-      <CommonBanner
+      {/* <CommonBanner
         heading="Advertiser Activities"
         pagination="Advertiser Activities"
-      />
+      /> */}
       <AdvertiserActivitiesArea />
     </>
   );

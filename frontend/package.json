@@ -27,7 +27,7 @@
     "react-popper": "^2.3.0",
     "react-router": "^6.22.1",
     "react-router-dom": "^6.21.3",
-    "react-scripts": "^3.0.1",
+    "react-table": "^7.8.0",
     "react-toastify": "^10.0.6",
     "socket.io-client": "^4.8.1",
     "three": "^0.170.0",
@@ -39,12 +39,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [
@@ -60,6 +54,8 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "eslint": "^5.16.0",
+    "react-scripts": "^5.0.1"
   }
 }
