@@ -25,7 +25,7 @@ const sendOtp = async (req, res) => {
         //3 steps to create an otp
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         user.otp = otp
-        user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes from now    
+        user.otpExpires = Date.now() + 1 * 60 * 1000; // 10 minutes from now    
         await user.save()
 
         // Send the OTP via email
