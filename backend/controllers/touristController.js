@@ -12,7 +12,8 @@ const activityTicketModel = require("../models/activityTicketModel");
 const itineraryTicketModel = require("../models/itineraryTicketModel");
 const placeTicketModel = require("../models/placeTicketModel");
 const placeModel = require("../models/placeModel");
-const tourGuideReviewModel = require("../models/tourGuideReviewModel");
+const nodemailer = require('nodemailer')
+const emailTemplates = require('../emailTemplate')
 const Stripe = require('stripe');
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -175,7 +176,7 @@ const bookActivity = async (req, res) => {
     if (!activity)
       throw Error('Please choose an activity to book')
     if (!date) throw Error('Date is required')
-    if (method !== 'availableCredit' || method !== 'card') throw Error('please specify a correct method of payment')
+    if (method !== 'availableCredit' && method !== 'card') throw Error('please specify a correct method of payment')
 
     const activityId = new mongoose.Types.ObjectId(activity);
     const bookingDate = new Date(date);
@@ -276,6 +277,27 @@ const bookActivity = async (req, res) => {
       await activityTicket.save();
     }
 
+    // Send  email
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const user = await userModel.findById(req.user._id)
+
+    const htmlContent = emailTemplates.bookedActivityEmail(activityObject.name, activityObject.date, receipt);
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: user.email,
+      subject: "Booked Activity",
+      html: htmlContent
+    };
+
+    await transporter.sendMail(mailOptions);
+
 
 
     //checking if tourist has available credit
@@ -303,7 +325,7 @@ const bookPlace = async (req, res) => {
       throw Error('Choose a ticket type')
     if (!amount)
       throw Error('Choose an amount')
-    if (method !== 'availableCredit' || method !== 'card') throw Error('please specify a correct method of payment')
+    if (method !== 'availableCredit' && method !== 'card') throw Error('please specify a correct method of payment')
 
     const placeId = new mongoose.Types.ObjectId(place);
     const placeObject = await placeModel.findById(placeId);
@@ -387,7 +409,7 @@ const bookItinerary = async (req, res) => {
     if (!itinerary)
       throw Error('Please choose an itinerary to book')
     if (!date) throw Error('Date is required')
-    if (method !== 'availableCredit' || method !== 'card') throw Error('please specify a correct method of payment')
+    if (method !== 'availableCredit' && method !== 'card') throw Error('please specify a correct method of payment')
     const itineraryId = new mongoose.Types.ObjectId(itinerary);
     const bookingDate = new Date(date);
     const itineraryObject = await itineraryModel.findById(itineraryId);
@@ -493,6 +515,27 @@ const bookItinerary = async (req, res) => {
       });
       await itineraryTicket.save();
     }
+
+    // Send the OTP via email
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const user = await userModel.findById(req.user._id)
+
+    const htmlContent = emailTemplates.bookedItineraryEmail(itineraryObject.name, date, receipt);
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: user.email,
+      subject: "Booked Activity",
+      html: htmlContent
+    };
+
+    await transporter.sendMail(mailOptions);
     return res.status(200).json({ message: "Itinerary booked successfully" });
   } catch (error) {
     res
@@ -935,7 +978,7 @@ const bookTransportation = async (req, res) => {
 
     const { transportationIdString, method, paymentMethodId } = req.body;
     if (!transportationIdString) throw Error("please pick a transportation");
-    if (method !== 'availableCredit' || method !== 'card') throw Error('please specify a correct method of payment')
+    if (method !== 'availableCredit' && method !== 'card') throw Error('please specify a correct method of payment')
 
     const transportationId = new mongoose.Types.ObjectId(
       transportationIdString
