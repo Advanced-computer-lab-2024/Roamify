@@ -99,7 +99,16 @@ const changePassword = async (req, res) => {
     try {
         if (!req.cookies.resetToken) throw Error('Access denied')
 
-        const user = await userModel.findById(req.body.userId)
+        let decoded;
+        // Decode the token
+        try {
+            decoded = jwt.verify(req.cookies.resetToken, process.env.SECRET);
+
+        }
+        catch (e) {
+            return res.status(401).json({ message: 'invalid token' })
+        }
+        const user = await userModel.findById(decoded.id)
 
         const { password, confirmedPassword } = req.body
 
@@ -124,6 +133,7 @@ const changePassword = async (req, res) => {
     }
     catch (error) {
 
+        console.log(error)
         return res.status(500).json({ message: error.message })
     }
 }
