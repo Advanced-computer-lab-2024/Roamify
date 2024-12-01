@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import ActivitiesTable from "../Activities/ActivitiesTable.js";
-import CommonBanner from "../../../component/Common/CommonBanner.js";
 import axios from "axios";
 import CreateTagButton from "../Activities/CreateTagButton.js";
 
 const PreferenceTags = () => {
   const [preferenceTags, setPreferenceTags] = useState([]);
+  const [searchInput, setSearchInput] = useState("");
 
-  // Fetch users by role
+  // Fetch preference tags
   useEffect(() => {
     axios
       .get(`http://localhost:3000/api/preference-tag/get-all`, {
@@ -18,23 +18,73 @@ const PreferenceTags = () => {
       })
       .catch((error) => console.error(error));
   }, []);
+
+  // Handle search input change
+  const handleSearchChange = (event) => {
+    setSearchInput(event.target.value);
+  };
+
+  // Filter tags based on search input
+  const filteredTags = preferenceTags.filter((tag) =>
+    tag.name.toLowerCase().includes(searchInput.toLowerCase())
+  );
+
   return (
-    <div>
+    <div style={{ minHeight: "100vh" }}>
+      {/* Header and Search Bar Section */}
       <div
         style={{
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          marginBottom: "20px",
+          padding: "0px 2vw",
         }}
       >
-        {/* <CreateActivityButton type={"category"} /> */}
+        {/* Title */}
+        <h1
+          style={{
+            fontSize: "24px",
+            fontWeight: "bold",
+            color: "var(--text-color)",
+          }}
+        >
+          Preference Tags
+        </h1>
+
+        {/* Search Bar and Create Tag Button */}
+        <div style={{ display: "flex", width: "100%" }}>
+          {/* Search Bar */}
+          <input
+            type="text"
+            placeholder="Search tags..."
+            value={searchInput}
+            onChange={handleSearchChange}
+            style={{
+              padding: "8px",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+              marginRight: "20px",
+              width: "300px",
+            }}
+          />
+
+          {/* Create Tag Button */}
+          <div style={{ marginLeft: "auto" }}>
+            <CreateTagButton type={"preference-tag"} />
+          </div>
+        </div>
       </div>
-      <CreateTagButton type={"preference-tag"} />
-      <ActivitiesTable
-        columns={[{ name: "name" }, { name: "description" }]}
-        categories={preferenceTags}
-        type={"preference-tag"}
-      />
+
+      {/* Table for displaying preference tags */}
+      <div style={{ marginTop: "20px", padding: "0px 2vw" }}>
+        <ActivitiesTable
+          columns={[{ name: "Name" }, { name: "Description" }]}
+          categories={filteredTags}
+          type={"preference-tag"}
+        />
+      </div>
     </div>
   );
 };

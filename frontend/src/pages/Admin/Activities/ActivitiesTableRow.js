@@ -24,7 +24,10 @@ const ActivitiesTableRow = ({ id, name, description, type }) => {
     <tr
       style={{
         transition: "background-color 0.2s ease-in-out",
-        borderBottom: "1px solid #e5e7eb", // Tailwind gray-200
+        borderBottom: "2px solid var(--border-color)", // Tailwind gray-200
+        borderBottomWidth: "1px",
+        borderColor: "var(--border-color)",
+        padding: "20px 10px",
       }}
       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f9fafb")} // Hover effect: Tailwind gray-50
       onMouseLeave={(e) =>

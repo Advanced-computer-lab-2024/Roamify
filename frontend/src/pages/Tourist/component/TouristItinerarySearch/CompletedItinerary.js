@@ -17,9 +17,12 @@ const CompletedItinerary = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get("http://localhost:3000/api/tourist/itinerary/unrated", {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        "http://localhost:3000/api/tourist/itinerary/unrated",
+        {
+          withCredentials: true,
+        }
+      );
       setItineraries(response.data.itineraries || []);
     } catch (error) {
       setItineraries([]);
@@ -39,49 +42,59 @@ const CompletedItinerary = () => {
 
   return (
     <>
-     <Header HeaderData={HeaderData} />
-     <CommonBanner heading="Rate Itinerary" pagination="itinerary" />
-    <section id="explore_area" className="section_padding">
-      <div className="container">
-        <SectionHeading heading={`${itineraries?.length || 0} itineraries found`} />
-        <div className="row">
-          <div className="col-lg-9">
-            {loading ? (
-              <p>Loading itineraries...</p>
-            ) : error ? (
-              <p>{error}</p>
-            ) : (
-              <div className="flight_search_result_wrapper">
-                {itineraries.length > 0 ? (
-                  itineraries.map((itinerary) => (
-                    <div className="flight_search_item_wrapper" key={itinerary.itineraryId}>
-                      <div className="flight_search_items">
-                        <h3 className="itinerary-name">{itinerary.itineraryName}</h3>
-                        <div className="itinerary-section">
-                          <p>
-                            <strong>Name:</strong> {itinerary.itineraryName}
-                          </p>
-                        </div>
-                        <div className="booking-section">
-                          <button
-                            onClick={() => navigate(`/itinerary-details/${itinerary.itineraryId}`)}
-                            className="btn btn_theme btn_sm"
-                          >
-                            Review
-                          </button>
+      {/* <CommonBanner heading="Rate Itinerary" pagination="itinerary" /> */}
+      <section id="explore_area" className="section_padding">
+        <div className="container">
+          <SectionHeading
+            heading={`${itineraries?.length || 0} itineraries found`}
+          />
+          <div className="row">
+            <div className="col-lg-9">
+              {loading ? (
+                <p>Loading itineraries...</p>
+              ) : error ? (
+                <p>{error}</p>
+              ) : (
+                <div className="flight_search_result_wrapper">
+                  {itineraries.length > 0 ? (
+                    itineraries.map((itinerary) => (
+                      <div
+                        className="flight_search_item_wrapper"
+                        key={itinerary.itineraryId}
+                      >
+                        <div className="flight_search_items">
+                          <h3 className="itinerary-name">
+                            {itinerary.itineraryName}
+                          </h3>
+                          <div className="itinerary-section">
+                            <p>
+                              <strong>Name:</strong> {itinerary.itineraryName}
+                            </p>
+                          </div>
+                          <div className="booking-section">
+                            <button
+                              onClick={() =>
+                                navigate(
+                                  `/itinerary-details/${itinerary.itineraryId}`
+                                )
+                              }
+                              className="btn btn_theme btn_sm"
+                            >
+                              Review
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <p>No itineraries available.</p>
-                )}
-              </div>
-            )}
+                    ))
+                  ) : (
+                    <p>No itineraries available.</p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
     </>
   );
 };
