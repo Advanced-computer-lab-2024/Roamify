@@ -29,6 +29,8 @@ const ForgotPasswordArea = () => {
 
       if (response.status === 200) {
         // Successfully sent OTP, redirect to OTP page
+        const { userId } = response.data; // Assuming the userId is returned in the response
+        localStorage.setItem("userId", userId); // Store the userId in localStorage
         window.location.href = "/otp-page"; // Redirect to OTP page
       } else {
         // Handle unexpected responses (non-200 status)

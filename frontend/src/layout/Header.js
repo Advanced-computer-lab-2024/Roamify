@@ -56,8 +56,14 @@ const Header = ({ HeaderData }) => {
 
   return (
     <>
-      <header className="main_header_arae">
-        <div className="topbar-area">
+      <header
+        className="main_header_arae"
+        style={{
+          borderBottom: "2px solid var(--secondary-color)",
+          padding: "10px 0px",
+        }}
+      >
+        {/* <div className="topbar-area" style={{ borderBottom: "none" }}>
           <div className="container">
             <div className="row align-items-center justify-content-between">
               <div className="col-lg-6 col-md-6">
@@ -133,7 +139,7 @@ const Header = ({ HeaderData }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="navbar-area">
           <div className="main-responsive-nav">
@@ -222,6 +228,10 @@ const Header = ({ HeaderData }) => {
                   className="others-options d-flex align-items-center"
                   style={{ flex: 1, display: "flex", justifyContent: "end" }}
                 >
+                  <div className="option-item" style={{ marginRight: "0px" }}>
+                    <ThemeToggleButton />
+                  </div>
+
                   <div className="option-item">
                     <ProfileButton />
                   </div>

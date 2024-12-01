@@ -1,6 +1,6 @@
 import React from "react";
 // import  CommonBanner
-import CommonBanner from "../../component/Common/CommonBanner.js";
+import CommonBanner from "../../../component/Common/CommonBanner.js";
 import AdvertiserActivitiesArea from "./AdvertiserActivitiesArea.js";
 const AdvertiserActivities = () => {
   return (

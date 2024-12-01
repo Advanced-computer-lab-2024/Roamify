@@ -62,6 +62,9 @@ Default CSS
   --secondary-color: #ffffff;
   --scroll-bar-color: #c092f7;
   --text-color: #2b2540;
+  --shimmer-start-color: #f0f0f0;
+  --shimmer-middle-color: #e0e0e0;
+  --shimmer-end-color: #f0f0f0;
   --box-shadow: -4px -4px 16px rgb(139 62 234 / 8%),
     4px 14px 28px rgb(139 148 250 / 7%);
   --dark-border: #1e1e1e;
@@ -77,12 +80,15 @@ Default CSS
 }
 
 .dark-mode {
-  --scroll-bar-color: #252525;
+  --scroll-bar-color: #202f5e;
   --background-color: #080f25;
   --dashboard-title-color: #aeb9e1;
   --secondary-color: #101935;
   --box-shadow: 0px 0px 7px rgba(255, 255, 255, 0.5);
   --text-color: #e7e9ea;
+  --shimmer-start-color: #1f2a41;
+  --shimmer-middle-color: #2a3c56;
+  --shimmer-end-color: #1f2a41;
 }
 
 html,

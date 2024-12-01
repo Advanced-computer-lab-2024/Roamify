@@ -9,12 +9,14 @@ import CopyRight from "../../layout/CopyRight";
 import { HeaderData } from "./TourGuideHeaderData.js";
 import TourGuideProfile from "./TourGuideProfile.js";
 import TourGuideItinerary from "./TourGuideItinerary.js";
+import Dashboard from "./Dashboard/Dashboard.js";
 const TourGuide = () => {
   return (
     <>
       <Header HeaderData={HeaderData} />
       <Routes>
-        <Route path="/" element={<TourGuideItinerary />} />
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/itineraries" element={<TourGuideItinerary />} />
       </Routes>
       <CopyRight />
     </>

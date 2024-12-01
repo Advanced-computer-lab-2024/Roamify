@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import SectionHeading from "../../component/Common/SectionHeading";
+import SectionHeading from "../../../component/Common/SectionHeading";
 import { ToastContainer, toast } from "react-toastify";
-import DeleteButton from "../Admin/Activities/DeleteButton";
-import CreateActivityButton from "./CreateActivityButton";
-import UpdateActivityButton from "./UpdateActivityButton";
+import DeleteButton from "../../Admin/Activities/DeleteButton";
+import CreateActivityButton from "../CreateActivityButton";
+import UpdateActivityButton from "../UpdateActivityButton";
+import SkeletonLoader from "./SkeletonLoader";
 
 const AdvertiserActivitiesArea = () => {
   const [activities, setActivities] = useState([]);
@@ -72,7 +73,7 @@ const AdvertiserActivitiesArea = () => {
           </div>
           <div className="col-lg-9">
             {loading ? (
-              <p>Loading activities...</p>
+              <SkeletonLoader />
             ) : error ? (
               <p>{error}</p>
             ) : (
