@@ -3,9 +3,10 @@ import Modal from "react-modal";
 import ProfileIcon from "../Icons/ProfileIcon";
 import { Link, useNavigate } from "react-router-dom";
 import AddUserButton from "../../pages/Admin/Users/AddUserButton";
-
+import Wallet from "../../pages/Profile/Wallet";
 function ProfileButton() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [walletModalIsOpen, setWalletModalIsOpen] = useState(false);
   const role = localStorage.getItem("role"); // Retrieve role from localStorage
   const navigate = useNavigate();
 
@@ -53,12 +54,23 @@ function ProfileButton() {
           <Link to={"/settings"}>
             <button onClick={() => setModalIsOpen(false)}>Settings</button>
           </Link>
+          {role === "tourist" && (
+        <button
+          onClick={() => {
+            // Redirect to the WalletPage when the button is clicked
+            navigate("/tourist/wallet");
+          }}
+        >
+          Wallet
+        </button>
+      )}
           {role === "admin" && <AddUserButton userType={"admin"} />}
           <Link to={""}>
             <button onClick={() => setModalIsOpen(false)}>Logout</button>
           </Link>
         </div>
       </Modal>
+     
     </div>
   );
 }
