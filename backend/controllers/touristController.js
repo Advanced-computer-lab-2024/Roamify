@@ -465,9 +465,8 @@ const bookItinerary = async (req, res) => {
       await walletModel.findByIdAndUpdate(tourist.wallet._id, {
         availableCredit,
       });
-      console.log(111)
     }
-    if (method == 'card') {
+    if (method === 'card') {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: itineraryObject.price * 100, // Amount in cents
         currency: 'usd', // Set the currency
