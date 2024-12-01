@@ -41,12 +41,12 @@ const sendOtp = async (req, res) => {
       },
     });
 
-    const mailOptions = {
-      from: process.env.EMAIL,
-      to: email,
-      subject: "Your OTP Code",
-      text: `Your OTP code is ${otp}. It is valid for 1 minute.`,
-    };
+        const mailOptions = {
+            from: process.env.EMAIL,
+            to: email,
+            subject: "Your OTP Code",
+            text: `Your OTP code is ${otp}. It is valid for 1 minute.`,
+        };
 
     await transporter.sendMail(mailOptions);
 
