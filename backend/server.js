@@ -9,11 +9,13 @@ const connectDB = require("./config/db"); // Database connection
 const setupMiddlewares = require("./config/middleware"); // General middlewares (CORS, cookieParser, etc.)
 const setupRoutes = require("./config/setupRoutes"); // API route setup with role-based checks
 const setupCronJobs = require("./cronJobs/cronScheduler"); // Cron job scheduler
-const { setupSocketIO } = require("./config/socket"); // Import Socket.IO setup
+const { setupSocketIO } = require("./config/socket");
+const {constants} = require("node:fs"); // Import Socket.IO setup
+const {PORT} = require("./config/constants");
 
 // Initialize app
 const app = express();
-const PORT = process.env.PORT || 3000;
+
 
 // Create an HTTP server
 const server = http.createServer(app); // Combine Express with an HTTP server
