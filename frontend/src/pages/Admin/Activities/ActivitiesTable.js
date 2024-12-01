@@ -7,7 +7,7 @@ const ActivitiesTable = ({ columns, categories, type }) => {
       <table
         style={{
           minWidth: "100%",
-          backgroundColor: "white",
+          backgroundColor: "var(--secondary-color)",
           boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
           borderRadius: "0.5rem",
           overflow: "hidden",
@@ -21,7 +21,7 @@ const ActivitiesTable = ({ columns, categories, type }) => {
               fontSize: "0.875rem",
               lineHeight: "1.5",
               borderBottomWidth: "2px",
-              borderColor: "#d1d5db", // Tailwind gray-300
+              borderColor: "var(--border-color)", // Tailwind gray-300
             }}
           >
             {columns.map((column, index) => (
@@ -43,7 +43,7 @@ const ActivitiesTable = ({ columns, categories, type }) => {
         </thead>
         <tbody
           style={{
-            color: "#1f2937", // Tailwind gray-800
+            color: "var(--dashboard-title-color)", // Tailwind gray-800
             fontSize: "0.875rem",
             fontWeight: "300", // font-light
           }}

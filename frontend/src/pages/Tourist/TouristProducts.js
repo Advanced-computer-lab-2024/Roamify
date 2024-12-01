@@ -9,7 +9,7 @@ import TouristProductsArea from "./component/TouristProducts";
 const TouristProducts = () => {
   return (
     <>
-      <CommonBanner heading="Tourist Products" pagination="products" />
+      {/* <CommonBanner heading="Tourist Products" pagination="products" /> */}
       {/* <SearchForm /> */}
       <TouristProductsArea />
     </>

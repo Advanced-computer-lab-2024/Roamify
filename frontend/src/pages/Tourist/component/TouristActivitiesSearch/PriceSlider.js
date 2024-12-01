@@ -26,8 +26,11 @@ const PriceSlider = ({ onApply }) => {
         defaultValue={[100, 500]}
         onChange={handleSliderChange}
         value={priceRange}
-        trackStyle={[{ backgroundColor: "#52c41a" }]}
-        handleStyle={[{ borderColor: "#52c41a" }, { borderColor: "#52c41a" }]}
+        trackStyle={[{ backgroundColor: "var(--main-color)" }]}
+        handleStyle={[
+          { borderColor: "var(--main-color)" },
+          { borderColor: "var(--main-color)" },
+        ]}
       />
       <button className="apply" type="button" onClick={handleApplyClick}>
         Apply

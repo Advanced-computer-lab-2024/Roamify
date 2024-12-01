@@ -82,6 +82,7 @@ const TouristProductsArea = () => {
                     className="form-control"
                     placeholder="Product Name"
                     defaultValue={searchName}
+                    style={{ background: "var(--background-color)" }}
                   />
                   <button type="submit" className="apply">
                     Search

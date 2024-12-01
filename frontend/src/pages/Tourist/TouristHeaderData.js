@@ -1,7 +1,7 @@
 export const HeaderData = [
   {
     menu: "Home",
-    link: "tourist-profile",
+    link: "",
   },
   {
     menu: "Transportations",
@@ -63,7 +63,7 @@ export const HeaderData = [
     subMenuitem: [
       {
         subItem: "View All",
-        linkL: "",
+        linkL: "products",
         subMenuActive: false,
       },
     ],

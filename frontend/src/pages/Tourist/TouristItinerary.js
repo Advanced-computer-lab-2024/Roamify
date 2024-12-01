@@ -7,10 +7,10 @@ import TouristItineraryArea from "./component/TouristItinerarySearch/index.js";
 const TouristItinerary = () => {
   return (
     <>
-      <CommonBanner
+      {/* <CommonBanner
         heading="Tourist Itinerary"
         pagination="Tourist Itinerary"
-      />
+      /> */}
       <TouristItineraryArea />
     </>
   );

@@ -43,52 +43,57 @@ const Wallet = () => {
 
   return (
     <>
-     <CommonBanner
-        heading="Wallet"
-        pagination="Wallet"
-      />
-    <div style={styles.pageContainer}>
-      <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Wallet Overview</h2>
-      <div style={styles.infoContainer}>
-        <div style={styles.infoRow}>
-          <h3 style={styles.header}>Available Credit</h3>
-          <p style={styles.value}>${walletData.availableCredit.toLocaleString()}</p>
-        </div>
-
-        {/* Display Wallet Cards if the cards array is not empty */}
-        {walletData.cards && walletData.cards.length > 0 ? (
-          <div style={styles.cardsContainer}>
-            <h3 style={styles.header}>Your Cards</h3>
-            <ul style={styles.cardsList}>
-              {walletData.cards.map((card, index) => (
-                <li key={index} style={styles.cardItem}>
-                  <strong>Card Name: </strong> {card.name}
-                  <br />
-                  <strong>Card Balance: </strong> ${card.balance.toLocaleString()}
-                </li>
-              ))}
-            </ul>
+      <div style={styles.pageContainer}>
+        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
+          Wallet Overview
+        </h2>
+        <div style={styles.infoContainer}>
+          <div style={styles.infoRow}>
+            <h3 style={styles.header}>Available Credit</h3>
+            <p style={styles.value}>
+              ${walletData.availableCredit.toLocaleString()}
+            </p>
           </div>
-        ) : (
-          <p>No cards available.</p>
-        )}
 
-        <div style={styles.infoRow}>
-          <h3 style={styles.header}>Refunded Activities Amount</h3>
-          <p style={styles.value}>{showRefunds(refundsData.refundedActivitiesAmount)}</p>
-        </div>
+          {/* Display Wallet Cards if the cards array is not empty */}
+          {walletData.cards && walletData.cards.length > 0 ? (
+            <div style={styles.cardsContainer}>
+              <h3 style={styles.header}>Your Cards</h3>
+              <ul style={styles.cardsList}>
+                {walletData.cards.map((card, index) => (
+                  <li key={index} style={styles.cardItem}>
+                    <strong>Card Name: </strong> {card.name}
+                    <br />
+                    <strong>Card Balance: </strong> $
+                    {card.balance.toLocaleString()}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p>No cards available.</p>
+          )}
 
-        <div style={styles.infoRow}>
-          <h3 style={styles.header}>Refunded Itineraries Amount</h3>
-          <p style={styles.value}>{showRefunds(refundsData.refundedItinerariesAmount)}</p>
-        </div>
+          <div style={styles.infoRow}>
+            <h3 style={styles.header}>Refunded Activities Amount</h3>
+            <p style={styles.value}>
+              {showRefunds(refundsData.refundedActivitiesAmount)}
+            </p>
+          </div>
 
-        <div style={styles.infoRow}>
-          <h3 style={styles.header}>Total Refunds</h3>
-          <p style={styles.value}>{showRefunds(refundsData.total)}</p>
+          <div style={styles.infoRow}>
+            <h3 style={styles.header}>Refunded Itineraries Amount</h3>
+            <p style={styles.value}>
+              {showRefunds(refundsData.refundedItinerariesAmount)}
+            </p>
+          </div>
+
+          <div style={styles.infoRow}>
+            <h3 style={styles.header}>Total Refunds</h3>
+            <p style={styles.value}>{showRefunds(refundsData.total)}</p>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 };

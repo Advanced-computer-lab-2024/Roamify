@@ -3507,11 +3507,15 @@ section {
 }
 
 .left_side_search_boxed {
-  background: #ffffff;
+  background: var(--secondary-color);
   border: 1px solid #00000030;
   border-radius: 6px;
   padding: 20px 15px;
   margin-bottom: 30px;
+}
+
+.left_side_search_boxed input {
+  background-color: var(--background-color);
 }
 
 .left_side_search_heading h5 {
@@ -3530,7 +3534,7 @@ section {
   border: none;
   background: transparent;
   padding: 0;
-  color: var(--main-color);
+  color: var(--text-color);
   font-weight: 500;
 }
 

@@ -24,13 +24,15 @@ import ReviewTourGuide from "./component/TouristItinerarySearch/ReviewTourGuide.
 import CompletedActivity from "./component/TouristActivitiesSearch/CompletedActivity.js";
 import Wallet from "../Profile/Wallet.js";
 import Wishlist from "./Wishlist.js";
+import Hotels from "./component/Hotels/Hotels.js";
 const Tourist = () => {
   return (
     <>
       <Header HeaderData={HeaderData} />
       <Routes>
         <Route path="/tourist-profile" element={<TouristProfile />} />
-        <Route path="/" element={<TouristProducts />} />
+        <Route path="/" element={<Hotels />} />
+        <Route path="/products" element={<TouristProducts />} />
         <Route path="/tourist-itinerary" element={<TouristItinerary />} />
         <Route path="/tour-details/:id" element={<TourDetails />} />
         <Route path="/tourist-places" element={<TouristPlaces />} />
@@ -45,7 +47,7 @@ const Tourist = () => {
         <Route path="/completed-itinerary" element={<CompletedItinerary />} />
         <Route path="/tour-guides" element={<ReviewTourGuide />} />
         <Route path="/completed-activity" element={<CompletedActivity />} />
-        <Route path="/wallet" element={<Wallet />}/>
+        <Route path="/wallet" element={<Wallet />} />
         <Route path="/wishlist" element={<Wishlist />}/>
       </Routes>
       <CopyRight />
