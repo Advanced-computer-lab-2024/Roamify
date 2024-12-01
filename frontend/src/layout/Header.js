@@ -7,6 +7,7 @@ import ProfileButton from "../component/Profile/ProfileButton";
 import ThemeToggleButton from "../pages/Home/ThemeToggleButton";
 import { useFlexLayout } from "react-table";
 import { color } from "chart.js/helpers";
+import { FaHeart } from 'react-icons/fa';
 
 const Header = ({ HeaderData }) => {
   const role = localStorage.getItem("role");
@@ -228,6 +229,16 @@ const Header = ({ HeaderData }) => {
                   className="others-options d-flex align-items-center"
                   style={{ flex: 1, display: "flex", justifyContent: "end" }}
                 >
+                    <div className="option-item" style={{ marginLeft: "20px" }}>
+                    <Link to="/tourist/wishlist"> {/* Link to the favorite page */}
+                      <FaHeart
+                        style={{
+                          fontSize: "24px", // Adjust the icon size
+                          color: "var(--text-color)", // Set the color for the icon
+                        }}
+                      />
+                    </Link>
+                  </div>
                   <div className="option-item" style={{ marginRight: "0px" }}>
                     <ThemeToggleButton />
                   </div>
