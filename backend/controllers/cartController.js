@@ -47,7 +47,6 @@ const addProductToCart = async (req, res) => {
         res.status(500).json({ message: 'Failed to add product to cart.', error: error.message });
     }
 };
-
 const removeProductFromCart = async (req, res) => {
     try {
         if (!req.body.product) return res.status(400).json({ message: 'please choose a product to remove from cart' });

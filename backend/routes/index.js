@@ -6,7 +6,7 @@ const advertiserRoutes = require("./advertiserRoutes");
 const sellerRoutes = require("./sellerRoutes");
 const tourismGovernorRoutes = require("./tourismGovernorRoutes");
 const productRoutes = require("./productRoutes");
-const cartRoutes = require("./cartRoute");
+const cartRoutes = require("./cartRoutes");
 const itineraryRoutes = require("./itineraryRoutes");
 const activityRoutes = require("./activityRoutes");
 const categoryRoutes = require("./categoryRoutes");
@@ -17,8 +17,9 @@ const complaintRoutes = require("./complaintRoutes");
 const exchangeRateRoutes = require("./exchangeRateRoutes");
 const flightRoutes = require("./flightRoutes");
 const hotelRoutes = require("./hotelRoutes");
-const resetPasswordRoutes = require('./resetPasswordRoutes')
-const notificationRoutes = require('./notificationRoutes')
+const resetPasswordRoutes = require('./resetPasswordRoutes');
+const notificationRoutes = require('./notificationRoutes');
+const wishlistRoutes = require("./wishlistRoutes");
 
 module.exports = [
     { path: "/api/user", route: userRoutes },
@@ -29,6 +30,7 @@ module.exports = [
     { path: "/api/tourismgovernor", route: tourismGovernorRoutes, role: ["tourismGovernor"] },
     { path: "/api/admin", route: adminRoutes, role: ["admin"] },
     { path: "/api/cart", route: cartRoutes, role: ["tourist"] },
+    { path: "/api/wishlist",route:wishlistRoutes, role: ["tourist"] },
     { path: "/api/product", route: productRoutes },
     { path: "/api/itinerary", route: itineraryRoutes },
     { path: "/api/activity", route: activityRoutes },
