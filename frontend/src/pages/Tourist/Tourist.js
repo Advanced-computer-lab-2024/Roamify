@@ -22,6 +22,7 @@ import Redeem from "./Redeem.js";
 import CompletedItinerary from "./component/TouristItinerarySearch/CompletedItinerary.js";
 import ReviewTourGuide from "./component/TouristItinerarySearch/ReviewTourGuide.js";
 import CompletedActivity from "./component/TouristActivitiesSearch/CompletedActivity.js";
+import Wallet from "../Profile/Wallet.js";
 const Tourist = () => {
   return (
     <>
@@ -43,6 +44,7 @@ const Tourist = () => {
         <Route path="/completed-itinerary" element={<CompletedItinerary />} />
         <Route path="/tour-guides" element={<ReviewTourGuide />} />
         <Route path="/completed-activity" element={<CompletedActivity />} />
+        <Route path="/wallet" element={<Wallet />}/>
       </Routes>
       <CopyRight />
     </>

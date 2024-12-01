@@ -7,6 +7,7 @@ const BookedItinerariesWrapper = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [popupMessage, setPopupMessage] = useState("");
+  const [selectedBooking, setSelectedBooking] = useState(null); // To store the booking to cancel
 
   useEffect(() => {
     const fetchBookedItineraries = async () => {
@@ -14,7 +15,7 @@ const BookedItinerariesWrapper = () => {
       setError(null);
 
       const statusQuery = filter === "All" ? "" : `?status=${filter.toLowerCase()}`;
-      const url = `http://localhost:3000/api/tourist/get-all-booked-itineraries${statusQuery}`;
+      const url = `http://localhost:3000/api/tourist/get-all-upcoming-booked-itineraries${statusQuery}`;
 
       try {
         const response = await axios.get(url, { withCredentials: true });
@@ -23,8 +24,11 @@ const BookedItinerariesWrapper = () => {
         );
         setBookedItineraries(validItineraries);
       } catch (err) {
+        if (err.response && err.response.status === 400) {
+          setError(` ${err.response.data.message || "Something went wrong. Please try again later."}`);
+        } else {
         setError("Failed to fetch booked itineraries. Please try again later.");
-      } finally {
+      }} finally {
         setLoading(false);
       }
     };
@@ -37,8 +41,8 @@ const BookedItinerariesWrapper = () => {
     return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
   };
 
-  const handleCancelItinerary = async (ticketId) => {
-    if (!ticketId) {
+  const handleCancelItinerary = async () => {
+    if (!selectedBooking) {
       setPopupMessage("No itinerary selected to cancel.");
       return;
     }
@@ -47,20 +51,30 @@ const BookedItinerariesWrapper = () => {
       await axios.delete(
         "http://localhost:3000/api/tourist/cancel-itinerary-booking",
         {
-          data: { ticketId },
+          data: { ticketId: selectedBooking },
           withCredentials: true
         }
       );
 
       setBookedItineraries((prevItineraries) =>
-        prevItineraries.filter((booking) => booking._id !== ticketId)
+        prevItineraries.filter((booking) => booking._id !== selectedBooking)
       );
-      
-      setPopupMessage("Itinerary cancelled successfully");
+
+      setPopupMessage("Cancelled successfully");
+      setSelectedBooking(null); // Reset selected booking
     } catch (err) {
-      const errorMessage = err.response?.data?.message;
-      setPopupMessage(errorMessage);
+      setPopupMessage("Failed to cancel the booking.");
     }
+  };
+
+  const openCancelConfirmation = (ticketId) => {
+    setSelectedBooking(ticketId); // Set the booking to cancel
+    setPopupMessage("Are you sure you want to cancel this itinerary?");
+  };
+
+  const closePopup = () => {
+    setPopupMessage(""); // Close the popup
+    setSelectedBooking(null); // Reset selected booking
   };
 
   return (
@@ -118,10 +132,13 @@ const BookedItinerariesWrapper = () => {
 
                     <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "15px" }}>
                       <button
-                        onClick={() => handleCancelItinerary(booking._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openCancelConfirmation(booking._id);
+                        }}
                         style={{
                           padding: "10px 20px",
-                          backgroundColor: "#ff4d4d",
+                          backgroundColor: "#8b3eea", // Purple cancel button
                           color: "#fff",
                           border: "none",
                           borderRadius: "5px",
@@ -138,37 +155,79 @@ const BookedItinerariesWrapper = () => {
           </div>
         </div>
 
+        {/* Popup Modal */}
         {popupMessage && (
-          <div style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
-          }}>
-            <div style={{
-              backgroundColor: "#fff",
-              padding: "20px",
-              borderRadius: "8px",
-              maxWidth: "500px",
-              textAlign: "center"
-            }}>
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "#fff",
+                padding: "20px",
+                borderRadius: "8px",
+                maxWidth: "500px",
+                textAlign: "center"
+              }}
+            >
               <p>{popupMessage}</p>
-              <button onClick={() => setPopupMessage("")} style={{
-                marginTop: "10px",
-                padding: "10px 20px",
-                backgroundColor: "#333",
-                color: "#fff",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer"
-              }}>
-                Close
-              </button>
+              {selectedBooking ? (
+                <div>
+                  <button
+                    onClick={handleCancelItinerary}
+                    style={{
+                      marginTop: "10px",
+                      padding: "10px 20px",
+                      backgroundColor: "#8b3eea", // Purple Cancel
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "5px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Yes, Cancel
+                  </button>
+                  <button
+                    onClick={closePopup}
+                    style={{
+                      marginTop: "10px",
+                      padding: "10px 20px",
+                      backgroundColor: "#333",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "5px",
+                      cursor: "pointer",
+                      marginLeft: "10px",
+                    }}
+                  >
+                    No, I changed my mind
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={closePopup}
+                  style={{
+                    marginTop: "10px",
+                    padding: "10px 20px",
+                    backgroundColor: "#333",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Close
+                </button>
+              )}
             </div>
           </div>
         )}
