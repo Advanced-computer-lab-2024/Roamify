@@ -18,7 +18,10 @@ function ProfileButton() {
     <div style={{ position: "relative" }}>
       <button
         onClick={() => setModalIsOpen(!modalIsOpen)}
-        style={{ border: "none", background: "none" }}
+        style={{
+          border: "none",
+          background: "none",
+        }}
       >
         <ProfileIcon height="5vh" width="5vw" />
       </button>

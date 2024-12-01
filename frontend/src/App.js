@@ -23,6 +23,7 @@ import Home from "./pages/Home/Home";
 import ForgetPassword from "./page/ForgetPassword";
 import ForgotPasswordArea from "./component/ForgotPassword";
 import OTPPage from "./page/OTPPage";
+import ResetPassword from "./page/ResetPassword";
 const App = () => {
   return (
     <>
@@ -32,6 +33,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/forget-password" element={<ForgetPassword />} />
         <Route path="/otp-page" element={<OTPPage />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/register" element={<Register />} />
         <Route path="/tourist/*" element={<Tourist />} />
         <Route path="/admin/*" element={<Admin />} />

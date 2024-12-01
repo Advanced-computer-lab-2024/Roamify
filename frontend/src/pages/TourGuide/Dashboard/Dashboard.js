@@ -39,12 +39,8 @@ const Dashboard = () => {
       }}
     >
       <div style={{ padding: "10px", display: "flex", position: "relative" }}>
-        <div>
-          <p
-            style={{ fontSize: "24px", color: "var(--dashboard-title-color)" }}
-          >
-            Your Dashboard
-          </p>
+        <div style={{ color: "var(--dashboard-title-color)" }}>
+          <p style={{ fontSize: "20px" }}>Your Dashboard</p>
           <p>{selectedDate ? selectedDate : "No date selected"}</p>{" "}
           {/* Display selected date or message */}
         </div>

@@ -17,7 +17,7 @@ const CardsSection = ({ date }) => {
     const fetchRevenueData = async () => {
       try {
         const revenueResponse = await axios.get(
-          `http://localhost:3000/api/advertiser/view-revenue`,
+          `http://localhost:3000/api/tourguide/view-revenue`,
           {
             params: { date: date },
             withCredentials: true,
@@ -39,7 +39,7 @@ const CardsSection = ({ date }) => {
     const fetchTouristsData = async () => {
       try {
         const touristsResponse = await axios.get(
-          `http://localhost:3000/api/advertiser/view-tourists`,
+          `http://localhost:3000/api/tourguide/view-tourists`,
           {
             params: { date: date },
             withCredentials: true,

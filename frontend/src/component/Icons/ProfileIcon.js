@@ -1,6 +1,10 @@
 import React from "react";
 
-function ProfileIcon({ height = "24px", width = "24px", fill = "#ffffff" }) {
+function ProfileIcon({
+  height = "24px",
+  width = "24px",
+  fill = "var(--text-color)",
+}) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

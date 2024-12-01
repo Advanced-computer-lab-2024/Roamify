@@ -1,9 +1,22 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const OTPPage = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [userId, setUserId] = useState(null);
   const [countdownTime, setCountdownTime] = useState(60);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
+  const [isOtpValid, setIsOtpValid] = useState(true); // State to track OTP validity
+
+  const navigate = useNavigate(); // Initialize navigate function
+
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("userId");
+    if (storedUserId) {
+      setUserId(storedUserId); // Set the userId from localStorage
+    }
+  }, []);
 
   // Handle OTP input change
   const handleInputChange = (e, index) => {
@@ -17,6 +30,32 @@ const OTPPage = () => {
     // Move focus to next input
     if (value && index < otp.length - 1) {
       document.getElementById(`otp${index + 2}`).focus();
+    }
+
+    // If OTP is complete, call the API
+    if (newOtp.every((digit) => digit !== "")) {
+      const otpString = newOtp.join(""); // Join the OTP array into a string
+      handleOtpSubmit(otpString); // Submit the OTP
+    }
+  };
+
+  // API call to verify OTP
+  const handleOtpSubmit = async (otpString) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/reset-password/check-otp",
+        { otp: otpString, userId: userId },
+        { withCredentials: true }
+      );
+      console.log(response.data); // Handle the response as needed
+      // You can update the state based on the API response (e.g., success or error messages)
+      // Handle success (e.g., navigate to next page)
+      localStorage.removeItem("userId");
+      alert("OTP verified successfully!");
+      navigate("/reset-password");
+    } catch (error) {
+      console.error("Error verifying OTP", error);
+      setIsOtpValid(false); // Set OTP as invalid if there is an error
     }
   };
 
@@ -39,6 +78,7 @@ const OTPPage = () => {
     setOtp(["", "", "", "", "", ""]);
     setCountdownTime(30);
     setIsResendDisabled(true);
+    setIsOtpValid(true); // Reset OTP validity
   };
 
   return (
@@ -111,6 +151,18 @@ const OTPPage = () => {
           ))}
         </div>
 
+        {!isOtpValid && (
+          <div
+            style={{
+              color: "red",
+              fontSize: "14px",
+              marginBottom: "10px",
+            }}
+          >
+            Invalid OTP. Please try again.
+          </div>
+        )}
+
         <div
           style={{
             marginBottom: "20px",
@@ -136,9 +188,6 @@ const OTPPage = () => {
               backgroundColor: "#ccc",
               cursor: "not-allowed",
             }),
-            ":hover": !isResendDisabled && {
-              backgroundColor: "#0056b3",
-            },
           }}
           onClick={handleResend}
           disabled={isResendDisabled}

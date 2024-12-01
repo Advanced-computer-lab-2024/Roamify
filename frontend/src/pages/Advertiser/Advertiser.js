@@ -7,7 +7,7 @@ import Header from "../../layout/Header";
 import { HeaderData } from "./AdvertiserHeaderData.js";
 import TouristActivities from "../Tourist/TouristActivities.js";
 import CopyRight from "../../layout/CopyRight.js";
-import AdvertiserActivities from "./AdvertiserActivities.js";
+import AdvertiserActivities from "./Activities/AdvertiserActivities.js";
 import Dashboard from "./Dashboard/Dashboard.js";
 
 const Advertiser = () => {

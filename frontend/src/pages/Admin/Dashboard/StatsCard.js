@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaCalendarAlt, FaMinusCircle } from "react-icons/fa"; // Import calendar icon
 import DatePicker from "react-datepicker"; // Import the datepicker component
 import "react-datepicker/dist/react-datepicker.css"; // Import datepicker CSS
+import { color } from "chart.js/helpers";
 
 const StatsCard = ({ title, value, width = "32%" }) => {
   return (
@@ -30,7 +31,15 @@ const StatsCard = ({ title, value, width = "32%" }) => {
       >
         {title}
       </h3>
-      <p style={{ fontSize: "24px", fontWeight: "bold" }}>{value}</p>
+      <p
+        style={{
+          fontSize: "24px",
+          fontWeight: "bold",
+          color: "var(--main-color)",
+        }}
+      >
+        {value}
+      </p>
     </div>
   );
 };
