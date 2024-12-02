@@ -12,6 +12,7 @@
     "vite": "^5.4.8"
   },
   "dependencies": {
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "react-toastify": "^10.0.6"
   }
 }

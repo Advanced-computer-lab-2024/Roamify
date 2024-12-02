@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify"; // Import both toast and ToastContainer
+import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
 import "./Card.css";
 
 const CommonCard = ({
@@ -11,6 +14,9 @@ const CommonCard = ({
   reviews,
   picture,
 }) => {
+  // State to track whether the item is in the wishlist
+  const [isInWishlist, setIsInWishlist] = useState(false);
+
   // Get currency symbol and exchange rate from localStorage
   const currencySymbol = localStorage.getItem("currencySymbol") || "$";
   const exchangeRate = parseFloat(localStorage.getItem("value")) || 1; // Default to 1 if not set
@@ -18,22 +24,77 @@ const CommonCard = ({
   // Calculate the converted price
   const convertedPrice = price * exchangeRate;
 
-  // Handler for the purchase action
-  const handlePurchase = () => {
-    // Logic to add product to cart or initiate a direct purchase
-    console.log("Purchase initiated for product:", id);
-    // You can redirect to a checkout page, update a state, or show a notification
+  // Check if the product is in the wishlist
+  useEffect(() => {
+    const checkWishlistStatus = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/wishlist/`, {
+          withCredentials: true,
+        });
+        const productInWishlist = response.data.wishlist.some(
+          (item) => item.productId === id
+        );
+        setIsInWishlist(productInWishlist);
+      } catch (error) {
+        console.error("Error checking wishlist:", error);
+      }
+    };
+
+    checkWishlistStatus();
+  }, [id]);
+
+  // Handler for adding/removing item from wishlist
+  const handleWishlist = async () => {
+    try {
+      if (isInWishlist) {
+        // Remove product from wishlist
+        console.log(`Removing product with ID: ${id}`);
+        const response = await axios.delete(
+          `http://localhost:3000/api/wishlist/remove-product/${id}`,
+          { withCredentials: true }
+        );
+        console.log(response); // Log the response from the API
+
+        setIsInWishlist(false); // Update state after removing from wishlist
+        toast.success("Item removed from your wishlist."); // Show success toast
+      } else {
+        // Add product to wishlist
+        console.log(`Adding product with ID: ${id}`);
+        const response = await axios.post(
+          `http://localhost:3000/api/wishlist/add-product/${id}`,
+          {},
+          { withCredentials: true }
+        );
+        console.log(response); // Log the response from the API
+
+        setIsInWishlist(true); // Update state after adding to wishlist
+        toast.success("Item successfully added to your wishlist!"); // Show success toast
+      }
+    } catch (error) {
+      console.error("Error adding/removing from wishlist:", error);
+      toast.error("There was an error with the wishlist operation."); // Show error toast
+    }
   };
 
   return (
     <div className="card" style={{ borderColor: "var(--secondary-color)" }}>
       <img src={picture} alt={name} className="card-img-top" />
-      <div
-        className="card-body"
-        style={{
-          background: "var(--secondary-color)",
-        }}
-      >
+      
+      {/* Heart icon for wishlist */}
+      <div className="heart_destinations" onClick={handleWishlist}>
+        <i
+          className={`fas fa-heart ${isInWishlist ? "heart-filled" : ""}`}
+          title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+          style={{
+            fontSize: "1.5rem",
+            color: isInWishlist ? "purple" : "black",
+            transition: "color 0.3s ease",
+          }}
+        ></i>
+      </div>
+
+      {/* Product details */}
+      <div className="card-body" style={{ background: "var(--secondary-color)" }}>
         <h5 className="card-title">{name}</h5>
         <p className="card-text">
           <strong>Seller:</strong> {sellerId.username}
@@ -49,6 +110,9 @@ const CommonCard = ({
           View Details
         </a>
       </div>
+
+      {/* Toast Container for notifications */}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

@@ -24,7 +24,9 @@ import ForgetPassword from "./page/ForgetPassword";
 import ForgotPasswordArea from "./component/ForgotPassword";
 import OTPPage from "./page/OTPPage";
 import ResetPassword from "./page/ResetPassword";
+
 const App = () => {
+  
   return (
     <>
       <Routes>
@@ -50,9 +52,10 @@ const App = () => {
         <Route path="/activity-details/:id" element={<ActivityDetails />} />
         <Route path="/itinerary-details/:id" element={<ItineraryDetails />} />
         <Route path="/place-details/:id" element={<PlaceDetails />} />
-
+       
         <Route path="/guest/*" element={<Guest />} />
       </Routes>
+     
     </>
   );
 };
