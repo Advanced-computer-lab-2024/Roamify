@@ -23,6 +23,12 @@ const ticket = new mongoose.Schema({
     pointsRedeemed: {
         type: Boolean,
         default: false
+    },
+    name: {
+        type: String
+    },
+    locations: {
+        type: [String]
     }
 }, { timestamps: true })
 

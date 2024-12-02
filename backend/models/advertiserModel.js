@@ -9,12 +9,12 @@ const advertiserSchema = new mongoose.Schema(
     },
     logo: {
       url: {
-          type: String,
+        type: String,
       },
       publicId: {
-          type: String,
+        type: String,
       }
-  },
+    },
     companyName: {
       type: String,
       required: true,

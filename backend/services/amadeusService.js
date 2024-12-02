@@ -29,7 +29,7 @@ const searchFlights = async (origin, destination, departureDate, returnDate, adu
 
         return flights;
     } catch (error) {
-        console.error("Error in searchFlights:", error.message);
+        console.error("Error in searchFlights:", error);
         throw new Error("Unable to fetch flight data");
     }
 };

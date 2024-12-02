@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { stringify } = require('querystring');
 
 const ticket = new mongoose.Schema({
     tourist: {
@@ -17,9 +18,21 @@ const ticket = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'receipt'
     },
+    date: {
+        type: Date
+    },
     pointsRedeemed: {
         type: Boolean,
         default: false
+    },
+    name: {
+        type: String,
+    },
+    locationName: {
+        type: String
+    },
+    time: {
+        type: String
     }
 }, { timestamps: true })
 
