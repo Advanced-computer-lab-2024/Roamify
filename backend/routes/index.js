@@ -19,6 +19,7 @@ const flightRoutes = require("./flightRoutes");
 const hotelRoutes = require("./hotelRoutes");
 const resetPasswordRoutes = require('./resetPasswordRoutes')
 const notificationRoutes = require('./notificationRoutes')
+const bookmarkRoutes = require('./bookmarkRoutes')
 
 module.exports = [
     { path: "/api/user", route: userRoutes },
@@ -42,4 +43,5 @@ module.exports = [
     { path: "/api/notifications", route: notificationRoutes, role: ['advertiser', 'tourGuide', 'seller', 'admin'] },
     { path: "/api/hotels", route: hotelRoutes, role: ['tourist'] },
     { path: "/api/reset-password", route: resetPasswordRoutes },
+    { path: "/api/bookmark", route: bookmarkRoutes, role: ['tourist'] },
 ];

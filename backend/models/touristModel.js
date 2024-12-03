@@ -52,6 +52,14 @@ const touristSchema = new mongoose.Schema(
     points: {
       type: Number,
       default: 0
+    },
+    bookmarkedActivities: {
+      type: [mongoose.Types.ObjectId],
+      ref: 'activity'
+    },
+    bookmarkedItineraries: {
+      type: [mongoose.Types.ObjectId],
+      ref: 'itinerary'
     }
 
   },
