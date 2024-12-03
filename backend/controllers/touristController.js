@@ -182,6 +182,8 @@ const bookActivity = async (req, res) => {
     const bookingDate = new Date(date);
     const activityObject = await activityModel.findById(activityId);
 
+    if (!activityObject.bookingAvailable) return res.status(400).json({ message: 'sorry you are trying to book an activity which is not taking bookings right now' })
+
     const today = new Date();
     //checking that this is the correct dater for this activity
     if (
@@ -418,6 +420,8 @@ const bookItinerary = async (req, res) => {
     const itineraryId = new mongoose.Types.ObjectId(itinerary);
     const bookingDate = new Date(date);
     const itineraryObject = await itineraryModel.findById(itineraryId);
+
+    if (itineraryObject.status === 'inactive') return res.status(400).json({ message: 'sorry you are trying to book an inactive itinerary' })
 
     const today = new Date();
     //checking that this is the correct dater for this activity

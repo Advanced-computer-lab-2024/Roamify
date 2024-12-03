@@ -44,10 +44,6 @@ const itinerarySchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        booked: {
-            type: Boolean,
-            default: false,
-        },
         status: {
             type: String,
             enum: ['active', 'inactive'], // Only allow 'active' or 'inactive' values
