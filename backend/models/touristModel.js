@@ -60,6 +60,10 @@ const touristSchema = new mongoose.Schema(
     bookmarkedItineraries: {
       type: [mongoose.Types.ObjectId],
       ref: 'itinerary'
+    },
+    interestedEvents: {
+      type: [mongoose.Types.ObjectId],
+      ref: 'activity'
     }
 
   },
