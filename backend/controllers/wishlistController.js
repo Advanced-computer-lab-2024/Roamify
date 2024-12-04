@@ -119,7 +119,7 @@ const getWishlistWithProductDetails = async (req, res) => {
             .populate({
                 path: "products.productId",
                 match: { isArchived: false }, // Exclude archived products
-                select: "name picture price sellerId", // Select fields from the product
+                select: "_id name picture price sellerId", // Select fields from the product
                 populate: {
                     path: "sellerId", // Populate seller details
                     select: "name role", // Select seller's name and role
@@ -144,6 +144,7 @@ const getWishlistWithProductDetails = async (req, res) => {
                         : product.sellerId?.name || "Unknown Seller";
 
                 return {
+                    productId : product._id,
                     name : product.name,
                     picture: product.picture,
                     sellerName,

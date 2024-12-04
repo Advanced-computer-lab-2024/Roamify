@@ -4,5 +4,5 @@ dotenv.config();
 module.exports = {
   PORT: process.env.PORT || 3000,
   DB_URI: process.env.DB_URI,
-  CORS_ORIGIN: "http://localhost:5173",
+  CORS_ORIGIN: "http://localhost:3001",
 };

@@ -23,7 +23,9 @@ import CompletedItinerary from "./component/TouristItinerarySearch/CompletedItin
 import ReviewTourGuide from "./component/TouristItinerarySearch/ReviewTourGuide.js";
 import CompletedActivity from "./component/TouristActivitiesSearch/CompletedActivity.js";
 import Wallet from "../Profile/Wallet.js";
+import Wishlist from "./Wishlist.js";
 import Hotels from "./component/Hotels/Hotels.js";
+import Cart from "./Cart.js";
 const Tourist = () => {
   return (
     <>
@@ -47,6 +49,8 @@ const Tourist = () => {
         <Route path="/tour-guides" element={<ReviewTourGuide />} />
         <Route path="/completed-activity" element={<CompletedActivity />} />
         <Route path="/wallet" element={<Wallet />} />
+        <Route path="/wishlist" element={<Wishlist />}/>
+        <Route path="/cart" element={<Cart />}/>
       </Routes>
       <CopyRight />
     </>

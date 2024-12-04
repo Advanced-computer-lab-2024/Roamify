@@ -263,6 +263,7 @@ const bookActivity = async (req, res) => {
         {
           status: "active",
           receipt: receipt._id,
+          date: activityObject.date
         }
       );
     }
@@ -273,6 +274,10 @@ const bookActivity = async (req, res) => {
         activity: activityId,
         status: "active",
         receipt: receipt._id,
+        date: activityObject.date,
+        name: activityObject.name,
+        time: activityObject.time,
+        locationName: activityObject.location.name
       });
       await activityTicket.save();
     }
@@ -505,12 +510,15 @@ const bookItinerary = async (req, res) => {
     }
     //create a new ticket of does not exist
     else {
+      console.log(itineraryObject.locations)
       const itineraryTicket = new itineraryTicketModel({
         tourist: req.user._id,
         itinerary: itineraryId,
         status: "active",
         receipt: receipt._id,
         date: bookingDate,
+        name: itineraryObject.name,
+        locations: itineraryObject.locations
       });
       await itineraryTicket.save();
     }
@@ -562,14 +570,14 @@ const cancelActivity = async (req, res) => {
     const ticket = await activityTicketModel
       .findById(ticketId)
       .populate("receipt")
-      .populate("activity");
+
     if (!ticket || ticket.status === "refunded")
       return res
         .status(400)
         .json({ message: "please choose a valid activity to cancel" });
     console.log(ticket);
 
-    const timeDifference = ticket.activity.date.getTime() - date.getTime();
+    const timeDifference = ticket.date.getTime() - date.getTime();
     const hoursDifference = timeDifference / (1000 * 60 * 60);
 
     if (hoursDifference <= 48) {
@@ -592,9 +600,7 @@ const cancelActivity = async (req, res) => {
         status: "refunded",
         receipt: receipt._id,
       });
-      console.log(tourist.wallet.availableCredit, ticket.receipt.price);
       tourist.wallet.availableCredit += ticket.receipt.price;
-      console.log(tourist.wallet.availableCredit);
       await walletModel.findByIdAndUpdate(tourist.wallet._id, {
         availableCredit: tourist.wallet.availableCredit,
       });
@@ -1049,8 +1055,7 @@ const getAllBookedActivities = async (req, res) => {
       throw Error('user does not exist')
     let activityTickets = await activityTicketModel
       .find({ tourist: req.user._id, status: "active" })
-      .populate("activity", "date time name location.name"); // Specify the fields you want to include
-    const filteredActivityTickets = activityTickets.filter(t => t.activity.date < new Date());
+    const filteredActivityTickets = activityTickets.filter(t => t.date < new Date());
     if (filteredActivityTickets.length === 0)
       throw Error('no booked activities yet')
     return res.status(200).json(filteredActivityTickets);
@@ -1096,7 +1101,7 @@ const getAllBookedItineraries = async (req, res) => {
         tourist: req.user._id,
         status: "active",
         date: { $lt: new Date() } // Condition to check if the date is in the past
-      }).populate("itinerary", "name locations"); // Specify the fields you want to include
+      })
     if (itineraryTickets.length === 0)
       throw Error('you have no itineraries that you have booked in the past')
     return res.status(200).json(itineraryTickets);
@@ -1120,11 +1125,10 @@ const getAllUpcomingBookedActivities = async (req, res) => {
 
     const activityTickets = await activityTicketModel
       .find({ tourist: req.user._id, status: "active" })
-      .populate("activity", "date time name location.name"); // Specify the fields you want to include
 
     // Filter bookedActivities for future dates
     const upcomingActivities = activityTickets.filter(
-      (ticket) => ticket.activity.date && ticket.activity.date > currentDate
+      (ticket) => ticket.date && ticket.date > currentDate
     );
 
     if (upcomingActivities.length === 0) {
@@ -1151,7 +1155,7 @@ const getAllUpcomingBookedItineraries = async (req, res) => {
 
     const itineraryTickets = await itineraryTicketModel
       .find({ tourist: req.user._id, status: "active" })
-      .populate("itinerary", "name locations"); // Specify the fields you want to include
+
 
     // Filter bookedActivities for future dates
     const upcomingItineraries = itineraryTickets.filter(

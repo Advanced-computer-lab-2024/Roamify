@@ -1,10 +1,29 @@
-.custom-btn {
-    background-color: #8b3eea;  /* Purple color */
-    color: white;  /* White text color */
-    margin-right: 10px;
-  }
-  
-  .custom-btn:hover {
-    background-color: #7329d6; /* Slightly darker purple on hover */
-  }
-   
+.card-body {
+  text-align: center; /* Center-align the text content inside the card body */
+}
+
+.card-title {
+  margin: 10px 0;
+  font-weight: bold;
+  text-align: center; /* Center-align the title */
+}
+
+.card-text {
+  margin: 5px 0;
+  text-align: center; /* Center-align other details like seller, price, rating */
+}
+
+.btn.custom-btn {
+  background-color: #8b3eea; /* Set the background color to #8b3eea */
+  color: white; /* Ensure text is readable */
+  text-decoration: none;
+  border: none; /* Remove border */
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn.custom-btn:hover {
+  background-color: #702fc6; /* Darken the color slightly on hover */
+}
