@@ -4,8 +4,10 @@ const itineraryTicketModel = require('../models/itineraryTicketModel')
 const notificationModel = require('../models/notificationModel')
 const nodemailer = require('nodemailer')
 const emailTemplate = require('../emailTemplate')
+const { getIo, connectedUsers } = require('../config/socket')
 
-const emailUser = async () => {
+
+const emailAndNotifyUser = async () => {
     try {
         const activityTickets = await activityTicketModel.find({ status: 'active', date: { $gt: new Date() } })
         const itineraryTickets = await itineraryTicketModel.find({ status: 'active', date: { $gt: new Date() } })
@@ -40,6 +42,7 @@ const emailUser = async () => {
                     text
                 }
                 await transporter.sendMail(mailOptions)
+                notifyUser(t.tourist, t.name, t.date, 'activity')
             }
 
 
@@ -70,6 +73,8 @@ const emailUser = async () => {
                     text
                 }
                 await transporter.sendMail(mailOptions)
+                notifyUser(t.tourist, t.name, t.date, 'itinerary')
+
             }
 
 
@@ -83,4 +88,4 @@ const emailUser = async () => {
     }
 }
 
-module.exports = emailUser 
+module.exports = emailAndNotifyUser 

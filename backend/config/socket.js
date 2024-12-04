@@ -4,9 +4,10 @@ const cookie = require("cookie"); // Use the cookie library for parsing
 
 
 let connectedUsers = {}; // In-memory store for userId -> socket.id mapping
+let io;
 
 const setupSocketIO = (server, app) => {
-    const io = new Server(server, {
+    io = new Server(server, {
         cors: {
             origin: ["http://localhost:5173"],
             credentials: true, // Allow cookies to be sent during WebSocket handshake
@@ -52,4 +53,4 @@ const setupSocketIO = (server, app) => {
     return io;
 };
 
-module.exports = { setupSocketIO, connectedUsers };
+module.exports = { setupSocketIO, connectedUsers, getIo: () => io };
