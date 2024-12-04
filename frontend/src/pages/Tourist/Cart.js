@@ -5,6 +5,7 @@ function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [notification, setNotification] = useState(""); // State for notification
 
   const fetchCartData = async () => {
     try {
@@ -23,20 +24,26 @@ function Cart() {
 
   const handleApiError = (err, action) => {
     if (err.response) {
-      console.error(`Error during ${action}:`, err.response.data.message || err.response.statusText);
+      console.error(
+        `Error during ${action}:`,
+        err.response.data.message || err.response.statusText
+      );
+      setNotification(err.response.data.message || "An error occurred"); // Display API error message
     } else {
       console.error(`Error during ${action}:`, err.message);
+      setNotification("An error occurred. Please try again."); // Default error message
     }
   };
 
   const handleIncrement = async (productId) => {
     try {
-      await axios.patch(
+      const response = await axios.patch(
         "http://localhost:3000/api/cart/increment-product",
         { product: productId },
         { withCredentials: true }
       );
       fetchCartData();
+      setNotification(response.data.message || "Quantity updated successfully");
     } catch (err) {
       handleApiError(err, "increment");
     }
@@ -44,12 +51,13 @@ function Cart() {
 
   const handleDecrement = async (productId) => {
     try {
-      await axios.patch(
+      const response = await axios.patch(
         "http://localhost:3000/api/cart/decrement-product",
         { product: productId },
         { withCredentials: true }
       );
       fetchCartData();
+      setNotification(response.data.message || "Quantity updated successfully");
     } catch (err) {
       handleApiError(err, "decrement");
     }
@@ -57,11 +65,15 @@ function Cart() {
 
   const handleDelete = async (productId) => {
     try {
-      await axios.delete("http://localhost:3000/api/cart/remove-product", {
-        data: { product: productId },
-        withCredentials: true,
-      });
+      const response = await axios.delete(
+        "http://localhost:3000/api/cart/remove-product",
+        {
+          data: { product: productId },
+          withCredentials: true,
+        }
+      );
       fetchCartData();
+      setNotification(response.data.message || "Product removed successfully");
     } catch (err) {
       handleApiError(err, "delete");
     }
@@ -75,6 +87,13 @@ function Cart() {
   useEffect(() => {
     fetchCartData();
   }, []);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(""), 3000); // Clear notification after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -94,9 +113,10 @@ function Cart() {
           maxWidth: "600px",
           backgroundColor: "#f9f9f9",
           boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+          position: "relative", // Added for notification positioning
         }}
       >
-        <h2 style={{ textAlign: "center", marginBottom: "20px"}}>Your Cart</h2>
+        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Your Cart</h2>
         <form onSubmit={handleSubmit}>
           {cartItems.map((item) => (
             <div
@@ -144,14 +164,13 @@ function Cart() {
                     backgroundColor: "#8b3eea",
                     border: "none",
                     borderRadius: "5px",
-                    fontSize: "20px",
-                    fontWeight: "bold",
+                    fontSize: "22px",
                     color: "#fff",
                     cursor: "pointer",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    marginLeft:"10px",
+                    marginLeft:"5px",
                   }}
                   onClick={() => handleDecrement(item.productId)}
                 >
@@ -162,7 +181,6 @@ function Cart() {
                     width: "40px",
                     textAlign: "center",
                     fontSize: "16px",
-                    fontWeight: "bold",
                   }}
                 >
                   {item.quantity}
@@ -176,7 +194,6 @@ function Cart() {
                     border: "none",
                     borderRadius: "5px",
                     fontSize: "16px",
-                    fontWeight: "bold",
                     color: "#fff",
                     cursor: "pointer",
                     display: "flex",
@@ -220,6 +237,26 @@ function Cart() {
             Checkout
           </button>
         </form>
+        {notification && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "-20px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              backgroundColor: "#ffefc2",
+              color: "#8b3e00",
+              borderRadius: "5px",
+              padding: "5px 10px",
+              fontSize: "12px",
+              boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+              textAlign: "center",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {notification}
+          </div>
+        )}
       </div>
     </div>
   );
