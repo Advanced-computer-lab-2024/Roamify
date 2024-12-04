@@ -58,10 +58,12 @@ Default CSS
 
 :root {
   --main-color: #8b3eea;
+  --main-color-hover: #a75efc;
   --background-color: #f3f6fd;
-  --secondary-color: #ffffff;
+  --secondary-color: #ffffffee;
+  --secondary-hover-color: #f0f0f0;
   --scroll-bar-color: #c092f7;
-  --text-color: #2b2540;
+  --text-color: #6c757d;
   --shimmer-start-color: #f0f0f0;
   --shimmer-middle-color: #e0e0e0;
   --shimmer-end-color: #f0f0f0;
@@ -72,7 +74,7 @@ Default CSS
   --white-color: #ffffff;
   --black-color: #2b2540;
   --black-color-opacity: #2b2540c4;
-  --paragraph-color: #818090;
+  --gray-color: #818090;
   --white-text: #e7e9ea;
   --bg-color: #f3f6fd;
   --transition: 0.4s all ease-in-out;
@@ -84,11 +86,17 @@ Default CSS
   --background-color: #080f25;
   --dashboard-title-color: #aeb9e1;
   --secondary-color: #101935;
+  --secondary-hover-color: #202f5e;
   --box-shadow: 0px 0px 7px rgba(255, 255, 255, 0.5);
   --text-color: #e7e9ea;
   --shimmer-start-color: #1f2a41;
   --shimmer-middle-color: #2a3c56;
   --shimmer-end-color: #1f2a41;
+}
+
+input[type="text"]:focus-visible {
+  border-color: var(--main-color); /* Change border color on focus-visible */
+  outline: none;
 }
 
 html,
@@ -311,7 +319,7 @@ section {
 
 .form-control:focus {
   color: var(--heading-color);
-  background-color: #fff;
+  /* background-color: #fff; */
   border: 1px solid var(--main-color);
   outline: none;
   box-shadow: none;
@@ -4188,7 +4196,7 @@ html:not([dir="rtl"]) .noUi-horizontal .noUi-handle {
 
 .form-control {
   height: 55px;
-  border: 2px dashed #dddddd75;
+  border: 2px solid #dddddd75;
   padding: 10px 22px;
   font-size: 16px;
 }
@@ -4199,8 +4207,8 @@ html:not([dir="rtl"]) .noUi-horizontal .noUi-handle {
 
 .form-control:focus {
   color: var(--heading-color);
-  background-color: #fff;
-  border: 2px dashed var(--main-color);
+  /* background-color: #fff; */
+  border: 2px solid var(--main-color);
   outline: none;
   box-shadow: none;
 }
