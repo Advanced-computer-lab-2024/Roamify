@@ -6,6 +6,30 @@ const nodemailer = require('nodemailer')
 const emailTemplate = require('../emailTemplate')
 const { getIo, connectedUsers } = require('../config/socket')
 
+async function notifyUser(userId, name, date, type) {
+
+    const message = type === 'activity' ? 'Reminder that you have a booked activity ${name} for tommorrow ${date}' : 'Reminder that you have a booked itinerary ${name} for tommorrow ${date}';
+    const notification = new notificationModel({
+        user: userId,
+        type: 'reminder of booking',
+        message
+    });
+    await notification.save();
+
+
+    const io = getIo();
+    const socketId = connectedUsers[userId.toString()];
+    if (socketId) {
+        io.to(socketId).emit("receiveNotification", message);
+        console.log('Notification sent to user ${userId}');
+    }
+    else {
+        console.log('User ${userId} is not connected.');
+    }
+
+
+}
+
 
 const emailAndNotifyUser = async () => {
     try {
