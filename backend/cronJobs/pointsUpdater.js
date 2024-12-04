@@ -11,7 +11,6 @@ const updatePoints = async () => {
 
     try {
         const receipts = await receiptModel.find({ status: 'successful' });
-        console.log(receipts)
         // Get the current date and time
         const now = new Date();
 
@@ -58,7 +57,6 @@ const updatePoints = async () => {
             // Check itinerary tickets
             const itineraryTicket = await itineraryTicketsModel.findOne({ receipt: receipt._id, status: 'active', pointsRedeemed: false });
 
-            console.log(itineraryTicket + '----------------------')
             if (itineraryTicket) {
                 const eventDate = new Date(itineraryTicket.date);
                 eventDate.setHours(0, 0, 0, 0);

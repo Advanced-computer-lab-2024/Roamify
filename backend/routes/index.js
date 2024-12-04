@@ -19,7 +19,7 @@ const flightRoutes = require("./flightRoutes");
 const hotelRoutes = require("./hotelRoutes");
 const resetPasswordRoutes = require("./resetPasswordRoutes");
 const notificationRoutes = require("./notificationRoutes");
-const wishlistRoutes = require("./wishlistRoutes");
+const bookmarkRoutes = require("./bookmarkRoutes");
 
 module.exports = [
   { path: "/api/user", route: userRoutes },
@@ -34,7 +34,6 @@ module.exports = [
   },
   { path: "/api/admin", route: adminRoutes, role: ["admin"] },
   { path: "/api/cart", route: cartRoutes, role: ["tourist"] },
-  { path: "/api/wishlist", route: wishlistRoutes, role: ["tourist"] },
   { path: "/api/product", route: productRoutes },
   { path: "/api/itinerary", route: itineraryRoutes },
   { path: "/api/activity", route: activityRoutes },
@@ -48,8 +47,9 @@ module.exports = [
   {
     path: "/api/notifications",
     route: notificationRoutes,
-    role: ["advertiser", "tourGuide", "seller", "admin"],
+    role: ["advertiser", "tourGuide", "seller", "admin", "tourist"],
   },
   { path: "/api/hotels", route: hotelRoutes, role: ["tourist"] },
   { path: "/api/reset-password", route: resetPasswordRoutes },
+  { path: "/api/bookmark", route: bookmarkRoutes, role: ["tourist"] },
 ];

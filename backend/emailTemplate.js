@@ -67,4 +67,41 @@ module.exports = {
       <p>Roamify Travel</p>
     `;
   },
+  reminderForActivity: (activityName, activityDate, activityLocation, username) => {
+    return `
+        Hi ${username},
+
+        We hope you're as excited as we are! This is a friendly reminder that you've booked an activity scheduled for tomorrow. Here are the details:
+
+        - Activity Name: ${activityName}
+        - Date & Time: ${activityDate}
+        - Location: ${activityLocation}
+
+        Please make sure to arrive on time and bring any necessary items or documents mentioned during the booking process. If you have any questions or need assistance, feel free to reply to this emaail.
+
+        We look forward to seeing you there and hope you have a fantastic experience!
+
+        Best regards,
+        Roamify Travel
+    `;
+  },
+  reminderForItinerary: (itineraryName, itineraryDate, username) => {
+    return `
+        Hi ${username},
+
+        We hope you're as excited as we are! This is a friendly reminder that you've booked an activity scheduled for tomorrow. Here are the details:
+
+        - Activity Name: ${itineraryName}
+        - Date & Time: ${itineraryDate}
+        
+
+        Please make sure to arrive on time and bring any necessary items or documents mentioned during the booking process. If you have any questions or need assistance, feel free to reply to this emaail.
+
+        We look forward to seeing you there and hope you have a fantastic experience!
+
+        Best regards,
+        Roamify Travel
+    `;
+  },
+
 };

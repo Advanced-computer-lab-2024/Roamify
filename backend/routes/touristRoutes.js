@@ -40,4 +40,5 @@ router.post('/review/rate/itinerary/:itineraryId', reviewController.rateItinerar
 router.post('/review/comment/itinerary/:itineraryId', reviewController.commentOnItinerary);
 router.post('/review/rate/activity/:activityId', reviewController.rateActivity);
 router.post('/review/comment/activity/:activityId', reviewController.commentOnActivity);
+router.put('/enable-notifications-on-events', touristController.enableNotificationsForActivities);
 module.exports = router;

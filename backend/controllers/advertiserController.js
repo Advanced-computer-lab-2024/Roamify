@@ -11,10 +11,38 @@ const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
 const { default: mongoose } = require('mongoose');
 const receiptModel = require('../models/receiptModel');
-const { constants } = require('module');
+const { connectedUsers } = require('../config/socket');
+const touristModel = require('../models/touristModel');
+const notificationModel = require('../models/notificationModel');
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
 const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
 
+
+async function notifyUser(io, userId, name) {
+
+  const message = `The activity ${name} is now open for bookings! Secure your spot today and don't miss out!`;
+  const notification = new notificationModel({
+    user: userId,
+    type: `booking available-${name}`,
+    message
+  });
+  await notification.save();
+
+  const user = await userModel.findById(userId)
+
+
+
+  const socketId = connectedUsers[userId.toString()];
+  if (socketId) {
+    io.to(socketId).emit("receiveNotification", message);
+    console.log(`Notification sent to user ${userId}`);
+  }
+  else {
+    console.log(`User ${userId} is not connected.`);
+  }
+
+
+}
 const createProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -37,6 +65,9 @@ const createProfile = async (req, res) => {
 
     if (!companyName || !websiteLink || !hotline || !companyProfile)
       throw Error('please fill all fields');
+
+    const advertiser = await advertiserModel.findOne({ companyName })
+    if (advertiser) return res.status(400).json({ message: 'this company name already exists please choose another' })
     await userModel.findByIdAndUpdate(userId, { status: "active" });
     const newAdvertiser = new advertiserModel({
       companyName,
@@ -700,6 +731,66 @@ const viewTotalTourists = async (req, res) => {
   }
 }
 
+const disableActivityBooking = async (req, res) => {
+  try {
+
+    if (!req.body.activityId) return res.status(400).json({ message: 'choose an activity to disable' })
+
+    const activityId = new mongoose.Types.ObjectId(req.body.activityId)
+
+    const activity = await activityModel.findById(activityId)
+
+
+    if (activity.advertiser.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'you are unauthorized to edit this activity' })
+
+    if (!activity.bookingAvailable) return res.status(400).json({ message: 'activity already disabled' })
+
+    activity.bookingAvailable = !activity.bookingAvailable;
+    await activity.save();
+    return res.status(200).json({ message: 'disabled activity' });
+  }
+  catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+}
+const enableActivityBooking = async (req, res) => {
+  try {
+
+    if (!req.body.activityId) return res.status(400).json({ message: 'choose an activity to disable' })
+
+    const activityId = new mongoose.Types.ObjectId(req.body.activityId)
+
+    const activity = await activityModel.findById(activityId)
+
+    if (activity.advertiser.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'you are unauthorized to edit this activity' })
+
+    if (activity.bookingAvailable) return res.status(400).json({ message: 'activity already enabled' })
+
+    activity.bookingAvailable = !activity.bookingAvailable;
+    await activity.save();
+
+    const tourists = await touristModel.find({
+      interestedEvents: activityId
+    });
+
+    console.log(tourists.length)
+    if (tourists.length > 0) {
+      const io = req.app.get("io");
+      for (t of tourists) {
+        notifyUser(io, t.user, activity.name)
+        t.interestedEvents = t.interestedEvents.filter(e => e.toString() !== activityId.toString())
+
+        await t.save();
+
+      }
+    }
+    return res.status(200).json({ message: 'enabled activity' });
+  }
+  catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+}
+
 module.exports = {
   createProfile,
   getProfile,
@@ -716,5 +807,7 @@ module.exports = {
   editTransportation,
   getMyTransportations,
   viewRevenue,
-  viewTotalTourists
+  viewTotalTourists,
+  disableActivityBooking,
+  enableActivityBooking
 };
