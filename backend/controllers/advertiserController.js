@@ -1,4 +1,21 @@
+const validator = require('validator');
 
+const advertiserModel = require("../models/advertiserModel");
+const transportationModel = require("../models/transportationModel");
+const userModel = require("../models/userModel");
+const activityModel = require("../models/activityModel");
+const preferenceTagModel = require('../models/preferenceTagModel');
+const categoryModel = require("../models/categoryModel");
+const activityTicketModel = require("../models/activityTicketModel");
+const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
+const multer = require('multer');
+const { default: mongoose } = require('mongoose');
+const receiptModel = require('../models/receiptModel');
+const { connectedUsers } = require('../config/socket');
+const touristModel = require('../models/touristModel');
+const notificationModel = require('../models/notificationModel');
+const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
+const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
 
 
 async function notifyUser(io, userId, name) {
@@ -736,43 +753,7 @@ const disableActivityBooking = async (req, res) => {
     return res.status(500).json({ message: error.message })
   }
 }
-const enableActivityBooking = async (req, res) => {
-  try {
 
-    if (!req.body.activityId) return res.status(400).json({ message: 'choose an activity to disable' })
-
-    const activityId = new mongoose.Types.ObjectId(req.body.activityId)
-
-    const activity = await activityModel.findById(activityId)
-
-    if (activity.advertiser.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'you are unauthorized to edit this activity' })
-
-    if (activity.bookingAvailable) return res.status(400).json({ message: 'activity already enabled' })
-
-    activity.bookingAvailable = !activity.bookingAvailable;
-    await activity.save();
-
-    const tourists = await touristModel.find({
-      interestedEvents: activityId
-    });
-
-    console.log(tourists.length)
-    if (tourists.length > 0) {
-      const io = req.app.get("io");
-      for (t of tourists) {
-        notifyUser(io, t.user, activity.name)
-        t.interestedEvents = t.interestedEvents.filter(e => e.toString() !== activityId.toString())
-
-        await t.save();
-
-      }
-    }
-    return res.status(200).json({ message: 'enabled activity' });
-  }
-  catch (error) {
-    return res.status(500).json({ message: error.message })
-  }
-}
 
 module.exports = {
   createProfile,
