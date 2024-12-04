@@ -76,6 +76,31 @@ const CommonCard = ({
     }
   };
 
+  // Handler for adding the product to the cart
+  const handleAddToCart = async () => {
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/api/cart/add-product`,
+        {
+          product: id,
+          quantity: 10,
+        },
+        { withCredentials: true }
+      );
+  
+      // Check the response JSON
+      if (response.data.success) {
+        toast.success(response.data.message || "Item added to cart successfully!");
+      } else {
+        toast.warning(response.data.message || "Could not add item to cart.");
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error("There was an error adding the item to the cart.");
+    }
+  };
+  
+
   return (
     <div className="card" style={{ borderColor: "var(--secondary-color)" }}>
       <img src={picture} alt={name} className="card-img-top" />
@@ -106,9 +131,14 @@ const CommonCard = ({
         <p className="card-text">
           <strong>Rating:</strong> {rating} ({reviews} reviews)
         </p>
-        <a href={`/product-details/${id}`} className="btn custom-btn mr-2">
-          View Details
-        </a>
+        <div className="button-group" style={{ display: "flex", gap: "8px" }}>
+          <a href={`/product-details/${id}`} className="btn custom-btn mr-2">
+            View Details
+          </a>
+          <button className="btn custom-btn" onClick={handleAddToCart}>
+            Add to Cart
+          </button>
+        </div>
       </div>
 
       {/* Toast Container for notifications */}

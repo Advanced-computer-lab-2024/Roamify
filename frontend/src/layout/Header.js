@@ -8,6 +8,7 @@ import ThemeToggleButton from "../pages/Home/ThemeToggleButton";
 import { useFlexLayout } from "react-table";
 import { color } from "chart.js/helpers";
 import { FaHeart } from 'react-icons/fa';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 const Header = ({ HeaderData }) => {
   const role = localStorage.getItem("role");
@@ -229,7 +230,7 @@ const Header = ({ HeaderData }) => {
                   className="others-options d-flex align-items-center"
                   style={{ flex: 1, display: "flex", justifyContent: "end" }}
                 >
-                    <div className="option-item" style={{ marginLeft: "20px" }}>
+                    <div className="option-item" style={{ marginLeft: "10px" }}>
                     <Link to="/tourist/wishlist"> {/* Link to the favorite page */}
                       <FaHeart
                         style={{
@@ -239,7 +240,16 @@ const Header = ({ HeaderData }) => {
                       />
                     </Link>
                   </div>
-                  <div className="option-item" style={{ marginRight: "0px" }}>
+                  <div className="option-item" style={{ marginLeft: "5px" }}>
+                      <ShoppingCartIcon 
+                        style={{
+                          fontSize: "24px", // Adjust the icon size
+                          color: "var(--text-color)", // Set the color for the icon
+                        }}
+                      />
+                    
+                  </div>
+                  <div className="option-item" style={{ marginRight: "0px" , transform: "scale(0.8)", transformOrigin: "center"}}>
                     <ThemeToggleButton />
                   </div>
 
