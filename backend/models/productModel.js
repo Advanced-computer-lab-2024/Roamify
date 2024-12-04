@@ -52,7 +52,7 @@
             default: false // Initially set to active (not archived)
           }
         },
-        { timestamps: true }
+           { timestamps: true }
     );
 
     const productModel = mongoose.model("product", productSchema);
