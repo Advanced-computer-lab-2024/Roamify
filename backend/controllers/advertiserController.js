@@ -1,20 +1,31 @@
-const validator = require('validator');
 
-const advertiserModel = require("../models/advertiserModel");
-const transportationModel = require("../models/transportationModel");
-const userModel = require("../models/userModel");
-const activityModel = require("../models/activityModel");
-const preferenceTagModel = require('../models/preferenceTagModel');
-const categoryModel = require("../models/categoryModel");
-const activityTicketModel = require("../models/activityTicketModel");
-const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
-const multer = require('multer');
-const { default: mongoose } = require('mongoose');
-const receiptModel = require('../models/receiptModel');
-const { constants } = require('module');
-const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
-const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
 
+
+async function notifyUser(io, userId, name) {
+
+  const message = `The activity ${name} is now open for bookings! Secure your spot today and don't miss out!`;
+  const notification = new notificationModel({
+    user: userId,
+    type: `booking available-${name}`,
+    message
+  });
+  await notification.save();
+
+  const user = await userModel.findById(userId)
+
+
+
+  const socketId = connectedUsers[userId.toString()];
+  if (socketId) {
+    io.to(socketId).emit("receiveNotification", message);
+    console.log(`Notification sent to user ${userId}`);
+  }
+  else {
+    console.log(`User ${userId} is not connected.`);
+  }
+
+
+}
 const createProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -740,6 +751,22 @@ const enableActivityBooking = async (req, res) => {
 
     activity.bookingAvailable = !activity.bookingAvailable;
     await activity.save();
+
+    const tourists = await touristModel.find({
+      interestedEvents: activityId
+    });
+
+    console.log(tourists.length)
+    if (tourists.length > 0) {
+      const io = req.app.get("io");
+      for (t of tourists) {
+        notifyUser(io, t.user, activity.name)
+        t.interestedEvents = t.interestedEvents.filter(e => e.toString() !== activityId.toString())
+
+        await t.save();
+
+      }
+    }
     return res.status(200).json({ message: 'enabled activity' });
   }
   catch (error) {
