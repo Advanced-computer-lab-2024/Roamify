@@ -8,10 +8,10 @@ const { getIo, connectedUsers } = require('../config/socket')
 
 async function notifyUser(userId, name, date, type) {
 
-    const message = type === 'activity' ? 'Reminder that you have a booked activity ${name} for tommorrow ${date}' : 'Reminder that you have a booked itinerary ${name} for tommorrow ${date}';
+    const message = type === 'activity' ? `Reminder that you have a booked activity ${name} for tommorrow ${date}` : `Reminder that you have a booked itinerary ${name} for tommorrow ${date}`;
     const notification = new notificationModel({
         user: userId,
-        type: 'reminder of booking',
+        type: `reminder of booking`,
         message
     });
     await notification.save();
@@ -21,16 +21,14 @@ async function notifyUser(userId, name, date, type) {
     const socketId = connectedUsers[userId.toString()];
     if (socketId) {
         io.to(socketId).emit("receiveNotification", message);
-        console.log('Notification sent to user ${userId}');
+        console.log(`Notification sent to user ${userId}`);
     }
     else {
-        console.log('User ${userId} is not connected.');
-    }
+        console.log(`User ${userId} is not connected.`);
+    }
 
 
 }
-
-
 const emailAndNotifyUser = async () => {
     try {
         const activityTickets = await activityTicketModel.find({ status: 'active', date: { $gt: new Date() } })
