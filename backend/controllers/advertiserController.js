@@ -775,3 +775,42 @@ module.exports = {
   disableActivityBooking,
   enableActivityBooking
 };
+
+
+const enableActivityBooking = async (req, res) => {
+  try {
+
+    if (!req.body.activityId) return res.status(400).json({ message: 'choose an activity to disable' })
+
+    const activityId = new mongoose.Types.ObjectId(req.body.activityId)
+
+    const activity = await activityModel.findById(activityId)
+
+    if (activity.advertiser.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'you are unauthorized to edit this activity' })
+
+    if (activity.bookingAvailable) return res.status(400).json({ message: 'activity already enabled' })
+
+    activity.bookingAvailable = !activity.bookingAvailable;
+    await activity.save();
+
+    const tourists = await touristModel.find({
+      interestedEvents: activityId
+    });
+
+    console.log(tourists.length)
+    if (tourists.length > 0) {
+      const io = req.app.get("io");
+      for (t of tourists) {
+        notifyUser(io, t.user, activity.name)
+        t.interestedEvents = t.interestedEvents.filter(e => e.toString() !== activityId.toString())
+
+        await t.save();
+
+      }
+    }
+    return res.status(200).json({ message: 'enabled activity' });
+  }
+  catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+}
