@@ -753,30 +753,6 @@ const disableActivityBooking = async (req, res) => {
     return res.status(500).json({ message: error.message })
   }
 }
-
-
-module.exports = {
-  createProfile,
-  getProfile,
-  updateProfile,
-  createActivity,
-  getMyActivities,
-  updateActivity,
-  deleteActivity,
-  uploadLogo,
-  upload,
-  createTransportation,
-  getAllTransportation,
-  deleteTransportation,
-  editTransportation,
-  getMyTransportations,
-  viewRevenue,
-  viewTotalTourists,
-  disableActivityBooking,
-  enableActivityBooking
-};
-
-
 const enableActivityBooking = async (req, res) => {
   try {
 
@@ -811,6 +787,27 @@ const enableActivityBooking = async (req, res) => {
     return res.status(200).json({ message: 'enabled activity' });
   }
   catch (error) {
-    return res.status(500).json({ message: error.message })
-  }
+    return res.status(500).json({ message: error.message })
+  }
 }
+
+module.exports = {
+  createProfile,
+  getProfile,
+  updateProfile,
+  createActivity,
+  getMyActivities,
+  updateActivity,
+  deleteActivity,
+  uploadLogo,
+  upload,
+  createTransportation,
+  getAllTransportation,
+  deleteTransportation,
+  editTransportation,
+  getMyTransportations,
+  viewRevenue,
+  viewTotalTourists,
+  disableActivityBooking,
+  enableActivityBooking
+};
