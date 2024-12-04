@@ -82,8 +82,7 @@ const CommonCard = ({
       const response = await axios.post(
         `http://localhost:3000/api/cart/add-product`,
         {
-          product: id,
-          quantity: 10,
+          product: id
         },
         { withCredentials: true }
       );

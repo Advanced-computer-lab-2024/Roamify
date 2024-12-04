@@ -241,13 +241,14 @@ const Header = ({ HeaderData }) => {
                     </Link>
                   </div>
                   <div className="option-item" style={{ marginLeft: "5px" }}>
+                    <Link to="/tourist/cart">
                       <ShoppingCartIcon 
                         style={{
                           fontSize: "24px", // Adjust the icon size
                           color: "var(--text-color)", // Set the color for the icon
                         }}
                       />
-                    
+                    </Link>  
                   </div>
                   <div className="option-item" style={{ marginRight: "0px" , transform: "scale(0.8)", transformOrigin: "center"}}>
                     <ThemeToggleButton />
