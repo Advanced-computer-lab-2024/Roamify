@@ -1,5 +1,6 @@
 const validator = require('validator');
-
+const nodemailer = require('nodemailer')
+const emailTemplate = require('../emailTemplate')
 const advertiserModel = require("../models/advertiserModel");
 const transportationModel = require("../models/transportationModel");
 const userModel = require("../models/userModel");
@@ -11,10 +12,38 @@ const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
 const { default: mongoose } = require('mongoose');
 const receiptModel = require('../models/receiptModel');
-const { constants } = require('module');
+const { connectedUsers } = require('../config/socket');
+const touristModel = require('../models/touristModel');
+const notificationModel = require('../models/notificationModel');
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
 const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
 
+
+async function notifyUser(io, userId, name) {
+
+  const message = `The activity ${name} is now open for bookings! Secure your spot today and don't miss out!`;
+  const notification = new notificationModel({
+    user: userId,
+    type: `booking available-${name}`,
+    message
+  });
+  await notification.save();
+
+  const user = await userModel.findById(userId)
+
+
+
+  const socketId = connectedUsers[userId.toString()];
+  if (socketId) {
+    io.to(socketId).emit("receiveNotification", message);
+    console.log(`Notification sent to user ${userId}`);
+  }
+  else {
+    console.log(`User ${userId} is not connected.`);
+  }
+
+
+}
 const createProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -37,6 +66,9 @@ const createProfile = async (req, res) => {
 
     if (!companyName || !websiteLink || !hotline || !companyProfile)
       throw Error('please fill all fields');
+
+    const advertiser = await advertiserModel.findOne({ companyName })
+    if (advertiser) return res.status(400).json({ message: 'this company name already exists please choose another' })
     await userModel.findByIdAndUpdate(userId, { status: "active" });
     const newAdvertiser = new advertiserModel({
       companyName,
@@ -200,6 +232,8 @@ const createActivity = async (req, res) => {
   }
 };
 const updateActivity = async (req, res) => {
+  const session = await mongoose.startSession(); // Start a session
+  session.startTransaction(); // Start a transaction
   try {
     const activityId = req.params.activityId;
     const advertiserId = req.user._id;
@@ -225,6 +259,9 @@ const updateActivity = async (req, res) => {
     const activityDate = activity.date.setHours(0, 0, 0);
 
     if (today > activityDate) return res.status(400).json({ message: 'this activity is old you are not allowed to edit it' })
+
+
+
     // Extract fields from the request body
     const {
       name,
@@ -239,6 +276,7 @@ const updateActivity = async (req, res) => {
       rating,
     } = req.body;
     const query = {};
+    const ticketQuery = {};
 
     // Update tags if provided
     if (tags) {
@@ -266,26 +304,63 @@ const updateActivity = async (req, res) => {
         throw Error("Please enter a future date");
       }
       query.date = date;
+      ticketQuery.date = date;
     }
 
     // Update remaining fields if provided
-    if (name) query.name = name;
-    if (location) query.location = location;
+    if (name) {
+      query.name = name;
+      ticketQuery.name = name;
+    }
+    if (location) {
+      query.location = location;
+      ticketQuery.locationName = location.name
+    }
     if (price) query.price = price;
-    if (time) query.time = time;
+    if (time) {
+      query.time = time;
+      ticketQuery.time = time
+    }
     if (discounts) query.discounts = discounts;
     if (rating) query.rating = rating;
     if (bookingAvailable !== undefined) query.bookingAvailable = bookingAvailable;
 
     // Update the activity with the constructed query
-    await activityModel.findByIdAndUpdate(activityId, query);
+    const activityTickets = await activityTicketModel.find({ activity: activity._id, status: 'active' })
 
+    if (activityTickets.length > 0) {
+      for (t of activityTickets) {
+        const transporter = nodemailer.createTransport({
+          service: "Gmail",
+          auth: {
+            user: process.env.EMAIL,
+            pass: process.env.EMAIL_PASSWORD,
+          }
+        })
+        const user = await userModel.findById(t.tourist)
+        const text = emailTemplate.notifyBookedUsersForUpdateInActivity(ticketQuery.name, ticketQuery.date, ticketQuery.locationName, user.username)
+        const mailOptions = {
+          from: process.env.EMAIL,
+          to: user.email,
+          subject: " Update: Your Upcoming Activity has been updated!",
+          text
+        }
+        await transporter.sendMail(mailOptions)
+      }
+    }
+
+    await activityModel.findByIdAndUpdate(activityId, query, { session });
+    await activityTicketModel.updateMany({ activity: activity._id }, ticketQuery, { session })
+
+    await session.commitTransaction();
+    session.endSession();
     res.status(200).json({
       message: "Activity updated successfully",
     });
   } catch (e) {
-    console.error(e); // Log the error for debugging
-    res.status(400).json({ message: e.message });
+    await session.abortTransaction();
+    session.endSession();
+    return res.status(400).json({ message: e.message });
   }
 };
 const deleteActivity = async (req, res) => {
@@ -700,6 +775,66 @@ const viewTotalTourists = async (req, res) => {
   }
 }
 
+const disableActivityBooking = async (req, res) => {
+  try {
+
+    if (!req.body.activityId) return res.status(400).json({ message: 'choose an activity to disable' })
+
+    const activityId = new mongoose.Types.ObjectId(req.body.activityId)
+
+    const activity = await activityModel.findById(activityId)
+
+
+    if (activity.advertiser.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'you are unauthorized to edit this activity' })
+
+    if (!activity.bookingAvailable) return res.status(400).json({ message: 'activity already disabled' })
+
+    activity.bookingAvailable = !activity.bookingAvailable;
+    await activity.save();
+    return res.status(200).json({ message: 'disabled activity' });
+  }
+  catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+}
+const enableActivityBooking = async (req, res) => {
+  try {
+
+    if (!req.body.activityId) return res.status(400).json({ message: 'choose an activity to disable' })
+
+    const activityId = new mongoose.Types.ObjectId(req.body.activityId)
+
+    const activity = await activityModel.findById(activityId)
+
+    if (activity.advertiser.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'you are unauthorized to edit this activity' })
+
+    if (activity.bookingAvailable) return res.status(400).json({ message: 'activity already enabled' })
+
+    activity.bookingAvailable = !activity.bookingAvailable;
+    await activity.save();
+
+    const tourists = await touristModel.find({
+      interestedEvents: activityId
+    });
+
+    console.log(tourists.length)
+    if (tourists.length > 0) {
+      const io = req.app.get("io");
+      for (t of tourists) {
+        notifyUser(io, t.user, activity.name)
+        t.interestedEvents = t.interestedEvents.filter(e => e.toString() !== activityId.toString())
+
+        await t.save();
+
+      }
+    }
+    return res.status(200).json({ message: 'enabled activity' });
+  }
+  catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+}
+
 module.exports = {
   createProfile,
   getProfile,
@@ -716,5 +851,7 @@ module.exports = {
   editTransportation,
   getMyTransportations,
   viewRevenue,
-  viewTotalTourists
+  viewTotalTourists,
+  disableActivityBooking,
+  enableActivityBooking
 };

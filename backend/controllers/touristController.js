@@ -182,6 +182,8 @@ const bookActivity = async (req, res) => {
     const bookingDate = new Date(date);
     const activityObject = await activityModel.findById(activityId);
 
+    if (!activityObject.bookingAvailable) return res.status(400).json({ message: 'sorry you are trying to book an activity which is not taking bookings right now' })
+
     const today = new Date();
     //checking that this is the correct dater for this activity
     if (
@@ -418,6 +420,8 @@ const bookItinerary = async (req, res) => {
     const itineraryId = new mongoose.Types.ObjectId(itinerary);
     const bookingDate = new Date(date);
     const itineraryObject = await itineraryModel.findById(itineraryId);
+
+    if (itineraryObject.status === 'inactive') return res.status(400).json({ message: 'sorry you are trying to book an inactive itinerary' })
 
     const today = new Date();
     //checking that this is the correct dater for this activity
@@ -1268,6 +1272,38 @@ const viewTotalRefundedReceipts = async (req, res) => {
   }
 }
 
+const enableNotificationsForActivities = async (req, res) => {
+  try {
+
+    if (!req.body.activityId) {
+      return res.status(400).json({ message: 'Please choose the activity' });
+    }
+
+    const activityId = new mongoose.Types.ObjectId(req.body.activityId)
+
+
+
+
+    const activity = await activityModel.findById(activityId);
+
+    if (activity.bookingAvailable) return res.status(400).json({ message: 'This activity already has booking available' })
+
+
+    const tourist = await touristModel.findOne({ user: req.user._id })
+
+
+    if (tourist.interestedEvents.some(t => t.toString() === activityId.toString())) {
+      return res.status(400).json({ message: 'You\'re already set to be notified when this event becomes available.' });
+    }
+
+    tourist.interestedEvents.push(activityId);
+    await tourist.save();
+    return res.status(200).json({ message: 'You have been successfully registered to receive notifications for this event.' });
+  }
+  catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+}
 module.exports = {
   createProfile,
   getProfile,
@@ -1292,5 +1328,6 @@ module.exports = {
   cancelPlace,
   getAllBookedPlaces,
   getWallet,
-  viewTotalRefundedReceipts
+  viewTotalRefundedReceipts,
+  enableNotificationsForActivities
 };

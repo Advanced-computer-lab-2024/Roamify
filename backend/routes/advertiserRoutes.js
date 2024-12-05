@@ -13,6 +13,8 @@ router.delete(
   "/delete-activity/:activityid",
   advertiserController.deleteActivity
 );
+router.put("/disable-activity-booking", advertiserController.disableActivityBooking)
+router.put("/enable-activity-booking", advertiserController.enableActivityBooking)
 router.post('/upload-logo', advertiserController.upload, advertiserController.uploadLogo);
 
 router.get("/get-my-activities", advertiserController.getMyActivities);
