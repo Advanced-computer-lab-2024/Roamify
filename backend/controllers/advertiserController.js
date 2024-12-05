@@ -358,7 +358,6 @@ const updateActivity = async (req, res) => {
       message: "Activity updated successfully",
     });
   } catch (e) {
-    console.log(e)
     await session.abortTransaction();
     session.endSession();
     return res.status(400).json({ message: e.message });
