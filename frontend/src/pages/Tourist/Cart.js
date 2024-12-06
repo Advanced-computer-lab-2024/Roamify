@@ -38,30 +38,31 @@ function Cart() {
   const handleIncrement = async (productId) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/cart/product/67338747e6ba7e47aa3988ba/increment",
-        { product: productId },
+        `http://localhost:3000/api/cart/product/${productId}/increment`, // Dynamically use productId
+        { product: productId }, // Include productId in the body for consistency (if needed)
         { withCredentials: true }
       );
-      fetchCartData();
+      fetchCartData(); // Refresh cart data
       setNotification(response.data.message || "Quantity updated successfully");
     } catch (err) {
       handleApiError(err, "increment");
     }
   };
-
+  
   const handleDecrement = async (productId) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/cart/product/67338747e6ba7e47aa3988ba/decrement",
-        { product: productId },
+        `http://localhost:3000/api/cart/product/${productId}/decrement`, // Dynamically use productId
+        { product: productId }, // Include productId in the body for consistency (if needed)
         { withCredentials: true }
       );
-      fetchCartData();
+      fetchCartData(); // Refresh cart data
       setNotification(response.data.message || "Quantity updated successfully");
     } catch (err) {
       handleApiError(err, "decrement");
     }
   };
+  
 
   const handleDelete = async (productId) => {
     try {
