@@ -16,7 +16,7 @@ const { connectedUsers } = require('../config/socket')
 
 async function notifyUser(io, userId, type, name) {
 
-  const message = type === 'ativity' ? `Your activity "${name}" has been flagged as inappropriate by the admin.` : `Your itinerary "${name}" has been flagged as inappropriate by the admin.`;
+  const message = type === 'activity' ? `Your activity "${name}" has been flagged as inappropriate by the admin.` : `Your itinerary "${name}" has been flagged as inappropriate by the admin.`;
   const notification = new notificationModel({
     user: userId,
     type: `flagged-${type}`,
