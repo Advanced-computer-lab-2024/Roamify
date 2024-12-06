@@ -1010,7 +1010,7 @@ const bookTransportation = async (req, res) => {
 
     }
 
-    if (method == 'card') {
+    if (method === 'card') {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: transportation.price * 100, // Amount in cents
         currency: 'usd', // Set the currency
