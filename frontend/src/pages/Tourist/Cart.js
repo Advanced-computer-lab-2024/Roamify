@@ -116,7 +116,7 @@ function Cart() {
           position: "relative", // Added for notification positioning
         }}
       >
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Your Cart</h2>
+        <h2 style={{ textAlign: "center", marginBottom: "20px" , fontSize: "24px"}}>Your Cart</h2>
         <form onSubmit={handleSubmit}>
           {cartItems.map((item) => (
             <div
