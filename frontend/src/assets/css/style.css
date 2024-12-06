@@ -94,9 +94,19 @@ Default CSS
   --shimmer-end-color: #1f2a41;
 }
 
-input[type="text"]:focus-visible {
-  border-color: var(--main-color); /* Change border color on focus-visible */
+.cancel-button {
+  background-color: #424446;
+}
+
+input[type="text"]:focus {
+  border: 1px solid var(--main-color);
   outline: none;
+}
+
+input[type="text"] {
+  background: var(--background-color);
+  border: 1px solid var(--gray-color);
+  color: var(--text-color);
 }
 
 html,

@@ -28,9 +28,12 @@ const CommonCard = ({
   useEffect(() => {
     const checkWishlistStatus = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/wishlist/`, {
-          withCredentials: true,
-        });
+        const response = await axios.get(
+          `http://localhost:3000/api/wishlist/`,
+          {
+            withCredentials: true,
+          }
+        );
         const productInWishlist = response.data.wishlist.some(
           (item) => item.productId === id
         );
@@ -82,14 +85,16 @@ const CommonCard = ({
       const response = await axios.post(
         `http://localhost:3000/api/cart/add-product`,
         {
-          product: id
+          product: id,
         },
         { withCredentials: true }
       );
-  
+
       // Check the response JSON
       if (response.data.success) {
-        toast.success(response.data.message || "Item added to cart successfully!");
+        toast.success(
+          response.data.message || "Item added to cart successfully!"
+        );
       } else {
         toast.warning(response.data.message || "Could not add item to cart.");
       }
@@ -98,12 +103,11 @@ const CommonCard = ({
       toast.error("There was an error adding the item to the cart.");
     }
   };
-  
 
   return (
     <div className="card" style={{ borderColor: "var(--secondary-color)" }}>
       <img src={picture} alt={name} className="card-img-top" />
-      
+
       {/* Heart icon for wishlist */}
       <div className="heart_destinations" onClick={handleWishlist}>
         <i
@@ -118,7 +122,10 @@ const CommonCard = ({
       </div>
 
       {/* Product details */}
-      <div className="card-body" style={{ background: "var(--secondary-color)" }}>
+      <div
+        className="card-body"
+        style={{ background: "var(--secondary-color)" }}
+      >
         <h5 className="card-title">{name}</h5>
         <p className="card-text">
           <strong>Seller:</strong> {sellerId.username}

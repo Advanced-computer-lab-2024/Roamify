@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import AddUserModal from "../../../component/Modals/AddUserModal";
 import { toKebabCase } from "../../../functions/toKebabCase";
 
-const AddUserButton = ({ userType }) => {
+const AddUserButton = ({ userType, fetchUsers }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   console.log(toKebabCase(userType));
 
@@ -20,7 +20,7 @@ const AddUserButton = ({ userType }) => {
         onClick={handleAddClick}
         style={{
           padding: "16px",
-          backgroundColor: "#3B82F6", // Use your desired accent color
+          backgroundColor: "var(--main-color)", // Use your desired accent color
           color: "#FFFFFF",
           border: "none",
           borderRadius: "10px",
@@ -31,6 +31,7 @@ const AddUserButton = ({ userType }) => {
         Add {userType}
       </button>
       <AddUserModal
+        fetchUsers={userType === "Tourism Governor" ? fetchUsers : null}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         newUserType={`add-${toKebabCase(userType)}`}

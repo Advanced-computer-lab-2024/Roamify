@@ -24,7 +24,7 @@ function ProfileButton() {
           background: "none",
         }}
       >
-        <ProfileIcon height="5vh" width="5vw" />
+        <ProfileIcon height="40px" width="40px" />
       </button>
 
       <Modal
@@ -55,22 +55,21 @@ function ProfileButton() {
             <button onClick={() => setModalIsOpen(false)}>Settings</button>
           </Link>
           {role === "tourist" && (
-        <button
-          onClick={() => {
-            // Redirect to the WalletPage when the button is clicked
-            navigate("/tourist/wallet");
-          }}
-        >
-          Wallet
-        </button>
-      )}
+            <button
+              onClick={() => {
+                // Redirect to the WalletPage when the button is clicked
+                navigate("/tourist/wallet");
+              }}
+            >
+              Wallet
+            </button>
+          )}
           {role === "admin" && <AddUserButton userType={"admin"} />}
           <Link to={""}>
             <button onClick={() => setModalIsOpen(false)}>Logout</button>
           </Link>
         </div>
       </Modal>
-     
     </div>
   );
 }

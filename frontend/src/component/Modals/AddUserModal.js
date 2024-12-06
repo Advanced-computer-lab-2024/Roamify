@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import AddUserForm from "../../pages/Admin/Users/AddUserForm";
 
-const AddUserModal = ({ isOpen, onClose, newUserType }) => {
+const AddUserModal = ({ isOpen, onClose, newUserType, fetchUsers }) => {
   const modalRef = useRef(null);
 
   useEffect(() => {
@@ -61,15 +61,21 @@ const AddUserModal = ({ isOpen, onClose, newUserType }) => {
             position: "absolute",
             top: "4px",
             right: "8px",
-            fontSize: "24px",
-            color: "#4A5568",
+            padding: "0px",
+            fontSize: "20px",
+            color: "var(--text-color)",
             cursor: "pointer",
+            background: "none",
           }}
           aria-label="Close Modal"
         >
           &times;
         </button>
-        <AddUserForm onClose={onClose} newUserType={newUserType} />
+        <AddUserForm
+          onClose={onClose}
+          newUserType={newUserType}
+          fetchUsers={fetchUsers}
+        />
       </div>
     </div>,
     document.body

@@ -1,7 +1,7 @@
 import React from "react";
 
 // Reusable LoadingSpinner component
-const LoadingLogo = ({ isVisible, size = "80px" }) => {
+const UnAuthorizedLogo = ({ isVisible, size = "50px", text }) => {
   if (!isVisible) return null; // Don't render the spinner if not visible
 
   return (
@@ -14,15 +14,16 @@ const LoadingLogo = ({ isVisible, size = "80px" }) => {
       }}
     >
       <img
-        src="/loading.gif" // Path to your loading GIF
-        alt={"Loading.."}
+        src="/unAuthorizedLogo.svg" // Path to your loading GIF
+        alt={"Loading..."}
         style={{
           width: size, // Set the size of the GIF (default is 50px)
           height: size,
         }}
       />
+      <p>{text}</p>
     </div>
   );
 };
 
-export default LoadingLogo;
+export default UnAuthorizedLogo;

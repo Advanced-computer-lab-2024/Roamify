@@ -3,6 +3,7 @@ import UsersTable from "./UsersTable.js";
 import axios from "axios";
 import CommonBanner from "../../../component/Common/CommonBanner.js";
 import toast, { Toaster } from "react-hot-toast";
+import EmptyResponseLogo from "../../../component/EmptyResponseLogo.js";
 
 const PendingUsers = () => {
   const [users, setUsers] = useState([]);
@@ -68,9 +69,11 @@ const PendingUsers = () => {
             Loading...
           </p> // Show loading indicator
         ) : hasNoPendingUsers ? (
-          <p style={{ fontSize: "18px", color: "var(--text-color)" }}>
-            No pending users available.
-          </p> // Show message if no pending users
+          <EmptyResponseLogo
+            isVisible={true}
+            size="400px"
+            text={"No Pending Users Currently.."}
+          />
         ) : (
           <UsersTable
             users={users}
