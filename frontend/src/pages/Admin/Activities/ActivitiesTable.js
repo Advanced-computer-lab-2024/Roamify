@@ -1,7 +1,7 @@
 import React from "react";
 import ActivitiesTableRow from "./ActivitiesTableRow";
 
-const ActivitiesTable = ({ columns, categories, type }) => {
+const ActivitiesTable = ({ columns, categories, type, reFetch }) => {
   return (
     <div style={{ overflowX: "auto" }}>
       <table
@@ -21,7 +21,7 @@ const ActivitiesTable = ({ columns, categories, type }) => {
               fontSize: "0.875rem",
               lineHeight: "1.5",
               borderBottomWidth: "2px",
-              borderColor: "var(--border-color)", // Tailwind gray-300
+              borderColor: "var(--border-color)",
             }}
           >
             {columns.map((column, index) => (
@@ -29,11 +29,12 @@ const ActivitiesTable = ({ columns, categories, type }) => {
                 key={index}
                 style={{
                   fontWeight: "400",
-                  paddingTop: "0.75rem",
-                  paddingBottom: "0.75rem",
+                  paddingTop: "3vh",
+                  paddingBottom: "3vh",
                   paddingLeft: "1.5rem",
                   paddingRight: "1.5rem",
                   textAlign: "left",
+                  color: "var(--text-color)",
                 }}
               >
                 {column.name}
@@ -55,6 +56,7 @@ const ActivitiesTable = ({ columns, categories, type }) => {
               name={category.name}
               description={category.description}
               type={type}
+              reFetch={reFetch}
             />
           ))}
         </tbody>

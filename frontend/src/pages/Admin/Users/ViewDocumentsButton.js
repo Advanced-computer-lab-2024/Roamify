@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { camelToReg } from "../../../functions/camelToReg";
+import LoadingLogo from "../../../component/LoadingLogo";
 
 const ViewDocumentsButton = ({ userId }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,8 +25,6 @@ const ViewDocumentsButton = ({ userId }) => {
 
       if (Object.keys(docs).length > 0) {
         toast.success("Documents loaded successfully!");
-      } else {
-        toast("No documents available for this user.");
       }
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -62,7 +61,8 @@ const ViewDocumentsButton = ({ userId }) => {
         >
           <div
             style={{
-              backgroundColor: "white",
+              backgroundColor: "var(--secondary-color)",
+              textAlign: "left",
               padding: "20px",
               borderRadius: "8px",
               width: "80%",
@@ -72,25 +72,37 @@ const ViewDocumentsButton = ({ userId }) => {
               position: "relative",
             }}
           >
-            <h3>Documents</h3>
-            <button
-              onClick={handleCloseModal}
-              style={{
-                position: "absolute",
-                top: "10px",
-                right: "10px",
-                background: "none",
-                border: "none",
-                fontSize: "1.5rem",
-                cursor: "pointer",
-                color: "gray",
-              }}
-            >
-              &times;
-            </button>
+            <div>
+              <h3>Documents</h3>
+              <button
+                onClick={handleCloseModal}
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  background: "none",
+                  border: "none",
+                  fontSize: "1.5rem",
+                  cursor: "pointer",
+                  color: "gray",
+                }}
+              >
+                &times;
+              </button>
+            </div>
 
             {loading ? (
-              <p>Loading documents...</p>
+              <div
+                style={{
+                  height: "100%",
+                  padding: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <LoadingLogo isVisible={true} size="50px" />
+              </div>
             ) : Object.keys(documents).length > 0 ? (
               <ul>
                 {Object.entries(documents).map(([docType, url], index) => (

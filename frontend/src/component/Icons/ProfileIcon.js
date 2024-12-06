@@ -1,8 +1,8 @@
 import React from "react";
 
 function ProfileIcon({
-  height = "24px",
-  width = "24px",
+  height = "30px",
+  width = "30px",
   fill = "var(--text-color)",
 }) {
   return (

@@ -8,15 +8,20 @@ const PreferenceTags = () => {
   const [searchInput, setSearchInput] = useState("");
 
   // Fetch preference tags
-  useEffect(() => {
+  const fetchPreferenceTags = () => {
     axios
-      .get(`http://localhost:3000/api/preference-tag/get-all`, {
+      .get("http://localhost:3000/api/preference-tag/get-all", {
         withCredentials: true,
       })
       .then((result) => {
         setPreferenceTags(result.data.tags);
       })
       .catch((error) => console.error(error));
+  };
+
+  // Initial fetch on component mount
+  useEffect(() => {
+    fetchPreferenceTags();
   }, []);
 
   // Handle search input change
@@ -39,7 +44,7 @@ const PreferenceTags = () => {
           justifyContent: "space-between",
           alignItems: "baseline",
           marginBottom: "20px",
-          padding: "0px 2vw",
+          padding: "0px 4vw",
         }}
       >
         {/* Title */}
@@ -63,28 +68,42 @@ const PreferenceTags = () => {
             onChange={handleSearchChange}
             style={{
               padding: "8px",
+              paddingLeft: "1vw",
               borderRadius: "4px",
-              border: "1px solid #ccc",
+              border: "1px solid var(--border-color)",
               marginRight: "20px",
+              color: "var(--dashboard-title-color)",
               width: "300px",
+              background: "var(--secondary-color)",
             }}
           />
 
           {/* Create Tag Button */}
           <div style={{ marginLeft: "auto" }}>
-            <CreateTagButton type={"preference-tag"} />
+            <CreateTagButton
+              type={"preference-tag"}
+              onCreated={fetchPreferenceTags}
+            />
           </div>
         </div>
       </div>
 
       {/* Table for displaying preference tags */}
-      <div style={{ marginTop: "20px", padding: "0px 2vw" }}>
+      <div style={{ marginTop: "20px", padding: "0px 4vw" }}>
         <ActivitiesTable
           columns={[{ name: "Name" }, { name: "Description" }]}
           categories={filteredTags}
           type={"preference-tag"}
+          reFetch={fetchPreferenceTags}
         />
       </div>
+      <style>
+        {`
+          input::placeholder {
+            color: var(--dashboard-title-color); /* You can replace this with any color you prefer */
+          }
+        `}
+      </style>
     </div>
   );
 };

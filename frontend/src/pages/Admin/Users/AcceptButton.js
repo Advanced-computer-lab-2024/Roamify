@@ -1,34 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
+import { FaCheck } from "react-icons/fa"; // Import FontAwesome check icon
+import ConfirmModal from "../../../component/Modals/ConfirmModal"; // Assuming you might use a confirmation modal
 
 const AcceptButton = ({ onAccept }) => {
   return (
-    <button
-      onClick={onAccept}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: "40px",
-        height: "40px",
-        backgroundColor: "transparent",
-        border: "2px solid #38c172",
-        color: "#38c172",
-        borderRadius: "50%",
-        cursor: "pointer",
-        transition: "background-color 0.3s, color 0.3s",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = "#38c172";
-        e.currentTarget.style.color = "#fff";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = "transparent";
-        e.currentTarget.style.color = "#38c172";
-      }}
-      aria-label="Accept"
-    >
-      &#10003;
-    </button>
+    <>
+      <button
+        onClick={onAccept}
+        style={{
+          marginLeft: "auto",
+          padding: "10px",
+          color: "var(--secondary-hover-color)", // Default icon color
+          borderRadius: "50%",
+          backgroundColor: "transparent",
+          transition: "background-color 0.3s, border-color 0.3s", // Transition on background and border
+          cursor: "pointer",
+          border: "2px solid var(--secondary-hover-color)",
+        }}
+        onMouseOver={(e) => {
+          e.target.style.backgroundColor = "var(--secondary-hover-color)"; // Green background on hover
+        }}
+        onMouseOut={(e) => {
+          e.target.style.backgroundColor = "transparent"; // Reset background
+          e.target.style.borderColor = "var(--secondary-hover-color)"; // Reset border color
+        }}
+      >
+        <FaCheck
+          size={18}
+          color="#ffffff"
+          style={{ backgroundColor: "transparent !important" }}
+        />{" "}
+        {/* Icon color remains unaffected */}
+      </button>
+    </>
   );
 };
 

@@ -25,6 +25,7 @@ import CompletedActivity from "./component/TouristActivitiesSearch/CompletedActi
 import Wallet from "../Profile/Wallet.js";
 import Wishlist from "./Wishlist.js";
 import Hotels from "./component/Hotels/Hotels.js";
+import Cart from "./Cart.js";
 const Tourist = () => {
   return (
     <>
@@ -49,6 +50,7 @@ const Tourist = () => {
         <Route path="/completed-activity" element={<CompletedActivity />} />
         <Route path="/wallet" element={<Wallet />} />
         <Route path="/wishlist" element={<Wishlist />}/>
+        <Route path="/cart" element={<Cart />}/>
       </Routes>
       <CopyRight />
     </>

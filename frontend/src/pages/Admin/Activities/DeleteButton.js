@@ -25,16 +25,16 @@ const DeleteButton = ({ handleDelete }) => {
           backgroundColor: "transparent",
           transition: "background-color 0.2s",
           cursor: "pointer",
-          border: "1px solid #cfcdcd",
+          border: "0px solid #cfcdcd",
         }}
         onMouseOver={(e) => {
-          e.target.style.backgroundColor = "#eceaea";
+          e.target.style.backgroundColor = "var(--secondary-hover-color)";
         }}
         onMouseOut={(e) => {
           e.target.style.backgroundColor = "transparent";
         }}
       >
-        <DeleteIcon />
+        <DeleteIcon fill="var(--text-color)" />
       </button>
 
       <ConfirmModal

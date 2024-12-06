@@ -4,7 +4,7 @@ import EditButton from "./EditButton";
 import axios from "axios";
 // import EditCategoryButton from "./EditCategoryButton";
 
-const ActivitiesTableRow = ({ id, name, description, type }) => {
+const ActivitiesTableRow = ({ id, name, description, type, reFetch }) => {
   const handleDelete = async () => {
     try {
       // Make a DELETE request to the backend API
@@ -15,6 +15,7 @@ const ActivitiesTableRow = ({ id, name, description, type }) => {
         }
       );
 
+      reFetch();
       console.log("Category deleted successfully:", response.data);
     } catch (error) {
       console.error("Error deleting category:", error.toString());
@@ -27,9 +28,10 @@ const ActivitiesTableRow = ({ id, name, description, type }) => {
         borderBottom: "2px solid var(--border-color)", // Tailwind gray-200
         borderBottomWidth: "1px",
         borderColor: "var(--border-color)",
-        padding: "20px 10px",
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f9fafb")} // Hover effect: Tailwind gray-50
+      onMouseEnter={(e) =>
+        (e.currentTarget.style.backgroundColor = "var(--background-color)")
+      } // Hover effect: Tailwind gray-50
       onMouseLeave={(e) =>
         (e.currentTarget.style.backgroundColor = "transparent")
       }
@@ -40,6 +42,7 @@ const ActivitiesTableRow = ({ id, name, description, type }) => {
           paddingBottom: "1rem",
           paddingLeft: "1.5rem",
           paddingRight: "1.5rem",
+          padding: "10px 2vw",
         }}
       >
         {name}
@@ -50,19 +53,28 @@ const ActivitiesTableRow = ({ id, name, description, type }) => {
           paddingBottom: "1rem",
           paddingLeft: "1.5rem",
           paddingRight: "1.5rem",
+          padding: "10px 2vw",
         }}
       >
         {description}
       </td>
-      <td>
+      <td
+        style={{
+          padding: "15px 0px",
+          textAlign: "end",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <EditButton
           type={type}
           itemId={id}
           name={name}
           description={description}
+          reFetch={reFetch}
         />
       </td>
-      <td>
+      <td style={{ padding: "15px 0px", textAlign: "center" }}>
         <DeleteButton handleDelete={handleDelete} />
       </td>
     </tr>

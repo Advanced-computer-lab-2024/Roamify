@@ -61,7 +61,7 @@ const LoginArea = () => {
     console.log("Token from cookie: ", token); // Log the token from the cookies
 
     const socket = io("http://localhost:3000", {
-      withCredentials: true, // Ensure cookies are sent with the WebSocket handshake
+      withCredentials: true,
     });
 
     // Event listener for successful connection
@@ -75,7 +75,7 @@ const LoginArea = () => {
     });
 
     // Event listener for custom server messages
-    socket.on("message", (data) => {
+    socket.on("receiveNotification", (data) => {
       console.log("Message from server:", data);
     });
 

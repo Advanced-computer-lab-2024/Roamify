@@ -3,7 +3,7 @@ import EditIcon from "../../../component/Icons/EditIcon";
 import DynamicEditModal from "../../../component/Modals/DynamicEditModal";
 import axios from "axios";
 
-const EditButton = ({ itemId, name, description, type }) => {
+const EditButton = ({ itemId, name, description, type, reFetch }) => {
   const editCategory = (formData) => {
     // console.log(categoryId);
     const data = {
@@ -17,6 +17,7 @@ const EditButton = ({ itemId, name, description, type }) => {
       .then((result) => {
         // Pass the created user data back
         handleCloseModal();
+        reFetch();
         if (result) console.log("edit Data Sent:", result.data);
       })
       .catch((err) => {
@@ -46,14 +47,16 @@ const EditButton = ({ itemId, name, description, type }) => {
           borderRadius: "9999px", // Full round button
           cursor: "pointer",
           transition: "background-color 0.3s",
-          border: "1px solid #cfcdcd",
         }}
-        onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#eceaea")} // Hover color
+        onMouseOver={(e) =>
+          (e.currentTarget.style.backgroundColor =
+            "var(--secondary-hover-color)")
+        } // Hover color
         onMouseOut={(e) =>
           (e.currentTarget.style.backgroundColor = "transparent")
         }
       >
-        <EditIcon />
+        <EditIcon fill="var(--text-color)" />
       </button>
 
       <DynamicEditModal

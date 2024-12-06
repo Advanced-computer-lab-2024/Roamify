@@ -1,9 +1,9 @@
-// PendingUsers.js
 import React, { useState, useEffect } from "react";
 import UsersTable from "./UsersTable.js";
 import axios from "axios";
 import CommonBanner from "../../../component/Common/CommonBanner.js";
 import toast, { Toaster } from "react-hot-toast";
+import EmptyResponseLogo from "../../../component/EmptyResponseLogo.js";
 
 const PendingUsers = () => {
   const [users, setUsers] = useState([]);
@@ -38,19 +38,61 @@ const PendingUsers = () => {
   }, []);
 
   return (
-    <div>
-      <p>Pending Users</p>
-      {loading ? (
-        <p>Loading...</p> // Show loading indicator
-      ) : hasNoPendingUsers ? (
-        <p>No pending users available.</p> // Show message if no pending users
-      ) : (
-        <UsersTable
-          users={users}
-          isPending={true}
-          fetchPendingUsers={fetchPendingUsers}
-        />
-      )}
+    <div style={{ minHeight: "100vh" }}>
+      {/* Header Section */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          marginBottom: "0px",
+          padding: "0px 4vw",
+        }}
+      >
+        {/* Title */}
+        <h1
+          style={{
+            fontSize: "24px",
+            fontWeight: "bold",
+            color: "var(--text-color)",
+          }}
+        >
+          Pending Users
+        </h1>
+      </div>
+
+      {/* Conditional Loading and Users Display */}
+      <div style={{ marginTop: "10px", padding: "0px 4vw" }}>
+        {loading ? (
+          <p style={{ fontSize: "18px", color: "var(--text-color)" }}>
+            Loading...
+          </p> // Show loading indicator
+        ) : hasNoPendingUsers ? (
+          <EmptyResponseLogo
+            isVisible={true}
+            size="400px"
+            text={"No Pending Users Currently.."}
+          />
+        ) : (
+          <UsersTable
+            users={users}
+            isPending={true}
+            fetchPendingUsers={fetchPendingUsers}
+          />
+        )}
+      </div>
+
+      {/* Optional: Add global placeholder styling */}
+      <style>
+        {`
+          input::placeholder {
+            color: var(--dashboard-title-color); /* You can replace this with any color you prefer */
+          }
+        `}
+      </style>
+
+      {/* Toast notifications */}
       <Toaster position="bottom-center" reverseOrder={false} />
     </div>
   );

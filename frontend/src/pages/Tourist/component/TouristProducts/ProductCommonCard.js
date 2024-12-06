@@ -28,9 +28,12 @@ const CommonCard = ({
   useEffect(() => {
     const checkWishlistStatus = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/wishlist/`, {
-          withCredentials: true,
-        });
+        const response = await axios.get(
+          `http://localhost:3000/api/wishlist/`,
+          {
+            withCredentials: true,
+          }
+        );
         const productInWishlist = response.data.wishlist.some(
           (item) => item.productId === id
         );
@@ -76,6 +79,40 @@ const CommonCard = ({
     }
   };
 
+  // Handler for adding the product to the cart
+  const handleAddToCart = async () => {
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/api/cart/product`,
+        {
+          product: id,
+        },
+        { withCredentials: true } // Ensure credentials are sent for authentication
+      );
+
+      // Check the response JSON
+      if (response.data.success) {
+        toast.success(
+          response.data.message || "Item added to cart successfully!"
+        );
+      } else {
+        toast.warning(response.data.message || "Could not add item to cart.");
+      }
+    } catch (error) {
+      // Extract and display API error message
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+      } else {
+        console.error("Unexpected error:", error);
+        toast.error("An unexpected error occurred.");
+      }
+    }
+  };
+
   return (
     <div className="card" style={{ borderColor: "var(--secondary-color)" , 
       boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Initial shadow
@@ -90,7 +127,7 @@ const CommonCard = ({
       e.currentTarget.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.1)"; // Reset shadow
     }}>
       <img src={picture} alt={name} className="card-img-top" />
-      
+
       {/* Heart icon for wishlist */}
       <div className="heart_destinations" onClick={handleWishlist}>
         <i
@@ -117,9 +154,14 @@ const CommonCard = ({
         <p className="card-text">
           <strong>Rating:</strong> {rating} ({reviews} reviews)
         </p>
-        <a href={`/product-details/${id}`} className="btn custom-btn mr-2">
-          View Details
-        </a>
+        <div className="button-group" style={{ display: "flex", gap: "8px" }}>
+          <a href={`/product-details/${id}`} className="btn custom-btn mr-2">
+            View Details
+          </a>
+          <button className="btn custom-btn" onClick={handleAddToCart}>
+            Add to Cart
+          </button>
+        </div>
       </div>
 
       {/* Toast Container for notifications */}
