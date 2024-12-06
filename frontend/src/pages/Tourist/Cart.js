@@ -67,10 +67,9 @@ function Cart() {
   const handleDelete = async (productId) => {
     try {
       const response = await axios.delete(
-        "http://localhost:3000/api/cart/product/67338747e6ba7e47aa3988ba",
+        `http://localhost:3000/api/cart/product/${productId}`, // Use dynamic productId here
         {
-          data: { product: productId },
-          withCredentials: true,
+          withCredentials: true, // No need for 'data' as DELETE request includes ID in the URL
         }
       );
       fetchCartData();
@@ -79,6 +78,7 @@ function Cart() {
       handleApiError(err, "delete");
     }
   };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
