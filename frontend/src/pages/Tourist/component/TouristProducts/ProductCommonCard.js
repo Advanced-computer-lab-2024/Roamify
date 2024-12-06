@@ -80,11 +80,11 @@ const CommonCard = ({
   const handleAddToCart = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:3000/api/cart/add-product`,
+        `http://localhost:3000/api/cart/product`,
         {
-          product: id,
+          product: product._id, // Ensure product ID is included
         },
-        { withCredentials: true }
+        { withCredentials: true } // Ensure credentials are sent for authentication
       );
   
       // Check the response JSON
@@ -103,6 +103,8 @@ const CommonCard = ({
       }
     }
   };
+  
+  
   
   
 
