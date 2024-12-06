@@ -80,10 +80,24 @@ function Cart() {
   };
   
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Cart submitted:", cartItems);
+    setLoading(true); // Set loading state to true while API call is in progress
+    try {
+      const response = await axios.post("http://localhost:3000/api/cart/review", {
+        cartItems // Assuming the API needs the cart items data
+      }, {
+        withCredentials: true
+      });
+      console.log("Checkout response:", response.data);
+      setNotification(response.data.message || "Checkout successful!"); // Display success message
+    } catch (err) {
+      handleApiError(err, "checkout");
+    } finally {
+      setLoading(false); // Set loading state to false after API call is complete
+    }
   };
+  
 
   useEffect(() => {
     fetchCartData();
