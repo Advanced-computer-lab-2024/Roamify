@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const productModel = require('../models/productModel'); // Import Product model
-const wishlistModel = require('../models/wishlistModel'); // Import Wishlist model
+const wishlistModel = require('../models/wishlistModel');
+const cartModel = require("../models/cartModel"); // Import Wishlist model
 
 const addProductToWishlist = async (req, res) => {
     try {
@@ -163,10 +164,72 @@ const getWishlistWithProductDetails = async (req, res) => {
         });
     }
 };
+const addProductFromWishlistToCart = async (req, res) => {
+    try {
+        const { productId } = req.params;
 
+        if (!productId) {
+            return res.status(400).json({ message: "Please choose a product to add to the cart." });
+        }
+
+        const product = await productModel.findById(productId);
+
+        // Check if the product exists and is not archived
+        if (!product || product.isArchived) {
+            return res.status(404).json({ message: "Product not found or unavailable." });
+        }
+
+        // Find the user's cart
+        let cart = await cartModel.findOne({ tourist: req.user._id });
+
+        if (!cart) {
+            // Create a new cart if it doesn't exist
+            cart = new cartModel({ tourist: req.user._id, products: [] });
+        }
+
+        const productInCart = cart.products.find((item) => item.productId.equals(productId));
+        const currentQuantityInCart = productInCart ? productInCart.quantity : 0;
+
+        // Check stock availability
+        if (currentQuantityInCart >= product.quantity) {
+            return res.status(400).json({
+                message: `Only ${product.quantity} units available. You already have ${currentQuantityInCart} in your cart.`,
+            });
+        }
+
+        // Increment quantity if the product already exists in the cart
+        if (productInCart) {
+            const totalRequestedQuantity = currentQuantityInCart + 1; // Add 1 from the wishlist
+            if (totalRequestedQuantity > product.quantity) {
+                const maxAllowed = product.quantity - currentQuantityInCart;
+                return res.status(400).json({
+                    message: `Only ${product.quantity} units available. You can add up to ${maxAllowed} more.`,
+                });
+            }
+            productInCart.quantity = totalRequestedQuantity;
+        } else {
+            // Add the product to the cart
+            cart.products.push({ productId, quantity: 1 });
+        }
+
+        // Save the cart
+        await cart.save();
+
+        // Remove the product from the wishlist
+        await wishlistModel.updateOne(
+            { userId: req.user._id },
+            { $pull: { products: productId } }
+        );
+
+        res.status(200).json({ message: "Product added to cart from wishlist successfully."});
+    } catch (error) {
+        res.status(500).json({ message: "Failed to add product to cart from wishlist.", error: error.message });
+    }
+};
 
 module.exports = {
     addProductToWishlist,
     removeProductFromWishlist,
-    getWishlistWithProductDetails
+    getWishlistWithProductDetails,
+    addProductFromWishlistToCart
 };
