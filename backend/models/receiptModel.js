@@ -13,6 +13,10 @@ const receiptSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'user'
     },
+    order: {
+        type: mongoose.Types.ObjectId,
+        ref: 'order'
+    },
     price: {
         type: Number
     },
@@ -20,7 +24,7 @@ const receiptSchema = new mongoose.Schema({
         type: String,
         enum: ['payment', 'refund']
     }
-}, { timestamps: true })
+}, { timestamps: true });
 
 const receiptModel = mongoose.model('receipt', receiptSchema);
-module.exports = receiptModel; 
+module.exports = receiptModel;
