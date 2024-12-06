@@ -4,6 +4,7 @@ import SectionHeading from "../../../../component/Common/SectionHeading";
 import SideBar from "./SideBar";
 import DateFilter from "./DateFilter";
 import { ToastContainer, toast } from "react-toastify";
+import { FaBookmark } from "react-icons/fa";
 
 const TouristActivitiesWrapper = () => {
   const [activities, setActivities] = useState([]);
@@ -25,7 +26,8 @@ const TouristActivitiesWrapper = () => {
   const [searchInputTag, setSearchInputTag] = useState("");
   const [searchInputCategory, setSearchInputCategory] = useState("");
   const [tags, setTags] = useState([]);
-
+  const [isInBookmark, setIsInBookmark] = useState(false);
+  const [bookmarkedActivities, setBookmarkedActivities] = useState({});
   const currencySymbol = localStorage.getItem("currencySymbol") || "$";
   const exchangeRate = parseFloat(localStorage.getItem("value")) || 1;
   const fetchActivities = async (
@@ -39,6 +41,7 @@ const TouristActivitiesWrapper = () => {
     setLoading(true);
     setError(null);
     try {
+      // Fetch activities
       const response = await axios.get(`http://localhost:3000/api/activity`, {
         withCredentials: true,
         params: {
@@ -53,6 +56,29 @@ const TouristActivitiesWrapper = () => {
         },
       });
       setActivities(response.data.activities);
+
+      // Attempt to fetch bookmarks
+      try {
+        const bookmarkResponse = await axios.get(
+          "http://localhost:3000/api/bookmark/activity",
+          { withCredentials: true }
+        );
+
+        // Map bookmarked activities by ID
+        const bookmarks = {};
+        bookmarkResponse.data.bookmarkedActivities.forEach((activity) => {
+          bookmarks[activity._id] = true;
+        });
+        setBookmarkedActivities(bookmarks);
+      } catch (bookmarkError) {
+        // Log and continue if bookmark fetch fails
+        if (bookmarkError.response && bookmarkError.response.status === 400) {
+          console.warn("Bookmark fetch failed, but activities will still display.");
+        } else {
+          console.error("Error fetching bookmarks:", bookmarkError);
+        }
+        setBookmarkedActivities({}); // Reset bookmarks in case of failure
+      }
     } catch (error) {
       if (error.response && error.response.status === 404) {
         setActivities([]);
@@ -204,15 +230,12 @@ const TouristActivitiesWrapper = () => {
   // Function to send activity details via email
   const handleEmailShare = (activity) => {
     const subject = `Check out this activity: ${activity.name}`;
-    const body = `I thought you'd be interested in this activity: ${
-      activity.name
-    }\n\nLocation: ${activity.location.name}\nDate: ${new Date(
-      activity.date
-    ).toLocaleDateString()}\nPrice: ${activity.price} EGP\n\n${
-      activity.category.description
-    }\n\nCheck it out: ${window.location.origin}/activity-details/${
-      activity._id
-    }`;
+    const body = `I thought you'd be interested in this activity: ${activity.name
+      }\n\nLocation: ${activity.location.name}\nDate: ${new Date(
+        activity.date
+      ).toLocaleDateString()}\nPrice: ${activity.price} EGP\n\n${activity.category.description
+      }\n\nCheck it out: ${window.location.origin}/activity-details/${activity._id
+      }`;
     const mailtoLink = `mailto:?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
@@ -226,6 +249,42 @@ const TouristActivitiesWrapper = () => {
     setMinRating(rating); // Update minRating
     fetchActivities(priceRange[0], priceRange[1], date, rating, category); // Refetch activities with new minRating
   };
+
+  const handleBookmark = async (activityId) => {
+    try {
+      if (bookmarkedActivities[activityId]) {
+        // Remove from bookmarks
+        await axios.delete("http://localhost:3000/api/bookmark/activity", {
+          data: { activityId },
+          withCredentials: true,
+        });
+
+        setBookmarkedActivities((prev) => ({
+          ...prev,
+          [activityId]: false,
+        }));
+        toast.success("Removed from bookmarks!");
+      } else {
+        // Add to bookmarks
+        await axios.put(
+          "http://localhost:3000/api/bookmark/activity",
+          { activityId },
+          { withCredentials: true }
+        );
+
+        setBookmarkedActivities((prev) => ({
+          ...prev,
+          [activityId]: true,
+        }));
+        toast.success("Added to bookmarks!");
+      }
+    } catch (err) {
+      console.error("Error updating bookmark:", err);
+      toast.error("Failed to update bookmark.");
+    }
+  };
+
+
   return (
     <section id="explore_area" className="section_padding">
       <div className="container">
@@ -266,15 +325,15 @@ const TouristActivitiesWrapper = () => {
                     searchType === "tag"
                       ? searchInputTag
                       : searchType === "category"
-                      ? searchInputCategory
-                      : searchInput
+                        ? searchInputCategory
+                        : searchInput
                   }
                   onChange={
                     searchType === "tag"
                       ? handleSearchInputTagChange
                       : searchType === "category"
-                      ? handleSearchInputCategoryChange
-                      : handleSearchInputChange
+                        ? handleSearchInputCategoryChange
+                        : handleSearchInputChange
                   }
                   style={{ marginBottom: "10px" }}
                 />
@@ -334,7 +393,24 @@ const TouristActivitiesWrapper = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="flight_search_right">
+                      <div className="flight_search_right" >
+                        <div
+                          style={{
+                            position: "relative",
+                            top: "10%",
+                            left: "90%",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => handleBookmark(activity._id)}
+                        >
+                          <FaBookmark
+                            size={24}
+                            color={
+                              bookmarkedActivities[activity._id] ? "#8b3eea" : "#ccc"
+                            }
+                          />
+                        </div>
+
                         <h5>
                           {activity.discounts ? (
                             <del>
@@ -473,6 +549,8 @@ const TouristActivitiesWrapper = () => {
           onClick={() => setShowPopup(false)}
         />
       )}
+       {/* Toast Container for notifications */}
+       <ToastContainer position="top-right" autoClose={3000} />
     </section>
   );
 };
