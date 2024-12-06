@@ -2,6 +2,7 @@ const productModel = require("../models/productModel");
 const cartModel = require("../models/cartModel");
 const mongoose = require('mongoose');
 
+
 const getCart = async (req, res) => {
     try {
         // Find the cart for the logged-in user
@@ -78,15 +79,7 @@ const addProductToCart = async (req, res) =>    {
 };
 const incrementProductInCart = async (req, res) => {
     try {
-        const { product: productId, quantity = 1 } = req.body;
-
-        if (quantity <= 0) {
-            return res.status(400).json({ message: "Invalid quantity. Must be greater than 0." });
-        }
-
-        if (!productId) {
-            return res.status(400).json({ message: 'Please choose a product to increment.' });
-        }
+        const productId = req.params.productId; // Extract product ID from URL
 
         const product = await productModel.findById(productId);
         if (!product || product.isArchived) {
@@ -104,16 +97,15 @@ const incrementProductInCart = async (req, res) => {
             return res.status(400).json({ message: 'Product not found in the cart.' });
         }
 
-        const totalRequestedQuantity = productInCart.quantity + quantity;
+        const totalRequestedQuantity = productInCart.quantity + 1;
 
         if (totalRequestedQuantity > product.quantity) {
-            const maxAllowed = product.quantity - productInCart.quantity;
             return res.status(400).json({
-                message: `Only ${product.quantity} units available. You already have ${productInCart.quantity} in your cart. You can add up to ${maxAllowed} more.`,
+                message: `Only ${product.quantity} units available. You already have ${productInCart.quantity} in your cart.`,
             });
         }
 
-        productInCart.quantity = totalRequestedQuantity;
+        productInCart.quantity += 1;
 
         await cart.save();
         res.status(200).json({ message: 'Product quantity incremented successfully.', cart });
@@ -123,15 +115,7 @@ const incrementProductInCart = async (req, res) => {
 };
 const decrementProductInCart = async (req, res) => {
     try {
-        const { product: productId, quantity = 1 } = req.body;
-
-        if (quantity <= 0) {
-            return res.status(400).json({ message: "Invalid quantity. Must be greater than 0." });
-        }
-
-        if (!productId) {
-            return res.status(400).json({ message: 'Please choose a product to decrement.' });
-        }
+        const productId = req.params.productId; // Extract product ID from URL
 
         const cart = await cartModel.findOne({ tourist: req.user._id });
 
@@ -146,12 +130,12 @@ const decrementProductInCart = async (req, res) => {
 
         const productInCart = cart.products[productIndex];
 
-        if (productInCart.quantity <= quantity) {
-            // Remove the product if decrement reduces quantity below 1
+        if (productInCart.quantity === 1) {
+            // Remove the product if quantity is 1
             cart.products.splice(productIndex, 1);
         } else {
             // Decrement the quantity
-            productInCart.quantity -= quantity;
+            productInCart.quantity -= 1;
         }
 
         await cart.save();
@@ -162,11 +146,7 @@ const decrementProductInCart = async (req, res) => {
 };
 const removeProductFromCart = async (req, res) => {
     try {
-        const { product: productId } = req.body;
-
-        if (!productId) {
-            return res.status(400).json({ message: 'Please choose a product to remove from the bin.' });
-        }
+        const productId = req.params.productId; // Extract product ID from URL
 
         const cart = await cartModel.findOne({ tourist: req.user._id });
 

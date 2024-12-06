@@ -21,6 +21,7 @@ const TouristProductsArea = () => {
     try {
       const response = await axios.get("http://localhost:3000/api/product", {
         params: {
+
           minPrice: minPrice || 0,
           maxPrice: maxPrice || Infinity,
           name: searchName,

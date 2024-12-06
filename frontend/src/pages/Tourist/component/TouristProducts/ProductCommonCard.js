@@ -83,11 +83,11 @@ const CommonCard = ({
   const handleAddToCart = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:3000/api/cart/add-product`,
+        `http://localhost:3000/api/cart/product`,
         {
           product: id,
         },
-        { withCredentials: true }
+        { withCredentials: true } // Ensure credentials are sent for authentication
       );
 
       // Check the response JSON
@@ -99,8 +99,17 @@ const CommonCard = ({
         toast.warning(response.data.message || "Could not add item to cart.");
       }
     } catch (error) {
-      console.error("Error adding to cart:", error);
-      toast.error("There was an error adding the item to the cart.");
+      // Extract and display API error message
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+      } else {
+        console.error("Unexpected error:", error);
+        toast.error("An unexpected error occurred.");
+      }
     }
   };
 

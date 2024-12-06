@@ -38,7 +38,7 @@ function Cart() {
   const handleIncrement = async (productId) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/cart/increment-product",
+        "http://localhost:3000/api/cart/product/67338747e6ba7e47aa3988ba/increment",
         { product: productId },
         { withCredentials: true }
       );
@@ -52,7 +52,7 @@ function Cart() {
   const handleDecrement = async (productId) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/cart/decrement-product",
+        "http://localhost:3000/api/cart/product/67338747e6ba7e47aa3988ba/decrement",
         { product: productId },
         { withCredentials: true }
       );
@@ -66,7 +66,7 @@ function Cart() {
   const handleDelete = async (productId) => {
     try {
       const response = await axios.delete(
-        "http://localhost:3000/api/cart/remove-product",
+        "http://localhost:3000/api/cart/product/67338747e6ba7e47aa3988ba",
         {
           data: { product: productId },
           withCredentials: true,
@@ -116,7 +116,7 @@ function Cart() {
           position: "relative", // Added for notification positioning
         }}
       >
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Your Cart</h2>
+        <h2 style={{ textAlign: "center", marginBottom: "20px" , fontSize: "24px"}}>Your Cart</h2>
         <form onSubmit={handleSubmit}>
           {cartItems.map((item) => (
             <div
