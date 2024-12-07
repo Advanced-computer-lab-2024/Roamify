@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; 
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState(""); // State for notification
+  const navigate = useNavigate(); 
 
   const fetchCartData = async () => {
     try {
@@ -82,21 +84,27 @@ function Cart() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Set loading state to true while API call is in progress
+    setLoading(true);
+
     try {
-      const response = await axios.post("http://localhost:3000/api/cart/review", {
-        cartItems // Assuming the API needs the cart items data
-      }, {
-        withCredentials: true
-      });
+      const response = await axios.post("http://localhost:3000/api/cart/checkout", {}, { withCredentials: true });
       console.log("Checkout response:", response.data);
-      setNotification(response.data.message || "Checkout successful!"); // Display success message
+      setNotification(response.data.message);
+      if (response.data.orderId) {
+        localStorage.setItem("orderId", response.data.orderId);
+        navigate('/tourist/address');  // Redirect to the Address page
+      } else {
+        throw new Error("No order ID received in response.");
+      }
     } catch (err) {
+      console.error("Checkout error:", err);
       handleApiError(err, "checkout");
     } finally {
-      setLoading(false); // Set loading state to false after API call is complete
+      setLoading(false);
     }
   };
+  
+  
   
 
   useEffect(() => {
@@ -131,7 +139,7 @@ function Cart() {
           position: "relative", // Added for notification positioning
         }}
       >
-        <h2 style={{ textAlign: "center", marginBottom: "20px" , fontSize: "24px"}}>Your Cart</h2>
+        <h2 style={{ textAlign: "center", marginBottom: "20px" , fontSize: "24px"}}> Shopping Cart</h2>
         <form onSubmit={handleSubmit}>
           {cartItems.map((item) => (
             <div
