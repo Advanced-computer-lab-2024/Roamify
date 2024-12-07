@@ -9,9 +9,13 @@ const orderSchema = new mongoose.Schema({
         }
     ],
     totalAmount: { type: Number, required: true },
-    status: { type: String, enum: ['Pending', 'Successful', 'Failed', 'Expired','Refund'], default: 'Pending' },
+    status: {
+        type: String,
+        enum: ['Pending', 'Expired', 'Refunded', 'Out For Delivery', 'Delivered', 'Cancelled', 'Processing'],
+        default: 'Pending',
+    },
     paymentMethod: { type: String, enum: ['Wallet', 'Stripe', 'COD'], default: null },
-    deliveryAddress: { type: mongoose.Types.ObjectId, ref: 'address'}
+    deliveryAddress: { type: mongoose.Types.ObjectId, ref: 'address', required: false }
 }, { timestamps: true });
 
 const orderModel = mongoose.model('order', orderSchema);
