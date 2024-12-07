@@ -45,22 +45,20 @@ const EditProductButton = ({
     <>
       <button
         onClick={handleDeleteClick}
+        className="cancel-button"
         style={{
-          marginLeft: "auto",
-          padding: "1rem",
-          backgroundColor: "transparent", // Assuming this is the secondary color
-          color: "white",
-          borderRadius: "9999px", // Full round button
+          flex: 1,
+          display: "flex",
+          height: "7vh",
+          alignItems: "center",
+          justifyContent: "space-evenly",
+          color: "var(--text-color)",
+          borderRadius: "5px", // Full round button
           cursor: "pointer",
           transition: "background-color 0.3s",
-          border: "1px solid #cfcdcd",
         }}
-        onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#eceaea")} // Hover color
-        onMouseOut={(e) =>
-          (e.currentTarget.style.backgroundColor = "transparent")
-        }
       >
-        <EditIcon />
+        <EditIcon fill="var(--text-color)" /> Edit
       </button>
 
       <DynamicEditModal

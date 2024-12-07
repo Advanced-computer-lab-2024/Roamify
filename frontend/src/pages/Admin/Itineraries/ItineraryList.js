@@ -3,6 +3,8 @@ import axios from "axios";
 import SectionHeading from "../../../component/Common/SectionHeading";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFlag, faFlagCheckered } from "@fortawesome/free-solid-svg-icons";
+import LoadingLogo from "../../../component/LoadingLogo";
+import { renderStars } from "../../../functions/renderStars";
 
 const ItineraryList = () => {
   const [itineraries, setItineraries] = useState([]);
@@ -57,56 +59,125 @@ const ItineraryList = () => {
     <>
       <section id="explore_area" className="section_padding">
         <div className="container">
-          <SectionHeading heading={`${itineraries?.length} tours found`} />
-          <div className="row">
-            <div className="col-lg-9">
+          <SectionHeading
+            heading={`${itineraries?.length} itineraries found`}
+          />
+          <div className="row" style={{ width: "100%" }}>
+            <div className="col-lg-9" style={{ width: "100%" }}>
               <div className="row">
                 <div className="col-lg-12">
                   <div className="flight_search_result_wrapper">
                     {loading ? (
-                      <p>Loading itineraries...</p>
+                      <LoadingLogo isVisible={true} />
                     ) : (
                       itineraries?.map((itinerary, index) => (
-                        <div
-                          className="flight_search_item_wrappper"
-                          key={itinerary._id}
-                        >
-                          <div className="flight_search_items">
-                            <div className="multi_city_flight_lists">
-                              <div className="flight_multis_area_wrapper">
-                                <div className="flight_search_left">
-                                  <div className="flight_search_destination">
-                                    <h1>{itinerary.name}</h1>
-                                  </div>
-                                </div>
-                                <div className="flight_search_middel">
-                                  <div className="flight_right_arrow">
-                                    <h6>{itinerary.activities[0]?.name}</h6>
-                                    <p>
-                                      {itinerary.activities[0]?.location?.name}
-                                    </p>
-                                  </div>
-                                  <div className="flight_search_destination">
-                                    <p>Tour Guide</p>
-                                    <h3>{itinerary.tourGuide.username}</h3>
-                                    <h6>{itinerary.tourGuide.email}</h6>
-                                  </div>
-                                </div>
+                        <div key={itinerary._id}>
+                          <div
+                            className="flight_search_items"
+                            style={{
+                              background: "var(--secondary-color)",
+                              height: "30vh",
+                            }}
+                          >
+                            <div
+                              className="left-side"
+                              style={{
+                                height: "100%",
+                                padding: "30px 30px",
+                                display: "flex",
+                                gap: "20px",
+                                flexDirection: "column",
+                                alignItems: "baseline",
+                                width: "100%",
+                              }}
+                            >
+                              <p style={{ fontSize: "28px" }}>
+                                {itinerary.name}
+                              </p>
+                              <span className="review-rating">
+                                {renderStars(itinerary.rating)}
+                              </span>
+                              <span className="review-rating">
+                                Language :{" "}
+                                <span
+                                  style={{
+                                    color: "var(--dashboard-title-color)",
+                                  }}
+                                >
+                                  {itinerary.language}
+                                </span>
+                              </span>
+                              <div
+                                className="activity-tags"
+                                style={{
+                                  display: "flex",
+                                  flexWrap: "wrap",
+                                  gap: "10px",
+                                  justifyContent: "flex-start",
+                                }}
+                              >
+                                {itinerary.preferenceTags.map((tag, index) => (
+                                  <>
+                                    <span
+                                      key={index}
+                                      style={{
+                                        whiteSpace: "nowrap",
+                                        fontSize: "14px",
+                                        color: "var(--dashboard-title-color)",
+                                      }}
+                                    >
+                                      {tag.name}
+                                    </span>
+                                    {index <
+                                      itinerary.preferenceTags.length - 1 && (
+                                      <span
+                                        style={{
+                                          margin: "0px 5px",
+                                          color: "var(--main-color)", // You can replace this with your desired color
+                                          display: "flex",
+                                          justifyContent: "center",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <i
+                                          className="fas fa-circle"
+                                          style={{ fontSize: "7px" }}
+                                        ></i>
+                                      </span>
+                                    )}
+                                  </>
+                                ))}
                               </div>
                             </div>
-                            <div className="flight_search_right">
-                              <h2>
-                                ${itinerary.price}
-                                <sup>Special offer</sup>
-                              </h2>
+                            <div
+                              className="flight_search_right"
+                              style={{
+                                background: "var(--main-color)",
+                                height: "100%",
+                                width: "20%",
+                                display: "flex",
+                                gap: "20px",
+                                flexDirection: "column",
+                                // alignItems: "center",
+                                justifyContent: "space-evenly",
+                              }}
+                            >
+                              <h2>${itinerary.price}</h2>
                               <button
-                                className="btn btn_theme btn_sm"
+                                className=" btn_theme btn_sm"
                                 onClick={() =>
                                   handleFlagToggle(
                                     itinerary._id,
                                     itinerary.flag
                                   )
                                 }
+                                style={{
+                                  border: "1px solid white",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  gap: "10px",
+                                }}
                               >
                                 {itinerary.flag ? (
                                   <>
@@ -120,7 +191,6 @@ const ItineraryList = () => {
                                   </>
                                 )}
                               </button>
-                              <p>*Conditions apply</p>
                               <div
                                 data-bs-toggle="collapse"
                                 data-bs-target={`#collapseExample${index}`}
@@ -137,43 +207,87 @@ const ItineraryList = () => {
                             id={`collapseExample${index}`}
                           >
                             <div className="flight_show_down_wrapper">
-                              <div className="flight-shoe_dow_item">
-                                <div className="airline-details">
-                                  <span className="airlineName fw-500">
-                                    {itinerary.activities[0]?.name}
-                                  </span>
-                                  <span className="flightNumber">
-                                    {itinerary.activities[0]?.category?.name}
-                                  </span>
-                                </div>
+                              <div
+                                className="flight-shoe_dow_item"
+                                style={{
+                                  flex: "1",
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  padding: "50px 20px",
+                                }}
+                              >
                                 <div className="flight_inner_show_component">
                                   <div className="flight_det_wrapper">
                                     <div className="flight_det">
-                                      <div className="code_time">
-                                        <span className="code">Location</span>
-                                        <span className="time">
-                                          {itinerary.pickUpLocation}
-                                        </span>
-                                      </div>
-                                      <p className="airport">Drop-off</p>
-                                      <p className="date">
-                                        {itinerary.dropOffLocation}
+                                      <p className="airport">
+                                        {itinerary.pickUpLocation}
                                       </p>
                                     </div>
                                   </div>
                                   <div className="flight_duration">
-                                    <span>{itinerary.language}</span>
+                                    <div className="arrow_right"></div>
+                                    <span>01h 15m</span>
+                                  </div>
+                                  <div className="flight_det_wrapper">
+                                    <div className="flight_det">
+                                      <p className="airport">
+                                        {itinerary.dropOffLocation}
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                              <div className="flight_refund_policy">
-                                <div className="TabPanelInner flex_widht_less">
-                                  <h4>Details</h4>
-                                  <p>
-                                    Accessibility:{" "}
-                                    {itinerary.accessibility ? "Yes" : "No"}
-                                  </p>
-                                  <p>Rating: {itinerary.rating}</p>
+                              <div
+                                className="flight_refund_policy"
+                                style={{ flex: 2 }}
+                              >
+                                <div
+                                  className="TabPanelInner flex_widht_less"
+                                  style={{ flex: 1 }}
+                                >
+                                  <h4>Pickup Dates</h4>
+                                  <div className="flight_info_taable">
+                                    {itinerary.availableDates.map(
+                                      (date, index) => (
+                                        <p className="fz12">
+                                          -{" "}
+                                          {
+                                            new Date(date)
+                                              .toISOString()
+                                              .split("T")[0]
+                                          }
+                                        </p>
+                                      )
+                                    )}
+                                  </div>
+                                </div>
+                                <div
+                                  className="TabPanelInner flex_widht_less"
+                                  style={{ flex: 1 }}
+                                >
+                                  <h4>Activities</h4>
+                                  <div className="flight_info_taable">
+                                    {itinerary.activities.map(
+                                      (activity, index) => (
+                                        <p className="fz12">
+                                          {index + 1}. {activity.name}
+                                        </p>
+                                      )
+                                    )}
+                                  </div>
+                                </div>
+                                <div
+                                  className="TabPanelInner"
+                                  style={{ flex: 1 }}
+                                >
+                                  <h4>Locations</h4>
+                                  <div className="flight_info_taable">
+                                    {itinerary.locations.map((location) => (
+                                      <h3>{location}</h3>
+                                    ))}
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -181,11 +295,6 @@ const ItineraryList = () => {
                         </div>
                       ))
                     )}
-                  </div>
-                  <div className="load_more_flight">
-                    <button className="btn btn_md">
-                      <i className="fas fa-spinner"></i> Load more..
-                    </button>
                   </div>
                 </div>
               </div>
