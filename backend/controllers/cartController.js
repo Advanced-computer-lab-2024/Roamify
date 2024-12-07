@@ -1,31 +1,33 @@
 const productModel = require("../models/productModel");
 const cartModel = require("../models/cartModel");
+const orderModel = require("../models/orderModel");
+const { expireOrder } = require("./orderController");
 const mongoose = require('mongoose');
-
 
 const getCart = async (req, res) => {
     try {
         // Find the cart for the logged-in user
         const cart = await cartModel.findOne({ tourist: req.user._id }).populate({
             path: "products.productId",
-            select: "name picture", // Select `name` and `picture` (array of images)
+            select: "name picture price", // Include `name`, `picture`, and `price`
         });
 
         if (!cart) {
             return res.status(404).json({ message: "Cart not found." });
         }
 
-        // Map the cart products to include only the required fields
+        // Map the cart products to include required fields
         const cartDetails = cart.products.map((item) => ({
             productId: item.productId._id,
             name: item.productId.name,
-            image: item.productId.picture?.[0]?.url || null, // Use the first image URL or null if unavailable
+            image: item.productId.picture?.[0]?.url || null,
             quantity: item.quantity,
+            price: item.productId.price // Fetch the product price from the populated product
         }));
 
         res.status(200).json({ message: "Cart retrieved successfully.", cart: cartDetails });
     } catch (error) {
-        res.status(500).json({ message: "Failed to retrieve cart." });
+        res.status(500).json({ message: "Failed to retrieve cart.", error: error.message });
     }
 };
 const addProductToCart = async (req, res) =>    {
@@ -168,5 +170,84 @@ const removeProductFromCart = async (req, res) => {
         res.status(500).json({ message: 'Failed to remove product from the cart.', error: error.message });
     }
 };
+const reviewCart = async (req, res) => {
+    try {
+        const cart = await cartModel.findOne({ tourist: req.user._id }).populate('products.productId');
 
-module.exports = {addProductToCart,removeProductFromCart,incrementProductInCart,decrementProductInCart,getCart};
+        if (!cart || cart.products.length === 0) {
+            return res.status(400).json({ message: 'Your cart is empty. Add items before checking out.' });
+        }
+
+        const removedProducts = [];
+        const outOfStockProducts = [];
+        const unavailableProducts = [];
+        const validProducts = [];
+
+        // Check and remove any previous Pending order
+        const existingOrder = await orderModel.findOne({ tourist: req.user._id, status: 'Pending' });
+        if (existingOrder) {
+            for (const item of existingOrder.products) {
+                await productModel.findByIdAndUpdate(item.productId, { $inc: { quantity: item.quantity } });
+            }
+            await existingOrder.deleteOne();
+        }
+
+        // Validate and lock product quantities
+        for (let i = cart.products.length - 1; i >= 0; i--) {
+            const item = cart.products[i];
+            const product = await productModel.findById(item.productId);
+
+            if (!product || product.isArchived) {
+                removedProducts.push(`${product?.name || 'A product'} has been removed from your cart.`);
+                cart.products.splice(i, 1);
+                continue;
+            }
+
+            if (product.quantity <= 0) {
+                outOfStockProducts.push(`${product.name} is out of stock.`);
+                cart.products.splice(i, 1);
+                continue;
+            }
+
+            if (product.quantity < item.quantity) {
+                unavailableProducts.push(`${product.name} has insufficient stock.`);
+                continue;
+            }
+
+            validProducts.push(item);
+            product.quantity -= item.quantity; // Lock the quantity
+            await product.save();
+        }
+
+        await cart.save();
+
+        if (removedProducts.length > 0 || outOfStockProducts.length > 0 || unavailableProducts.length > 0) {
+            return res.status(400).json({
+                message: 'Issues were found in your cart.',
+                removedProducts,
+                outOfStockProducts,
+                unavailableProducts,
+            });
+        }
+
+        // Calculate total and create a new Pending order
+        const totalAmount = validProducts.reduce((sum, item) => sum + item.quantity * item.productId.price, 0);
+
+        const newOrder = new orderModel({
+            tourist: req.user._id,
+            products: validProducts.map(item => ({ productId: item.productId._id, quantity: item.quantity })),
+            totalAmount,
+        });
+
+        await newOrder.save();
+
+        // Start expiration timer
+        setTimeout(async () => await expireOrder(newOrder._id), 15 * 60 * 1000);
+
+        res.status(200).json({ message: 'Cart reviewed successfully.', orderId: newOrder._id });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to review cart.', error: error.message });
+    }
+};
+
+module.exports = {addProductToCart,removeProductFromCart,incrementProductInCart,decrementProductInCart,getCart,reviewCart};

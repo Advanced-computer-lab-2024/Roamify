@@ -13,10 +13,9 @@ const emailTemplates = require('../emailTemplate');
 const { default: mongoose } = require("mongoose");
 const { connectedUsers } = require('../config/socket')
 
-
 async function notifyUser(io, userId, type, name) {
 
-  const message = type === 'ativity' ? `Your activity "${name}" has been flagged as inappropriate by the admin.` : `Your itinerary "${name}" has been flagged as inappropriate by the admin.`;
+  const message = type === 'activity' ? `Your activity "${name}" has been flagged as inappropriate by the admin.` : `Your itinerary "${name}" has been flagged as inappropriate by the admin.`;
   const notification = new notificationModel({
     user: userId,
     type: `flagged-${type}`,
@@ -344,7 +343,6 @@ const unflagItinerary = async (req, res) => {
     });
   }
 };
-
 const flagActivity = async (req, res) => {
   try {
     const { activityIdString } = req.body;
@@ -414,7 +412,6 @@ const getPendingUsers = async (req, res) => {
     });
   }
 };
-
 const getTotalUsers = async (req, res) => {
   try {
 
@@ -449,7 +446,6 @@ const getTotalUsers = async (req, res) => {
     return res.status(500).json({ message: error.message })
   }
 }
-
 
 module.exports = {
   addTourismGovernor,
