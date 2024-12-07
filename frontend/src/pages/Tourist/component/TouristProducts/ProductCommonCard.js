@@ -53,7 +53,7 @@ const CommonCard = ({
         // Remove product from wishlist
         console.log(`Removing product with ID: ${id}`);
         const response = await axios.delete(
-          `http://localhost:3000/api/wishlist/remove-product/${id}`,
+          `http://localhost:3000/api/wishlist/${id}`,
           { withCredentials: true }
         );
         console.log(response); // Log the response from the API
@@ -64,7 +64,7 @@ const CommonCard = ({
         // Add product to wishlist
         console.log(`Adding product with ID: ${id}`);
         const response = await axios.post(
-          `http://localhost:3000/api/wishlist/add-product/${id}`,
+          `http://localhost:3000/api/wishlist/${id}`,
           {},
           { withCredentials: true }
         );

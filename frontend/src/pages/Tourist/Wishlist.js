@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaTrashAlt } from "react-icons/fa";
 import { FaShoppingCart } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 const Wishlist = () => {
@@ -46,7 +48,7 @@ const Wishlist = () => {
   const confirmDelete = async () => {
     try {
       // API call to remove the product from the wishlist
-      await axios.delete(`http://localhost:3000/api/wishlist/remove-product/${productToDelete}`, {
+      await axios.delete(`http://localhost:3000/api/wishlist/${productToDelete}`, {
         withCredentials: true,
       });
 
@@ -65,11 +67,25 @@ const Wishlist = () => {
   };
 
   // Function to handle adding a product to the cart (placeholder)
-  const handleAddToCart = (productId) => {
-    console.log(`Adding product ${productId} to cart`);
-  };
-
-  // Function to close the popup modal
+  
+  const handleAddToCart = async (productId) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/api/wishlist/${productId}/cart`,
+        {},
+        { withCredentials: true }
+      );
+      // Show success message as toast
+      toast.success(response.data.message || "Added to cart successfully!");
+  
+      // Re-fetch the wishlist data to remove the item from the list
+      fetchWishlistData();
+    } catch (err) {
+      // Show error message as toast
+      toast.error(err.response?.data?.message || "Failed to add to cart.");
+      console.error("Error adding to cart:", err);
+    }
+  };  // Function to close the popup modal
   const closePopup = () => {
     setShowModal(false);
   };
@@ -230,6 +246,7 @@ const Wishlist = () => {
           </div>
         </div>
       )}
+      <ToastContainer position="top-right" autoClose={3000} />
     </>
   );
 };
