@@ -39,8 +39,8 @@ const CompletedActivity = () => {
 
   return (
     <>
-     <Header HeaderData={HeaderData} />
-     <CommonBanner heading="Rate Activity" pagination="activity" />
+     
+    
     <section id="explore_area" className="section_padding">
       <div className="container">
         <SectionHeading heading={`${itineraries?.length || 0} activities found`} />

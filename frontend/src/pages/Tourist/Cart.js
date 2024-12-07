@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; 
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState(""); // State for notification
+  const navigate = useNavigate(); 
 
   const fetchCartData = async () => {
     try {
@@ -38,38 +40,38 @@ function Cart() {
   const handleIncrement = async (productId) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/cart/product/67338747e6ba7e47aa3988ba/increment",
-        { product: productId },
+        `http://localhost:3000/api/cart/product/${productId}/increment`, // Dynamically use productId
+        { product: productId }, // Include productId in the body for consistency (if needed)
         { withCredentials: true }
       );
-      fetchCartData();
+      fetchCartData(); // Refresh cart data
       setNotification(response.data.message || "Quantity updated successfully");
     } catch (err) {
       handleApiError(err, "increment");
     }
   };
-
+  
   const handleDecrement = async (productId) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/cart/product/67338747e6ba7e47aa3988ba/decrement",
-        { product: productId },
+        `http://localhost:3000/api/cart/product/${productId}/decrement`, // Dynamically use productId
+        { product: productId }, // Include productId in the body for consistency (if needed)
         { withCredentials: true }
       );
-      fetchCartData();
+      fetchCartData(); // Refresh cart data
       setNotification(response.data.message || "Quantity updated successfully");
     } catch (err) {
       handleApiError(err, "decrement");
     }
   };
+  
 
   const handleDelete = async (productId) => {
     try {
       const response = await axios.delete(
-        "http://localhost:3000/api/cart/product/67338747e6ba7e47aa3988ba",
+        `http://localhost:3000/api/cart/product/${productId}`, // Use dynamic productId here
         {
-          data: { product: productId },
-          withCredentials: true,
+          withCredentials: true, // No need for 'data' as DELETE request includes ID in the URL
         }
       );
       fetchCartData();
@@ -78,11 +80,32 @@ function Cart() {
       handleApiError(err, "delete");
     }
   };
+  
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Cart submitted:", cartItems);
+    setLoading(true);
+
+    try {
+      const response = await axios.post("http://localhost:3000/api/cart/checkout", {}, { withCredentials: true });
+      console.log("Checkout response:", response.data);
+      setNotification(response.data.message);
+      if (response.data.orderId) {
+        localStorage.setItem("orderId", response.data.orderId);
+        navigate('/tourist/address');  // Redirect to the Address page
+      } else {
+        throw new Error("No order ID received in response.");
+      }
+    } catch (err) {
+      console.error("Checkout error:", err);
+      handleApiError(err, "checkout");
+    } finally {
+      setLoading(false);
+    }
   };
+  
+  
+  
 
   useEffect(() => {
     fetchCartData();
@@ -116,7 +139,7 @@ function Cart() {
           position: "relative", // Added for notification positioning
         }}
       >
-        <h2 style={{ textAlign: "center", marginBottom: "20px" , fontSize: "24px"}}>Your Cart</h2>
+        <h2 style={{ textAlign: "center", marginBottom: "20px" , fontSize: "24px"}}> Shopping Cart</h2>
         <form onSubmit={handleSubmit}>
           {cartItems.map((item) => (
             <div

@@ -6,10 +6,12 @@ const activityModel = require("../models/activityModel");
 const itineraryModel = require("../models/itineraryModel");
 const itineraryTicketModel = require("../models/itineraryTicketModel");
 const receiptModel = require('../models/receiptModel')
-const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
+const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
-const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
-const upload = multer({ storage }).single('profilePicture'); // Accept only 1 file with field name 'profilePicture'
+const storage = multer.memoryStorage();
+const upload = multer({ storage }).single('profilePicture');
+const emailTemplate = require('../emailTemplate')
+const nodemailer = require('nodemailer')
 
 const createProfile = async (req, res) => {
   try {
@@ -149,6 +151,8 @@ const createItinerary = async (req, res) => {
   }
 };
 const updateItinerary = async (req, res) => {
+  const session = await mongoose.startSession(); // Start a session
+  session.startTransaction(); // Start a transaction
   try {
 
     const itineraryId = req.params.itineraryId;
@@ -169,6 +173,7 @@ const updateItinerary = async (req, res) => {
     if (isOld.length === itinerary.availableDates.length) return res.status(400).json({ message: 'this itinerary is old it can not be edited ' })
 
     const updates = { language, price, pickUpLocation, dropOffLocation, accessibility, rating, booked };
+    const ticketQuery = {};
     const activityIds = [];
     const locations = [];
     const preferenceTags = [];
@@ -184,23 +189,19 @@ const updateItinerary = async (req, res) => {
       }
       updates.activities = activityIds;
       updates.locations = locations;
+      ticketQuery.locations = locations
       updates.preferenceTags = preferenceTags;
     }
 
     if (oldDate && newDate) {
 
-      // Convert `oldDate` and `newDate` to comparable formats
       const formattedOldDate = new Date(oldDate).toISOString().split('T')[0];
       const formattedNewDate = new Date(newDate);
 
-      console.log(formattedOldDate)
-      console.log(formattedNewDate)
-
-      // Check if `oldDate` exists in `availableDates`
-      const isDateAvailable = itinerary.availableDates
-        .some(d => new Date(d).toISOString().split('T')[0] === formattedOldDate);
-
-      if (!isDateAvailable) {
+      const dateIndex = itinerary.availableDates.findIndex(
+        d => new Date(d).toISOString().split('T')[0] === formattedOldDate
+      );
+      if (dateIndex === -1) {
         return res.status(400).json({ message: 'Please specify a correct date to change.' });
       }
       if (new Date(oldDate) < today) {
@@ -210,27 +211,51 @@ const updateItinerary = async (req, res) => {
         return res.status(400).json({ message: 'Please enter a valid future date.' });
       }
 
-      // Update the date in `availableDates`
-      const dateIndex = itinerary.availableDates.findIndex(
-        d => new Date(d).toISOString().split('T')[0] === formattedOldDate
-      );
+
 
 
       itinerary.availableDates[dateIndex] = formattedNewDate;
       await itinerary.save();
-      const itineraryTickets = await itineraryTicketModel.find({ itinerary: itineraryId, status: 'active', date: oldDate })
-      for (ticket of itineraryTickets) {
-        ticket.date = formattedNewDate
-        await ticket.save()
-      }
+      ticketQuery.date = formattedNewDate
 
     }
 
 
-    await itineraryModel.findByIdAndUpdate(itineraryId, updates);
+    const itineraryTickets = await itineraryTicketModel.find({ itinerary: itineraryId, status: 'active' })
+
+    if (itineraryTickets.length > 0) {
+      for (t of itineraryTickets) {
+        const transporter = nodemailer.createTransport({
+          service: "Gmail",
+          auth: {
+            user: process.env.EMAIL,
+            pass: process.env.EMAIL_PASSWORD,
+          }
+        })
+        const user = await userModel.findById(t.tourist)
+        console.log(user)
+        const text = emailTemplate.notifyBookedUsersForUpdateInItinerary(t.name, ticketQuery.date, user.username)
+        const mailOptions = {
+          from: process.env.EMAIL,
+          to: user.email,
+          subject: " Update: Your Upcoming itinerary has been updated!",
+          text
+        }
+        await transporter.sendMail(mailOptions)
+      }
+    }
+
+
+    await itineraryTicketModel.updateMany({ itinerary: itineraryId, status: 'active' }, ticketQuery, { session })
+    await itineraryModel.findByIdAndUpdate(itineraryId, updates, { session });
+    await session.commitTransaction();
+    session.endSession()
     res.status(200).json({ message: "Itinerary updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Failed to update itinerary", error: error.message });
+    console.log(error)
+    await session.abortTransaction()
+    session.endSession()
+    res.status(500).json({ message: error.message });
   }
 };
 const deleteItinerary = async (req, res) => {

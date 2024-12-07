@@ -1,5 +1,6 @@
 const validator = require('validator');
-
+const nodemailer = require('nodemailer')
+const emailTemplate = require('../emailTemplate')
 const advertiserModel = require("../models/advertiserModel");
 const transportationModel = require("../models/transportationModel");
 const userModel = require("../models/userModel");
@@ -231,6 +232,8 @@ const createActivity = async (req, res) => {
   }
 };
 const updateActivity = async (req, res) => {
+  const session = await mongoose.startSession(); // Start a session
+  session.startTransaction(); // Start a transaction
   try {
     const activityId = req.params.activityId;
     const advertiserId = req.user._id;
@@ -256,6 +259,9 @@ const updateActivity = async (req, res) => {
     const activityDate = activity.date.setHours(0, 0, 0);
 
     if (today > activityDate) return res.status(400).json({ message: 'this activity is old you are not allowed to edit it' })
+
+
+
     // Extract fields from the request body
     const {
       name,
@@ -270,6 +276,7 @@ const updateActivity = async (req, res) => {
       rating,
     } = req.body;
     const query = {};
+    const ticketQuery = {};
 
     // Update tags if provided
     if (tags) {
@@ -297,26 +304,63 @@ const updateActivity = async (req, res) => {
         throw Error("Please enter a future date");
       }
       query.date = date;
+      ticketQuery.date = date;
     }
 
     // Update remaining fields if provided
-    if (name) query.name = name;
-    if (location) query.location = location;
+    if (name) {
+      query.name = name;
+      ticketQuery.name = name;
+    }
+    if (location) {
+      query.location = location;
+      ticketQuery.locationName = location.name
+    }
     if (price) query.price = price;
-    if (time) query.time = time;
+    if (time) {
+      query.time = time;
+      ticketQuery.time = time
+    }
     if (discounts) query.discounts = discounts;
     if (rating) query.rating = rating;
     if (bookingAvailable !== undefined) query.bookingAvailable = bookingAvailable;
 
     // Update the activity with the constructed query
-    await activityModel.findByIdAndUpdate(activityId, query);
+    const activityTickets = await activityTicketModel.find({ activity: activity._id, status: 'active' })
 
+    if (activityTickets.length > 0) {
+      for (t of activityTickets) {
+        const transporter = nodemailer.createTransport({
+          service: "Gmail",
+          auth: {
+            user: process.env.EMAIL,
+            pass: process.env.EMAIL_PASSWORD,
+          }
+        })
+        const user = await userModel.findById(t.tourist)
+        const text = emailTemplate.notifyBookedUsersForUpdateInActivity(ticketQuery.name, ticketQuery.date, ticketQuery.locationName, user.username)
+        const mailOptions = {
+          from: process.env.EMAIL,
+          to: user.email,
+          subject: " Update: Your Upcoming Activity has been updated!",
+          text
+        }
+        await transporter.sendMail(mailOptions)
+      }
+    }
+
+    await activityModel.findByIdAndUpdate(activityId, query, { session });
+    await activityTicketModel.updateMany({ activity: activity._id }, ticketQuery, { session })
+
+    await session.commitTransaction();
+    session.endSession();
     res.status(200).json({
       message: "Activity updated successfully",
     });
   } catch (e) {
-    console.error(e); // Log the error for debugging
-    res.status(400).json({ message: e.message });
+    await session.abortTransaction();
+    session.endSession();
+    return res.status(400).json({ message: e.message });
   }
 };
 const deleteActivity = async (req, res) => {

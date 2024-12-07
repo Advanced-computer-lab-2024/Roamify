@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { FaMapMarkerAlt } from "react-icons/fa";
+
 
 const BookedActivitiesWrapper = () => {
   const [bookedActivities, setBookedActivities] = useState([]);
@@ -22,16 +24,17 @@ const BookedActivitiesWrapper = () => {
       try {
         const response = await axios.get(url, { withCredentials: true });
         // Filter out any bookings without a valid activity or activity ID
-        const validBookings = response.data.filter(
-          (booking) => booking.activity && booking.activity._id
-        );
+        const validBookings = response.data
+        // .filter(
+        //   (booking) => booking.activity && booking.activity._id
+        // );
         setBookedActivities(validBookings);
       } catch (err) {
         if (err.response && err.response.status === 400) {
           setError(` ${err.response.data.message || "Something went wrong. Please try again later."}`);
         } else {
-        setError("Failed to fetch booked itineraries. Please try again later.");
-      }
+          setError("Failed to fetch booked itineraries. Please try again later.");
+        }
       } finally {
         setLoading(false);
       }
@@ -98,49 +101,56 @@ const BookedActivitiesWrapper = () => {
                 {bookedActivities.map((booking) => (
                   <div
                     key={booking._id}
-                    onClick={() => handleActivityClick(booking.activity._id)}
                     style={{
                       backgroundColor: "#f9f9f9",
                       padding: "20px",
                       borderRadius: "8px",
                       boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
                       cursor: "pointer",
-                      flex: "1 1 23%", // Ensures 3 activities per row
-                      minWidth: "300px", // Ensure a minimum width for the cards
-                      maxWidth: "calc(33% - 20px)", // Adjust to fit 3 cards per row
-                      transition: "transform 0.3s ease, box-shadow 0.3s ease", // Smooth transition for transform and shadow
+                      flex: "1 1 30%", // Adjust to ensure flexibility
+                      minWidth: "300px",
+                      maxWidth: "calc(33% - 20px)",
+                      transition: "transform 0.3s ease, box-shadow 0.3s ease",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "scale(1.05)"; // Slightly scale up the card
-                      e.currentTarget.style.boxShadow = "0 10px 20px rgba(0, 0, 0, 0.2)"; // Larger shadow on hover
+                      e.currentTarget.style.transform = "scale(1.05)";
+                      e.currentTarget.style.boxShadow = "0 10px 20px rgba(0, 0, 0, 0.2)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "scale(1)"; // Reset size
-                      e.currentTarget.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.1)"; // Reset shadow
+                      e.currentTarget.style.transform = "scale(1)";
+                      e.currentTarget.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.1)";
                     }}
                   >
-                    <h3 style={{
-                      fontSize: "20px",
-                      marginBottom: "15px",
-                      textAlign: "center",
-                      fontWeight: "bold",  // Make the name bold
-                      textDecoration: "underline",  // Underline the name
-                    }}>
-                      {booking.activity.name}
+                    <h3
+                      style={{
+                        fontSize: "20px",
+                        marginBottom: "15px",
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        textDecoration: "underline",
+                      }}
+                    >
+                      {booking.name}
                     </h3>
                     <div style={{ marginBottom: "15px" }}>
-                      {booking.activity?.location?.name && (
-                        <p><strong>Location:</strong> {booking.activity.location.name}</p>
-                      )}
-                      {booking.activity?.price && (
-                        <p><strong>Price:</strong> {booking.activity.price} EGP</p>
-                      )}
-                      {booking.date && (
-                        <p><strong>Date:</strong> {formatDate(booking.date)}</p>
-                      )}
-                      {booking.activity?.time && (
-                        <p><strong>Time:</strong> {booking.activity.time}</p>
-                      )}
+                      <p style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <FaMapMarkerAlt style={{ color: "#8b3eea" }} /> {/* Purple pin icon */}
+                        {booking.locationName}
+                      </p>
+                      <p>
+                        <strong>Status:</strong> {booking.status}
+                      </p>
+
+                      <p>
+                        <strong>Date:</strong> {formatDate(booking.date)}
+                      </p>
+                      <p>
+                        <strong>Time:</strong> {booking.time}
+                      </p>
+                      <p>
+                        <strong>Points Redeemed:</strong> {booking.pointsRedeemed ? "Yes" : "No"}
+                      </p>
+
                     </div>
                     <div style={{ textAlign: "center" }}>
                       <button
@@ -151,7 +161,7 @@ const BookedActivitiesWrapper = () => {
                         className="btn btn_theme"
                         style={{
                           padding: "8px 15px",
-                          backgroundColor: "#8b3eea", // Purple cancel button
+                          backgroundColor: "#8b3eea",
                           color: "#fff",
                           border: "none",
                           borderRadius: "5px",
@@ -164,6 +174,7 @@ const BookedActivitiesWrapper = () => {
                     </div>
                   </div>
                 ))}
+
               </div>
             )}
           </div>

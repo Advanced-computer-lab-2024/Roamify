@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import { FaMapMarkerAlt } from "react-icons/fa";
 const BookedItinerariesWrapper = () => {
   const [bookedItineraries, setBookedItineraries] = useState([]);
   const [filter, setFilter] = useState("All");
@@ -20,15 +20,16 @@ const BookedItinerariesWrapper = () => {
       try {
         const response = await axios.get(url, { withCredentials: true });
         const validItineraries = response.data.filter(
-          (itinerary) => itinerary.itinerary 
+          (itinerary) => itinerary.itinerary
         );
         setBookedItineraries(validItineraries);
       } catch (err) {
         if (err.response && err.response.status === 400) {
           setError(` ${err.response.data.message || "Something went wrong. Please try again later."}`);
         } else {
-        setError("Failed to fetch booked itineraries. Please try again later.");
-      }} finally {
+          setError("Failed to fetch booked itineraries. Please try again later.");
+        }
+      } finally {
         setLoading(false);
       }
     };
@@ -89,7 +90,25 @@ const BookedItinerariesWrapper = () => {
             ) : bookedItineraries.length === 0 ? (
               <p>No booked itineraries found.</p>
             ) : (
-              <div className="flight_search_result_wrapper" style={{ display: "grid", gap: "20px" }}>
+              <div className="flight_search_result_wrapper" style={{ display: "grid", gap: "20px",
+                backgroundColor: "#f9f9f9",
+                padding: "20px",
+                borderRadius: "8px",
+                boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+                cursor: "pointer",
+                flex: "1 1 30%", // Adjust to ensure flexibility
+                minWidth: "300px",
+                maxWidth: "calc(33% - 20px)",
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.05)";
+                e.currentTarget.style.boxShadow = "0 10px 20px rgba(0, 0, 0, 0.2)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.1)";
+              }}>
                 {bookedItineraries.map((booking) => (
                   <div
                     className="flight_search_item_wrapper"
@@ -102,32 +121,38 @@ const BookedItinerariesWrapper = () => {
                       padding: "20px",
                       marginBottom: "20px",
                       borderRadius: "8px",
-                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)"
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                     }}
                   >
-                    {booking.itinerary?.name && (
-                      <h3 style={{ marginBottom: "15px", textAlign: "center" }}>
-                        {booking.itinerary.name}
-                      </h3>
-                    )}
-                    
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: "20px" }}>
-                      <div style={{ flex: "1 1 200px" }}>
-                        {booking.itinerary?.location?.name && (
-                          <p><strong>Location:</strong> {booking.itinerary.location.name}</p>
-                        )}
-                        {booking.itinerary?.price && (
-                          <p><strong>Price:</strong> {booking.itinerary.price} EGP</p>
-                        )}
-                      </div>
-                      <div style={{ flex: "1 1 200px" }}>
-                        {booking.date && (
-                          <p><strong>Date:</strong> {formatDate(booking.date)}</p>
-                        )}
-                        {booking.itinerary?.time && (
-                          <p><strong>Time:</strong> {booking.itinerary.time}</p>
-                        )}
-                      </div>
+                    <h3
+                      style={{
+                        marginBottom: "15px",
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        textDecoration: "underline",
+                      }}
+                    >
+                      {booking.name}
+                    </h3>
+
+                    <div style={{ marginBottom: "15px" }}>
+                      {booking.locations.length > 0 && (
+                        <p style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <FaMapMarkerAlt style={{ color: "#8b3eea" }} />
+                          {booking.locations.join(", ")}
+                        </p>
+                      )}
+                      <p>
+                        <strong>Status:</strong> {booking.status}
+                      </p>
+                     
+                      <p>
+                        <strong>Date:</strong> {formatDate(booking.date)}
+                      </p>
+                      <p>
+                        <strong>Points Redeemed:</strong> {booking.pointsRedeemed ? "Yes" : "No"}
+                      </p>
+                     
                     </div>
 
                     <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "15px" }}>
@@ -142,7 +167,7 @@ const BookedItinerariesWrapper = () => {
                           color: "#fff",
                           border: "none",
                           borderRadius: "5px",
-                          cursor: "pointer"
+                          cursor: "pointer",
                         }}
                       >
                         Cancel Booking
@@ -150,6 +175,7 @@ const BookedItinerariesWrapper = () => {
                     </div>
                   </div>
                 ))}
+
               </div>
             )}
           </div>

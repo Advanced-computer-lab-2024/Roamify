@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaTrashAlt } from "react-icons/fa";
+import { FaShoppingCart } from "react-icons/fa";
+
 
 const Wishlist = () => {
   const [wishlistData, setWishlistData] = useState(null);
@@ -80,7 +82,18 @@ const Wishlist = () => {
           {wishlistData?.wishlist?.length > 0 ? (
             <div style={styles.cardsContainer}>
               {wishlistData.wishlist.map((item, index) => (
-                <div className="flight_search_item_wrappper" key={index}>
+                <div className="flight_search_item_wrappper" key={index}  style={{
+                  boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Initial shadow
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease", // Smooth transition
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "scale(1.05)"; // Enlarge
+                  e.currentTarget.style.boxShadow = "0px 8px 16px rgba(0, 0, 0, 0.2)"; // Stronger shadow
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "scale(1)"; // Reset size
+                  e.currentTarget.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.1)"; // Reset shadow
+                }}>
                   <div
                     className="flight_search_items"
                     style={{
@@ -106,15 +119,25 @@ const Wishlist = () => {
                           </div>
                         </div>
                         <div style={{ display: "flex", alignItems: "end" }}>
-                          <button
-                            onClick={() => handleAddToCart(item.productId)}
-                            style={styles.addToCartBtn}
-                          >
-                            Add to Cart
-                          </button>
+                        <button
+  onClick={() => handleAddToCart(item.productId)}
+  style={{
+    background: "#007bff",
+    border: "none",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "12px",
+    margin:"5px",
+    marginBottom:"1px"
+  }}
+>
+  <FaShoppingCart size={20} />
+</button>
                           <button
                             onClick={() => handleDelete(item.productId)}
-                            style={styles.deleteBtn}
+                            style={{margin:"2px"}}
                           >
                             <FaTrashAlt size={20} />
                           </button>

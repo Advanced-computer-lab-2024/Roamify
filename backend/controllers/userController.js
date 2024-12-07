@@ -358,14 +358,15 @@ const termsAndConditions = async (req, res) => {
   }
 };
 const deleteAccount = async (req, res) => {
+  const session = await mongoose.startSession(); // Start a session
+  session.startTransaction(); // Start a transaction
   try {
     const user = await userModel.findById(req.user._id);
 
 
     const role = user.role;
 
-    const session = await mongoose.startSession(); // Start a session
-    session.startTransaction(); // Start a transaction
+
 
     if (role === "advertiser") {
       let activityTickets = await activityTicketModel
@@ -474,7 +475,8 @@ const deleteAccount = async (req, res) => {
     return res.status(200).json({ message: "deleted user successfully" });
 
   } catch (error) {
-    console.log(error);
+    await session.abortTransaction();
+    session.endSession();
     return res.status(400).json({
       message: "error could not delete account",
       error: error.message,

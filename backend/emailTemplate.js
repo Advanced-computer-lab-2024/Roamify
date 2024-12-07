@@ -103,5 +103,42 @@ module.exports = {
         Roamify Travel
     `;
   },
+  notifyBookedUsersForUpdateInActivity: (activityName, activityDate, activityLocation, username) => {
+    return `
+Hi ${username},
+
+We hope this message finds you well. We’re writing to inform you about an update to an activity you’ve booked with us. Here are the new details:
+
+    Activity Name: ${activityName}
+    New Date & Time: ${activityDate}
+    Location: ${activityLocation}
+
+We apologize for any inconvenience caused and appreciate your understanding. Please make sure to note the updated details and prepare accordingly.
+
+If you have any questions or require assistance, don’t hesitate to reply to this email or contact our support team.
+
+We look forward to seeing you soon and hope you enjoy this updated experience!
+
+Best regards,
+Roamify Travel    `;
+  },
+  notifyBookedUsersForUpdateInItinerary: (itineraryName, itineraryDate, username) => {
+    return `
+Hi ${username},
+
+We hope this message finds you well. We’re writing to inform you about an update to an itinerary you’ve booked with us. Here are the new details:
+
+    Itinerary Name: ${itineraryName}
+    New Date & Time: ${itineraryDate}
+
+We apologize for any inconvenience caused and appreciate your understanding. Please make sure to note the updated details and prepare accordingly.
+
+If you have any questions or require assistance, don’t hesitate to reply to this email or contact our support team.
+
+We look forward to seeing you soon and hope you enjoy this updated experience!
+
+Best regards,
+Roamify Travel    `;
+  },
 
 };
