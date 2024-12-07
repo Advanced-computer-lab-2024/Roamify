@@ -1,0 +1,102 @@
+.billing-header h2 {
+    font-size: 24px;
+    margin-bottom: 10px; /* Reducing the space below the header */
+    text-align: center;
+}
+
+.billing-container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.billing-form {
+    padding: 20px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    width: 350px;
+    margin: 20px auto;
+}
+
+.billing-form label {
+    display: flex;
+    align-items: center; /* Align items vertically */
+    margin-bottom: 10px; /* Space between options */
+}
+
+.billing-form input[type="radio"] {
+    margin-right: 10px; /* Space between radio button and label */
+}
+
+.icon {
+    margin-left: auto; /* Push the icon to the right */
+    color: #8b3eea; /* Custom color for icons */
+}
+
+.button-container {
+    display: flex;
+    justify-content: center; /* Center the confirm button */
+}
+
+.billing-button {
+    padding: 10px 20px;
+    background-color: #8b3eea;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%; /* Full width of the form */
+    margin-top: 10px;
+}
+
+.billing-button:hover {
+    background-color: #7328c4;
+}
+.error-message {
+    color: #8b3eea; /* Change color to a warning red */
+    margin: 5px 0 15px; /* Adjust spacing around the text */
+    font-size: 14px; /* Ensure text is legible */
+    text-align: center; /* Align text to the left */
+}
+.success-message {
+    color: #8b3eea; /* Change color to a warning red */
+    margin: 5px 0 15px; /* Adjust spacing around the text */
+    font-size: 14px; /* Ensure text is legible */
+    text-align: center; /* Align text to the left */
+}
+.promo-code-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.promo-code-input {
+    flex-grow: 1;
+    padding: 8px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.clear-promo-btn {
+    border: none;
+    background: none;
+    color: #8b3eea; /* Same color as icons */
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.clear-promo-btn:hover {
+    color: #7328c4; /* Darker color on hover */
+}
+
+
+

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Address.css';
+import { useNavigate } from 'react-router-dom';
 
 const AddressComponent = () => {
+    const navigate = useNavigate(); 
     const [addresses, setAddresses] = useState([]);
     const [selectedAddress, setSelectedAddress] = useState('');
     const [showAddAddressForm, setShowAddAddressForm] = useState(false);
@@ -52,15 +54,6 @@ const AddressComponent = () => {
         }
     };
 
-    const makePayment = async () => {
-        try {
-            const response = await axios.post(`http://localhost:3000/api/orders/67538472c048fe90ec7e1dd8/payment`, {}, { withCredentials: true });
-            console.log('Payment Success:', response.data);
-        } catch (error) {
-            console.error('Payment Error:', error);
-        }
-    };
-
     useEffect(() => {
         fetchAddresses();
     }, []);
@@ -95,7 +88,7 @@ const AddressComponent = () => {
             )}
             <div className="button-container">
                 <button onClick={() => setShowAddAddressForm(!showAddAddressForm)} className="add-address-button">Add a New Address</button>
-                <button onClick={makePayment} className="pay-now-button">Pay Now</button>
+                <button onClick={() => navigate('/tourist/billing')} className="pay-now-button">Pay Now</button>
             </div>
         </div>
     );

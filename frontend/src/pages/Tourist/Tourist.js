@@ -27,6 +27,7 @@ import Wishlist from "./Wishlist.js";
 import Hotels from "./component/Hotels/Hotels.js";
 import Cart from "./Cart.js";
 import Address from "./Address.js";
+import Billing from "./Billing.js";
 const Tourist = () => {
   return (
     <>
@@ -53,6 +54,7 @@ const Tourist = () => {
         <Route path="/wishlist" element={<Wishlist />}/>
         <Route path="/cart" element={<Cart />}/>
         <Route path="/address" element={<Address />}/>
+        <Route path="/billing" element={<Billing />}/>
       </Routes>
       <CopyRight />
     </>
