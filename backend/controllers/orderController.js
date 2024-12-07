@@ -3,6 +3,8 @@ const orderModel = require('../models/orderModel.js');
 const productModel = require('../models/productModel.js');
 const addressModel = require('../models/addressModel.js');
 const userModel = require('../models/userModel.js');
+const receiptModel = require('../models/receiptModel');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const expireOrder = async (orderId) => {
     try {
@@ -47,20 +49,18 @@ const updateOrderAddress = async (req, res) => {
 };
 const processPayment = async (req, res) => {
     try {
-        const { orderId, paymentMethod } = req.body;
+        const { orderId } = req.params;
+        const { paymentMethod, paymentMethodId } = req.body;
 
-        // Find the order
         const order = await orderModel.findById(orderId).populate('products.productId');
         if (!order || order.tourist.toString() !== req.user._id.toString()) {
             return res.status(404).json({ message: 'Order not found or not authorized.' });
         }
 
-        // Check order status
         if (order.status !== 'Pending') {
             return res.status(400).json({ message: 'Order is not in a valid state for payment.' });
         }
 
-        // Handle payment
         if (paymentMethod === 'Wallet') {
             const user = await userModel.findById(req.user._id);
             if (user.wallet < order.totalAmount) {
@@ -69,50 +69,97 @@ const processPayment = async (req, res) => {
             user.wallet -= order.totalAmount;
             await user.save();
         } else if (paymentMethod === 'Stripe') {
+            if (!paymentMethodId) {
+                return res.status(400).json({ message: 'Payment method ID is required for Stripe payments.' });
+            }
             const paymentIntent = await stripe.paymentIntents.create({
-                amount: transportation.price * 100,
+                amount: order.totalAmount * 100,
                 currency: 'usd',
-                payment_method: req.body.paymentMethodId,
+                payment_method: paymentMethodId,
                 confirm: true,
-                return_url: 'https://yourfrontendurl.com/payment-success', // Replace with your frontend success page
             });
-        }
-        else if (paymentMethod === 'COD')
-        {}
-        else {
+            if (paymentIntent.status !== 'succeeded') {
+                return res.status(400).json({ message: 'Stripe payment failed.' });
+            }
+        } else if (paymentMethod !== 'COD') {
             return res.status(400).json({ message: 'Invalid payment method.' });
         }
 
         // Update order status
-        order.status = 'Successful';
+        order.status = 'Processing';
         order.paymentMethod = paymentMethod;
         await order.save();
 
-        // Create a receipt
+        // Create receipt only for Wallet and Stripe
+        if (paymentMethod !== 'COD') {
+            const receipt = new receiptModel({
+                type: 'product',
+                status: 'successful',
+                tourist: req.user._id,
+                order: orderId,
+                price: order.totalAmount,
+                receiptType: 'payment',
+            });
+            await receipt.save();
+        }
+
+        // Clear cart
+        await cartModel.findOneAndDelete({ tourist: req.user._id });
+
+        res.status(200).json({ message: 'Payment processed successfully.', order });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to process payment.', error: error.message });
+    }
+};
+const markOrderOutForDelivery = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+
+        const order = await orderModel.findById(orderId);
+        if (!order || order.status !== 'Processing') {
+            return res.status(400).json({ message: 'Order is not in a valid state for delivery.' });
+        }
+
+        order.status = 'Out For Delivery';
+        await order.save();
+
+        res.status(200).json({ message: 'Order marked as out for delivery.', order });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update order status.', error: error.message });
+    }
+};
+const confirmCODPayment = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+
+        const order = await orderModel.findById(orderId);
+        if (!order || order.status !== 'Out For Delivery') {
+            return res.status(400).json({ message: 'Order is not in a valid state for COD confirmation.' });
+        }
+
+        order.status = 'Delivered';
+        await order.save();
+
         const receipt = new receiptModel({
             type: 'product',
             status: 'successful',
-            tourist: req.user._id,
+            tourist: order.tourist,
+            order: orderId,
             price: order.totalAmount,
-            receiptType: 'payment'
+            receiptType: 'payment',
         });
         await receipt.save();
 
-        // Clear cart after successful payment
-        await cartModel.findOneAndDelete({ tourist: req.user._id });
-
-        res.status(200).json({
-            message: 'Payment successful. Receipt generated.',
-            order,
-            receipt
-        });
+        res.status(200).json({ message: 'COD payment confirmed. Order delivered.', order, receipt });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to process payment.', error: error.message });
+        res.status(500).json({ message: 'Failed to confirm COD payment.', error: error.message });
     }
 };
 
 module.exports = {
     expireOrder,
     updateOrderAddress,
-    processPayment
+    processPayment,
+    confirmCODPayment,
+    markOrderOutForDelivery
 };
