@@ -87,18 +87,50 @@ const ComplaintsArea = () => {
   };
 
   return (
-    <section id="explore_area" className="section_padding">
-      <div className="container">
-        <div className="row">
-          <div className="col-lg-9">
+    <section
+      id="explore_area"
+      className="section_padding"
+      style={{ minHeight: "100vh" }}
+    >
+      <div
+        className="container"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <div
+          style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "1vh" }}
+        >
+          Complaints
+        </div>
+        <div
+          className="row"
+          style={{
+            width: "100%",
+            margin: "0px",
+            padding: "0px",
+            display: "flex",
+          }}
+        >
+          <div className="col-lg-9" style={{ width: "100%" }}>
             {/* Filter Buttons */}
-            <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+            <div
+              style={{
+                display: "flex",
+                marginBottom: "20px",
+                borderBottom: "1px solid var(--main-color)",
+              }}
+            >
               <button
                 type="button"
                 className={`btn ${
                   filter === "All" ? "btn-primary" : "btn-outline-primary"
                 }`}
                 onClick={() => setFilter("All")}
+                style={{
+                  borderRadius: "0px",
+                }}
               >
                 All
               </button>
@@ -108,15 +140,21 @@ const ComplaintsArea = () => {
                   filter === "pending" ? "btn-primary" : "btn-outline-primary"
                 }`}
                 onClick={() => setFilter("pending")}
+                style={{
+                  borderRadius: "0px",
+                }}
               >
                 Pending
               </button>
               <button
                 type="button"
                 className={`btn ${
-                  filter === "resolved" ? "btn-success" : "btn-outline-success"
+                  filter === "resolved" ? "btn-primary" : "btn-outline-primary"
                 }`}
                 onClick={() => setFilter("resolved")}
+                style={{
+                  borderRadius: "0px",
+                }}
               >
                 Resolved
               </button>
@@ -124,9 +162,15 @@ const ComplaintsArea = () => {
                 type="button"
                 className="btn btn-outline-secondary"
                 onClick={toggleSortOrder}
-                style={{ display: "flex", alignItems: "center" }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginLeft: "auto",
+                  border: "none",
+                  borderRadius: "0px",
+                }}
               >
-                Sort{" "}
+                Date{" "}
                 <FontAwesomeIcon
                   icon={
                     sortOrder === "asc"
@@ -149,7 +193,7 @@ const ComplaintsArea = () => {
                   key={index}
                   style={{
                     width: "100%",
-                    backgroundColor: "#f9f9f9",
+                    backgroundColor: "var(--secondary-color)",
                     display: "flex",
                     flexDirection: "row",
                     justifyContent: "space-between",
@@ -161,8 +205,15 @@ const ComplaintsArea = () => {
                   }}
                 >
                   <div style={{ flex: "1" }}>
-                    <h3 style={{ marginBottom: "10px" }}>{complaint.title}</h3>
-                    <h5>
+                    <h3
+                      style={{
+                        marginBottom: "10px",
+                        color: "var(--text-color)",
+                      }}
+                    >
+                      {complaint.title}
+                    </h3>
+                    <h5 style={{ color: "var(--dashboard-title-color)" }}>
                       Date:{" "}
                       {new Date(complaint.date).toISOString().split("T")[0]}
                     </h5>
@@ -172,13 +223,19 @@ const ComplaintsArea = () => {
                     <button
                       style={{
                         padding: "10px 15px",
-                        backgroundColor: "#007bff",
-                        color: "#fff",
-                        border: "none",
+                        backgroundColor: "transparent",
+                        color: "var(--text-color)",
+                        border: "1px solid var(--main-color)",
                         borderRadius: "4px",
                         cursor: "pointer",
                       }}
                       onClick={() => openModal(complaint._id)}
+                      onMouseOver={(e) => {
+                        e.target.style.backgroundColor = "var(--main-color)";
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.backgroundColor = "transparent";
+                      }}
                     >
                       View Details
                     </button>
@@ -187,13 +244,22 @@ const ComplaintsArea = () => {
                       <button
                         style={{
                           padding: "10px 15px",
-                          backgroundColor: "#28a745",
+                          backgroundColor: "var(--main-color)",
                           color: "#fff",
                           border: "none",
                           borderRadius: "4px",
                           cursor: "pointer",
                         }}
                         onClick={() => handleResolveComplaint(complaint._id)}
+                        onMouseOver={(e) => {
+                          e.target.style.backgroundColor =
+                            "var(--main-color-hover)";
+                          e.target.style.color = "#fff";
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.backgroundColor = "var(--main-color)";
+                          e.target.style.color = "var(--text-color)";
+                        }}
                       >
                         Resolve
                       </button>

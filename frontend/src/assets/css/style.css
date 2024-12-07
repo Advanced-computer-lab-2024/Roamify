@@ -87,6 +87,7 @@ Default CSS
   --dashboard-title-color: #aeb9e1;
   --secondary-color: #101935;
   --secondary-hover-color: #202f5e;
+  --secondary-border-color: #202f5e;
   --box-shadow: 0px 0px 7px rgba(255, 255, 255, 0.5);
   --text-color: #e7e9ea;
   --shimmer-start-color: #1f2a41;
@@ -95,7 +96,13 @@ Default CSS
 }
 
 .cancel-button {
-  background-color: #424446;
+  border: 1px solid var(--main-color);
+  background: transparent;
+  color: var(--text-color);
+}
+
+.cancel-button:hover {
+  background: var(--main-color);
 }
 
 input[type="text"]:focus {
@@ -105,7 +112,7 @@ input[type="text"]:focus {
 
 input[type="text"] {
   background: var(--background-color);
-  border: 1px solid var(--gray-color);
+  border: 1px solid var(--secondary-border-color);
   color: var(--text-color);
 }
 
@@ -336,7 +343,7 @@ section {
 }
 
 .section_padding {
-  padding: 100px 0;
+  padding: 50px 0;
 }
 
 .section_padding_top {
@@ -441,7 +448,6 @@ section {
   -moz-user-select: none;
   user-select: none;
   font-size: 16px;
-  border-radius: 5px;
   box-shadow: none;
   overflow: hidden;
   white-space: nowrap;
@@ -450,7 +456,7 @@ section {
 }
 
 .btn:hover {
-  color: var(--white-color);
+  /* color: var(--white-color); */
 }
 
 .btn-six:hover {
@@ -1164,7 +1170,7 @@ section {
 }
 
 .theme_common_box_two {
-  border-radius: 11px;
+  border-radius: 15px;
   overflow: hidden;
   border: 1px solid #d2d2d275;
   transition: var(--transition);
@@ -5690,7 +5696,7 @@ textarea {
 
 .flight_search_items {
   background: #ffffff;
-  border: 1px solid #dddddd;
+  border: 1px solid var(--secondary-border-color);
   border-radius: 12px;
   display: flex;
   justify-content: space-between;
@@ -5765,7 +5771,9 @@ textarea {
 
 .flight_search_right {
   background: #f3eff9;
-  padding: 25px 16px 20px 25px;
+  padding: 20px 20px;
+  border-top-right-radius: 12px; /* Top-right border radius */
+  border-bottom-right-radius: 12px; /* Bottom-right border radius */
 }
 
 .flight_search_right h5 {
@@ -5818,7 +5826,7 @@ textarea {
 }
 
 .flight_policy_refund {
-  border: 1px solid #d7d6d6;
+  border: 1px solid var(--secondary-border-color);
   border-radius: 10px;
   padding: 0px 20px;
 }
@@ -5929,7 +5937,6 @@ textarea {
 
 .flight_show_down_wrapper {
   display: flex;
-  border-bottom: 1px solid #cdcdcd;
   padding-top: 25px;
 }
 

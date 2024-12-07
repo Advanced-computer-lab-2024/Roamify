@@ -84,7 +84,7 @@ const ComplaintModal = ({
           width: "600px",
           height: "400px",
           padding: "20px",
-          backgroundColor: "#fff",
+          backgroundColor: "var(--secondary-color)",
           borderRadius: "8px",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
           position: "relative",
@@ -117,7 +117,7 @@ const ComplaintModal = ({
             marginTop: "10px",
             padding: "10px",
             borderRadius: "4px",
-            border: "1px solid #ccc",
+            border: "1px solid var(--secondary-border-color)",
             overflowY: "auto",
           }}
         >
@@ -135,17 +135,16 @@ const ComplaintModal = ({
               flex: "1",
               padding: "10px",
               borderRadius: "4px",
-              border: "1px solid #ccc",
               marginRight: "10px",
-              backgroundColor: isReplied ? "#e9ecef" : "white",
             }}
           />
           <button
             onClick={handleReplySubmit}
             disabled={isReplied}
             style={{
-              padding: "10px 15px",
-              backgroundColor: isReplied ? "#6c757d" : "#007bff",
+              backgroundColor: isReplied
+                ? "var(--gray-color)"
+                : "var(--main-color)",
               color: "#fff",
               border: "none",
               borderRadius: "4px",

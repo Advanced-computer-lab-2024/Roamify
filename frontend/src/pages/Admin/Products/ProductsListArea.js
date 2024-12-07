@@ -201,8 +201,8 @@ const ProductsListArea = ({ isAdmin }) => {
                       description={product.description}
                       discount={product.discount}
                       discountPrice={product.discountPrice}
-                      reviewRating={product.reviewRating}
-                      reviewCount={product.reviewCount}
+                      rating={product.rating}
+                      reviews={product.reviews}
                       key={index}
                       isAdmin={isAdmin}
                       isArchived={product.isArchived}
