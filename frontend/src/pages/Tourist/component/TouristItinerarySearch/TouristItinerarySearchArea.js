@@ -7,6 +7,7 @@ import "./DateFilter";
 import "./TouristItinerary.css";
 import { ToastContainer, toast } from "react-toastify";
 
+import { FaBookmark } from "react-icons/fa";
 const TouristItineraryWrapper = () => {
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +30,7 @@ const TouristItineraryWrapper = () => {
   const [showShareOptions, setShowShareOptions] = useState({});
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
-
+  const [bookmarkedItineraries, setBookmarkedItineraries] = useState({});
   const [searchType, setSearchType] = useState("name");
   const [searchInput, setSearchInput] = useState("");
 
@@ -70,6 +71,28 @@ const TouristItineraryWrapper = () => {
         },
       });
       setItineraries(response.data || []);
+       // Attempt to fetch bookmarks
+       try {
+        const bookmarkResponse = await axios.get(
+          "http://localhost:3000/api/bookmark/itinerary",
+          { withCredentials: true }
+        );
+
+        // Map bookmarked activities by ID
+        const bookmarks = {};
+        bookmarkResponse.data.forEach((itinerary) => {
+          bookmarks[itinerary._id] = true;
+        });
+        setBookmarkedItineraries(bookmarks);
+      } catch (bookmarkError) {
+        // Log and continue if bookmark fetch fails
+        if (bookmarkError.response && bookmarkError.response.status === 400) {
+          console.warn("Bookmark fetch failed, but activities will still display.");
+        } else {
+          console.error("Error fetching bookmarks:", bookmarkError);
+        }
+        setBookmarkedItineraries({}); // Reset bookmarks in case of failure
+      }
     } catch (error) {
       setItineraries([]);
       setError(
@@ -200,6 +223,41 @@ const TouristItineraryWrapper = () => {
     )}&body=${encodeURIComponent(body)}`;
   };
 
+  const handleBookmark = async (itineraryId) => {
+    try {
+      if (bookmarkedItineraries[itineraryId]) {
+        // Remove from bookmarks
+        await axios.delete("http://localhost:3000/api/bookmark/itinerary", {
+          data: { itineraryId },
+          withCredentials: true,
+        });
+
+        setBookmarkedItineraries((prev) => ({
+          ...prev,
+          [itineraryId]: false,
+        }));
+        toast.success("Removed from bookmarks!");
+      } else {
+        // Add to bookmarks
+        await axios.put(
+          "http://localhost:3000/api/bookmark/itinerary",
+          { itineraryId },
+          { withCredentials: true }
+        );
+
+        setBookmarkedItineraries((prev) => ({
+          ...prev,
+          [itineraryId]: true,
+        }));
+        toast.success("Added to bookmarks!");
+      }
+    } catch (err) {
+      console.error("Error updating bookmark:", err);
+      toast.error("Failed to update bookmark.");
+    }
+  };
+
+
   return (
     <section id="explore_area" className="section_padding">
       <div className="container">
@@ -285,85 +343,134 @@ const TouristItineraryWrapper = () => {
               <p>{error}</p>
             ) : (
               <div className="flight_search_result_wrapper">
-                {itineraries.length > 0 ? (
-                  itineraries.map((itinerary) => (
-                    <div
-                      className="flight_search_item_wrapper"
-                      key={itinerary._id}
-                    >
-                      <div className="flight_search_items">
-                        <h3 className="itinerary-name">{itinerary.title}</h3>
-                        <div className="itinerary-section">
-                          <p>
-                            <strong>Name:</strong> {itinerary.name}
-                          </p>
-                          <p>
-                            <strong>Location:</strong>{" "}
-                            {itinerary.locations.join(", ")}
-                          </p>
-                          <p>
-                            <strong>Language:</strong> {itinerary.language}
-                          </p>
-                          <p>
-                            <strong>Accessibility:</strong>{" "}
-                            {itinerary.accessibility ? "Yes" : "No"}
-                          </p>
-                          <p>
-                            <strong>Available Date:</strong>{" "}
-                            {itinerary.availableDates &&
-                            itinerary.availableDates.length > 0
-                              ? formatDate(itinerary.availableDates[0])
-                              : "No dates available"}
-                          </p>
-                        </div>
-                        <div className="booking-section">
-                          <h2>
-                            {itinerary.price * exchangeRate} {currencySymbol}
-                          </h2>
-                          <button
-                            onClick={() =>
-                              handleBooking(
-                                itinerary._id,
-                                itinerary.availableDates[0]
-                              )
-                            }
-                            className="btn btn_theme btn_sm"
-                            disabled={
-                              !itinerary.availableDates ||
-                              itinerary.availableDates.length === 0
-                            }
-                          >
-                            Book now
-                          </button>
-                          <button
-                            className="btn btn_theme btn_sm"
-                            onClick={() => handleShareToggle(itinerary._id)}
-                          >
-                            Share
-                          </button>
-                          {showShareOptions[itinerary._id] && (
-                            <div className="share-options">
-                              <button
-                                className="btn btn_theme btn_sm"
-                                onClick={() => handleCopyLink(itinerary._id)}
-                              >
-                                Copy Link
-                              </button>
-                              <button
-                                className="btn btn_theme btn_sm"
-                                onClick={() => handleEmailShare(itinerary)}
-                              >
-                                Share via Email
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p>No itineraries available.</p>
-                )}
+{itineraries.length > 0 ? (
+  itineraries.map((itinerary) => (
+    <div className="flight_search_item_wrappper" key={itinerary._id}>
+      <div className="flight_search_items">
+        <div className="multi_city_flight_lists">
+          <div className="flight_multis_area_wrapper">
+            <div className="flight_search_left">
+              <div className="flight_search_destination">
+                <p>Location</p>
+                <h3>{itinerary.locations.join(", ")}</h3>
+              </div>
+            </div>
+            <div className="flight_search_middel">
+              <div className="flight_right_arrow">
+                <h3>{itinerary.name}</h3>
+                <p>{itinerary.language}</p>
+              </div>
+              <div className="flight_search_destination">
+                <p>Available Date</p>
+                <h3>
+                  {itinerary.availableDates &&
+                  itinerary.availableDates.length > 0
+                    ? new Date(itinerary.availableDates[0]).toLocaleDateString()
+                    : "No dates available"}
+                </h3>
+                <h6>Accessibility: {itinerary.accessibility ? "Yes" : "No"}</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flight_search_right">
+          <div
+            style={{
+              position: "relative",
+              top: "10%",
+              left: "90%",
+              cursor: "pointer",
+            }}
+            onClick={() => handleBookmark(itinerary._id)}
+          >
+            <FaBookmark
+              size={24}
+              color={
+                bookmarkedItineraries[itinerary._id] ? "#8b3eea" : "#ccc"
+              }
+            />
+          </div>
+
+          <h5>
+            {itinerary.discounts ? (
+              <del>
+                {(
+                  (
+                    itinerary.price *
+                    (1 + itinerary.discounts / 100)
+                  ).toFixed(2) * exchangeRate
+                ).toFixed(2)}{" "}
+                {currencySymbol}
+              </del>
+            ) : (
+              ""
+            )}
+          </h5>
+          <h2>
+            {(itinerary.price * exchangeRate).toFixed(2)} {currencySymbol}
+            <sup>
+              {itinerary.discounts
+                ? `${itinerary.discounts}% off`
+                : ""}
+            </sup>
+          </h2>
+          <button
+            onClick={() =>
+              handleBooking(itinerary._id, itinerary.availableDates[0])
+            }
+            className="btn btn_theme btn_sm"
+            disabled={
+              !itinerary.availableDates || itinerary.availableDates.length === 0
+            }
+          >
+            Book now
+          </button>
+
+          {/* Share Button */}
+          <div>
+            <button
+              onClick={() => handleCopyLink(itinerary._id)}
+              className="btn btn-secondary btn-sm me-2"
+            >
+              Copy Link
+            </button>
+            <button
+              onClick={() => handleEmailShare(itinerary)}
+              className="btn btn-primary btn-sm"
+            >
+              Share via Email
+            </button>
+          </div>
+
+          <div
+            data-bs-toggle="collapse"
+            data-bs-target={`#collapseExample${itinerary._id}`}
+            aria-expanded="false"
+            aria-controls={`collapseExample${itinerary._id}`}
+          >
+            Show more <i className="fas fa-chevron-down"></i>
+          </div>
+        </div>
+      </div>
+      <div
+        className="flight_policy_refund collapse"
+        id={`collapseExample${itinerary._id}`}
+      >
+        <div className="flight_show_down_wrapper">
+          <div className="flight-shoe_dow_item">
+            <h4>Itinerary Details</h4>
+            <p className="fz12">Language: {itinerary.language}</p>
+            <p className="fz12">
+              Accessibility: {itinerary.accessibility ? "Yes" : "No"}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  ))
+) : (
+  <p>No itineraries available.</p>
+)}
               </div>
             )}
           </div>
@@ -411,6 +518,8 @@ const TouristItineraryWrapper = () => {
           />
         )}
       </div>
+      {/* Toast Container for notifications */}
+      <ToastContainer position="top-right" autoClose={3000} />
     </section>
   );
 };
