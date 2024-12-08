@@ -1,13 +1,15 @@
 const userModel = require('../models/userModel');
 const sellerModel = require('../models/sellerModel');
 const orderModel=require('../models/orderModel');
+mangoose= require('mongoose');
+const productModel=require('../models/productModel');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
+const {Types} = require("mongoose");
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
 const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
-
 
 const createProfile = async (req, res) => {
   try {
@@ -162,60 +164,49 @@ const uploadLogo = async (req, res) => {
 }
 const getSalesReport = async (req, res) => {
   try {
-    const sellerId = req.user._id;
+    const { sellerId } = req.user; // Assuming seller is authenticated, and their ID is available
 
-    // Fetch orders with relevant statuses and populate product details
+    // Fetch products sold by this seller
+    const products = await productModel.find({ seller: sellerId });
+
+    // Get product IDs to filter orders
+    const productIds = products.map(product => product._id);
+
+    // Fetch orders containing the seller's products
     const orders = await orderModel.find({
-      status: { $in: ['Delivered','Out For Delivery','Processing','Arrived'] },
-    }).populate({
-      path: 'products.productId',
-      select: 'name price sellerId', // Only populate necessary fields
+      'products.productId': { $in: productIds },
+      status: { $in: ['Delivered'] } // Include relevant statuses
     });
 
-    if (!orders.length) {
-      return res.status(404).json({ message: 'No sales data found for this seller.' });
-    }
-
+    // Calculate revenue and sales breakdown
     let totalRevenue = 0;
-    const productRevenue = {};
-
-    for (const order of orders) {
-      for (const product of order.products) {
-        if (!product.productId) {
-          // Skip if the productId is missing (possibly deleted)
-          continue;
-        }
-
-        if (product.productId.sellerId.toString() === sellerId.toString()) {
-          const productTotal = product.priceAtPurchase * product.quantity;
-          totalRevenue += productTotal;
-
-          if (!productRevenue[product.productId._id]) {
-            productRevenue[product.productId._id] = {
-              name: product.productId.name,
-              revenue: productTotal,
-              quantity: product.quantity,
-            };
-          } else {
-            productRevenue[product.productId._id].revenue += productTotal;
-            productRevenue[product.productId._id].quantity += product.quantity;
-          }
-        }
-      }
-    }
+    const salesDetails = orders.map(order => {
+      const sellerProducts = order.products.filter(product => productIds.includes(product.productId.toString()));
+      const revenue = sellerProducts.reduce((sum, product) => sum + (product.priceAtPurchase * product.quantity), 0);
+      totalRevenue += revenue;
+      return {
+        orderId: order._id,
+        status: order.status,
+        revenue,
+        products: sellerProducts.map(p => ({
+          productId: p.productId,
+          name: products.find(prod => prod._id.toString() === p.productId.toString()).name,
+          quantity: p.quantity,
+          priceAtPurchase: p.priceAtPurchase,
+        })),
+      };
+    });
 
     res.status(200).json({
-      message: 'Sales report retrieved successfully.',
-      report: {
-        totalRevenue,
-        breakdown: Object.values(productRevenue),
-      },
+      message: 'Sales report generated successfully.',
+      totalRevenue,
+      salesDetails,
     });
   } catch (error) {
+    console.error('Error generating sales report:', error.message);
     res.status(500).json({ message: 'Failed to generate sales report.', error: error.message });
   }
 };
-
 
 module.exports = { createProfile,
   getProfile,
