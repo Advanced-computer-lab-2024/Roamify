@@ -10,8 +10,6 @@ const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage }).single('profilePicture');
-const emailTemplate = require('../emailTemplate')
-const nodemailer = require('nodemailer')
 
 const createProfile = async (req, res) => {
   try {
@@ -378,8 +376,6 @@ const setStatusOfItinerary = async (req, res) => {
 
   }
 }
-
-
 const viewRevenue = async (req, res) => {
   try {
     //get all tickets
@@ -459,16 +455,12 @@ const viewRevenue = async (req, res) => {
 
     filteredResults.forEach(e => totalRevenue += (e.price * e.count))
 
-
-
-
     return res.status(200).json({ filteredResults, totalRevenue });
   } catch (error) {
     console.log(error)
     return res.status(500).json({ message: error.message });
   }
 };
-
 const viewTotalTourists = async (req, res) => {
   try {
     //get all active tickets
