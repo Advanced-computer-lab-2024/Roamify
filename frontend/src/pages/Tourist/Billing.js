@@ -45,7 +45,6 @@ const Billing = () => {
             return;
         }
 
-        const orderId = localStorage.getItem('orderId');
         if (!orderId) {
             toast.error('Order ID not found. Please ensure an order is selected.');
             return;
@@ -60,7 +59,6 @@ const Billing = () => {
                 },
                 credentials: 'include',
             });
-
             const data = await response.json();
             if (response.ok) {
                 setCheckoutSummary((prevSummary) => ({
@@ -74,7 +72,6 @@ const Billing = () => {
                 throw new Error(data.message || 'Failed to apply promo code.');
             }
         } catch (error) {
-            console.error('Error applying promo code:', error);
             toast.error(error.message || 'An error occurred. Please try again.');
         }
     };
@@ -110,101 +107,97 @@ const Billing = () => {
         <div className="billing-container">
             <ToastContainer />
             <div className="billing-flex">
-                {/* Order Summary Card */}
+                {/* Order Summary */}
                 <div className="billing-card summary-card">
+                    <h3>Order Summary</h3>
                     {checkoutSummary ? (
                         <>
-                            <h3>Order Summary</h3>
-                            <div className="summary-content">
-                                <p><strong>Created At:</strong> {new Date(checkoutSummary.createdAt).toLocaleString()}</p>
-                                <ul>
-                                    {checkoutSummary.products.map((product) => (
-                                        <li key={product.productId}>
-                                            <div className="product-details">
-                                                <p><strong>Product Name:</strong> {product.name}</p>
-                                                <p>
-                                                    Quantity: {product.quantity} 
-                                                    ({product.quantity} x ${product.priceAtPurchase} = ${product.subtotal})
-                                                </p>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                                <p><strong>Total Items:</strong> {checkoutSummary.products.reduce((total, product) => total + product.quantity, 0)}</p>
-                                <p><strong>Delivery Address:</strong> {`${checkoutSummary.deliveryAddress.street}, ${checkoutSummary.deliveryAddress.city}, ${checkoutSummary.deliveryAddress.postalCode}`}</p>
-                                <p><strong>Total Cost:</strong> ${checkoutSummary.totalProductCost.toFixed(2)}</p>
-                                <p><strong>Discount:</strong> ${checkoutSummary.discountApplied.toFixed(2)}</p>
-                                <p><strong>Final Amount:</strong> ${checkoutSummary.finalAmount.toFixed(2)}</p>
-                            </div>
+                            <p><strong>Created At:</strong> {new Date(checkoutSummary.createdAt).toLocaleString()}</p>
+                            <ul>
+                                {checkoutSummary.products.map((product) => (
+                                    <li key={product.productId}>
+                                        <div>
+                                            <p><strong>Product Name:</strong> {product.name}</p>
+                                            <p>
+                                                Quantity: {product.quantity} ({product.quantity} x ${product.priceAtPurchase} = ${product.subtotal})
+                                            </p>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                            <p><strong>Total Items:</strong> {checkoutSummary.products.reduce((total, product) => total + product.quantity, 0)}</p>
+                            <p><strong>Delivery Address:</strong> {checkoutSummary.deliveryAddress.street}, {checkoutSummary.deliveryAddress.city}, {checkoutSummary.deliveryAddress.postalCode}</p>
+                            <p><strong>Total Cost:</strong> ${checkoutSummary.totalProductCost.toFixed(2)}</p>
+                            <p><strong>Discount:</strong> ${checkoutSummary.discountApplied.toFixed(2)}</p>
+                            <p><strong>Final Amount:</strong> ${checkoutSummary.finalAmount.toFixed(2)}</p>
                         </>
                     ) : (
                         <p>Loading Summary...</p>
                     )}
                 </div>
 
-                {/* Payment Method Card */}
+                {/* Payment Method */}
                 <div className="billing-card payment-card">
-    <h3>Select Payment Method</h3>
-    <form onSubmit={(e) => e.preventDefault()}>
-        <label>
-            <input
-                type="radio"
-                name="paymentMethod"
-                value="COD"
-                checked={paymentMethod === 'COD'}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-            />
-            <span>Cash On Delivery</span>
-            <FontAwesomeIcon icon={faMoneyBillWave} className="icon" />
-        </label>
-        <label>
-            <input
-                type="radio"
-                name="paymentMethod"
-                value="Stripe"
-                checked={paymentMethod === 'Stripe'}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-            />
-            <span>Stripe</span>
-            <FontAwesomeIcon icon={faStripeS} className="icon" />
-        </label>
-        <label>
-            <input
-                type="radio"
-                name="paymentMethod"
-                value="Wallet"
-                checked={paymentMethod === 'Wallet'}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-            />
-            <span>Wallet</span>
-            <FontAwesomeIcon icon={faWallet} className="icon" />
-        </label>
-        <div className="promo-code-container">
-            <input
-                type="text"
-                placeholder="Apply a promo code"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-                className="promo-code-input"
-            />
-            <button
-                type="button"
-                className="billing-button apply-button"
-                onClick={applyPromoCode}
-            >
-                Apply
-            </button>
-        </div>
-        <button
-            type="button"
-            className="billing-button"
-            onClick={handlePayment}
-        >
-            Confirm Payment
-        </button>
-    </form>
-</div>
-
+                    <h3>Select Payment Method</h3>
+                    <form onSubmit={(e) => e.preventDefault()}>
+                        <label>
+                            <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="COD"
+                                checked={paymentMethod === 'COD'}
+                                onChange={(e) => setPaymentMethod(e.target.value)}
+                            />
+                            <span>Cash On Delivery</span>
+                            <FontAwesomeIcon icon={faMoneyBillWave} className="icon" />
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="Stripe"
+                                checked={paymentMethod === 'Stripe'}
+                                onChange={(e) => setPaymentMethod(e.target.value)}
+                            />
+                            <span>Stripe</span>
+                            <FontAwesomeIcon icon={faStripeS} className="icon" />
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="Wallet"
+                                checked={paymentMethod === 'Wallet'}
+                                onChange={(e) => setPaymentMethod(e.target.value)}
+                            />
+                            <span>Wallet</span>
+                            <FontAwesomeIcon icon={faWallet} className="icon" />
+                        </label>
+                        <div className="promo-code-container">
+                            <input
+                                type="text"
+                                placeholder="Apply a promo code"
+                                value={promoCode}
+                                onChange={(e) => setPromoCode(e.target.value)}
+                                className="promo-code-input"
+                            />
+                            <button
+                                type="button"
+                                className="billing-button apply-button"
+                                onClick={applyPromoCode}
+                            >
+                                Apply
+                            </button>
+                        </div>
+                        <button
+                            type="button"
+                            className="billing-button"
+                            onClick={handlePayment}
+                        >
+                            Confirm Payment
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );
