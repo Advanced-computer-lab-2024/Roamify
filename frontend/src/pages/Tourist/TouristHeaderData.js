@@ -73,6 +73,11 @@ export const HeaderData = [
     submenu: false,
   },
   {
+    menu: "Flights",
+    link: "tourist-flights",
+    submenu: false,
+  },
+  {
     menu: "Complain",
     submenu: true,
     subMenuitem: [

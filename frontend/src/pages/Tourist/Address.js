@@ -4,7 +4,7 @@ import './Address.css';
 import { useNavigate } from 'react-router-dom';
 
 const AddressComponent = () => {
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     const [addresses, setAddresses] = useState([]);
     const [selectedAddress, setSelectedAddress] = useState('');
     const [showAddAddressForm, setShowAddAddressForm] = useState(false);
@@ -17,9 +17,24 @@ const AddressComponent = () => {
         country: ''
     });
 
+    useEffect(() => {
+        fetchAddresses();
+    }, []);
+
+    // Function to get the token from local storage or cookie
+    const getToken = () => {
+        return localStorage.getItem('token'); // Or wherever your token is stored
+    };
+
     const fetchAddresses = async () => {
+        const token = getToken();
         try {
-            const response = await axios.get('http://localhost:3000/api/address', { withCredentials: true });
+            const response = await axios.get('http://localhost:3000/api/address', {
+                withCredentials: true,
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (response.data && response.data.addresses) {
                 setAddresses(response.data.addresses);
                 if (response.data.addresses.length > 0) {
@@ -30,6 +45,38 @@ const AddressComponent = () => {
             }
         } catch (error) {
             console.error('Error fetching addresses:', error);
+            alert('Failed to fetch addresses. Check console for more details.');
+        }
+    };
+
+    const handleAddressChange = (addressId) => {
+        setSelectedAddress(addressId);
+        fetchOrderAddress(addressId);
+    };
+
+    const fetchOrderAddress = async (addressId) => {
+        const token = getToken();
+        const orderId = localStorage.getItem('orderId'); // Assuming orderId is stored in local storage
+        try {
+            const url = `http://localhost:3000/api/order/${orderId}/address/${addressId}`;
+            const response = await axios.patch(url, {}, {
+                withCredentials: true,
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log('Order Address Data:', response.data);
+        } catch (error) {
+            console.error('Error fetching order address:', error);
+            if (error.response) {
+                console.error('Error status:', error.response.status);
+                console.error('Error data:', error.response.data);
+                alert(`Failed to fetch order address: ${error.response.data.message}`);
+            } else if (error.request) {
+                console.error('No response received:', error.request);
+            } else {
+                console.error('Error setting up the request:', error.message);
+            }
         }
     };
 
@@ -43,20 +90,23 @@ const AddressComponent = () => {
 
     const submitNewAddress = async (event) => {
         event.preventDefault();
+        const token = getToken();
         try {
-            const response = await axios.post('http://localhost:3000/api/address', newAddress, { withCredentials: true });
+            const response = await axios.post('http://localhost:3000/api/address', newAddress, {
+                withCredentials: true,
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             console.log(response.data.message);
             fetchAddresses();
             setShowAddAddressForm(false);
             setNewAddress({ name: '', street: '', city: '', state: '', postalCode: '', country: '' });
         } catch (error) {
             console.error('Error adding address:', error);
+            alert('Failed to add new address. Check console for more details.');
         }
     };
-
-    useEffect(() => {
-        fetchAddresses();
-    }, []);
 
     return (
         <div className="address-container">
@@ -70,7 +120,7 @@ const AddressComponent = () => {
                         name="address"
                         value={address._id}
                         checked={selectedAddress === address._id}
-                        onChange={() => setSelectedAddress(address._id)}
+                        onChange={() => handleAddressChange(address._id)}
                     />
                     {address.name}: {address.street}, {address.city}, {address.state}, {address.postalCode}, {address.country}
                 </div>
