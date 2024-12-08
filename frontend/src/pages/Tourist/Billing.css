@@ -1,75 +1,270 @@
+/* General container styles */
 .billing-container {
-    width: 100%;
-    max-width: 400px; /* Adjust width for a slimmer form */
-    background: #fff;
+    max-width: 1200px;
+    margin: 0 auto;
     padding: 20px;
+    background-color: #f8f9fa;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    margin: 20px auto;
-    display: flex;
-    flex-direction: column;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
 }
 
-.billing-header h2 {
-    color: #ccc;
+.billing-flex {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.billing-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.summary-card p, 
+.summary-card h3, 
+.summary-card ul li {
+    font-size: 1rem; /* Uniform size */
+    color: #555555; /* Uniform grey color */
+    text-align: center; /* Consistent alignment */
+}
+
+.summary-card p strong {
+    color: #555555; /* Same grey color for strong text */
+    font-weight: bold; /* To make the strong text stand out */
+}
+
+
+.payment-card {
+    flex: 1;
+}
+
+/* Order summary styles */
+h3 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
     text-align: center;
-    margin-bottom: 20px; /* Added space between header and options */
-    font-size: 20px;
+    color: #333333;
+    font-weight: bold;
 }
 
-.billing-form {
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul li {
+    margin: 10px 0;
+    font-size: 1rem;
+    color: #555555;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
 }
 
-label {
-    margin-bottom: 10px; /* Space between each payment option */
+ul li span {
+    color: #333333;
+    font-weight: bold;
+}
+
+p {
+    margin: 8px 0;
+    font-size: 1rem;
+    color: #555555;
+    line-height: 1.5;
+}
+
+p strong {
+    color: #333333;
+    font-weight: 600;
+}
+
+.product-name {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.product-subtotal {
+    font-size: 0.95rem;
+    color: #666666;
+    margin-left: 10px;
+    margin-top: -5px;
+}
+
+/* Payment method styles */
+.payment-card label {
     display: flex;
-    align-items: center; /* Aligns the text with the radio button */
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f8f8f8;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.payment-card .icon {
+    color: #8b3eea; /* Set to the desired purple color */
+    font-size: 1.5rem; /* Adjust size if needed */
+}
+.payment-card label:hover .icon {
+    color: #6a5acd; /* Slightly different purple on hover */
 }
 
-.icon {
-    margin-left: auto; /* Space after the text */
-    color: #8b3eea;
+
+.payment-card label:hover {
+    background-color: #eef7ff;
+    border-color: #6a5acd;
+}
+
+.payment-card input[type="radio"] {
+    margin-right: 10px;
+}
+
+.payment-card .icon {
+    margin-left: 10px;
+    color: #666666;
+    font-size: 1.2rem;
 }
 
 .promo-code-container {
     display: flex;
-    margin-top: 20px; /* Added more space above the promo code input */
+    gap: 10px;
+    margin-top: 15px;
 }
 
 .promo-code-input {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
+    flex: 1;
+    padding: 5px;
+    border: 1px solid #ddd;
     border-radius: 5px;
-}
-
-.clear-promo-btn {
-    margin-left: 10px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: #666;
+    font-size: 1rem;
 }
 
 .billing-button {
+    display: block;
     width: 100%;
+    padding: 10px;
     background-color: #8b3eea;
-    color: white;
+    color: #ffffff;
     border: none;
-    padding: 10px 20px;
     border-radius: 5px;
-    margin-top: 15px;
     cursor: pointer;
-}
-
-.error-message, .success-message {
+    font-size: 1rem;
+    font-weight: bold;
     text-align: center;
-    color: #ff0000;
-    margin-top: 10px;
+    margin-top: 100px;
+    transition: background-color 0.3s ease;
 }
 
-.success-message {
-    color: #008000;
+
+/* Payment Methods Styling */
+.payment-card label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f8f8f8;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
+
+.payment-card label:hover {
+    background-color: #eef7ff;
+    border-color: #6a5acd;
+}
+
+.payment-card input[type="radio"] {
+    margin-right: 10px;
+}
+
+.payment-card span {
+    flex: 1;
+    text-align: left;
+    font-size: 1rem;
+    color: #555555;
+}
+
+.payment-card .icon {
+    margin-left: 10px;
+    color: #666666;
+    font-size: 1.2rem;
+}
+
+/* Promo Code Styling */
+.promo-code-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.promo-code-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.billing-button.apply-button {
+    padding: 10px;
+    background-color: #8b3eea;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    width: auto; /* Matches the size of the promo code input */
+    flex-shrink: 0;
+}
+
+.billing-button.apply-button:hover {
+    background-color: #8b3eea;
+}
+
+.icon{
+    color: #8b3eea;
+}
+.summary-content p {
+    font-size: 1rem;
+    margin: 10px 0;
+    text-align: left;
+}
+
+.summary-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+.summary-content ul li {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+    color: #555555;
+    margin-bottom: 5px;
+}
+.product-details p {
+    font-size: 1rem;
+    color: #555555;
+    margin: 5px 0;
+    line-height: 1.5;
+}
+
+
+.product-details strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+    color: #333333;
+}
+
+
+
