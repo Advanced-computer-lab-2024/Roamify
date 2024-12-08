@@ -195,18 +195,30 @@ const TouristActivitiesWrapper = () => {
     }
   };
 
-  const handleBooking = async (activityId, activityDate) => {
+  const handleBooking = async (activityId, activityDate, method, paymentMethodId, promoCode) => {
     try {
+      // Format the activity date to ISO date format
       const formattedDate = new Date(activityDate).toISOString().split("T")[0];
+  
+      // Make the POST request to the API
       await axios.post(
         "http://localhost:3000/api/tourist/book-activity",
-        { activity: activityId, date: formattedDate },
-        { withCredentials: true }
+        {
+          activity: activityId,
+          date: formattedDate,
+          method, // Payment method: "availableCredit" or "card"
+          paymentMethodId, // Payment method ID
+          promoCode // Optional promo code
+        },
+        { withCredentials: true } // Include credentials for authentication
       );
+  
+      // Display success message
       setPopupMessage("Booking successful!");
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
     } catch (error) {
+      // Handle errors and display appropriate message
       const errorMessage =
         error.response && error.response.data && error.response.data.message
           ? error.response.data.message
@@ -217,6 +229,7 @@ const TouristActivitiesWrapper = () => {
       console.error("Error booking activity:", error);
     }
   };
+  
 
   // Function to copy activity link
   const handleCopyLink = (activityId) => {
