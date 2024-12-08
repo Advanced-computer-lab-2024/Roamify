@@ -270,7 +270,6 @@ const bookActivity = async (req, res) => {
       tourist: req.user._id,
       price: finalPrice,
       receiptType: "payment",
-      activity: activityId,
       promoCode: promoCode.code
     });
     await receipt.save({ session });
@@ -550,8 +549,7 @@ const bookItinerary = async (req, res) => {
       status: "successful",
       tourist: req.user._id,
       price: finalPrice,
-      receiptType: "payment",
-      itinerary: itineraryId
+      receiptType: "payment"
     });
     await receipt.save({ session });
 
@@ -657,7 +655,7 @@ const cancelActivity = async (req, res) => {
             "Unable to cancel booking as it must be done at least 48 hours in advance.",
         });
     } else {
-      console.log(ticket)
+
       const receipt = new receiptModel({
         type: "activity",
         status: "successful",
@@ -670,6 +668,7 @@ const cancelActivity = async (req, res) => {
         status: "refunded",
         receipt: receipt._id,
       });
+      console.log(ticket.receipt.price)
       tourist.wallet.availableCredit += ticket.receipt.price;
       await walletModel.findByIdAndUpdate(tourist.wallet._id, {
         availableCredit: tourist.wallet.availableCredit,
