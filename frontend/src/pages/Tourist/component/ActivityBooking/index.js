@@ -111,6 +111,7 @@ const BookedActivitiesWrapper = () => {
                       minWidth: "300px",
                       maxWidth: "calc(33% - 20px)",
                       transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                       background: "var(--secondary-color)"
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = "scale(1.05)";

@@ -4,7 +4,7 @@ import { FaTrashAlt } from "react-icons/fa";
 import { FaShoppingCart } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import LoadingLogo from "../../component/LoadingLogo";
 
 const Wishlist = () => {
   const [wishlistData, setWishlistData] = useState(null);
@@ -12,6 +12,7 @@ const Wishlist = () => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+
 
   // Fetch wishlist data from the server
   const fetchWishlistData = async () => {
@@ -21,7 +22,11 @@ const Wishlist = () => {
       });
       setWishlistData(response.data);
     } catch (err) {
-      setError(err.message);
+      if (err.response && err.response.status === 404) {
+        setError("Wishlist is empty.");
+      }else{
+      setError(err.message);}
+
     } finally {
       setLoading(false);
     }
@@ -32,11 +37,11 @@ const Wishlist = () => {
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <LoadingLogo isVisible={true} />;
   }
 
   if (error) {
-    return <p>Error: {error}</p>;
+    return <p> {error}</p>;
   }
 
   // Function to handle deleting a product from the wishlist
@@ -125,7 +130,7 @@ const Wishlist = () => {
                     <div>
                       <div className="flight_multis_area_wrapper">
                         <div className="flight_search_left">
-                          <div className="flight_logo">
+                          <div className="flight_logo" style={{width:"250px", height:"250px"}}>
                             <img src={item.picture[0].url} alt={item.name} />
                           </div>
                           <div>

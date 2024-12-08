@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import CommonBanner from "../../../../component/Common/CommonBanner";
 import { HeaderData } from "../../TouristHeaderData";
 import Header from "../../../../layout/Header";
+import LoadingLogo from "../../../../component/LoadingLogo";
 const CompletedActivity = () => {
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +18,7 @@ const CompletedActivity = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get("http://localhost:3000/api/tourist/activity/unrated", {
+      const response = await axios.get("http://localhost:3000/api/tourist/get-all-booked-activities", {
         withCredentials: true,
       });
       setItineraries(response.data.activities || []);
@@ -47,7 +48,7 @@ const CompletedActivity = () => {
         <div className="row">
           <div className="col-lg-9">
             {loading ? (
-              <p>Loading activity...</p>
+              <LoadingLogo isVisible={true} />
             ) : error ? (
               <p>{error}</p>
             ) : (

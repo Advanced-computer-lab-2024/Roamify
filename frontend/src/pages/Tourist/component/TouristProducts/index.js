@@ -4,7 +4,7 @@ import SectionHeading from "../../../../component/Common/SectionHeading";
 import CommonCard from "./ProductCommonCard";
 import productDefault from "./productdefault.png";
 import PriceSlider from "../TouristActivitiesSearch/PriceSlider";
-
+import LoadingLogo from "../../../../component/LoadingLogo";
 const TouristProductsArea = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -141,7 +141,7 @@ const TouristProductsArea = () => {
           <div className="col-lg-9">
             <div className="row">
               {loading ? (
-                <p>Loading products...</p>
+                <LoadingLogo isVisible={true} />
               ) : error ? (
                 <p>{error}</p>
               ) : products.length > 0 ? (
