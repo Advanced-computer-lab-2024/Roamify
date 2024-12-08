@@ -1,6 +1,7 @@
 const productModel = require("../models/productModel");
 const cartModel = require("../models/cartModel");
 const orderModel = require("../models/orderModel");
+const receiptModel = require("../models/receiptModel");
 const {agenda} = require("../config/agenda");
 const mongoose = require("mongoose");
 
@@ -157,6 +158,7 @@ const reviewCart = async (req, res) => {
             throw new Error("Your cart is empty or contains invalid products.");
         }
 
+        // Prepare bulk operations to decrement inventory
         const bulkOps = cart.products.map((item) => ({
             updateOne: {
                 filter: { _id: item.productId._id, quantity: { $gte: item.quantity } },
@@ -165,12 +167,15 @@ const reviewCart = async (req, res) => {
         }));
         const result = await productModel.bulkWrite(bulkOps, { session });
 
+        // Check if all products were successfully updated in the inventory
         if (result.modifiedCount !== cart.products.length) {
             throw new Error("Some products are out of stock.");
         }
 
+        // Calculate the total amount for the order for confirmation or display purposes
         const totalAmount = cart.products.reduce((sum, item) => sum + item.productId.price * item.quantity, 0);
 
+        // Create a new order
         const newOrder = new orderModel({
             tourist: req.user._id,
             products: cart.products.map((item) => ({
@@ -178,17 +183,28 @@ const reviewCart = async (req, res) => {
                 quantity: item.quantity,
                 priceAtPurchase: item.productId.price,
             })),
-            totalAmount,
             status: "Pending",
         });
 
         await newOrder.save({ session });
 
-        // Ensure Agenda is initialized
-        if (!agenda || typeof agenda.schedule !== "function") {
-            throw new Error("Agenda is not initialized or ready.");
-        }
+        // Create a pending receipt associated with this order
+        const newReceipt = new receiptModel({
+            type: 'product',
+            status: 'pending',
+            tourist: req.user._id,
+            order: newOrder._id,
+            price: totalAmount,
+            receiptType: 'payment'
+        });
 
+        await newReceipt.save({ session });
+
+        // Link the receipt to the order
+        newOrder.receipt = newReceipt._id;
+        await newOrder.save({ session });
+
+        // Schedule the job to expire the order if not processed in time
         const job = await agenda.schedule("in 10 minutes", "expire order", { orderId: newOrder._id.toString() });
         newOrder.expirationJobId = job.attrs._id;
         await newOrder.save({ session });
@@ -196,7 +212,12 @@ const reviewCart = async (req, res) => {
         await session.commitTransaction();
         session.endSession();
 
-        res.status(200).json({ message: "Cart reviewed and order created.", order: newOrder });
+        res.status(200).json({
+            message: "Cart reviewed and order created.",
+            order: newOrder,
+            totalAmount: totalAmount,
+            receiptId: newReceipt._id
+        });
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
