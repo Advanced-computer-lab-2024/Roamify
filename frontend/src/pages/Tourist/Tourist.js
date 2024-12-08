@@ -28,6 +28,9 @@ import Hotels from "./component/Hotels/Hotels.js";
 import Cart from "./Cart.js";
 import Address from "./Address.js";
 import Billing from "./Billing.js";
+import Bookmarks from "./Bookmarks.js";
+import ActivityDetails from "./component/TouristActivitiesSearch/ActivityDetails.js";
+import ItineraryDetails from "./component/TouristItinerarySearch/ItineraryDetails.js";
 const Tourist = () => {
   return (
     <>
@@ -55,6 +58,9 @@ const Tourist = () => {
         <Route path="/cart" element={<Cart />}/>
         <Route path="/address" element={<Address />}/>
         <Route path="/billing" element={<Billing />}/>
+        <Route path="/bookmarks" element={<Bookmarks />}/>
+        <Route path="/activity-details/:id" element={<ActivityDetails />}/>
+        <Route path="/itinerary-details/:id" element={<ItineraryDetails />}/>
       </Routes>
       <CopyRight />
     </>

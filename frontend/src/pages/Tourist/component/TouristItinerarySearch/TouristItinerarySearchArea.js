@@ -6,6 +6,9 @@ import PriceSlider from "../TouristActivitiesSearch/PriceSlider";
 import "./DateFilter";
 import "./TouristItinerary.css";
 import { ToastContainer, toast } from "react-toastify";
+import { renderStars } from "../../../../functions/renderStars";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFlag, faFlagCheckered } from "@fortawesome/free-solid-svg-icons";
 
 import { FaBookmark } from "react-icons/fa";
 const TouristItineraryWrapper = () => {
@@ -71,8 +74,8 @@ const TouristItineraryWrapper = () => {
         },
       });
       setItineraries(response.data || []);
-       // Attempt to fetch bookmarks
-       try {
+      // Attempt to fetch bookmarks
+      try {
         const bookmarkResponse = await axios.get(
           "http://localhost:3000/api/bookmark/itinerary",
           { withCredentials: true }
@@ -209,15 +212,12 @@ const TouristItineraryWrapper = () => {
 
   const handleEmailShare = (itinerary) => {
     const subject = `Check out this itinerary: ${itinerary.name}`;
-    const body = `I thought you'd be interested in this itinerary: ${
-      itinerary.name
-    }\n\nLocation: ${itinerary.locations.join(
-      ", "
-    )}\nAvailable Date: ${formatDate(itinerary.availableDates[0])}\nPrice: ${
-      itinerary.price
-    } EGP\n\nCheck it out: ${window.location.origin}/itinerary-details/${
-      itinerary._id
-    }`;
+    const body = `I thought you'd be interested in this itinerary: ${itinerary.name
+      }\n\nLocation: ${itinerary.locations.join(
+        ", "
+      )}\nAvailable Date: ${formatDate(itinerary.availableDates[0])}\nPrice: ${itinerary.price
+      } EGP\n\nCheck it out: ${window.location.origin}/itinerary-details/${itinerary._id
+      }`;
     window.location.href = `mailto:?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
@@ -342,136 +342,248 @@ const TouristItineraryWrapper = () => {
             ) : error ? (
               <p>{error}</p>
             ) : (
-              <div className="flight_search_result_wrapper">
-{itineraries.length > 0 ? (
-  itineraries.map((itinerary) => (
-    <div className="flight_search_item_wrappper" key={itinerary._id}>
-      <div className="flight_search_items">
-        <div className="multi_city_flight_lists">
-          <div className="flight_multis_area_wrapper">
-            <div className="flight_search_left">
-              <div className="flight_search_destination">
-                <p>Location</p>
-                <h3>{itinerary.locations.join(", ")}</h3>
-              </div>
-            </div>
-            <div className="flight_search_middel">
-              <div className="flight_right_arrow">
-                <h3>{itinerary.name}</h3>
-                <p>{itinerary.language}</p>
-              </div>
-              <div className="flight_search_destination">
-                <p>Available Date</p>
-                <h3>
-                  {itinerary.availableDates &&
-                  itinerary.availableDates.length > 0
-                    ? new Date(itinerary.availableDates[0]).toLocaleDateString()
-                    : "No dates available"}
-                </h3>
-                <h6>Accessibility: {itinerary.accessibility ? "Yes" : "No"}</h6>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="flight_search_right">
-          <div
-            style={{
-              position: "relative",
-              top: "10%",
-              left: "90%",
-              cursor: "pointer",
-            }}
-            onClick={() => handleBookmark(itinerary._id)}
-          >
-            <FaBookmark
-              size={24}
-              color={
-                bookmarkedItineraries[itinerary._id] ? "#8b3eea" : "#ccc"
-              }
-            />
-          </div>
+              itineraries?.map((itinerary, index) => (
+                <div key={itinerary._id}>
+                  <div
+                    className="flight_search_items"
+                    style={{
+                      background: "var(--secondary-color)",
+                      height: "40vh",
+                    }}
+                  >
+                    <div
+                      className="left-side"
+                      style={{
+                        height: "100%",
+                        padding: "30px 30px",
+                        display: "flex",
+                        gap: "20px",
+                        flexDirection: "column",
+                        alignItems: "baseline",
+                        width: "100%",
+                      }}
+                    >
+                      <div
+                        style={{
+                         
+                          top: "10%",
+                          right: "90%",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => handleBookmark(itinerary._id)}
+                      >
+                        <FaBookmark
+                          size={24}
+                          color={
+                            bookmarkedItineraries[itinerary._id] ? "#8b3eea" : "#ccc"
+                          }
+                          style={{right:"100px"}}
+                        />
+                      </div>
+                      <p style={{ fontSize: "28px" }}>
+                        {itinerary.name}
+                      </p>
+                      <span className="review-rating">
+                        {renderStars(itinerary.rating)}
+                      </span>
+                      <span className="review-rating">
+                        Language :{" "}
+                        <span
+                          style={{
+                            color: "var(--dashboard-title-color)",
+                          }}
+                        >
+                          {itinerary.language}
+                        </span>
+                      </span>
+                      <div
+                        className="activity-tags"
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: "10px",
+                          justifyContent: "flex-start",
+                        }}
+                      >
+                        {itinerary.preferenceTags.map((tag, index) => (
+                          <>
+                            <span
+                              key={index}
+                              style={{
+                                whiteSpace: "nowrap",
+                                fontSize: "14px",
+                                color: "var(--dashboard-title-color)",
+                              }}
+                            >
+                              {tag.name}
+                            </span>
+                            {index <
+                              itinerary.preferenceTags.length - 1 && (
+                                <span
+                                  style={{
+                                    margin: "0px 5px",
+                                    color: "var(--main-color)", // You can replace this with your desired color
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <i
+                                    className="fas fa-circle"
+                                    style={{ fontSize: "7px" }}
+                                  ></i>
+                                </span>
+                              )}
+                          </>
+                        ))}
+                      </div>
+                    </div>
+                    <div
+                      className="flight_search_right"
+                      style={{
+                        background: "var(--main-color)",
+                        height: "100%",
+                        width: "40%",
+                        display: "flex",
+                        gap: "20px",
+                        flexDirection: "column",
+                        // alignItems: "center",
+                        justifyContent: "space-evenly",
+                       
+                      }}
+                    >
+                      <h2>${itinerary.price}</h2>
+                      
 
-          <h5>
-            {itinerary.discounts ? (
-              <del>
-                {(
-                  (
-                    itinerary.price *
-                    (1 + itinerary.discounts / 100)
-                  ).toFixed(2) * exchangeRate
-                ).toFixed(2)}{" "}
-                {currencySymbol}
-              </del>
-            ) : (
-              ""
-            )}
-          </h5>
-          <h2>
-            {(itinerary.price * exchangeRate).toFixed(2)} {currencySymbol}
-            <sup>
-              {itinerary.discounts
-                ? `${itinerary.discounts}% off`
-                : ""}
-            </sup>
-          </h2>
-          <button
-            onClick={() =>
-              handleBooking(itinerary._id, itinerary.availableDates[0])
-            }
-            className="btn btn_theme btn_sm"
-            disabled={
-              !itinerary.availableDates || itinerary.availableDates.length === 0
-            }
-          >
-            Book now
-          </button>
-
-          {/* Share Button */}
-          <div>
-            <button
-              onClick={() => handleCopyLink(itinerary._id)}
-              className="btn btn-secondary btn-sm me-2"
-            >
-              Copy Link
-            </button>
-            <button
-              onClick={() => handleEmailShare(itinerary)}
-              className="btn btn-primary btn-sm"
-            >
-              Share via Email
-            </button>
-          </div>
-
-          <div
-            data-bs-toggle="collapse"
-            data-bs-target={`#collapseExample${itinerary._id}`}
-            aria-expanded="false"
-            aria-controls={`collapseExample${itinerary._id}`}
-          >
-            Show more <i className="fas fa-chevron-down"></i>
-          </div>
-        </div>
-      </div>
-      <div
-        className="flight_policy_refund collapse"
-        id={`collapseExample${itinerary._id}`}
-      >
-        <div className="flight_show_down_wrapper">
-          <div className="flight-shoe_dow_item">
-            <h4>Itinerary Details</h4>
-            <p className="fz12">Language: {itinerary.language}</p>
-            <p className="fz12">
-              Accessibility: {itinerary.accessibility ? "Yes" : "No"}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  ))
-) : (
-  <p>No itineraries available.</p>
-)}
-              </div>
+                      <button
+                        onClick={() =>
+                          handleBooking(itinerary._id, itinerary.availableDates[0])
+                        }
+                        className="btn btn-secondary btn-sm me-2"
+                        disabled={
+                          !itinerary.availableDates || itinerary.availableDates.length === 0
+                        }
+                      >
+                        Book now
+                      </button>
+                      {/* Share Button */}
+                      <div>
+                        <button
+                          onClick={() => handleCopyLink(itinerary._id)}
+                          className="btn btn-secondary btn-sm me-2"
+                        >
+                          Copy Link
+                        </button>
+                        <button
+                          onClick={() => handleEmailShare(itinerary)}
+                          className="btn btn-secondary btn-sm me-2"
+                        >
+                          Share via Email
+                        </button>
+                      </div>
+                      <div
+                        data-bs-toggle="collapse"
+                        data-bs-target={`#collapseExample${index}`}
+                        aria-expanded="false"
+                        aria-controls={`collapseExample${index}`}
+                      >
+                        Show more{" "}
+                        <i className="fas fa-chevron-down"></i>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    className="flight_policy_refund collapse"
+                    id={`collapseExample${index}`}
+                  >
+                    <div className="flight_show_down_wrapper">
+                      <div
+                        className="flight-shoe_dow_item"
+                        style={{
+                          flex: "1",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: "50px 20px",
+                        }}
+                      >
+                        <div className="flight_inner_show_component">
+                          <div className="flight_det_wrapper">
+                            <div className="flight_det">
+                              <p className="airport">
+                                {itinerary.pickUpLocation}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flight_duration">
+                            <div className="arrow_right"></div>
+                            <span>01h 15m</span>
+                          </div>
+                          <div className="flight_det_wrapper">
+                            <div className="flight_det">
+                              <p className="airport">
+                                {itinerary.dropOffLocation}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        className="flight_refund_policy"
+                        style={{ flex: 2 }}
+                      >
+                        <div
+                          className="TabPanelInner flex_widht_less"
+                          style={{ flex: 1 }}
+                        >
+                          <h4>Pickup Dates</h4>
+                          <div className="flight_info_taable">
+                            {itinerary.availableDates.map(
+                              (date, index) => (
+                                <p className="fz12">
+                                  -{" "}
+                                  {
+                                    new Date(date)
+                                      .toISOString()
+                                      .split("T")[0]
+                                  }
+                                </p>
+                              )
+                            )}
+                          </div>
+                        </div>
+                        <div
+                          className="TabPanelInner flex_widht_less"
+                          style={{ flex: 1 }}
+                        >
+                          <h4>Activities</h4>
+                          <div className="flight_info_taable">
+                            {itinerary.activities.map(
+                              (activity, index) => (
+                                <p className="fz12">
+                                  {index + 1}. {activity.name}
+                                </p>
+                              )
+                            )}
+                          </div>
+                        </div>
+                        <div
+                          className="TabPanelInner"
+                          style={{ flex: 1 }}
+                        >
+                          <h4>Locations</h4>
+                          <div className="flight_info_taable">
+                            {itinerary.locations.map((location) => (
+                              <h3>{location}</h3>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
             )}
           </div>
         </div>

@@ -33,8 +33,7 @@ const ItineraryDetails = ({ itineraryId }) => {
 
   return (
     <>
-      <Header HeaderData={HeaderData} />
-      <CommonBanner heading={itinerary.name} pagination="Itinerary Details" />
+     
       <section className="itinerary_details_section">
         <div className="container">
           <div className="row">

@@ -51,8 +51,7 @@ const ActivityDetails = () => {
 
   return (
     <>
-      <Header HeaderData={HeaderData} />
-      <CommonBanner heading={activity.name} pagination="Activity Details" />
+      
       <section className="activity_details_section">
         <div className="container">
           <div className="row">
