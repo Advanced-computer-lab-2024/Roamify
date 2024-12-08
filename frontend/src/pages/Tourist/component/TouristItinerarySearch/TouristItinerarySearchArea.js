@@ -9,7 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { renderStars } from "../../../../functions/renderStars";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFlag, faFlagCheckered } from "@fortawesome/free-solid-svg-icons";
-
+import LoadingLogo from "../../../../component/LoadingLogo";
 import { FaBookmark } from "react-icons/fa";
 const TouristItineraryWrapper = () => {
   const [itineraries, setItineraries] = useState([]);
@@ -338,7 +338,7 @@ const TouristItineraryWrapper = () => {
           </div>
           <div className="col-lg-9">
             {loading ? (
-              <p>Loading itineraries...</p>
+             <LoadingLogo isVisible={true} />
             ) : error ? (
               <p>{error}</p>
             ) : (

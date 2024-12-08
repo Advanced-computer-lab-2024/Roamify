@@ -34,6 +34,7 @@ module.exports = [
     { path: "/api/admin", route: adminRoutes, role: ["admin"] },
     { path: "/api/cart", route: cartRoutes, role: ["tourist"] },
     { path: "/api/wishlist",route:wishlistRoutes, role: ["tourist"] },
+    { path: "/api/bookmark",route:bookmarkRoutes, role: ["tourist"] },
     { path: "/api/product", route: productRoutes },
     { path: "/api/itinerary", route: itineraryRoutes },
     { path: "/api/activity", route: activityRoutes },
