@@ -3,11 +3,19 @@ const cartModel = require("../models/cartModel");
 const orderModel = require("../models/orderModel");
 const {agenda} = require("../config/agenda");
 const mongoose = require("mongoose");
-
+const receiptModel = require("../models/receiptModel")
+;
 const cancelPendingOrderAndRestoreStock = async (req, res, next) => {
+    const session = await mongoose.startSession();
     try {
-        const pendingOrder = await orderModel.findOne({ tourist: req.user._id, status: "Pending" });
-        if (!pendingOrder) return next(); // Proceed if no pending order exists
+        session.startTransaction();
+
+        // Find the pending order for the user
+        const pendingOrder = await orderModel.findOne({ tourist: req.user._id, status: "Pending" }).populate('receipt').session(session);
+        if (!pendingOrder) {
+            session.endSession();
+            return next(); // Proceed if no pending order exists
+        }
 
         // Prepare bulk operations to restore stock
         const bulkOps = pendingOrder.products.map((item) => ({
@@ -19,27 +27,28 @@ const cancelPendingOrderAndRestoreStock = async (req, res, next) => {
 
         // Execute bulk operations to restore stock
         if (bulkOps.length > 0) {
-            await productModel.bulkWrite(bulkOps);
+            await productModel.bulkWrite(bulkOps, { session });
             console.log("Stock restored for pending order.");
         }
 
-        // Mark the pending order as cancelled
-        pendingOrder.status = "Cancelled";
-
-        // Remove the expiration job if it exists
-        if (pendingOrder.expirationJobId) {
-            const job = await agenda.jobs({ _id: new mongoose.Types.ObjectId(pendingOrder.expirationJobId) }); // Fixed
-            if (job.length > 0) {
-                await job[0].remove();
-                console.log(`Removed expiration job ${pendingOrder.expirationJobId}.`);
-            }
+        // Delete the receipt if it exists
+        if (pendingOrder.receipt) {
+            await receiptModel.findByIdAndDelete(pendingOrder.receipt._id).session(session);
+            console.log("Corresponding receipt deleted.");
         }
 
-        // Save the updated order
-        await pendingOrder.save();
-        console.log("Pending order cancelled and stock restored.");
+        // Delete the pending order
+        await orderModel.findByIdAndDelete(pendingOrder._id).session(session);
+        console.log("Pending order deleted.");
+
+        await session.commitTransaction();
+        session.endSession();
         next(); // Proceed to the next middleware
     } catch (error) {
+        if (session.inTransaction()) {
+            await session.abortTransaction();
+        }
+        session.endSession();
         console.error(`Error canceling pending order: ${error.message}`);
         res.status(500).json({ message: "Failed to cancel pending order and restore stock.", error: error.message });
     }
