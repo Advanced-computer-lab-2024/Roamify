@@ -266,7 +266,7 @@ const getUserOrders = async (req, res) => {
         res.status(500).json({ message: 'Failed to retrieve orders.', error: error.toString() });
     }
 };
-const getOrderDetails = async (req, res) => {
+const getCheckoutSummary = async (req, res) => {
     try {
         const { orderId } = req.params;
 
@@ -274,48 +274,66 @@ const getOrderDetails = async (req, res) => {
             return res.status(400).json({ message: 'Invalid Order ID.' });
         }
 
+        // Fetch the pending order, ensuring it belongs to the user and is still pending
         const order = await orderModel.findOne({
             _id: orderId,
             tourist: req.user._id,
+            status: "Pending", // Restrict to pending orders only
         })
             .populate('products.productId', 'name price')
             .populate('deliveryAddress')
-            .populate('receipt') // Ensure this is correct based on your schema references
+            .populate('receipt') // Ensure the receipt is correctly linked
             .exec();
 
         if (!order) {
-            return res.status(404).json({ message: 'Order not found or not authorized.' });
+            return res.status(404).json({ message: 'Pending order not found or not authorized.' });
         }
 
-        const orderDetails = {
-            id: order._id,
-            products: order.products.map(item => ({
-                productId: item.productId._id,
-                name: item.productId.name,
-                priceAtPurchase: item.priceAtPurchase,
-                quantity: item.quantity,
-            })),
-            status: order.status,
-            paymentMethod: order.paymentMethod,
-            deliveryAddress: {
-                street: order.deliveryAddress.street,
-                city: order.deliveryAddress.city,
-                postalCode: order.deliveryAddress.postalCode,
-            },
+        // Generate a detailed breakdown of products
+        const productsSummary = order.products.map(item => ({
+            productId: item.productId._id,
+            name: item.productId.name,
+            priceAtPurchase: item.priceAtPurchase,
+            quantity: item.quantity,
+            subtotal: item.priceAtPurchase * item.quantity, // Subtotal for each product
+        }));
+
+        const totalProductCost = productsSummary.reduce((total, item) => total + item.subtotal, 0);
+
+        // Validate receipt presence and its details
+        const receipt = order.receipt;
+        if (!receipt) {
+            return res.status(400).json({ message: 'Receipt is missing for this order. Please contact support.' });
+        }
+
+        const discountApplied = receipt.promoCode
+            ? totalProductCost - receipt.price
+            : 0; // Calculate discount if a promo code is applied
+
+        const checkoutSummary = {
+            orderId: order._id,
             createdAt: order.createdAt,
-            updatedAt: order.updatedAt,
-            receipt: order.receipt ? {
-                id: order.receipt._id,
-                status: order.receipt.status,
-                price: order.receipt.price,
-                receiptType: order.receipt.receiptType
-            } : null
+            products: productsSummary,
+            deliveryAddress: order.deliveryAddress
+                ? {
+                    street: order.deliveryAddress.street || "Not Provided",
+                    city: order.deliveryAddress.city || "Not Provided",
+                    postalCode: order.deliveryAddress.postalCode || "Not Provided",
+                }
+                : "Delivery address not provided",
+            totalProductCost: totalProductCost,
+            discountApplied: discountApplied,
+            finalAmount: receipt.price, // Price after applying promo code or adjustments
+            promoCode: receipt.promoCode || "No Promo Code Applied",
         };
 
-        res.status(200).json({ message: 'Order details retrieved successfully.', order: orderDetails });
+        res.status(200).json({
+            message: 'Checkout summary retrieved successfully.',
+            checkoutSummary,
+        });
     } catch (error) {
-        console.error(`Failed to retrieve details for order ${orderId}:`, error.message);
-        res.status(500).json({ message: 'Failed to retrieve order details.', error: error.message });
+        console.error(`Failed to retrieve checkout summary for order ${orderId}:`, error.message);
+        res.status(500).json({ message: 'Failed to retrieve checkout summary.', error: error.message });
     }
 };
 const updateOrderAddress = async (req, res) => {
@@ -660,7 +678,7 @@ module.exports = {
     confirmCODPayment,
     markOrderOutForDelivery,
     getUserOrders,
-    getOrderDetails,
     cancelOrder,
-    applyPromoCodeToOrder
+    applyPromoCodeToOrder,
+    getCheckoutSummary
 };

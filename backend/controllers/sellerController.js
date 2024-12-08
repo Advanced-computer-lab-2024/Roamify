@@ -164,43 +164,71 @@ const uploadLogo = async (req, res) => {
 }
 const getSalesReport = async (req, res) => {
   try {
-    const { sellerId } = req.user; // Assuming seller is authenticated, and their ID is available
+    const { filterBy = 'all', month, productId } = req.query;
+    const { sellerId } = req.user; // Seller authentication assumed
 
-    // Fetch products sold by this seller
+    // Fetch all products associated with the seller
     const products = await productModel.find({ seller: sellerId });
+    if (!products.length) {
+      return res.status(404).json({ message: 'No products found for this seller.' });
+    }
 
-    // Get product IDs to filter orders
-    const productIds = products.map(product => product._id);
+    const productIds = products.map(product => product._id.toString());
+    let filter = { 'products.productId': { $in: productIds }, status: { $in: ['Delivered'] } };
 
-    // Fetch orders containing the seller's products
-    const orders = await orderModel.find({
-      'products.productId': { $in: productIds },
-      status: { $in: ['Delivered'] } // Include relevant statuses
-    });
+    // Apply filters based on query parameters
+    if (filterBy === 'month') {
+      if (!month || isNaN(new Date(`${month}-01`))) {
+        return res.status(400).json({ message: 'Invalid or missing month.' });
+      }
+      const startOfMonth = new Date(`${month}-01`);
+      const endOfMonth = new Date(startOfMonth.getFullYear(), startOfMonth.getMonth() + 1, 0);
+      filter.createdAt = { $gte: startOfMonth, $lte: endOfMonth };
+    } else if (filterBy === 'product') {
+      if (!productId || !productIds.includes(productId)) {
+        return res.status(400).json({ message: 'Invalid or missing product ID.' });
+      }
+      filter['products.productId'] = productId;
+    }
 
-    // Calculate revenue and sales breakdown
+    // Fetch orders matching the filter
+    const orders = await orderModel.find(filter);
+    if (!orders.length) {
+      return res.status(404).json({ message: 'No sales found for the specified filter.' });
+    }
+
+    // Calculate total revenue and sales breakdown
     let totalRevenue = 0;
-    const salesDetails = orders.map(order => {
-      const sellerProducts = order.products.filter(product => productIds.includes(product.productId.toString()));
-      const revenue = sellerProducts.reduce((sum, product) => sum + (product.priceAtPurchase * product.quantity), 0);
-      totalRevenue += revenue;
-      return {
-        orderId: order._id,
-        status: order.status,
-        revenue,
-        products: sellerProducts.map(p => ({
-          productId: p.productId,
-          name: products.find(prod => prod._id.toString() === p.productId.toString()).name,
-          quantity: p.quantity,
-          priceAtPurchase: p.priceAtPurchase,
-        })),
-      };
+    let totalProductsSold = 0;
+    const productBreakdown = {};
+
+    orders.forEach(order => {
+      order.products.forEach(product => {
+        if (productIds.includes(product.productId.toString())) {
+          const productName = products.find(p => p._id.toString() === product.productId.toString())?.name || 'Unknown Product';
+
+          if (!productBreakdown[productName]) {
+            productBreakdown[productName] = {
+              productId: product.productId,
+              name: productName,
+              quantitySold: 0,
+              revenue: 0,
+            };
+          }
+
+          productBreakdown[productName].quantitySold += product.quantity;
+          productBreakdown[productName].revenue += product.priceAtPurchase * product.quantity;
+          totalProductsSold += product.quantity;
+          totalRevenue += product.priceAtPurchase * product.quantity;
+        }
+      });
     });
 
     res.status(200).json({
       message: 'Sales report generated successfully.',
       totalRevenue,
-      salesDetails,
+      totalProductsSold,
+      breakdown: Object.values(productBreakdown), // Convert object to array for client-side usage
     });
   } catch (error) {
     console.error('Error generating sales report:', error.message);

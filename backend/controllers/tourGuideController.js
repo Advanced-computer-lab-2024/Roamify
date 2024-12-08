@@ -6,10 +6,10 @@ const activityModel = require("../models/activityModel");
 const itineraryModel = require("../models/itineraryModel");
 const itineraryTicketModel = require("../models/itineraryTicketModel");
 const receiptModel = require('../models/receiptModel')
-const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
+const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
-const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
-const upload = multer({ storage }).single('profilePicture'); // Accept only 1 file with field name 'profilePicture'
+const storage = multer.memoryStorage();
+const upload = multer({ storage }).single('profilePicture');
 
 const createProfile = async (req, res) => {
   try {
@@ -353,8 +353,6 @@ const setStatusOfItinerary = async (req, res) => {
 
   }
 }
-
-
 const viewRevenue = async (req, res) => {
   try {
     //get all tickets
@@ -434,16 +432,12 @@ const viewRevenue = async (req, res) => {
 
     filteredResults.forEach(e => totalRevenue += (e.price * e.count))
 
-
-
-
     return res.status(200).json({ filteredResults, totalRevenue });
   } catch (error) {
     console.log(error)
     return res.status(500).json({ message: error.message });
   }
 };
-
 const viewTotalTourists = async (req, res) => {
   try {
     //get all active tickets
