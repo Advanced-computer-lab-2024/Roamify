@@ -59,6 +59,7 @@ const Tourist = () => {
         <Route path="/cart" element={<Cart />}/>
         <Route path="/address" element={<Address />}/>
         <Route path="/billing" element={<Billing />}/>
+        <Route path="/orders" element={<Orders />}/>
       </Routes>
       <CopyRight />
     </>
