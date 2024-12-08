@@ -1,102 +1,75 @@
-.billing-header h2 {
-    font-size: 24px;
-    margin-bottom: 10px; /* Reducing the space below the header */
-    text-align: center;
+.billing-container {
+    width: 100%;
+    max-width: 400px; /* Adjust width for a slimmer form */
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
 }
 
-.billing-container {
-    width: 80%;
-    margin: auto;
-    padding: 20px;
-    background-color: #f9f9f9;
+.billing-header h2 {
+    color: #ccc;
+    text-align: center;
+    margin-bottom: 20px; /* Added space between header and options */
+    font-size: 20px;
 }
 
 .billing-form {
-    padding: 20px;
-    background-color: #ffffff;
-    border: 1px solid #ccc;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
     display: flex;
     flex-direction: column;
-    width: 350px;
-    margin: 20px auto;
 }
 
-.billing-form label {
+label {
+    margin-bottom: 10px; /* Space between each payment option */
     display: flex;
-    align-items: center; /* Align items vertically */
-    margin-bottom: 10px; /* Space between options */
-}
-
-.billing-form input[type="radio"] {
-    margin-right: 10px; /* Space between radio button and label */
+    align-items: center; /* Aligns the text with the radio button */
 }
 
 .icon {
-    margin-left: auto; /* Push the icon to the right */
-    color: #8b3eea; /* Custom color for icons */
+    margin-left: auto; /* Space after the text */
+    color: #8b3eea;
 }
 
-.button-container {
-    display: flex;
-    justify-content: center; /* Center the confirm button */
-}
-
-.billing-button {
-    padding: 10px 20px;
-    background-color: #8b3eea;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%; /* Full width of the form */
-    margin-top: 10px;
-}
-
-.billing-button:hover {
-    background-color: #7328c4;
-}
-.error-message {
-    color: #8b3eea; /* Change color to a warning red */
-    margin: 5px 0 15px; /* Adjust spacing around the text */
-    font-size: 14px; /* Ensure text is legible */
-    text-align: center; /* Align text to the left */
-}
-.success-message {
-    color: #8b3eea; /* Change color to a warning red */
-    margin: 5px 0 15px; /* Adjust spacing around the text */
-    font-size: 14px; /* Ensure text is legible */
-    text-align: center; /* Align text to the left */
-}
 .promo-code-container {
-    position: relative;
     display: flex;
-    align-items: center;
+    margin-top: 20px; /* Added more space above the promo code input */
 }
 
 .promo-code-input {
     flex-grow: 1;
-    padding: 8px;
-    margin-top: 10px;
+    padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 5px;
 }
 
 .clear-promo-btn {
+    margin-left: 10px;
+    background: transparent;
     border: none;
-    background: none;
-    color: #8b3eea; /* Same color as icons */
     cursor: pointer;
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
+    color: #666;
 }
 
-.clear-promo-btn:hover {
-    color: #7328c4; /* Darker color on hover */
+.billing-button {
+    width: 100%;
+    background-color: #8b3eea;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-top: 15px;
+    cursor: pointer;
 }
 
+.error-message, .success-message {
+    text-align: center;
+    color: #ff0000;
+    margin-top: 10px;
+}
 
-
+.success-message {
+    color: #008000;
+}

@@ -28,6 +28,7 @@ import Hotels from "./component/Hotels/Hotels.js";
 import Cart from "./Cart.js";
 import Address from "./Address.js";
 import Billing from "./Billing.js";
+import Orders from "./Orders.js";
 const Tourist = () => {
   return (
     <>
@@ -55,6 +56,7 @@ const Tourist = () => {
         <Route path="/cart" element={<Cart />}/>
         <Route path="/address" element={<Address />}/>
         <Route path="/billing" element={<Billing />}/>
+        <Route path="/orders" element={<Orders />}/>
       </Routes>
       <CopyRight />
     </>
