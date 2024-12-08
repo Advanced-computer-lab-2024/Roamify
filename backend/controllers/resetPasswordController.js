@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 
-
 const sendOtp = async (req, res) => {
     try {
         const email = req.body.email;
@@ -25,7 +24,7 @@ const sendOtp = async (req, res) => {
         //3 steps to create an otp
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         user.otp = otp
-        user.otpExpires = Date.now() + 1 * 60 * 1000; // 10 minutes from now    
+        user.otpExpires = Date.now() + 1 * 60 * 1000; // 10 minutes from now
         await user.save()
 
         // Send the OTP via email
@@ -55,7 +54,6 @@ const sendOtp = async (req, res) => {
         return res.status(500).json({ message: error.message })
     }
 }
-
 const checkOtp = async (req, res) => {
     try {
         const user = await userModel.findById(req.body.userId)
@@ -94,7 +92,6 @@ const checkOtp = async (req, res) => {
         return res.status(500).json({ message: error.message })
     }
 }
-
 const changePassword = async (req, res) => {
     try {
         if (!req.cookies.resetToken) throw Error('Access denied')

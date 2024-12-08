@@ -1,7 +1,7 @@
 const cron = require("node-cron");
 const { updatePoints, setLevel } = require("./pointsUpdater");
 const fetchAndUpdateExchangeRates = require("./fetchAndUpdateExchangeRates");
-
+const sendBirthdayPromoCodes = require("./birthdayPromocodeSchedular");
 module.exports = () => {
   // Run all tasks daily at 12:00 AM
   cron.schedule(
@@ -12,6 +12,7 @@ module.exports = () => {
       await updatePoints();
       await setLevel();
       await fetchAndUpdateExchangeRates();
+      await sendBirthdayPromoCodes();
     },
     {
       timezone: "Africa/Cairo",

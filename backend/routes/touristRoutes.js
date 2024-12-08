@@ -10,7 +10,6 @@ router.post('/create-profile', touristController.createProfile);
 router.get('/get-profile', touristController.getProfile);
 router.get('/get-wallet', touristController.getWallet);
 router.put('/update-profile', touristController.updateProfile);
-router.get('/products/')
 router.post('/book-itinerary', touristController.bookItinerary);
 router.post('/book-place', touristController.bookPlace);
 router.delete('/cancel-place', touristController.cancelPlace);

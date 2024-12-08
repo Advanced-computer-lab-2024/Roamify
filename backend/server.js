@@ -1,43 +1,59 @@
-// Load environment variables from .env
-require("dotenv").config();
-
-// Import modules
+require("dotenv").config(); // Load environment variables
 const express = require("express");
-const http = require("http"); // Import HTTP module for server creation
-const { Server } = require("socket.io"); // Import Socket.IO
-const connectDB = require("./config/db"); // Database connection
-const setupMiddlewares = require("./config/middleware"); // General middlewares (CORS, cookieParser, etc.)
-const setupRoutes = require("./config/setupRoutes"); // API route setup with role-based checks
-const setupCronJobs = require("./cronJobs/cronScheduler"); // Cron job scheduler
-const { setupSocketIO } = require("./config/socket");
-const {constants} = require("node:fs"); // Import Socket.IO setup
-const {PORT} = require("./config/constants");
+const http = require("http");
+const connectDB = require("./config/db");
+const setupMiddlewares = require("./config/middleware");
+const setupRoutes = require("./config/setupRoutes");
+const setupSocketIO = require("./config/socket").setupSocketIO;
+const { agenda, startupRecovery } = require("./config/agenda");
+const PORT = process.env.PORT || 3000; // Use PORT from environment variables or default to 3000
 
-// Initialize app
+// Initialize the app
 const app = express();
+const server = http.createServer(app); // HTTP server
 
+(async () => {
+  try {
+    // Connect to the database
+    await connectDB();
+    console.log("✅ Connected to the database");
 
-// Create an HTTP server
-const server = http.createServer(app); // Combine Express with an HTTP server
+    // Start Agenda
+    await agenda.start();
+    console.log("✅ Agenda started");
 
-// Initialize Socket.IO
-setupSocketIO(server, app); // Pass server and app to the Socket.IO setup
+    // Perform recovery tasks
+    await startupRecovery();
+    console.log("✅ Startup recovery completed");
 
-// Connect to the database
-connectDB();
+    // Setup middlewares
+    setupMiddlewares(app);
 
-// Setup middlewares (e.g., CORS, cookie parsing, JSON parsing)
-setupMiddlewares(app);
+    // Setup API routes
+    setupRoutes(app);
 
-// Setup API routes with role-based authentication
-setupRoutes(app);
+    // Initialize Socket.IO
+    setupSocketIO(server, app);
 
-// Initialize cron jobs (scheduled tasks)
-setupCronJobs();
+    // Start the server
+    server.listen(PORT, () => {
+      console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Error during server startup:", error.message);
+    process.exit(1); // Exit the process if initialization fails
+  }
+})();
 
+// Graceful shutdown for Agenda
+process.on("SIGTERM", async () => {
+  console.log("SIGTERM received, shutting down gracefully...");
+  await agenda.stop();
+  process.exit(0);
+});
 
-
-// Start the HTTP server
-server.listen(PORT, () => {
-  console.log(`✅ Server is running on http://localhost:${PORT}`);
+process.on("SIGINT", async () => {
+  console.log("SIGINT received, shutting down gracefully...");
+  await agenda.stop();
+  process.exit(0);
 });
