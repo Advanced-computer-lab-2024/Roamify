@@ -1,5 +1,6 @@
 const userModel = require('../models/userModel');
 const sellerModel = require('../models/sellerModel');
+const orderModel=require('../models/orderModel');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
@@ -159,5 +160,67 @@ const uploadLogo = async (req, res) => {
 
   }
 }
+const getSalesReport = async (req, res) => {
+  try {
+    const sellerId = req.user._id;
 
-module.exports = { createProfile, getProfile, updateProfile, upload, uploadLogo };
+    // Fetch orders with relevant statuses and populate product details
+    const orders = await orderModel.find({
+      status: { $in: ['Delivered','Out For Delivery','Processing','Arrived'] },
+    }).populate({
+      path: 'products.productId',
+      select: 'name price sellerId', // Only populate necessary fields
+    });
+
+    if (!orders.length) {
+      return res.status(404).json({ message: 'No sales data found for this seller.' });
+    }
+
+    let totalRevenue = 0;
+    const productRevenue = {};
+
+    for (const order of orders) {
+      for (const product of order.products) {
+        if (!product.productId) {
+          // Skip if the productId is missing (possibly deleted)
+          continue;
+        }
+
+        if (product.productId.sellerId.toString() === sellerId.toString()) {
+          const productTotal = product.priceAtPurchase * product.quantity;
+          totalRevenue += productTotal;
+
+          if (!productRevenue[product.productId._id]) {
+            productRevenue[product.productId._id] = {
+              name: product.productId.name,
+              revenue: productTotal,
+              quantity: product.quantity,
+            };
+          } else {
+            productRevenue[product.productId._id].revenue += productTotal;
+            productRevenue[product.productId._id].quantity += product.quantity;
+          }
+        }
+      }
+    }
+
+    res.status(200).json({
+      message: 'Sales report retrieved successfully.',
+      report: {
+        totalRevenue,
+        breakdown: Object.values(productRevenue),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to generate sales report.', error: error.message });
+  }
+};
+
+
+module.exports = { createProfile,
+  getProfile,
+  updateProfile,
+  upload,
+  uploadLogo,
+  getSalesReport
+};

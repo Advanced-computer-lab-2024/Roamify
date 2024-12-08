@@ -1230,7 +1230,6 @@ const redeemPoints = async (req, res) => {
       .json({ message: "error in redeeming points", error: error.message });
   }
 };
-
 const getWallet = async (req, res) => {
   try {
 
@@ -1245,7 +1244,6 @@ const getWallet = async (req, res) => {
     return res.status(400).json({ message: 'error could not retrieve wallet' })
   }
 }
-
 const viewTotalRefundedReceipts = async (req, res) => {
   try {
 

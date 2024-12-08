@@ -23,6 +23,7 @@ const bookmarkRoutes = require("./bookmarkRoutes");
 const wishlistRoutes = require("./wishlistRoutes");
 const addressRoutes = require("./addressRoutes");
 const orderRoutes = require("./orderRoutes");
+const promoCodeRoutes = require("./promoCodeRoutes");
 module.exports = [
     { path: "/api/user", route: userRoutes },
     { path: "/api/tourist", route: touristRoutes, role: ["tourist"] },
@@ -47,6 +48,6 @@ module.exports = [
     { path: "/api/hotels", route: hotelRoutes, role: ['tourist'] },
     { path: "/api/reset-password", route: resetPasswordRoutes },
     { path: "/api/address", route: addressRoutes, role: ['tourist'] },
-    { path: "/api/order", route: orderRoutes, role: ['tourist'] },
-    { path: "/api/bookmark", route: bookmarkRoutes, role: ["tourist"] },
+    { path: "/api/order", route: orderRoutes},
+    { path: "/api/promocode", route: promoCodeRoutes, role: ['admin'] }
 ];
