@@ -2,7 +2,7 @@ const Agenda = require("agenda");
 const orderModel = require("../models/orderModel");
 const productModel = require("../models/productModel");
 const mongoose = require("mongoose");
-
+const receiptModel = require("../models/receiptModel")
 const agenda = new Agenda({
     db: {
         address: process.env.MONGO_URI,
