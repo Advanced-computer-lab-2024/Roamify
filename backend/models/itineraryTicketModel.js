@@ -29,6 +29,9 @@ const ticket = new mongoose.Schema({
     },
     locations: {
         type: [String]
+    },
+    originalPrice: {
+        type: Number
     }
 }, { timestamps: true })
 

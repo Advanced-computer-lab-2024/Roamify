@@ -21,7 +21,8 @@ const receiptSchema = new mongoose.Schema({
         ref: 'order',
         required: false  // Optional, as not all receipts might be linked to an order
     },
-    price: {
+    price:
+    {
         type: Number,
         required: true  // Represents the final charged price after discounts
     },
@@ -30,6 +31,7 @@ const receiptSchema = new mongoose.Schema({
         enum: ['payment', 'refund'],
         required: true
     },
+
     promoCode: {
         type: String,
         default: null
