@@ -144,6 +144,7 @@ const ProfileSidebar = ({ profilePicture }) => {
             </Link>
           </li>
         )}
+        
       </ul>
 
       {/* Modal for Uploading Profile Picture */}
