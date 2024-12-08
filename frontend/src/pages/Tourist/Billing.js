@@ -1,61 +1,82 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMoneyBillWave, faWallet, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { faStripeS } from '@fortawesome/free-brands-svg-icons';
 import './Billing.css';
 
-const Billing = () => {
+const Billing = ({selectedAddress}) => {
+    const [orderId, setOrderId] = useState(''); 
     const [paymentMethod, setPaymentMethod] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [promoCode, setPromoCode] = useState('');
 
+    useEffect(() => {
+        // Fetch orderId from local storage upon component mount
+        const fetchedOrderId = localStorage.getItem('orderId');
+        if (fetchedOrderId) {
+            setOrderId(fetchedOrderId);
+        }
+    }, []);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
-        setErrorMessage('');
-        setSuccessMessage('');
-
-        const orderId = localStorage.getItem('orderId');
-        const url = `http://localhost:3000/api/order/${orderId}/payment`;
-
+    
+        if (!orderId) {
+            setErrorMessage('Order ID is missing.');
+            setTimeout(() => {
+                setErrorMessage('');
+            }, 2000);
+            return; // Exit the function early if no order ID is available
+        }
+    
+        if (!paymentMethod) {
+            setErrorMessage('Please select a payment method.');
+            setTimeout(() => {
+                setErrorMessage('');
+            }, 2000);
+            return; // Exit the function early if no payment method is selected
+        }
+    
+        const url = `http://localhost:3000/api/order/${orderId}/payment`; // Dynamic orderId
+    
         try {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ paymentMethod, promoCode }),
-                credentials: 'include'
+                body: JSON.stringify({ paymentMethod }), // Send only paymentMethod
+                credentials: 'include',
             });
-
+    
             const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || "An unknown error occurred");
+            if (response.ok) {
+                setSuccessMessage(data.message || 'Payment successful!');
+                setTimeout(() => {
+                    setSuccessMessage('');
+                }, 3000);
+            } else {
+                throw new Error(data.message || 'Payment failed. Please try again.');
             }
-            console.log('Payment Successful:', data);
-            setSuccessMessage('Payment Successful!');
-            setTimeout(() => {
-                setSuccessMessage('');
-            }, 3000);
         } catch (error) {
-            console.error('Payment Error:', error);
-            setErrorMessage(error.message);
+            setErrorMessage(error.message || 'An error occurred. Please try again.');
             setTimeout(() => {
                 setErrorMessage('');
             }, 2000);
         }
     };
+    
+
 
     const handleApplyPromo = async () => {
-        const orderId = localStorage.getItem('orderId');
         const url = `http://localhost:3000/api/order/${orderId}/promo-code/${promoCode}`;
 
         try {
             const response = await fetch(url, {
-                method: 'POST',
+                method: 'PATCH',
                 credentials: 'include'
             });
-
             const data = await response.json();
             if (!response.ok) {
                 throw new Error(data.message || "Failed to apply promo code");
@@ -65,7 +86,7 @@ const Billing = () => {
                 setSuccessMessage('');
             }, 2000);
         } catch (error) {
-            setErrorMessage(error.message);
+            setErrorMessage(error.message || "Promo code application failed.");
             setTimeout(() => {
                 setErrorMessage('');
             }, 2000);
@@ -73,11 +94,10 @@ const Billing = () => {
     };
 
     const handleClearPromo = async () => {
-        const orderId = localStorage.getItem('orderId');
         const url = `http://localhost:3000/api/order/${orderId}/promo-code/none`;
 
         try {
-            const response = await fetch(url, { method: 'POST', credentials: 'include' });
+            const response = await fetch(url, { method: 'PATCH', credentials: 'include' });
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || "Failed to clear promo code");
 
@@ -85,11 +105,10 @@ const Billing = () => {
             setSuccessMessage('Promo code cleared successfully!');
             setTimeout(() => setSuccessMessage(''), 3000);
         } catch (error) {
-            setErrorMessage(error.message);
+            setErrorMessage(error.message || "Failed to clear promo code.");
             setTimeout(() => setErrorMessage(''), 3000);
         }
     };
-
 
     return (
         <div className="billing-container">
@@ -97,7 +116,6 @@ const Billing = () => {
                 <h2>Select Payment Method</h2>
             </div>
             <form className="billing-form" onSubmit={handleSubmit}>
-                {/* Payment Method Selection */}
                 <label>
                     <input 
                         type="radio"
@@ -131,8 +149,6 @@ const Billing = () => {
                     Wallet
                     <FontAwesomeIcon icon={faWallet} className="icon" />
                 </label>
-
-                {/* Promo Code Application */}
                 <div className="promo-code-container">
                     <input 
                         type="text" 
@@ -148,7 +164,6 @@ const Billing = () => {
                         <FontAwesomeIcon icon={faTimes} />
                     </button>}
                 </div>
-
                 <button type="submit" className="billing-button">Confirm Payment</button>
                 {errorMessage && <p className="error-message">{errorMessage}</p>}
                 {successMessage && <p className="success-message">{successMessage}</p>}

@@ -87,22 +87,27 @@ function Cart() {
     setLoading(true);
 
     try {
+      // Make the API call to the checkout endpoint
       const response = await axios.post("http://localhost:3000/api/cart/checkout", {}, { withCredentials: true });
       console.log("Checkout response:", response.data);
       setNotification(response.data.message);
-      if (response.data.orderId) {
-        localStorage.setItem("orderId", response.data.orderId);
+
+      // Access the order ID from the nested 'order' object in the response
+      if (response.data.order && response.data.order._id) {
+        localStorage.setItem("orderId", response.data.order._id);  // Store the order ID from the response
         navigate('/tourist/address');  // Redirect to the Address page
       } else {
+        // Throw an error if no order ID is found in the response
         throw new Error("No order ID received in response.");
       }
     } catch (err) {
       console.error("Checkout error:", err);
-      handleApiError(err, "checkout");
+      handleApiError(err, "checkout");  // Handle errors appropriately
     } finally {
-      setLoading(false);
+      setLoading(false);  // Ensure loading state is reset
     }
   };
+
   
   
   
