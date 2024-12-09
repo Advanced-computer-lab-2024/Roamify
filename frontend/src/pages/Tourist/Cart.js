@@ -145,7 +145,7 @@ function Cart() {
                 backgroundColor: "#fff",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center" }}>
+              <div style={{ display: "flex", alignItems: "center", flex: "1" }}>
                 <img
                   src={item.image}
                   alt={item.name}
@@ -161,36 +161,58 @@ function Cart() {
                   <strong>{item.name}</strong>
                 </div>
               </div>
-              <div style={{ textAlign: "center", display: "flex", alignItems: "center", gap: "5px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "10px",
+                  flex: "0 0 auto",
+                }}
+              >
                 <button
                   type="button"
                   style={{
-                    width: "35px",
-                    height: "35px",
+                    width: "40px",
+                    height: "40px",
                     backgroundColor: "#8b3eea",
                     border: "none",
                     borderRadius: "5px",
                     fontSize: "22px",
                     color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     cursor: "pointer",
                   }}
                   onClick={() => handleDecrement(item.productId)}
                 >
                   -
                 </button>
-                <span style={{ width: "40px", textAlign: "center", fontSize: "16px" }}>
+                <span
+                  style={{
+                    minWidth: "40px",
+                    height: "40px",
+                    lineHeight: "40px",
+                    textAlign: "center",
+                    fontSize: "16px",
+                  }}
+                >
                   {item.quantity}
                 </span>
                 <button
                   type="button"
                   style={{
-                    width: "35px",
-                    height: "35px",
+                    width: "40px",
+                    height: "40px",
                     backgroundColor: "#8b3eea",
                     border: "none",
                     borderRadius: "5px",
-                    fontSize: "16px",
+                    fontSize: "22px",
                     color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     cursor: "pointer",
                   }}
                   onClick={() => handleIncrement(item.productId)}
@@ -205,7 +227,10 @@ function Cart() {
                   border: "none",
                   color: "#f44336",
                   cursor: "pointer",
-                  fontSize: "18px",
+                  fontSize: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
                 onClick={() => handleDelete(item.productId)}
               >
