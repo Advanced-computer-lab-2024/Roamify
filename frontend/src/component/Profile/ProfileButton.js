@@ -76,7 +76,7 @@ function ProfileButton() {
             data-tooltip-id="wallet-tooltip"
             data-tooltip-content="Wallet"
             style={{ cursor: "pointer" }}
-            onClick={() => navigate("/tourist/orders")}
+            onClick={() => navigate("/tourist/wishlist")}
           >
             <FaHeart
               style={{
@@ -84,7 +84,7 @@ function ProfileButton() {
                 color: "var(--text-color)", // Set the color for the icon
               }}
             />
-            Favorites
+            Wishlist
           </div>
         )}
         {role === "tourist" && (

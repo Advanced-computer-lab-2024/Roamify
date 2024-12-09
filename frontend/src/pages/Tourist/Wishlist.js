@@ -5,6 +5,7 @@ import { FaShoppingCart } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import LoadingLogo from "../../component/LoadingLogo";
+import EmptyResponseLogo from "../../component/EmptyResponseLogo.js";
 
 const Wishlist = () => {
   const [wishlistData, setWishlistData] = useState(null);
@@ -12,7 +13,6 @@ const Wishlist = () => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
-
 
   // Fetch wishlist data from the server
   const fetchWishlistData = async () => {
@@ -24,9 +24,9 @@ const Wishlist = () => {
     } catch (err) {
       if (err.response && err.response.status === 404) {
         setError("Wishlist is empty.");
-      }else{
-      setError(err.message);}
-
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -53,9 +53,12 @@ const Wishlist = () => {
   const confirmDelete = async () => {
     try {
       // API call to remove the product from the wishlist
-      await axios.delete(`http://localhost:3000/api/wishlist/${productToDelete}`, {
-        withCredentials: true,
-      });
+      await axios.delete(
+        `http://localhost:3000/api/wishlist/${productToDelete}`,
+        {
+          withCredentials: true,
+        }
+      );
 
       // Re-fetch the wishlist data after deletion
       fetchWishlistData();
@@ -72,7 +75,7 @@ const Wishlist = () => {
   };
 
   // Function to handle adding a product to the cart (placeholder)
-  
+
   const handleAddToCart = async (productId) => {
     try {
       const response = await axios.post(
@@ -82,7 +85,7 @@ const Wishlist = () => {
       );
       // Show success message as toast
       toast.success(response.data.message || "Added to cart successfully!");
-  
+
       // Re-fetch the wishlist data to remove the item from the list
       fetchWishlistData();
     } catch (err) {
@@ -90,7 +93,7 @@ const Wishlist = () => {
       toast.error(err.response?.data?.message || "Failed to add to cart.");
       console.error("Error adding to cart:", err);
     }
-  };  // Function to close the popup modal
+  }; // Function to close the popup modal
   const closePopup = () => {
     setShowModal(false);
   };
@@ -98,81 +101,95 @@ const Wishlist = () => {
   return (
     <>
       <div style={styles.pageContainer}>
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Your Wishlist</h2>
-        <div style={styles.infoContainer}>
-          {wishlistData?.wishlist?.length > 0 ? (
-            <div style={styles.cardsContainer}>
-              {wishlistData.wishlist.map((item, index) => (
-                <div className="flight_search_item_wrappper" key={index}  style={{
+        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
+          Your Wishlist
+        </h2>
+
+        {wishlistData?.wishlist?.length > 0 ? (
+          <div style={styles.cardsContainer}>
+            {wishlistData.wishlist.map((item, index) => (
+              <div
+                className="flight_search_item_wrappper"
+                key={index}
+                style={{
                   boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Initial shadow
                   transition: "transform 0.3s ease, box-shadow 0.3s ease", // Smooth transition
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "scale(1.05)"; // Enlarge
-                  e.currentTarget.style.boxShadow = "0px 8px 16px rgba(0, 0, 0, 0.2)"; // Stronger shadow
+                  e.currentTarget.style.boxShadow =
+                    "0px 8px 16px rgba(0, 0, 0, 0.2)"; // Stronger shadow
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = "scale(1)"; // Reset size
-                  e.currentTarget.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.1)"; // Reset shadow
-                }}>
-                  <div
-                    className="flight_search_items"
-                    style={{
-                      background: "#ffffff",
-                      border: "1px solid #dddddd",
-                      borderRadius: "12px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      display: "inline",
-                    }}
-                  >
-                    <div>
-                      <div className="flight_multis_area_wrapper">
-                        <div className="flight_search_left">
-                          <div className="flight_logo" style={{width:"250px", height:"250px"}}>
-                            <img src={item.picture[0].url} alt={item.name} />
-                          </div>
-                          <div>
-                            <h2>{item.name}</h2>
-                            <h5>by {item.sellerName}</h5>
-                            <h5>Price ${item.price}</h5>
-                          </div>
+                  e.currentTarget.style.boxShadow =
+                    "0px 4px 8px rgba(0, 0, 0, 0.1)"; // Reset shadow
+                }}
+              >
+                <div
+                  className="flight_search_items"
+                  style={{
+                    background: "#ffffff",
+                    border: "1px solid #dddddd",
+                    borderRadius: "12px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    display: "inline",
+                  }}
+                >
+                  <div>
+                    <div className="flight_multis_area_wrapper">
+                      <div className="flight_search_left">
+                        <div
+                          className="flight_logo"
+                          style={{ width: "250px", height: "250px" }}
+                        >
+                          <img src={item.picture[0].url} alt={item.name} />
                         </div>
-                        <div style={{ display: "flex", alignItems: "end" }}>
+                        <div>
+                          <h2>{item.name}</h2>
+                          <h5>by {item.sellerName}</h5>
+                          <h5>Price ${item.price}</h5>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "end" }}>
                         <button
-  onClick={() => handleAddToCart(item.productId)}
-  style={{
-    background: "#007bff",
-    border: "none",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "12px",
-    margin:"5px",
-    marginBottom:"1px"
-  }}
->
-  <FaShoppingCart size={20} />
-</button>
-                          <button
-                            onClick={() => handleDelete(item.productId)}
-                            style={{margin:"2px"}}
-                          >
-                            <FaTrashAlt size={20} />
-                          </button>
-                        </div>
+                          onClick={() => handleAddToCart(item.productId)}
+                          style={{
+                            background: "#007bff",
+                            border: "none",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "12px",
+                            margin: "5px",
+                            marginBottom: "1px",
+                          }}
+                        >
+                          <FaShoppingCart size={20} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.productId)}
+                          style={{ margin: "2px" }}
+                        >
+                          <FaTrashAlt size={20} />
+                        </button>
                       </div>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p>Your wishlist is empty.</p>
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyResponseLogo
+            isVisible={true}
+            text={"Your wishlist is empty"}
+            size="400px"
+          />
+        )}
       </div>
 
       {/* Popup Modal */}
@@ -199,7 +216,9 @@ const Wishlist = () => {
               textAlign: "center",
             }}
           >
-            <p>Are you sure you want to remove this product from your wishlist?</p>
+            <p>
+              Are you sure you want to remove this product from your wishlist?
+            </p>
             {productToDelete ? (
               <div>
                 <button
@@ -263,7 +282,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    minHeight:"100vh"
+    minHeight: "100vh",
   },
   infoContainer: {
     width: "100%",
