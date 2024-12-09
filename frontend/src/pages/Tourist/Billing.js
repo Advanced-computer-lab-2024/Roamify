@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMoneyBillWave, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { faStripeS } from '@fortawesome/free-brands-svg-icons';
@@ -11,6 +12,7 @@ const Billing = () => {
     const [paymentMethod, setPaymentMethod] = useState('');
     const [promoCode, setPromoCode] = useState('');
     const [checkoutSummary, setCheckoutSummary] = useState(null);
+    const navigate = useNavigate(); // Initialize the useNavigate hook
 
     useEffect(() => {
         const fetchedOrderId = localStorage.getItem('orderId');
@@ -95,6 +97,7 @@ const Billing = () => {
             const data = await response.json();
             if (response.ok) {
                 toast.success(data.message || 'Payment successful!');
+                navigate('/tourist/orders'); // Navigate to Orders page
             } else {
                 throw new Error(data.message || 'Payment failed. Please try again.');
             }
