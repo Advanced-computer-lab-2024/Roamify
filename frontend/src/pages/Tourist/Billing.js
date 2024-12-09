@@ -122,17 +122,20 @@ const Billing = () => {
                                         <div>
                                             <p><strong>Product Name:</strong> {product.name}</p>
                                             <p>
-                                                Quantity: {product.quantity} ({product.quantity} x ${product.priceAtPurchase} = ${product.subtotal})
+                                                <strong>Quantity:</strong>{product.quantity} x ${product.priceAtPurchase}
                                             </p>
                                         </div>
                                     </li>
                                 ))}
                             </ul>
-                            <p><strong>Total Items:</strong> {checkoutSummary.products.reduce((total, product) => total + product.quantity, 0)}</p>
                             <p><strong>Delivery Address:</strong> {checkoutSummary.deliveryAddress.street}, {checkoutSummary.deliveryAddress.city}, {checkoutSummary.deliveryAddress.postalCode}</p>
-                            <p><strong>Total Cost:</strong> ${checkoutSummary.totalProductCost.toFixed(2)}</p>
+                            
+                            {/* Horizontal line */}
+                            <hr style={{ margin: '20px 0', borderColor: '#ddd' }} />
+
+                            <p><strong>Total Price:</strong> ${checkoutSummary.totalProductCost.toFixed(2)}</p>
                             <p><strong>Discount:</strong> ${checkoutSummary.discountApplied.toFixed(2)}</p>
-                            <p><strong>Final Amount:</strong> ${checkoutSummary.finalAmount.toFixed(2)}</p>
+                            <p><strong>Subtotal:</strong> ${checkoutSummary.finalAmount.toFixed(2)}</p>
                         </>
                     ) : (
                         <p>Loading Summary...</p>
