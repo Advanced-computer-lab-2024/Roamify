@@ -16,6 +16,7 @@ const CommonCard = ({
 }) => {
   // State to track whether the item is in the wishlist
   const [isInWishlist, setIsInWishlist] = useState(false);
+  
 
   // Get currency symbol and exchange rate from localStorage
   const currencySymbol = localStorage.getItem("currencySymbol") || "$";
@@ -34,7 +35,7 @@ const CommonCard = ({
             withCredentials: true,
           }
         );
-        const productInWishlist = response.data.wishlist.some(
+        const productInWishlist = response.data?.wishlist?.some(
           (item) => item.productId === id
         );
         setIsInWishlist(productInWishlist);

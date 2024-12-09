@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-
+import { toast, ToastContainer } from "react-toastify";
 const ReviewArea = ({ itineraryId }) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -18,29 +18,26 @@ const ReviewArea = ({ itineraryId }) => {
     setFeedbackMessage("");
 
     try {
-      if (rating) {
+      if (rating && comment) {
         await axios.post(
           `http://localhost:3000/api/tourist/review/rate/itinerary/${itineraryId}`,
           { rating },
           { withCredentials: true }
         );
-        setFeedbackMessage((prev) => prev + "Rating submitted successfully. ");
-      }
-
-      if (comment) {
         await axios.post(
           `http://localhost:3000/api/tourist/review/comment/itinerary/${itineraryId}`,
           { comment },
           { withCredentials: true }
         );
-        setFeedbackMessage((prev) => prev + "Comment submitted successfully.");
+        toast.success("Review submitted successfully")
       }
 
-      if (!rating && !comment) {
-        setFeedbackMessage("Please provide a rating or a comment.");
+
+      if (!rating || !comment) {
+        toast.error("Please provide a rating and a comment.");
       }
     } catch (error) {
-      setFeedbackMessage("Failed to submit review. Please try again.");
+      toast.error("Failed to submit review. Please try again.");
     }
 
     // Reset form fields after submission
@@ -52,7 +49,7 @@ const ReviewArea = ({ itineraryId }) => {
     <div className="container">
       <div className="row">
         <div className="col-lg-8">
-          <div className="write_your_review_wrapper">
+          <div className="write_your_review_wrapper" style={{ background: "var(--secondary-color)"  }}>
             <h3 className="heading_theme">Write your review</h3>
             <div className="write_review_inner_boxed">
               <form id="news_comment_form" onSubmit={handleSubmit}>
@@ -93,6 +90,8 @@ const ReviewArea = ({ itineraryId }) => {
           </div>
         </div>
       </div>
+      
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

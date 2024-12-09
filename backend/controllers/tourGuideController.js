@@ -7,7 +7,7 @@ const itineraryModel = require("../models/itineraryModel");
 const itineraryTicketModel = require("../models/itineraryTicketModel");
 const receiptModel = require('../models/receiptModel')
 const cloudinary = require('../config/cloudinary');
-const cloudinary = require('../config/cloudinary');
+
 const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage }).single('profilePicture');

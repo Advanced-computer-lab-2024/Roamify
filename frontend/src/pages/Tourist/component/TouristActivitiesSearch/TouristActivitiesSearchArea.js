@@ -290,7 +290,7 @@ const TouristActivitiesWrapper = () => {
 
   const handleNotifyMe = async (activityId) => {
     try {
-      const response = await axios.post(
+      const response = await axios.put(
         "http://localhost:3000/api/tourist/enable-notifications-on-events",
         { activityId },
         { withCredentials: true }
@@ -298,7 +298,16 @@ const TouristActivitiesWrapper = () => {
       setNotificationActive(true); // Update button state
       toast.success(response.data.message); // Show success toast
     } catch (error) {
-      toast.error("Failed to set notification");
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+      } else {
+        console.error("Unexpected error:", error);
+        toast.error("An unexpected error occurred.");
+      }
     }
   };
 

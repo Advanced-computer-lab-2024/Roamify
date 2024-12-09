@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import CommonBanner from "../../../../component/Common/CommonBanner";
 import ReviewArea from "./ReviewArea.js";
 import Header from "../../../../layout/Header.js";
 import { HeaderData } from "../../TouristHeaderData.js";
+import { FaMapMarkerAlt, FaCalendarAlt } from "react-icons/fa"; // Location & Time Icons
+import { GiPriceTag } from "react-icons/gi"; // Price Icon
+
 const ActivityDetails = () => {
   const { id } = useParams();
   const [activity, setActivity] = useState(null);
@@ -51,49 +53,129 @@ const ActivityDetails = () => {
 
   return (
     <>
-      
-      <section className="activity_details_section">
+      {/* <Header HeaderData={HeaderData} /> */}
+      <section
+        className="activity_details_section"
+        style={{
+          padding: "50px 0",
+          backgroundColor: "var(--secondary-color)",
+        }}
+      >
         <div className="container">
           <div className="row">
+            {/* Left Column: Main Activity Info */}
             <div className="col-lg-8">
-              <h2>{activity.name}</h2>
-              <p>{activity.category.name}</p>
-              <p>{activity.location.name}</p>
-              <h3>{activity.price} EGP</h3>
-              {activity.discounts && (
-                <h5>
-                  <del>
+              <div
+                className="activity-card"
+                style={{
+                  padding: "20px",
+                  borderRadius: "8px",
+                  backgroundColor: "var(--primary-color)",
+                  boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                  color: "#fff",
+                }}
+              >
+                <h2 style={{ fontSize: "2rem", fontWeight: "600" }}>
+                  {activity.name}
+                </h2>
+                <p style={{ fontSize: "1.1rem", margin: "10px 0" }}>
+                  <strong>Category:</strong> {activity.category.name}
+                </p>
+                <p style={{ fontSize: "1.1rem", margin: "10px 0" }}>
+                  <strong>Location:</strong> {activity.location.name}
+                </p>
+                <div
+                  style={{
+                    fontSize: "1.5rem",
+                    fontWeight: "500",
+                    color: "#27ae60",
+                    margin: "10px 0",
+                  }}
+                >
+                  <GiPriceTag style={{ marginRight: "10px" }} />
+                  {activity.price} EGP
+                </div>
+                {activity.discounts && (
+                  <h5 style={{ color: "#f39c12", textDecoration: "line-through" }}>
                     {(activity.price * (1 + activity.discounts / 100)).toFixed(
                       2
                     )}{" "}
                     EGP
-                  </del>
-                </h5>
-              )}
-              <p>{activity.description}</p>
-              <button onClick={handleBooking} className="btn btn_theme">
-                Book Now
-              </button>
+                  </h5>
+                )}
+                <p style={{ margin: "20px 0", lineHeight: "1.6" }}>
+                  {activity.description}
+                </p>
+                <button
+                  onClick={handleBooking}
+                  className="btn btn_theme"
+                  style={{
+                    padding: "12px 30px",
+                    fontSize: "1rem",
+                    backgroundColor: "#27ae60",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                  }}
+                >
+                  Book Now
+                </button>
+              </div>
             </div>
+
+            {/* Right Column: Activity Details */}
             <div className="col-lg-4">
-              <h4>Details</h4>
-              <p>
-                <strong>Location:</strong> {activity.location.name}
-              </p>
-              <p>
-                <strong>Coordinates:</strong>{" "}
-                {activity.location.coordinates.join(", ")}
-              </p>
-              <p>
-                <strong>Time:</strong> {activity.time}
-              </p>
-              <p>
-                <strong>Tags:</strong>{" "}
-                {activity.tags.map((tag) => tag.name).join(", ")}
-              </p>
+              <div
+                className="activity-card"
+                style={{
+                  padding: "20px",
+                  borderRadius: "8px",
+                  backgroundColor: "var(--primary-color)",
+                  boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                  color: "#fff",
+                }}
+              >
+                <h4>Activity Details</h4>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <FaMapMarkerAlt
+                    style={{ marginRight: "10px", color: "#3498db" }}
+                  />
+                  <p>
+                    <strong>Location:</strong> {activity.location.name}
+                  </p>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <FaCalendarAlt
+                    style={{ marginRight: "10px", color: "#f39c12" }}
+                  />
+                  <p>
+                    <strong>Time:</strong> {activity.time}
+                  </p>
+                </div>
+                <p>
+                  <strong>Tags:</strong>{" "}
+                  {activity.tags.map((tag) => tag.name).join(", ")}
+                </p>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Review Section */}
         <ReviewArea itineraryId={id} />
       </section>
 
@@ -120,7 +202,15 @@ const ActivityDetails = () => {
           <button
             onClick={() => setShowPopup(false)}
             className="btn btn_theme"
-            style={{ marginTop: "10px" }}
+            style={{
+              marginTop: "10px",
+              backgroundColor: "#27ae60",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              padding: "8px 20px",
+              cursor: "pointer",
+            }}
           >
             Close
           </button>
