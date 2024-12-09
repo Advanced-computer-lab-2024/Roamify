@@ -1,156 +1,155 @@
 /* General container styles */
 /* Center the containers on the page */
 .billing-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
-    height: 100vh; /* Full height of the viewport */
-    background-color: #f8f9fa; /* Optional for background color */
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  height: 100vh; /* Full height of the viewport */
+  background-color: #f8f9fa; /* Optional for background color */
 }
-
 
 /* Flex container for two cards */
 .billing-flex {
-    display: flex;
-    gap: 20px;
+  display: flex;
+  gap: 20px;
 }
 
 /* General card styles */
 .billing-card {
-    background-color: #ffffff;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Titles */
 h3 {
-    font-size: 1.5rem;
-    text-align: center;
-    color: #333333;
-    font-weight: bold;
-    margin-bottom: 20px;
-    margin-top: 40px;
+  font-size: 1.5rem;
+  text-align: center;
+  color: #333333;
+  font-weight: bold;
+  margin-bottom: 20px;
+  margin-top: 40px;
 }
 
 /* Order Summary */
 .summary-card p,
 .summary-card ul li {
-    font-size: 1rem;
-    color: #555555;
-    margin: 5px 0;
-    line-height: 1.5;
-    text-align: left;
+  font-size: 1rem;
+  color: #555555;
+  margin: 5px 0;
+  line-height: 1.5;
+  text-align: left;
 }
 
 .summary-card p strong {
-    color: #333333;
+  color: #333333;
 }
 
 ul {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
 }
 
-ul li {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
+.summary-card ul li {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
 }
 
 /* Payment Card */
 .payment-card {
-    flex: 1;
-    width: 400px;
+  flex: 1;
+  width: 400px;
 }
 
 .payment-card label {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f8f8f8;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f8f8f8;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .payment-card label:hover {
-    background-color: #eef7ff;
-    border-color: #6a5acd;
+  background-color: #eef7ff;
+  border-color: #6a5acd;
 }
 
 .payment-card input[type="radio"] {
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
 .payment-card span {
-    flex: 1;
-    text-align: left;
-    font-size: 1rem;
-    color: #555555;
+  flex: 1;
+  text-align: left;
+  font-size: 1rem;
+  color: #555555;
 }
 
 .payment-card .icon {
-    color: #8b3eea;
-    font-size: 1.5rem;
+  color: #8b3eea;
+  font-size: 1.5rem;
 }
 
 /* Promo Code Section */
 .promo-code-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
 }
 
 .promo-code-input {
-    width: 70%; /* Adjusted to match button */
-    height: 40px;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1rem;
+  width: 70%; /* Adjusted to match button */
+  height: 40px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
 }
 
 .billing-button.apply-button {
-    width: 28%;
-    height: 40px;
-    background-color: #8b3eea;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    font-weight: bold;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+  width: 28%;
+  height: 40px;
+  background-color: #8b3eea;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .billing-button.apply-button:hover {
-    background-color: #6a5acd;
+  background-color: #6a5acd;
 }
 
 /* Confirm Payment Button */
 .billing-button {
-    width: 100%;
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #8b3eea;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    font-weight: bold;
-    text-align: center;
-    cursor: pointer;
+  width: 100%;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #8b3eea;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
 }
 
 .billing-button:hover {
-    background-color: #6a5acd;
+  background-color: #6a5acd;
 }

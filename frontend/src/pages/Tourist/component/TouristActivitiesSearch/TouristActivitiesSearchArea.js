@@ -8,6 +8,9 @@ import { FaBookmark } from "react-icons/fa";
 import LoadingLogo from "../../../../component/LoadingLogo";
 import { renderStars } from "../../../../functions/renderStars";
 import { FaBell } from "react-icons/fa";
+import { Share } from "@mui/icons-material";
+import ShareModal from "../TouristItinerarySearch/ShareModal";
+
 const TouristActivitiesWrapper = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +36,17 @@ const TouristActivitiesWrapper = () => {
   const currencySymbol = localStorage.getItem("currencySymbol") || "$";
   const exchangeRate = parseFloat(localStorage.getItem("value")) || 1;
   const [notificationActive, setNotificationActive] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openShareModal = () => {
+    setIsModalOpen(true);
+  };
+
+  // Function to close the modal
+  const closeShareModal = () => {
+    setIsModalOpen(false);
+  };
 
   const fetchActivities = async (
     minBudget,
@@ -77,7 +91,9 @@ const TouristActivitiesWrapper = () => {
       } catch (bookmarkError) {
         // Log and continue if bookmark fetch fails
         if (bookmarkError.response && bookmarkError.response.status === 400) {
-          console.warn("Bookmark fetch failed, but activities will still display.");
+          console.warn(
+            "Bookmark fetch failed, but activities will still display."
+          );
         } else {
           console.error("Error fetching bookmarks:", bookmarkError);
         }
@@ -195,11 +211,17 @@ const TouristActivitiesWrapper = () => {
     }
   };
 
-  const handleBooking = async (activityId, activityDate, method, paymentMethodId, promoCode) => {
+  const handleBooking = async (
+    activityId,
+    activityDate,
+    method,
+    paymentMethodId,
+    promoCode
+  ) => {
     try {
       // Format the activity date to ISO date format
       const formattedDate = new Date(activityDate).toISOString().split("T")[0];
-  
+
       // Make the POST request to the API
       await axios.post(
         "http://localhost:3000/api/tourist/book-activity",
@@ -208,11 +230,11 @@ const TouristActivitiesWrapper = () => {
           date: formattedDate,
           method, // Payment method: "availableCredit" or "card"
           paymentMethodId, // Payment method ID
-          promoCode // Optional promo code
+          promoCode, // Optional promo code
         },
         { withCredentials: true } // Include credentials for authentication
       );
-  
+
       // Display success message
       setPopupMessage("Booking successful!");
       setShowPopup(true);
@@ -229,7 +251,6 @@ const TouristActivitiesWrapper = () => {
       console.error("Error booking activity:", error);
     }
   };
-  
 
   // Function to copy activity link
   const handleCopyLink = (activityId) => {
@@ -247,12 +268,15 @@ const TouristActivitiesWrapper = () => {
   // Function to send activity details via email
   const handleEmailShare = (activity) => {
     const subject = `Check out this activity: ${activity.name}`;
-    const body = `I thought you'd be interested in this activity: ${activity.name
-      }\n\nLocation: ${activity.location.name}\nDate: ${new Date(
-        activity.date
-      ).toLocaleDateString()}\nPrice: ${activity.price} EGP\n\n${activity.category.description
-      }\n\nCheck it out: ${window.location.origin}/activity-details/${activity._id
-      }`;
+    const body = `I thought you'd be interested in this activity: ${
+      activity.name
+    }\n\nLocation: ${activity.location.name}\nDate: ${new Date(
+      activity.date
+    ).toLocaleDateString()}\nPrice: ${activity.price} EGP\n\n${
+      activity.category.description
+    }\n\nCheck it out: ${window.location.origin}/activity-details/${
+      activity._id
+    }`;
     const mailtoLink = `mailto:?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
@@ -364,15 +388,15 @@ const TouristActivitiesWrapper = () => {
                     searchType === "tag"
                       ? searchInputTag
                       : searchType === "category"
-                        ? searchInputCategory
-                        : searchInput
+                      ? searchInputCategory
+                      : searchInput
                   }
                   onChange={
                     searchType === "tag"
                       ? handleSearchInputTagChange
                       : searchType === "category"
-                        ? handleSearchInputCategoryChange
-                        : handleSearchInputChange
+                      ? handleSearchInputCategoryChange
+                      : handleSearchInputChange
                   }
                   style={{ marginBottom: "10px" }}
                 />
@@ -408,32 +432,46 @@ const TouristActivitiesWrapper = () => {
                     className="flight_search_item_wrappper"
                     key={activity._id}
                   >
-                    <div className="flight_search_items" style={{
-                      background: "var(--secondary-color)",
-                      padding: "20px",  // Adding padding to make the shadow effect more visible
-                      borderRadius: "10px",  // Optional: to round the corners of the box
-                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1)",  // Shadow effect
-                      transition: "box-shadow 0.3s ease",  // Smooth transition on hover
-                    }}>
+                    <div
+                      className="flight_search_items"
+                      style={{
+                        background: "var(--secondary-color)",
+                        padding: "20px", // Adding padding to make the shadow effect more visible
+                        borderRadius: "10px", // Optional: to round the corners of the box
+                        boxShadow:
+                          "0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1)", // Shadow effect
+                        transition: "box-shadow 0.3s ease", // Smooth transition on hover
+                      }}
+                    >
                       <div className="multi_city_flight_lists">
                         <div className="flight_multis_area_wrapper">
-                          <div className="flight_search_left" style={{
-                            height: "100%",
-                            padding: "30px 30px",
-                            display: "flex",
-                            gap: "20px",
-                            flexDirection: "column",
-                            alignItems: "baseline",
-                            width: "100%",
-                          }}>
+                          <div
+                            className="flight_search_left"
+                            style={{
+                              height: "100%",
+                              padding: "30px 30px",
+                              display: "flex",
+                              gap: "20px",
+                              flexDirection: "column",
+                              alignItems: "baseline",
+                              width: "100%",
+                            }}
+                          >
                             <div className="flight_search_destination">
-                              <h3 style={{ fontSize: "28px" }}>{activity.name}</h3>
-                              <p> <i className="fas fa-map-marker-alt" style={{ marginRight: '8px' }}></i>{activity.location.name}</p>
-
+                              <h3 style={{ fontSize: "28px" }}>
+                                {activity.name}
+                              </h3>
+                              <p>
+                                {" "}
+                                <i
+                                  className="fas fa-map-marker-alt"
+                                  style={{ marginRight: "8px" }}
+                                ></i>
+                                {activity.location.name}
+                              </p>
                             </div>
                           </div>
                           <div className="flight_search_middel">
-
                             <div className="flight_search_destination">
                               <p>Date</p>
                               <h3>
@@ -444,7 +482,7 @@ const TouristActivitiesWrapper = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="flight_search_right" >
+                      <div className="flight_search_right">
                         <span className="review-rating">
                           {renderStars(activity.rating)}
                         </span>
@@ -460,7 +498,9 @@ const TouristActivitiesWrapper = () => {
                           <FaBookmark
                             size={24}
                             color={
-                              bookmarkedActivities[activity._id] ? "#8b3eea" : "#ccc"
+                              bookmarkedActivities[activity._id]
+                                ? "#8b3eea"
+                                : "#ccc"
                             }
                           />
                         </div>
@@ -492,7 +532,9 @@ const TouristActivitiesWrapper = () => {
                         {/* Book Now Button */}
                         {activity.bookingAvailable ? (
                           <button
-                            onClick={() => handleBooking(activity._id, activity.date)}
+                            onClick={() =>
+                              handleBooking(activity._id, activity.date)
+                            }
                             className="btn btn_theme btn_sm"
                           >
                             Book now
@@ -508,7 +550,11 @@ const TouristActivitiesWrapper = () => {
                             </button>
                             <button
                               onClick={() => handleNotifyMe(activity._id)}
-                              className={`btn ${notificationActive ? "btn-success" : "btn-warning"} btn-sm`}
+                              className={`btn ${
+                                notificationActive
+                                  ? "btn-success"
+                                  : "btn-warning"
+                              } btn-sm`}
                               style={{
                                 marginLeft: "10px",
                               }}
@@ -522,17 +568,18 @@ const TouristActivitiesWrapper = () => {
                         {/* Share Button */}
                         <div>
                           <button
-                            onClick={() => handleCopyLink(activity._id)}
-                            className="btn btn-secondary btn-sm me-2"
+                            onClick={openShareModal}
+                            className=" btn-secondary "
                           >
-                            Copy Link
+                            <Share style={{ marginRight: "8px" }} />
+                            Share
                           </button>
-                          <button
-                            onClick={() => handleEmailShare(activity)}
-                            className="btn btn-primary btn-sm"
-                          >
-                            Share via Email
-                          </button>
+                          <ShareModal
+                            handleCopy={() => handleCopyLink(activity._id)}
+                            handleShareEmail={() => handleEmailShare(activity)}
+                            isOpen={isModalOpen}
+                            onClose={closeShareModal}
+                          />
                         </div>
 
                         <div
@@ -540,7 +587,6 @@ const TouristActivitiesWrapper = () => {
                           data-bs-target={`#collapseExample${activity._id}`}
                           aria-expanded="false"
                           aria-controls={`collapseExample${activity._id}`}
-
                         >
                           Show more <i className="fas fa-chevron-down"></i>
                         </div>
