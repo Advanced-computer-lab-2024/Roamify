@@ -70,7 +70,7 @@ const ActivityDetails = () => {
                 style={{
                   padding: "20px",
                   borderRadius: "8px",
-                  backgroundColor: "var(--primary-color)",
+                  backgroundColor: "var(--secondary-color)",
                   boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
                   color: "#fff",
                 }}
@@ -132,7 +132,7 @@ const ActivityDetails = () => {
                 style={{
                   padding: "20px",
                   borderRadius: "8px",
-                  backgroundColor: "var(--primary-color)",
+                  backgroundColor: "var(--secondary-color)",
                   boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
                   color: "#fff",
                 }}
