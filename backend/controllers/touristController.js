@@ -35,6 +35,7 @@ function isAdult(dateOfBirth) {
 const createProfile = async (req, res) => {
   const id = req.user._id;
 
+
   // Check if a profile already exists for this user
   if (id) {
     const existingProfile = await touristModel.findOne({ user: id });
@@ -54,7 +55,7 @@ const createProfile = async (req, res) => {
   } = req.body;
   try {
     const adult = isAdult(dateOfBirth);
-
+    await userModel.findByIdAndUpdate(id, {isAdult:adult});
     let wallet = null;
     if (adult) {
       wallet = new walletModel({
@@ -73,7 +74,6 @@ const createProfile = async (req, res) => {
       nationality,
       dateOfBirth,
       occupation,
-      adult,
       wallet: wallet, // Setting wallet to null initially
     });
     await tourist.save();
@@ -172,6 +172,8 @@ const bookActivity = async (req, res) => {
       .populate("wallet");
     if (!tourist)
       throw Error('Tourist does not exist')
+
+    if(!tourist.isAdult) return res.status(400).json({message:'You are not eligible yet to do this action'})
 
     const { activity, date, method, paymentMethodId } = req.body;
     if (!activity)
@@ -318,7 +320,7 @@ const bookPlace = async (req, res) => {
       .populate("wallet");
     if (!tourist)
       throw Error('Tourist does not exist')
-
+    if(!tourist.isAdult) return res.status(400).json({message:'You are not eligible yet to do this action'})
     const { place, ticketType, amount, method, paymentMethodId } = req.body;
     if (!place)
       throw Error('Choose a place to visit')
@@ -405,7 +407,7 @@ const bookItinerary = async (req, res) => {
       .populate("wallet");
     if (!tourist)
       throw Error('Tourist does not exist')
-
+    if(!tourist.isAdult) return res.status(400).json({message:'You are not eligible yet to do this action'})
     const { itinerary, date, method, paymentMethodId } = req.body;
     if (!itinerary)
       throw Error('Please choose an itinerary to book')
@@ -976,6 +978,7 @@ const bookTransportation = async (req, res) => {
       .findOne({ user: req.user._id })
       .populate("wallet");
 
+    if(!tourist.isAdult) return res.status(400).json({message:'You are not eligible yet to do this action'})
     const { transportationIdString, method, paymentMethodId } = req.body;
     if (!transportationIdString) throw Error("please pick a transportation");
     if (method !== 'availableCredit' && method !== 'card') throw Error('please specify a correct method of payment')

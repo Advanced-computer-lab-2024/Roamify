@@ -50,8 +50,12 @@ const userSchema = new mongoose.Schema(
     termsAndConditions: {
       type: Boolean,
       default: false
-    }
+    },
+      isAdult: {
+          type:Boolean
+      },
   },
+
   { timestamps: true }
 );
 
