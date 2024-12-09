@@ -1,0 +1,72 @@
+.address-header h2 {
+    font-size: 24px;  /* Example font size, adjust as needed */
+    margin-bottom: 10px;  /* Optional: Adjusts space below the heading */
+}
+
+.address-container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.address-header {
+    font-size: 24px;
+    padding-bottom: 20px;
+}
+
+.address-details {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
+}
+
+.add-address-form {
+    padding: 10px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    width: 350px; /* Adjusted width to make the form narrower */
+    margin: 20px auto; /* This centers the form within its container */
+}
+.add-address-form input {
+    padding: 8px; /* Adds padding inside the input fields for better text visibility */
+    margin-bottom: 5px; /* Adds space between the fields */
+    border: 1px solid #ccc; /* Standard border for the inputs */
+    border-radius: 4px; /* Rounded corners for the inputs */
+}
+
+
+.button-container {
+    display: flex;
+    justify-content: space-between; /* Aligns the buttons to the bottom corners */
+}
+
+.add-address-button, .pay-now-button {
+    padding: 10px 20px;
+    background-color: #8b3eea;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.add-address-button:hover, .pay-now-button:hover {
+    background-color: #7328c4;
+}
+.add-address-form button {
+    padding: 10px 20px;
+    background-color: #8b3eea;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px; /* Adds top margin to the button */
+}
+
+.add-address-form button:hover {
+    background-color: #7328c4;
+}
