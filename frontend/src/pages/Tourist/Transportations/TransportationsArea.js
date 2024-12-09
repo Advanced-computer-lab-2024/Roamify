@@ -121,7 +121,7 @@ const TransportationsArea = () => {
                   key={index}
                   style={{
                     width: "100%",
-                    backgroundColor: "#f9f9f9",
+                    backgroundColor: "var(--secondary-color)",
                     display: "flex",
                     flexDirection: "row",
                     justifyContent: "space-between",
@@ -132,8 +132,15 @@ const TransportationsArea = () => {
                     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                   }}
                 >
-                  <div style={{ flex: "1" }}>
-                    <h3 style={{ marginBottom: "10px" }}>
+                  <div
+                    style={{ flex: "1", color: "var(--dashboard-title-color)" }}
+                  >
+                    <h3
+                      style={{
+                        marginBottom: "10px",
+                        color: "var(--text-color)",
+                      }}
+                    >
                       {transportation.name}
                     </h3>
                     <p>Type: {transportation.type}</p>
@@ -150,8 +157,8 @@ const TransportationsArea = () => {
                     <button
                       style={{
                         padding: "10px 15px",
-                        backgroundColor: "#007bff",
-                        color: "#fff",
+                        backgroundColor: "var(--main-color)",
+                        color: "white",
                         border: "none",
                         borderRadius: "4px",
                         cursor: "pointer",

@@ -11,6 +11,7 @@ const AddProductButton = ({
   price,
   quantity,
   description,
+  fetchProducts,
 }) => {
   const handleSubmit = async (formData) => {
     try {
@@ -25,6 +26,8 @@ const AddProductButton = ({
         }
       );
 
+      fetchProducts();
+      handleCloseModal();
       // Handle the successful response
       console.log("Product updated successfully:", response.data);
     } catch (error) {
@@ -55,7 +58,6 @@ const AddProductButton = ({
           borderRadius: "4px", // Full round button
           cursor: "pointer",
           transition: "background-color 0.3s",
-          border: "1px solid #cfcdcd",
         }}
         onMouseOut={(e) =>
           (e.currentTarget.style.backgroundColor = "var(--main-color)")

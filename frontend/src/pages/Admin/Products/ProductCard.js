@@ -104,6 +104,7 @@ const ProductCard = (props) => {
                       quantity={props.quantity}
                       description={props.description}
                       img={props.img}
+                      fetchProducts={props.fetchProducts}
                     />
                     <button
                       onClick={handleArchiveToggle}

@@ -11,6 +11,7 @@ import { ExploreData } from "../../../component/Common/CommonCard/Data";
 import axios from "axios";
 import ProductCard from "./ProductCard";
 import AddProductButton from "./AddProductButton";
+import LoadingLogo from "../../../component/LoadingLogo";
 
 const ProductsListArea = ({ isAdmin }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,32 +21,32 @@ const ProductsListArea = ({ isAdmin }) => {
   const [name, setName] = useState("");
   const [ratingSort, setRatingSort] = useState("");
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3000/api/product`, {
-          params: {
-            minPrice: minPrice || 0,
-            maxPrice: maxPrice || Infinity,
-            name: name || "",
-            order: ratingSort,
-          },
-          withCredentials: true,
-        });
-        setProducts(response.data.products);
-        console.log(response.data.products);
-      } catch (error) {
-        console.error("Error fetching users:", error);
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/product`, {
+        params: {
+          minPrice: minPrice || 0,
+          maxPrice: maxPrice || Infinity,
+          name: name || "",
+          order: ratingSort,
+        },
+        withCredentials: true,
+      });
+      setProducts(response.data.products);
+      console.log(response.data.products);
+    } catch (error) {
+      console.error("Error fetching users:", error);
 
-        // Check if the error response status is 404
-        if (error.response && error.response.status === 404) {
-          setProducts([]);
-        }
-      } finally {
-        setIsLoading(false);
+      // Check if the error response status is 404
+      if (error.response && error.response.status === 404) {
+        setProducts([]);
       }
-    };
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchProducts();
   }, [minPrice, maxPrice, name, ratingSort]);
 
@@ -189,7 +190,7 @@ const ProductsListArea = ({ isAdmin }) => {
             <div className="col-lg-9">
               <div className="row">
                 {isLoading ? ( // Check if data is still loading
-                  <p>Loading products...</p>
+                  <LoadingLogo isVisible={true} size="200px" />
                 ) : products.length > 0 ? ( // Check if there are products
                   products.map((product, index) => (
                     <ProductCard

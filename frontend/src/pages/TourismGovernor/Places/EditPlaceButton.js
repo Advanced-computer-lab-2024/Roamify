@@ -136,13 +136,13 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
       <div
         ref={modalRef}
         style={{
-          backgroundColor: "white",
+          backgroundColor: "var(--secondary-color)",
           padding: "24px",
           borderRadius: "8px",
           boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
           width: "90%",
           maxWidth: "600px",
-          maxHeight: "90vh",
+          maxHeight: "70vh",
           overflowY: "auto",
         }}
       >

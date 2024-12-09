@@ -23,6 +23,7 @@ import Complaints from "./Complaints/Complaints.js";
 import PendingUsers from "./Users/PendingUsers.js";
 import Itineraries from "./Itineraries/Itineraries.js";
 import Dashboard from "./Dashboard/Dashboard.js";
+import CreatePromoCodeButton from "./createPromoCodeButton.js";
 
 const Admin = () => {
   return (
@@ -65,6 +66,8 @@ const Admin = () => {
         {/* <Route path="/booking-confirmation" element={<BookingConfirmation />} /> */}
         <Route path="/complaints" element={<Complaints />} />
       </Routes>
+      <CreatePromoCodeButton />
+
       <CopyRight />
     </>
   );

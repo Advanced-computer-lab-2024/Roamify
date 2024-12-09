@@ -6,7 +6,7 @@ const ItineraryArea = () => {
 
   return (
     <>
-      <section id="theme_search_form_tour">
+      <section id="theme_search_form_tour" style={{ minHeight: "100vh" }}>
         <div className="container">
           {/* <div className="row">
             <div className="col-lg-12">

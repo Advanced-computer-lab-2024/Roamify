@@ -81,13 +81,14 @@ const CreateProductModal = ({ isOpen, onClose, fields, onSubmit, img }) => {
       <div
         ref={modalRef}
         style={{
-          backgroundColor: "white",
+          backgroundColor: "var(--secondary-color)",
           padding: "24px",
           borderRadius: "8px",
           boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-          width: "90%",
+          height: "70vh",
+          width: "80%",
           maxWidth: "600px",
-          height: "fit-content",
+          overflowY: "auto",
         }}
       >
         <h2
@@ -106,7 +107,9 @@ const CreateProductModal = ({ isOpen, onClose, fields, onSubmit, img }) => {
                 key={field.name}
                 style={{ display: "flex", flexDirection: "column", gap: "1vh" }}
               >
-                <label>Image</label>
+                <label style={{ color: "var(--dashboard-title-color)" }}>
+                  Image
+                </label>
                 {image && (
                   <img
                     src={image}
@@ -126,7 +129,7 @@ const CreateProductModal = ({ isOpen, onClose, fields, onSubmit, img }) => {
                   htmlFor={field.name}
                   style={{
                     display: "block",
-                    color: "#4A5568",
+                    color: "var(--dashboard-title-color)",
                   }}
                 >
                   {field.label || field.name}
@@ -158,20 +161,13 @@ const CreateProductModal = ({ isOpen, onClose, fields, onSubmit, img }) => {
           >
             <button
               type="button"
+              className="cancel-button"
               onClick={onClose}
               style={{
                 padding: "8px 12px",
                 borderRadius: "4px",
                 marginRight: "16px",
-                backgroundColor: "#E2E8F0",
-                color: "#4A5568",
               }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = "#CBD5E0")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "#E2E8F0")
-              }
             >
               Cancel
             </button>
@@ -180,14 +176,15 @@ const CreateProductModal = ({ isOpen, onClose, fields, onSubmit, img }) => {
               style={{
                 padding: "8px 12px",
                 borderRadius: "4px",
-                backgroundColor: "#2B6CB0",
+                backgroundColor: "var(--main-color)",
                 color: "white",
               }}
               onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = "#3182CE")
+                (e.currentTarget.style.backgroundColor =
+                  "var(--main-color-hover)")
               }
               onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "#2B6CB0")
+                (e.currentTarget.style.backgroundColor = "var(--main-color)")
               }
             >
               Save

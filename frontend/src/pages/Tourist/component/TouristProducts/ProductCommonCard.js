@@ -114,19 +114,31 @@ const CommonCard = ({
   };
 
   return (
-    <div className="card" style={{ borderColor: "var(--secondary-color)" , 
-      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Initial shadow
-      transition: "transform 0.3s ease, box-shadow 0.3s ease", // Smooth transition
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = "scale(1.05)"; // Enlarge
-      e.currentTarget.style.boxShadow = "0px 8px 16px rgba(0, 0, 0, 0.2)"; // Stronger shadow
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = "scale(1)"; // Reset size
-      e.currentTarget.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.1)"; // Reset shadow
-    }}>
-      <img src={picture} alt={name} className="card-img-top" />
+    <div
+      className="card"
+      style={{
+        borderColor: "var(--secondary-color)",
+        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Initial shadow
+        transition: "transform 0.3s ease, box-shadow 0.3s ease", // Smooth transition
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "scale(1.05)"; // Enlarge
+        e.currentTarget.style.boxShadow = "0px 8px 16px rgba(0, 0, 0, 0.2)"; // Stronger shadow
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "scale(1)"; // Reset size
+        e.currentTarget.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.1)"; // Reset shadow
+      }}
+    >
+      <img
+        src={picture}
+        alt={name}
+        className="card-img-top"
+        style={{
+          height: "30vh",
+          objectFit: "cover",
+        }}
+      />
 
       {/* Heart icon for wishlist */}
       <div className="heart_destinations" onClick={handleWishlist}>
@@ -142,7 +154,10 @@ const CommonCard = ({
       </div>
 
       {/* Product details */}
-      <div className="card-body" style={{ background: "var(--secondary-color)"  }}>
+      <div
+        className="card-body"
+        style={{ background: "var(--secondary-color)" }}
+      >
         <h5 className="card-title">{name}</h5>
         <p className="card-text">
           <strong>Seller:</strong> {sellerId.username}

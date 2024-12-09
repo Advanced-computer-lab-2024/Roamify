@@ -2,6 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "./ThemeContext";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import the styles for react-toastify
 
 import App from "./App";
 
@@ -15,6 +17,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <BrowserRouter>
     <ThemeProvider>
+      <ToastContainer />
       <App />
     </ThemeProvider>
   </BrowserRouter>
