@@ -21,7 +21,7 @@ const CompletedActivity = () => {
       const response = await axios.get("http://localhost:3000/api/tourist/get-all-booked-activities", {
         withCredentials: true,
       });
-      setItineraries(response.data.activities || []);
+      setItineraries(response.data.activity || []);
     } catch (error) {
       setItineraries([]);
       setError(
