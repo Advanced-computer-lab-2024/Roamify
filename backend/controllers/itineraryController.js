@@ -1,7 +1,6 @@
 const itineraryModel = require("../models/itineraryModel");
 const userModel = require("../models/userModel");
 const itineraryTicketModel = require("../models/itineraryTicketModel");
-const itineraryReviewModel = require("../models/itineraryReviewModel");
 const jwt = require("jsonwebtoken");
 
 const getFilteredItineraries = async (req, res) => {
@@ -146,45 +145,5 @@ const getFilteredItineraries = async (req, res) => {
         res.status(500).json({ message: "Failed to retrieve itineraries", error: error.message });
     }
 };
-const getUnratedCompletedItineraries = async (req, res) => {
-    try {
-        // Step 1: Verify that the user exists
-        const tourist = await userModel.findById(req.user._id);
-        if (!tourist) {
-            return res.status(400).json({ message: 'User does not exist' });
-        }
 
-        // Step 2: Retrieve itinerary tickets with past dates
-        const itineraryTickets = await itineraryTicketModel
-            .find({ tourist: req.user._id, status: 'active', date: { $lt: new Date() } }) // Only tickets with past dates
-            .populate('itinerary', '_id name'); // Populate only the itinerary id and name
-
-        // Step 3: Get all rated itineraries by this tourist
-        const ratedItineraries = await itineraryReviewModel.find({ tourist: req.user._id }).select('itinerary');
-        const ratedItineraryIds = ratedItineraries.map(review => review.itinerary.toString());
-
-        // Step 4: Filter out itineraries that are already rated
-        const unratedItineraries = itineraryTickets
-            .filter(ticket => !ratedItineraryIds.includes(ticket.itinerary._id.toString()))
-            .map(ticket => ({
-                itineraryId: ticket.itinerary._id,
-                itineraryName: ticket.itinerary.name
-            }));
-
-        // Step 5: Check if there are unrated itineraries
-        if (unratedItineraries.length === 0) {
-            return res.status(400).json({ message: 'No unrated completed itineraries to review' });
-        }
-
-        res.status(200).json({
-            message: 'Unrated completed itineraries retrieved successfully',
-            itineraries: unratedItineraries
-        });
-    } catch (error) {
-        console.error("Error retrieving unrated completed itineraries:", error);
-        res.status(500).json({ message: "Couldn't retrieve unrated completed itineraries" });
-    }
-};
-
-
-module.exports = { getFilteredItineraries, getUnratedCompletedItineraries }
+module.exports = { getFilteredItineraries}
