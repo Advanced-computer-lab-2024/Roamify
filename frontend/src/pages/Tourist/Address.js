@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Address.css';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 const AddressComponent = () => {
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     const [addresses, setAddresses] = useState([]);
-    const [selectedAddress, setSelectedAddress] = useState('');
+    const [selectedAddress, setSelectedAddress] = useState(''); // Ensure it's initially empty
     const [showAddAddressForm, setShowAddAddressForm] = useState(false);
     const [newAddress, setNewAddress] = useState({
         name: '',
@@ -17,19 +19,59 @@ const AddressComponent = () => {
         country: ''
     });
 
+    useEffect(() => {
+        fetchAddresses();
+    }, []);
+
+    const getToken = () => {
+        return localStorage.getItem('token'); // Or wherever your token is stored
+    };
+
     const fetchAddresses = async () => {
+        const token = getToken();
         try {
-            const response = await axios.get('http://localhost:3000/api/address', { withCredentials: true });
+            const response = await axios.get('http://localhost:3000/api/address', {
+                withCredentials: true,
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (response.data && response.data.addresses) {
                 setAddresses(response.data.addresses);
-                if (response.data.addresses.length > 0) {
-                    setSelectedAddress(response.data.addresses[0]._id);
-                }
             } else {
-                console.error('No address data found');
+                toast.error('No address data found');
             }
         } catch (error) {
             console.error('Error fetching addresses:', error);
+            toast.error('Failed to fetch addresses. Please try again.');
+        }
+    };
+
+    const handleAddressChange = (addressId) => {
+        setSelectedAddress(addressId);
+        fetchOrderAddress(addressId);
+    };
+
+    const fetchOrderAddress = async (addressId) => {
+        const token = getToken();
+        const orderId = localStorage.getItem('orderId');
+        try {
+            const url = `http://localhost:3000/api/order/${orderId}/address/${addressId}`;
+            const response = await axios.patch(url, {}, {
+                withCredentials: true,
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            toast.success('Order address updated successfully');
+            console.log('Order Address Data:', response.data);
+        } catch (error) {
+            console.error('Error updating order address:', error);
+            if (error.response) {
+                toast.error(`Failed to update order address: ${error.response.data.message}`);
+            } else {
+                toast.error('An error occurred while updating the address.');
+            }
         }
     };
 
@@ -43,20 +85,31 @@ const AddressComponent = () => {
 
     const submitNewAddress = async (event) => {
         event.preventDefault();
+        const token = getToken();
         try {
-            const response = await axios.post('http://localhost:3000/api/address', newAddress, { withCredentials: true });
-            console.log(response.data.message);
+            const response = await axios.post('http://localhost:3000/api/address', newAddress, {
+                withCredentials: true,
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            toast.success('New address added successfully!');
             fetchAddresses();
             setShowAddAddressForm(false);
             setNewAddress({ name: '', street: '', city: '', state: '', postalCode: '', country: '' });
         } catch (error) {
             console.error('Error adding address:', error);
+            toast.error('Failed to add a new address. Please try again.');
         }
     };
 
-    useEffect(() => {
-        fetchAddresses();
-    }, []);
+    const handleProceedToBuy = () => {
+        if (!selectedAddress) {
+            toast.warn('Please select an address before proceeding.');
+        } else {
+            navigate('/tourist/billing');
+        }
+    };
 
     return (
         <div className="address-container">
@@ -70,7 +123,7 @@ const AddressComponent = () => {
                         name="address"
                         value={address._id}
                         checked={selectedAddress === address._id}
-                        onChange={() => setSelectedAddress(address._id)}
+                        onChange={() => handleAddressChange(address._id)}
                     />
                     {address.name}: {address.street}, {address.city}, {address.state}, {address.postalCode}, {address.country}
                 </div>
@@ -88,8 +141,9 @@ const AddressComponent = () => {
             )}
             <div className="button-container">
                 <button onClick={() => setShowAddAddressForm(!showAddAddressForm)} className="add-address-button">Add a New Address</button>
-                <button onClick={() => navigate('/tourist/billing')} className="pay-now-button">Pay Now</button>
+                <button onClick={handleProceedToBuy} className="pay-now-button">Proceed to Buy</button>
             </div>
+            <ToastContainer position="bottom-center" />
         </div>
     );
 };

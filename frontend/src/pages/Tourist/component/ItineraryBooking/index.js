@@ -100,6 +100,7 @@ const BookedItinerariesWrapper = () => {
                 minWidth: "300px",
                 maxWidth: "calc(33% - 20px)",
                 transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                 background: "var(--secondary-color)"
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "scale(1.05)";
@@ -115,7 +116,7 @@ const BookedItinerariesWrapper = () => {
                     key={booking._id}
                     style={{
                       width: "100%",
-                      backgroundColor: "#f9f9f9",
+                      background: "var(--secondary-color)",
                       display: "flex",
                       flexDirection: "column",
                       padding: "20px",

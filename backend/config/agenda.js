@@ -2,7 +2,7 @@ const Agenda = require("agenda");
 const orderModel = require("../models/orderModel");
 const productModel = require("../models/productModel");
 const mongoose = require("mongoose");
-
+const receiptModel = require("../models/receiptModel")
 const agenda = new Agenda({
     db: {
         address: process.env.MONGO_URI,
@@ -10,7 +10,6 @@ const agenda = new Agenda({
     },
 });
 
-// Define the "expire order" job
 agenda.define("expire order", async (job) => {
     const { orderId } = job.attrs.data;
 
@@ -18,13 +17,14 @@ agenda.define("expire order", async (job) => {
     session.startTransaction();
 
     try {
-        const order = await orderModel.findById(orderId).session(session);
+        const order = await orderModel.findById(orderId).populate('receipt').session(session);
         if (!order || order.status !== "Pending") {
             await session.abortTransaction();
             session.endSession();
             return;
         }
 
+        // Rollback product inventory
         const bulkOps = order.products.map((item) => ({
             updateOne: {
                 filter: { _id: item.productId },
@@ -33,17 +33,27 @@ agenda.define("expire order", async (job) => {
         }));
         await productModel.bulkWrite(bulkOps, { session });
 
-        order.status = "Cancelled";
-        await order.save({ session });
+        // Remove the receipt if it exists
+        if (order.receipt) {
+            await receiptModel.findByIdAndDelete(order.receipt._id).session(session);
+            console.log("Corresponding receipt deleted.");
+        }
+
+        // Remove the order itself
+        await orderModel.findByIdAndDelete(order._id).session(session);
+        console.log(`Order ${orderId} deleted due to expiration.`);
 
         await session.commitTransaction();
         session.endSession();
     } catch (error) {
-        await session.abortTransaction();
+        if (session.inTransaction()) {
+            await session.abortTransaction();
+        }
         session.endSession();
         console.error("Failed to expire order:", error.message);
     }
 });
+
 
 // Function to handle startup recovery
 const startupRecovery = async () => {
@@ -66,5 +76,5 @@ const startupRecovery = async () => {
     }
 };
 
-module.exports = {agenda};
+module.exports = { agenda };
 module.exports.startupRecovery = startupRecovery;

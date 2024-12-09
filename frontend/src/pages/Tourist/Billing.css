@@ -1,75 +1,156 @@
+/* General container styles */
+/* Center the containers on the page */
 .billing-container {
-    width: 100%;
-    max-width: 400px; /* Adjust width for a slimmer form */
-    background: #fff;
+    max-width: 1200px;
+    margin: 0 auto;
     padding: 20px;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 100vh; /* Full height of the viewport */
+    background-color: #f8f9fa; /* Optional for background color */
+}
+
+
+/* Flex container for two cards */
+.billing-flex {
+    display: flex;
+    gap: 20px;
+}
+
+/* General card styles */
+.billing-card {
+    background-color: #ffffff;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    margin: 20px auto;
-    display: flex;
-    flex-direction: column;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.billing-header h2 {
-    color: #ccc;
+/* Titles */
+h3 {
+    font-size: 1.5rem;
     text-align: center;
-    margin-bottom: 20px; /* Added space between header and options */
-    font-size: 20px;
+    color: #333333;
+    font-weight: bold;
+    margin-bottom: 20px;
 }
 
-.billing-form {
+/* Order Summary */
+.summary-card p,
+.summary-card ul li {
+    font-size: 1rem;
+    color: #555555;
+    margin: 5px 0;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.summary-card p strong {
+    font-weight: bold;
+    color: #333333;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+ul li {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    margin-bottom: 10px;
 }
 
-label {
-    margin-bottom: 10px; /* Space between each payment option */
+/* Payment Card */
+.payment-card {
+    flex: 1;
+    width: 400px;
+}
+
+.payment-card label {
     display: flex;
-    align-items: center; /* Aligns the text with the radio button */
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f8f8f8;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.icon {
-    margin-left: auto; /* Space after the text */
+.payment-card label:hover {
+    background-color: #eef7ff;
+    border-color: #6a5acd;
+}
+
+.payment-card input[type="radio"] {
+    margin-right: 10px;
+}
+
+.payment-card span {
+    flex: 1;
+    text-align: left;
+    font-size: 1rem;
+    color: #555555;
+}
+
+.payment-card .icon {
     color: #8b3eea;
+    font-size: 1.5rem;
 }
 
+/* Promo Code Section */
 .promo-code-container {
     display: flex;
-    margin-top: 20px; /* Added more space above the promo code input */
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
 }
 
 .promo-code-input {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
+    width: 70%; /* Adjusted to match button */
+    height: 40px;
+    padding: 8px;
+    border: 1px solid #ddd;
     border-radius: 5px;
+    font-size: 1rem;
 }
 
-.clear-promo-btn {
-    margin-left: 10px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: #666;
-}
-
-.billing-button {
-    width: 100%;
+.billing-button.apply-button {
+    width: 28%;
+    height: 40px;
     background-color: #8b3eea;
     color: white;
     border: none;
-    padding: 10px 20px;
     border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.billing-button.apply-button:hover {
+    background-color: #6a5acd;
+}
+
+/* Confirm Payment Button */
+.billing-button {
+    width: 100%;
     margin-top: 15px;
+    padding: 10px;
+    background-color: #8b3eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
     cursor: pointer;
 }
 
-.error-message, .success-message {
-    text-align: center;
-    color: #ff0000;
-    margin-top: 10px;
-}
-
-.success-message {
-    color: #008000;
+.billing-button:hover {
+    background-color: #6a5acd;
 }

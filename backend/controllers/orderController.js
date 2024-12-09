@@ -52,117 +52,102 @@ const markOrderOutForDelivery = async (req, res) => {
     }
 };
 const cancelOrder = async (req, res) => {
-    try {
-        const { orderId } = req.params;
-
-        // Validate Order ID
-        if (!mongoose.Types.ObjectId.isValid(orderId)) {
-            return res.status(400).json({ message: 'Invalid Order ID.' });
-        }
-
-        // Fetch the order
-        const order = await orderModel.findById(orderId);
-        if (!order || order.tourist.toString() !== req.user._id.toString()) {
-            return res.status(404).json({ message: 'Order not found or not authorized.' });
-        }
-
-        // Define cancellable statuses
-        const cancellableStatuses = ['Pending', 'Processing'];
-
-        if (!cancellableStatuses.includes(order.status)) {
-            return res.status(400).json({ message: `Only orders with statuses ${cancellableStatuses.join(', ')} can be cancelled.` });
-        }
-
-        // Start a session for transaction
-        const session = await mongoose.startSession();
-        session.startTransaction();
-
         try {
-            // If order is Pending or Processing, restore stock
-            if (['Pending', 'Processing'].includes(order.status)) {
+            const { orderId } = req.params;
+
+            // Validate Order ID
+            if (!mongoose.Types.ObjectId.isValid(orderId)) {
+                return res.status(400).json({ message: 'Invalid Order ID.' });
+            }
+
+            // Fetch the order
+            const order = await orderModel.findById(orderId);
+            if (!order || order.tourist.toString() !== req.user._id.toString()) {
+                return res.status(404).json({ message: 'Order not found or not authorized.' });
+            }
+
+            // Define cancellable statuses
+            const cancellableStatuses = ['Processing'];
+            if (!cancellableStatuses.includes(order.status)) {
+                return res.status(400).json({ message: `Only orders with statuses ${cancellableStatuses.join(', ')} can be cancelled.` });
+            }
+
+            // Start a session for transaction
+            const session = await mongoose.startSession();
+            session.startTransaction();
+
+            try {
+                // Restore stock if order is Pending or Processing
                 const bulkOps = order.products.map((item) => ({
                     updateOne: {
                         filter: { _id: item.productId },
                         update: { $inc: { quantity: item.quantity } },
                     },
                 }));
-                if (bulkOps.length > 0) {
-                    await productModel.bulkWrite(bulkOps, { session });
+                await productModel.bulkWrite(bulkOps, { session });
+
+                // Refund if necessary and create receipt if order is Processing and not COD
+                if (order.status === 'Processing' && order.paymentMethod !== 'COD') {
+                    const refundAmount = order.products.reduce((sum, item) => sum + (item.priceAtPurchase * item.quantity), 0);
+
+                    await walletModel.updateOne(
+                        { tourist: req.user._id },
+                        { $inc: { availableCredit: refundAmount } },
+                        { session }
+                    );
+
+                    const receipt = new receiptModel({
+                        type: 'product',
+                        status: 'successful',
+                        tourist: req.user._id,
+                        order: orderId,
+                        price: refundAmount,
+                        receiptType: 'refund',
+                    });
+                    await receipt.save({ session });
                 }
+
+                // Update order status to Cancelled
+                order.status = 'Cancelled';
+                await order.save({ session });
+
+                await session.commitTransaction();
+                session.endSession();
+
+                res.status(200).json({ message: 'Order cancelled successfully.', order });
+            } catch (innerError) {
+                await session.abortTransaction();
+                session.endSession();
+                console.error(`Error cancelling order ${orderId}:`, innerError.message);
+                res.status(500).json({ message: 'Failed to cancel and refund order.', error: innerError.message });
             }
-
-            // Handle Refunds if applicable
-            if (['Processing'].includes(order.status) && ['Wallet', 'Stripe'].includes(order.paymentMethod)) {
-                const refundAmount = order.totalAmount;
-
-                if (order.paymentMethod === 'Wallet') {
-                    const wallet = await walletModel.findOne({ tourist: req.user._id }).session(session);
-                    if (!wallet) {
-                        throw new Error('Wallet not found for user.');
-                    }
-                    wallet.availableCredit += refundAmount;
-                    await wallet.save({ session });
-                }
-
-                // Create refund receipt
-                const receipt = new receiptModel({
-                    type: 'product',
-                    status: 'successful',
-                    tourist: req.user._id,
-                    order: orderId,
-                    price: refundAmount,
-                    receiptType: 'refund',
-                });
-                await receipt.save({ session });
-            }
-
-            // Update order status to Cancelled
-            order.status = 'Cancelled';
-            await order.save({ session });
-
-            // Remove the scheduled expiration job if it exists
-            if (order.expirationJobId) {
-                const job = await agenda.jobs({ _id: new mongoose.Types.ObjectId(order.expirationJobId) });
-                if (job && job.length > 0) {
-                    await job[0].remove();
-                    console.log(`Removed expiration job ${order.expirationJobId} for order ${orderId}`);
-                }
-            }
-
-            await session.commitTransaction();
-            session.endSession();
-
-            res.status(200).json({ message: 'Order cancelled successfully.', order });
-        } catch (innerError) {
-            await session.abortTransaction();
-            session.endSession();
-            console.error(`Error cancelling order ${orderId}:`, innerError.message);
-            throw innerError; // Let the outer catch handle the response
+        } catch (error) {
+            console.error(`Failed to cancel order ${req.params.orderId}:`, error.message);
+            res.status(500).json({ message: 'Failed to cancel order.', error: error.message });
         }
-    } catch (error) {
-        console.error(`Failed to cancel order ${req.params.orderId}:`, error.message);
-        res.status(500).json({ message: 'Failed to cancel order.', error: error.message });
-    }
-};
+    };
 const confirmCODPayment = async (req, res) => {
     try {
         const { orderId } = req.params;
 
         // Validate Order ID
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
-            return res.status(400).json({ message: 'Invalid Order ID.' });
+            return res.status(400).json({ message: 'Invalid Order ID provided.' });
         }
 
-        // Fetch the order
-        const order = await orderModel.findById(orderId);
-        if (!order || order.tourist.toString() !== req.user._id.toString()) {
-            return res.status(404).json({ message: 'Order not found or not authorized.' });
+        // Fetch the order and its associated receipt
+        const order = await orderModel.findById(orderId).populate('receipt');
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found.' });
+        }
+        if (order.tourist.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Not authorized to access this order.' });
         }
 
         // Validate order status and payment method
         if (order.status !== 'Out For Delivery' || order.paymentMethod !== 'COD') {
             return res.status(400).json({
-                message: 'Order is not in a valid state for COD confirmation. Ensure it is "Out For Delivery" with payment method "COD".',
+                message: 'Order must be "Out For Delivery" and the payment method must be "COD" to confirm payment.',
             });
         }
 
@@ -175,93 +160,96 @@ const confirmCODPayment = async (req, res) => {
             order.status = 'Delivered';
             await order.save({ session });
 
-            // Create receipt
-            const receipt = new receiptModel({
-                type: 'product',
-                status: 'successful',
-                tourist: order.tourist,
-                order: orderId,
-                price: order.totalAmount,
-                receiptType: 'payment',
-            });
-            await receipt.save({ session });
+            // Correctly update the existing receipt if it exists
+            if (order.receipt) {
+                await receiptModel.updateOne(
+                    { _id: order.receipt._id },
+                    { status: 'successful' }, // Update the status to 'successful'
+                    { session }
+                );
+            }
 
             await session.commitTransaction();
             session.endSession();
 
             res.status(200).json({
-                message: 'COD payment confirmed. Order delivered.',
+                message: 'COD payment confirmed, order delivered.',
                 order: {
                     id: order._id,
                     status: order.status,
-                    totalAmount: order.totalAmount,
                 },
-                receipt: {
-                    id: receipt._id,
-                    price: receipt.price,
-                    receiptType: receipt.receiptType,
-                },
+                receipt: order.receipt ? {
+                    id: order.receipt._id,
+                    price: order.receipt.price,
+                    receiptType: order.receipt.receiptType,
+                } : null,
             });
         } catch (innerError) {
             await session.abortTransaction();
             session.endSession();
             console.error(`Error confirming COD payment for order ${orderId}:`, innerError.message);
-            throw innerError; // Let the outer catch handle the response
+            res.status(500).json({ message: 'Error confirming COD payment.', error: innerError.message });
         }
     } catch (error) {
         console.error(`Failed to confirm COD payment for order ${req.params.orderId}:`, error.message);
-        res.status(500).json({ message: 'Failed to confirm COD payment.', error: error.message });
+        res.status(500).json({ message: 'Error processing request.', error: error.message });
     }
 };
 const getUserOrders = async (req, res) => {
     try {
         const { page = 1, limit = 10, sortBy = 'createdAt', order = 'desc' } = req.query;
-
-        // Validate Pagination Parameters
         const pageNumber = parseInt(page, 10);
         const limitNumber = parseInt(limit, 10);
 
-        if (isNaN(pageNumber) || isNaN(limitNumber) || pageNumber <= 0 || limitNumber <= 0) {
-            return res.status(400).json({ message: 'Invalid pagination parameters. Page and limit must be positive integers.' });
+        if (isNaN(pageNumber) || isNaN(limitNumber) || pageNumber < 1 || limitNumber < 1) {
+            return res.status(400).json({ message: 'Page and limit must be positive integers.' });
         }
 
-        // Fetch orders for the authenticated user with pagination and sorting
+        const filteredStatuses = ['Processing', 'Delivered', 'Cancelled', 'Refunded'];
+
         const orders = await orderModel.find({
             tourist: req.user._id,
-            status: { $ne: null }, // Exclude orders with null status
+            status: { $in: filteredStatuses }
         })
             .sort({ [sortBy]: order === 'asc' ? 1 : -1 })
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
-            .populate('products.productId deliveryAddress')
-            .lean(); // Use lean() for faster read-only queries
+            .populate('products.productId', 'name price')  // Select fields as necessary for your product model
+            .populate('deliveryAddress', 'street city')  // Only necessary fields from the address
+            .populate('receipt') // Correct population assuming the reference is set correctly in the Order schema
+            .lean();
 
-        // Get total count for pagination
         const totalOrders = await orderModel.countDocuments({
             tourist: req.user._id,
-            status: { $ne: null },
+            status: { $in: filteredStatuses }
         });
 
         if (orders.length === 0) {
             return res.status(404).json({ message: 'No orders found.' });
         }
 
-        // Sanitize orders before sending to the client
         const sanitizedOrders = orders.map(order => ({
             id: order._id,
             products: order.products.map(item => ({
                 productId: item.productId._id,
-                name: item.productId.name, // Assuming 'name' field exists
+                name: item.productId.name,
                 priceAtPurchase: item.priceAtPurchase,
                 quantity: item.quantity,
             })),
-            discountApplied: order.discountApplied,
-            totalAmount: order.totalAmount,
             status: order.status,
             paymentMethod: order.paymentMethod,
-            deliveryAddress: order.deliveryAddress, // Ensure this is sanitized as needed
+            deliveryAddress: {
+                street: order.deliveryAddress.street,
+                city: order.deliveryAddress.city,
+            },
             createdAt: order.createdAt,
             updatedAt: order.updatedAt,
+            receipt: order.receipt ? {
+                id: order.receipt._id,
+                status: order.receipt.status,
+                price: order.receipt.price,
+                receiptType: order.receipt.receiptType
+            } : null,
         }));
 
         res.status(200).json({
@@ -274,71 +262,94 @@ const getUserOrders = async (req, res) => {
             },
         });
     } catch (error) {
-        console.error(`Failed to retrieve orders for user ${req.user._id}:`, error.message);
-        res.status(500).json({ message: 'Failed to retrieve orders.', error: error.message });
+        console.error(`Failed to retrieve orders for user ${req.user._id}:`, error);
+        res.status(500).json({ message: 'Failed to retrieve orders.', error: error.toString() });
     }
 };
-const getOrderDetails = async (req, res) => {
+const getCheckoutSummary = async (req, res) => {
     try {
         const { orderId } = req.params;
 
-        // Validate Order ID
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return res.status(400).json({ message: 'Invalid Order ID.' });
         }
 
-        // Fetch the order and ensure it belongs to the authenticated user
+        // Fetch the pending order, ensuring it belongs to the user and is still pending
         const order = await orderModel.findOne({
             _id: orderId,
             tourist: req.user._id,
-        }).populate('products.productId deliveryAddress');
+            status: "Pending", // Restrict to pending orders only
+        })
+            .populate('products.productId', 'name price')
+            .populate('deliveryAddress')
+            .populate('receipt') // Ensure the receipt is correctly linked
+            .exec();
 
         if (!order) {
-            return res.status(404).json({ message: 'Order not found or not authorized.' });
+            return res.status(404).json({ message: 'Pending order not found or not authorized.' });
         }
 
-        // Sanitize order details
-        const sanitizedOrder = {
-            id: order._id,
-            products: order.products.map(item => ({
-                productId: item.productId._id,
-                name: item.productId.name, // Assuming 'name' field exists
-                priceAtPurchase: item.priceAtPurchase,
-                quantity: item.quantity,
-            })),
-            discountApplied: order.discountApplied,
-            totalAmount: order.totalAmount,
-            status: order.status,
-            paymentMethod: order.paymentMethod,
-            deliveryAddress: order.deliveryAddress, // Ensure delivery address is sanitized
+        // Generate a detailed breakdown of products
+        const productsSummary = order.products.map(item => ({
+            productId: item.productId._id,
+            name: item.productId.name,
+            priceAtPurchase: item.priceAtPurchase,
+            quantity: item.quantity,
+            subtotal: item.priceAtPurchase * item.quantity, // Subtotal for each product
+        }));
+
+        const totalProductCost = productsSummary.reduce((total, item) => total + item.subtotal, 0);
+
+        // Validate receipt presence and its details
+        const receipt = order.receipt;
+        if (!receipt) {
+            return res.status(400).json({ message: 'Receipt is missing for this order. Please contact support.' });
+        }
+
+        const discountApplied = receipt.promoCode
+            ? totalProductCost - receipt.price
+            : 0; // Calculate discount if a promo code is applied
+
+        const checkoutSummary = {
+            orderId: order._id,
             createdAt: order.createdAt,
-            updatedAt: order.updatedAt,
+            products: productsSummary,
+            deliveryAddress: order.deliveryAddress
+                ? {
+                    street: order.deliveryAddress.street || "Not Provided",
+                    city: order.deliveryAddress.city || "Not Provided",
+                    postalCode: order.deliveryAddress.postalCode || "Not Provided",
+                }
+                : "Delivery address not provided",
+            totalProductCost: totalProductCost,
+            discountApplied: discountApplied,
+            finalAmount: receipt.price, // Price after applying promo code or adjustments
+            promoCode: receipt.promoCode || "No Promo Code Applied",
         };
 
-        res.status(200).json({ message: 'Order details retrieved successfully.', order: sanitizedOrder });
+        res.status(200).json({
+            message: 'Checkout summary retrieved successfully.',
+            checkoutSummary,
+        });
     } catch (error) {
-        console.error(`Failed to retrieve details for order ${req.params.orderId}:`, error.message);
-        res.status(500).json({ message: 'Failed to retrieve order details.', error: error.message });
+        console.error(`Failed to retrieve checkout summary for order ${orderId}:`, error.message);
+        res.status(500).json({ message: 'Failed to retrieve checkout summary.', error: error.message });
     }
 };
 const updateOrderAddress = async (req, res) => {
     const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
+        session.startTransaction();
         const { orderId, addressId } = req.params;
 
-        // Validate Order ID
-        if (!mongoose.Types.ObjectId.isValid(orderId)) {
-            return res.status(400).json({ message: 'Invalid Order ID.' });
+        // Validate Order ID and Address ID
+        if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(addressId)) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({ message: 'Invalid Order ID or Address ID.' });
         }
 
-        // Validate Address ID
-        if (!mongoose.Types.ObjectId.isValid(addressId)) {
-            return res.status(400).json({ message: 'Invalid Address ID.' });
-        }
-
-        // Fetch the order with session
+        // Fetch the order and ensure it belongs to the authenticated user
         const order = await orderModel.findById(orderId).session(session);
         if (!order || order.tourist.toString() !== req.user._id.toString()) {
             await session.abortTransaction();
@@ -346,16 +357,15 @@ const updateOrderAddress = async (req, res) => {
             return res.status(404).json({ message: 'Order not found or not authorized.' });
         }
 
-        // Define statuses that allow address updates
-        const modifiableStatuses = ['Pending']; // Adjust based on business logic
-
+        // Check if the order status allows for address update
+        const modifiableStatuses = ['Pending'];  // Typically, address can only be changed if the order is still pending
         if (!modifiableStatuses.includes(order.status)) {
             await session.abortTransaction();
             session.endSession();
             return res.status(400).json({ message: `Cannot update address for orders with status "${order.status}".` });
         }
 
-        // Fetch the new address with session
+        // Fetch the new address and ensure it belongs to the user
         const address = await addressModel.findById(addressId).session(session);
         if (!address || address.user.toString() !== req.user._id.toString()) {
             await session.abortTransaction();
@@ -363,23 +373,26 @@ const updateOrderAddress = async (req, res) => {
             return res.status(404).json({ message: 'Address not found or not authorized.' });
         }
 
-        // Update the delivery address
-        order.deliveryAddress = addressId;
+        // Update the delivery address in the order
+        order.deliveryAddress = address._id;
         await order.save({ session });
 
         await session.commitTransaction();
         session.endSession();
 
-        // Sanitize the order data before sending
-        const sanitizedOrder = {
-            id: order._id,
-            deliveryAddress: order.deliveryAddress,
-            status: order.status,
-            totalAmount: order.totalAmount,
-            // Add other non-sensitive fields as needed
-        };
-
-        res.status(200).json({ message: 'Delivery address updated successfully.', order: sanitizedOrder });
+        // Respond with the updated order details
+        res.status(200).json({
+            message: 'Delivery address updated successfully.',
+            order: {
+                id: order._id,
+                deliveryAddress: {
+                    street: address.street,
+                    city: address.city,
+                    postalCode: address.postalCode
+                },
+                status: order.status
+            }
+        });
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
@@ -389,243 +402,275 @@ const updateOrderAddress = async (req, res) => {
 };
 const applyPromoCodeToOrder = async (req, res) => {
     const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
+        session.startTransaction();
         const { orderId, promoCode } = req.params;
 
-        // Validate Order ID
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             await session.abortTransaction();
             session.endSession();
             return res.status(400).json({ message: 'Invalid Order ID.' });
         }
 
-        // Find the order with session
-        const order = await orderModel.findById(orderId).populate('products.productId').session(session);
+        // Fetch the order and populate its receipt
+        const order = await orderModel.findById(orderId).populate('receipt').session(session);
         if (!order || order.tourist.toString() !== req.user._id.toString()) {
             await session.abortTransaction();
             session.endSession();
             return res.status(404).json({ message: 'Order not found or not authorized.' });
         }
 
-        // Validate order status
         if (order.status !== 'Pending') {
             await session.abortTransaction();
             session.endSession();
-            return res.status(400).json({ message: 'Promo code can only be applied or removed from pending orders.' });
+            return res.status(400).json({ message: 'Promo codes can only be applied to pending orders.' });
         }
 
-        const originalAmount = order.products.reduce(
-            (sum, item) => sum + (item.priceAtPurchase * item.quantity),
-            0
-        );
+        // Validate if the receipt exists
+        if (!order.receipt) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({ message: 'No receipt associated with this order.' });
+        }
+
+        const receipt = order.receipt;
 
         if (promoCode === 'none') {
-            // Remove the existing promo code
-            order.promoCode = null;
-            order.discountApplied = 0; // Reset discount
-            order.totalAmount = originalAmount; // Reset to original amount
-            await order.save({ session });
+            // Ensure a promo code is currently applied before removing it
+            if (!receipt.promoCode) {
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({ message: 'No promo code is currently applied to this order.' });
+            }
 
+            // Calculate the total price of products at the time of purchase
+            const originalAmount = order.products.reduce(
+                (sum, item) => sum + (item.priceAtPurchase * item.quantity),
+                0
+            );
+
+            // Remove promo code and reset discount in the receipt
+            receipt.promoCode = null;
+            receipt.price = originalAmount; // Reset to the original calculated price
+            await receipt.save({ session });
             await session.commitTransaction();
             session.endSession();
-
             return res.status(200).json({
                 message: 'Promo code removed successfully.',
-                order: {
-                    id: order._id,
-                    discountApplied: order.discountApplied,
-                    totalAmount: order.totalAmount,
-                    status: order.status,
-                }
+                receipt: {
+                    id: receipt._id,
+                    promoCode: receipt.promoCode,
+                    price: receipt.price,
+                    status: receipt.status,
+                },
             });
         }
 
-        // Apply the new promo code
+        // Ensure no promo code is currently applied before applying a new one
+        if (receipt.promoCode) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({ message: 'A promo code is already applied to this order.' });
+        }
+
+        // Validate promo code
         const code = await promoCodeModel.findOne({ code: promoCode, isActive: true }).session(session);
-        if (!code) {
+        if (!code || new Date() > code.expiryDate || (code.usesLeft !== null && code.usesLeft <= 0)) {
             await session.abortTransaction();
             session.endSession();
-            return res.status(404).json({ message: 'Promo code not found or inactive.' });
+            return res.status(404).json({ message: 'Promo code not valid or expired.' });
         }
 
-        if (new Date() > code.expiryDate) {
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(400).json({ message: 'Promo code has expired.' });
-        }
-
-        // Check if promo code has uses left, if applicable
-        if (code.usesLeft !== null && code.usesLeft <= 0) {
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(400).json({ message: 'Promo code has no uses left.' });
-        }
-
-        // Calculate discount
+        // Calculate the total price of products and apply the discount
+        const originalAmount = receipt.price;
         const discount = (originalAmount * code.discountPercentage) / 100;
         const discountedAmount = originalAmount - discount;
 
-        // Update the order with the promo code
-        order.promoCode = promoCode;
-        order.totalAmount = discountedAmount;
-        order.discountApplied = discount;
-        await order.save({ session });
+        // Update the receipt with the promo code details
+        receipt.promoCode = promoCode;
+        receipt.price = discountedAmount; // Update the price in the receipt
+        await receipt.save({ session });
 
         await session.commitTransaction();
         session.endSession();
-
         return res.status(200).json({
             message: 'Promo code applied successfully.',
-            originalAmount,
-            discount,
-            discountedAmount,
-            order: {
-                id: order._id,
-                promoCode: order.promoCode,
-                status: order.status,
-            }
+            receipt: {
+                id: receipt._id,
+                promoCode: receipt.promoCode,
+                price: receipt.price,
+                status: receipt.status,
+            },
         });
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
-        console.error(`Failed to apply or remove promo code for order ${req.params.orderId}:`, error.message);
+        console.error(`Failed to apply or remove promo code:`, error.message);
         return res.status(500).json({ message: 'Failed to apply or remove promo code.', error: error.message });
     }
 };
 const processPayment = async (req, res) => {
     const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
+        session.startTransaction();
         const { orderId } = req.params;
         const { paymentMethod, paymentMethodId } = req.body;
 
-        // Validate Order ID
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(400).json({ message: 'Invalid Order ID.' });
         }
 
-        // Fetch the order with session
-        const order = await orderModel.findById(orderId).populate('products.productId').session(session);
+        // Fetch the order and populate its receipt
+        const order = await orderModel.findById(orderId).populate('receipt').session(session);
         if (!order || order.tourist.toString() !== req.user._id.toString()) {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(404).json({ message: 'Order not found or not authorized.' });
         }
 
-        // Validate essential details
-        if (!order.deliveryAddress) {
-            return res.status(400).json({ message: 'Delivery address is required to process payment.' });
-        }
-
-        if (order.products.length === 0) {
-            return res.status(400).json({ message: 'Order must contain at least one product to process payment.' });
-        }
-
         if (order.status !== 'Pending') {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(400).json({ message: 'Order must be in "Pending" state to process payment.' });
         }
+
+        // Validate delivery address
+        if (!order.deliveryAddress) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({ message: 'A valid delivery address is required to process payment.' });
+        }
+
+        const receipt = order.receipt; // Guaranteed to exist
+        const paymentAmount = receipt.price; // Use price from receipt
 
         let paymentSuccessful = false;
 
         // Handle Wallet Payment
         if (paymentMethod === 'Wallet') {
             const wallet = await walletModel.findOne({ tourist: req.user._id }).session(session);
-            if (!wallet || wallet.availableCredit < order.totalAmount) {
+            if (!wallet || wallet.availableCredit < paymentAmount) {
+                await session.abortTransaction();
+                session.endSession();
                 return res.status(400).json({ message: 'Insufficient wallet balance.' });
             }
-            wallet.availableCredit -= order.totalAmount;
+
+            wallet.availableCredit -= paymentAmount;
             await wallet.save({ session });
             paymentSuccessful = true;
 
             // Handle Stripe Payment
         } else if (paymentMethod === 'Stripe') {
             if (!paymentMethodId) {
+                await session.abortTransaction();
+                session.endSession();
                 return res.status(400).json({ message: 'Payment method ID is required for Stripe payments.' });
             }
 
             try {
                 const paymentIntent = await stripe.paymentIntents.create({
-                    amount: Math.round(order.totalAmount * 100), // Amount in cents
+                    amount: Math.round(paymentAmount * 100), // Amount in cents
                     currency: 'usd',
                     payment_method: paymentMethodId,
                     confirm: true,
                 });
 
-                if (paymentIntent.status !== 'succeeded') {
-                    return res.status(400).json({ message: 'Stripe payment failed.' });
+                if (paymentIntent.status === 'succeeded') {
+                    paymentSuccessful = true;
+                } else {
+                    await session.abortTransaction();
+                    session.endSession();
+                    return res.status(400).json({
+                        message: 'Stripe payment failed.',
+                        error: paymentIntent.last_payment_error?.message || 'Unknown error',
+                    });
                 }
-
-                paymentSuccessful = true;
             } catch (stripeError) {
+                await session.abortTransaction();
+                session.endSession();
                 console.error(`Stripe payment error for order ${orderId}:`, stripeError.message);
                 return res.status(400).json({ message: 'Stripe payment failed.', error: stripeError.message });
             }
 
-            // Handle Invalid Payment Method
+            // Handle COD
         } else if (paymentMethod === 'COD') {
-            return res.status(400).json({ message: 'COD does not require payment processing here.' });
+            // Leave the receipt status as 'pending' for COD
+            receipt.status = 'pending';
+            paymentSuccessful = true;
+
         } else {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(400).json({ message: 'Invalid payment method.' });
         }
 
-        if (!paymentSuccessful) {
+        if (paymentSuccessful) {
+            // Update receipt for non-COD payments
+            if (paymentMethod !== 'COD') {
+                receipt.status = 'successful';
+            }
+
+            await receipt.save({ session });
+
+            // Decrement promo code usage if applicable
+            if (receipt.promoCode) {
+                const promoCode = await promoCodeModel.findOne({ code: receipt.promoCode }).session(session);
+                if (promoCode) {
+                    if (promoCode.usesLeft !== null) {
+                        if (promoCode.usesLeft > 0) {
+                            promoCode.usesLeft -= 1;
+                            if (promoCode.usesLeft === 0) {
+                                promoCode.isActive = false;
+                            }
+                        } else {
+                            await session.abortTransaction();
+                            session.endSession();
+                            return res.status(400).json({ message: 'Promo code is no longer valid for use.' });
+                        }
+                    }
+                    await promoCode.save({ session });
+                }
+            }
+
+            // Update order details
+            order.status = 'Processing';
+            order.paymentMethod = paymentMethod;
+            await order.save({ session });
+
+            // Clear the user's cart
+            await cartModel.findOneAndDelete({ tourist: req.user._id }).session(session);
+
+            await session.commitTransaction();
+            session.endSession();
+
+            return res.status(200).json({
+                message: 'Payment successful. Order is now processing.',
+                order: {
+                    id: order._id,
+                    status: order.status,
+                },
+                receipt: {
+                    id: receipt._id,
+                    price: receipt.price,
+                    receiptType: receipt.receiptType,
+                },
+            });
+        } else {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(400).json({ message: 'Payment was not successful.' });
         }
-
-        // Handle Promo Code Usage
-        if (order.promoCode) {
-            const code = await promoCodeModel.findOne({ code: order.promoCode }).session(session);
-            if (code) {
-                // Check if promo code is expired
-                if (new Date() > code.expiryDate) {
-                    return res.status(400).json({ message: 'Promo code has expired.' });
-                }
-
-                // Check if promo code has uses left
-                if (code.usesLeft !== null && code.usesLeft <= 0) {
-                    return res.status(400).json({ message: 'Promo code has no uses left.' });
-                }
-
-                // Decrement uses upon successful payment
-                if (code.usesLeft !== null) {
-                    code.usesLeft -= 1;
-                    if (code.usesLeft === 0) {
-                        code.isActive = false;
-                    }
-                }
-                await code.save({ session }); // Save promo code with session
-            }
-        }
-
-        // Update order status and payment method
-        order.status = 'Processing';
-        order.paymentMethod = paymentMethod;
-        await order.save({ session });
-
-        // Delete the user's cart
-        await cartModel.findOneAndDelete({ tourist: req.user._id }).session(session);
-
-        await session.commitTransaction();
-        session.endSession();
-
-        // Sanitize the order data before sending
-        const sanitizedOrder = {
-            id: order._id,
-            status: order.status,
-            paymentMethod: order.paymentMethod,
-            totalAmount: order.totalAmount,
-        };
-
-        res.status(200).json({ message: 'Payment successful. Order is now processing.', order: sanitizedOrder });
     } catch (error) {
-        await session.abortTransaction();
+        if (session.inTransaction()) {
+            await session.abortTransaction();
+        }
         session.endSession();
         console.error(`Failed to process payment for order ${req.params.orderId}:`, error.message);
-        res.status(500).json({ message: 'Failed to process payment.', error: error.message });
+        return res.status(500).json({ message: 'Failed to process payment.', error: error.message });
     }
 };
-
 
 module.exports = {
     updateOrderAddress,
@@ -633,7 +678,7 @@ module.exports = {
     confirmCODPayment,
     markOrderOutForDelivery,
     getUserOrders,
-    getOrderDetails,
     cancelOrder,
-    applyPromoCodeToOrder
+    applyPromoCodeToOrder,
+    getCheckoutSummary
 };

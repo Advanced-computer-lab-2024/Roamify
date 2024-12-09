@@ -85,7 +85,7 @@ const CommonCard = ({
       const response = await axios.post(
         `http://localhost:3000/api/cart/product`,
         {
-          product: id,
+           productId:id
         },
         { withCredentials: true } // Ensure credentials are sent for authentication
       );
