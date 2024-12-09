@@ -29,9 +29,7 @@ const ReviewTourGuide = () => {
     } catch (error) {
       setItineraries([]);
       setError(
-        error.response && error.response.status === 404
-          ? "No itineraries found"
-          : "An error occurred while fetching itineraries."
+        error.response.data.message
       );
     } finally {
       setLoading(false);
@@ -44,7 +42,7 @@ const ReviewTourGuide = () => {
 
   return (
     <>
-      <Header HeaderData={HeaderData} />
+      
       <CommonBanner heading="Rate Tour Guide" pagination="tourguide" />
       <section id="explore_area" className="section_padding">
         <div className="container">
