@@ -7,7 +7,7 @@ import ProfileButton from "../component/Profile/ProfileButton";
 import ThemeToggleButton from "../pages/Home/ThemeToggleButton";
 import { useFlexLayout } from "react-table";
 import { color } from "chart.js/helpers";
-import { FaHeart } from "react-icons/fa";
+import { FaHeart, FaBell } from "react-icons/fa";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 const Header = ({ HeaderData }) => {
@@ -230,40 +230,13 @@ const Header = ({ HeaderData }) => {
                 </div>
                 <div
                   className="others-options d-flex align-items-center"
-                  style={{ flex: 1, display: "flex", justifyContent: "end" }}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    justifyContent: "end",
+                    marginLeft: "2vw",
+                  }}
                 >
-                  {role === "tourist" && (
-                    <>
-                      <div
-                        className="option-item"
-                        style={{ marginLeft: "10px" }}
-                      >
-                        <Link to="/tourist/wishlist">
-                          {" "}
-                          {/* Link to the favorite page */}
-                          <FaHeart
-                            style={{
-                              fontSize: "24px", // Adjust the icon size
-                              color: "var(--text-color)", // Set the color for the icon
-                            }}
-                          />
-                        </Link>
-                      </div>
-                      <div
-                        className="option-item"
-                        style={{ marginLeft: "5px" }}
-                      >
-                        <Link to="/tourist/cart">
-                          <ShoppingCartIcon
-                            style={{
-                              fontSize: "24px", // Adjust the icon size
-                              color: "var(--text-color)", // Set the color for the icon
-                            }}
-                          />
-                        </Link>
-                      </div>
-                    </>
-                  )}
                   <div
                     className="option-item"
                     style={{
@@ -273,6 +246,69 @@ const Header = ({ HeaderData }) => {
                     }}
                   >
                     <ThemeToggleButton />
+                  </div>
+                  {role === "tourist" && (
+                    <div style={{ position: "relative" }}>
+                      <select
+                        value={currency}
+                        onChange={(e) => {
+                          const selectedCurrency = e.target.value;
+                          const selectedOption = currencyOptions.find(
+                            (option) => option.currency === selectedCurrency
+                          );
+                          handleCurrencyChange(
+                            selectedCurrency,
+                            selectedOption ? selectedOption.symbol : "$",
+                            selectedOption ? selectedOption.value : 1 // Save exchange rate
+                          );
+                        }}
+                        style={{
+                          padding: "10px",
+                          borderRadius: "999px",
+                          border: "1px solid var(--secondary-border-color)",
+                          backgroundColor: "var(--secondary-color)",
+                          color: "var(--text-color)",
+                          fontSize: "12px",
+                          height: "6vh ",
+                          width: "6vh",
+                          appearance: "none",
+                          backgroundImage: "none",
+                          cursor: "pointer",
+                        }}
+                        className="currency-dropdown"
+                      >
+                        {filteredCurrencyOptions.map((currencyOption) => (
+                          <option
+                            key={currencyOption.currency}
+                            value={currencyOption.currency}
+                          >
+                            {currencyOption.currency} ({currencyOption.symbol})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {role === "tourist" && (
+                    <div className="option-item" style={{ marginRight: "0px" }}>
+                      <Link to="/tourist/cart">
+                        <ShoppingCartIcon
+                          style={{
+                            fontSize: "20px", // Adjust the icon size
+                            color: "var(--text-color)", // Set the color for the icon
+                          }}
+                        />
+                      </Link>
+                    </div>
+                  )}
+
+                  <div className="option-item" style={{ marginRight: "0px" }}>
+                    <FaBell
+                      style={{
+                        fontSize: "20px", // Adjust the icon size
+                        color: "var(--text-color)", // Set the color for the icon
+                      }}
+                    />
                   </div>
 
                   <div className="option-item">

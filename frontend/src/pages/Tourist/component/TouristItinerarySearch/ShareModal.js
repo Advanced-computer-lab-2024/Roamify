@@ -7,14 +7,17 @@ const ShareModal = ({ isOpen, onClose, handleCopy, handleShareEmail }) => {
 
   return (
     <div
-      className="modal"
       style={{
-        display: "flex",
         position: "fixed",
-        height: "100vh",
-        width: "100vw",
-        alignItems: "center",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.1)",
+        display: "flex",
         justifyContent: "center",
+        alignItems: "center",
+        zIndex: 50,
       }}
       onClick={onClose}
     >
@@ -33,7 +36,7 @@ const ShareModal = ({ isOpen, onClose, handleCopy, handleShareEmail }) => {
         }}
       >
         <div style={{ display: "flex" }}>
-          <h2>Share Itinerary</h2>
+          <h2 style={{ color: "var(--text-color)" }}>Share Itinerary</h2>
           <button
             onClick={onClose}
             style={{

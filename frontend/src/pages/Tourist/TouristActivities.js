@@ -7,10 +7,6 @@ import TouristActivitiesForm from "./component/TouristActivitiesSearch/TouristAc
 const TouristActivities = () => {
   return (
     <>
-      <CommonBanner
-        heading="Tourist Activities"
-        pagination="Tourist Activities"
-      />
       <TouristActivitiesForm />
       {/* <TouristActivitiesArea /> */}
     </>

@@ -95,6 +95,48 @@ Default CSS
   --shimmer-end-color: #1f2a41;
 }
 
+.profile-nav {
+  padding: 15px 20px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: transparent;
+  border-radius: 8px;
+  gap: 20px;
+}
+
+.profile-icon-section {
+  flex: 3;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Creates 3 equal-width columns */
+  gap: 10px; /* Optional: Adds space between grid items */
+}
+
+.profile-icon-section .option-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px;
+  background-color: var(--background-color);
+  border-radius: 8px;
+}
+
+.others-options > div {
+  flex: 1;
+  /* padding: 10px;   */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-nav:hover {
+  background-color: var(--background-color);
+}
+
 .flight_search_result_wrapper {
   display: flex;
   flex-direction: column;

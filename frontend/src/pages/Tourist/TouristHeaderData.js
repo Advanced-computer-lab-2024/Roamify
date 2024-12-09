@@ -94,25 +94,21 @@ export const HeaderData = [
       },
     ],
   },
-  {
-    menu: "Points",
-    submenu: true,
-    subMenuitem: [
-      {
-        subItem: "View My Level",
-        linkL: "/tourist/point",
-        subMenuActive: false,
-      },
+  // {
+  //   menu: "Points",
+  //   submenu: true,
+  //   subMenuitem: [
+  //     {
+  //       subItem: "View My Level",
+  //       linkL: "/tourist/point",
+  //       subMenuActive: false,
+  //     },
 
-      {
-        subItem: "Redeem My Points",
-        linkL: "/tourist/redeem",
-        subMenuActive: false,
-      },
-    ],
-  },
-  {
-    menu: " Orders",
-    link: "orders",
-  },
+  //     {
+  //       subItem: "Redeem My Points",
+  //       linkL: "/tourist/redeem",
+  //       subMenuActive: false,
+  //     },
+  //   ],
+  // },
 ];

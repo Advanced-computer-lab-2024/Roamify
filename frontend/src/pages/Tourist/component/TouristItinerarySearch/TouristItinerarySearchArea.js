@@ -39,8 +39,10 @@ const TouristItineraryWrapper = () => {
   const [searchType, setSearchType] = useState("name");
   const [searchInput, setSearchInput] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentItinerary, setCurrentItinerary] = useState(false);
 
-  const openShareModal = () => {
+  const openShareModal = (itinerary) => {
+    setCurrentItinerary(itinerary);
     setIsModalOpen(true);
   };
 
@@ -497,18 +499,12 @@ const TouristItineraryWrapper = () => {
                           Book now
                         </button>
                         <button
-                          onClick={openShareModal}
+                          onClick={() => openShareModal(itinerary)}
                           className=" btn-secondary "
                         >
                           <Share style={{ marginRight: "8px" }} />
                           Share
                         </button>
-                        <ShareModal
-                          handleCopy={() => handleCopyLink(itinerary._id)}
-                          handleShareEmail={() => handleEmailShare(itinerary)}
-                          isOpen={isModalOpen}
-                          onClose={closeShareModal}
-                        />
                       </div>
                       <div
                         data-bs-toggle="collapse"
@@ -640,6 +636,14 @@ const TouristItineraryWrapper = () => {
               zIndex: 999,
             }}
             onClick={() => setShowPopup(false)}
+          />
+        )}
+        {isModalOpen && (
+          <ShareModal
+            handleCopy={() => handleCopyLink(currentItinerary._id)}
+            handleShareEmail={() => handleEmailShare(currentItinerary)}
+            isOpen={isModalOpen}
+            onClose={closeShareModal}
           />
         )}
       </div>

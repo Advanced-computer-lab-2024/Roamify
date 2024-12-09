@@ -36,15 +36,18 @@ const TouristActivitiesWrapper = () => {
   const currencySymbol = localStorage.getItem("currencySymbol") || "$";
   const exchangeRate = parseFloat(localStorage.getItem("value")) || 1;
   const [notificationActive, setNotificationActive] = useState(false);
+  const [currentActivity, setCurrentActivity] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openShareModal = () => {
+  const openShareModal = (activity) => {
+    setCurrentActivity(activity);
     setIsModalOpen(true);
   };
 
   // Function to close the modal
   const closeShareModal = () => {
+    setCurrentActivity(null);
     setIsModalOpen(false);
   };
 
@@ -254,6 +257,7 @@ const TouristActivitiesWrapper = () => {
 
   // Function to copy activity link
   const handleCopyLink = (activityId) => {
+    console.log(activityId);
     const activityUrl = `${window.location.origin}/activity-details/${activityId}`;
     navigator.clipboard
       .writeText(activityUrl)
@@ -433,59 +437,101 @@ const TouristActivitiesWrapper = () => {
                     key={activity._id}
                   >
                     <div
-                      className="flight_search_items"
+                      className=""
                       style={{
+                        display: "flex",
                         background: "var(--secondary-color)",
-                        padding: "20px", // Adding padding to make the shadow effect more visible
                         borderRadius: "10px", // Optional: to round the corners of the box
                         boxShadow:
                           "0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1)", // Shadow effect
                         transition: "box-shadow 0.3s ease", // Smooth transition on hover
                       }}
                     >
-                      <div className="multi_city_flight_lists">
-                        <div className="flight_multis_area_wrapper">
-                          <div
-                            className="flight_search_left"
+                      <div
+                        className="flight_search_left"
+                        style={{
+                          flex: "1",
+                          height: "100%",
+                          padding: "30px 0px",
+                          display: "flex",
+                          gap: "20px",
+                          flexDirection: "column",
+                          alignItems: "baseline",
+                          width: "100%",
+                        }}
+                      >
+                        <div
+                          className="flight_search_destination"
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "left",
+                            gap: "10px",
+                          }}
+                        >
+                          <h3
                             style={{
-                              height: "100%",
-                              padding: "30px 30px",
-                              display: "flex",
-                              gap: "20px",
-                              flexDirection: "column",
-                              alignItems: "baseline",
-                              width: "100%",
+                              fontSize: "28px",
+                              color: "var(--text-color)",
+                              textAlign: "left",
                             }}
                           >
-                            <div className="flight_search_destination">
-                              <h3 style={{ fontSize: "28px" }}>
-                                {activity.name}
-                              </h3>
-                              <p>
-                                {" "}
-                                <i
-                                  className="fas fa-map-marker-alt"
-                                  style={{ marginRight: "8px" }}
-                                ></i>
-                                {activity.location.name}
-                              </p>
-                            </div>
+                            {activity.name}
+                          </h3>
+                          <span className="review-rating">
+                            {renderStars(activity.rating)}
+                          </span>
+                          <p style={{ color: "var(--dashboard-title-color)" }}>
+                            {" "}
+                            <i
+                              className="fas fa-map-marker-alt"
+                              style={{
+                                marginRight: "8px",
+                              }}
+                            ></i>
+                            {activity.location.name}
+                          </p>
+                        </div>
+
+                        <div
+                          className="flight_search_destination"
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "10px",
+                            color: "var(--dashboard-title-color)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "baseline",
+                            }}
+                          >
+                            <p>Date : </p>
+                            <p>
+                              {new Date(activity.date).toLocaleDateString()}
+                            </p>
                           </div>
-                          <div className="flight_search_middel">
-                            <div className="flight_search_destination">
-                              <p>Date</p>
-                              <h3>
-                                {new Date(activity.date).toLocaleDateString()}
-                              </h3>
-                              <h6>Time: {activity.time}</h6>
-                            </div>
-                          </div>
+
+                          <h6>Time : {activity.time}</h6>
                         </div>
                       </div>
-                      <div className="flight_search_right">
-                        <span className="review-rating">
-                          {renderStars(activity.rating)}
-                        </span>
+
+                      <div
+                        className="flight_search_right"
+                        style={{
+                          background: "var(--scroll-bar-color)",
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
+                          // alignItems: "center",
+                          justifyContent: "space-evenly",
+                          position: "relative",
+                          color: "white",
+                        }}
+                      >
                         <div
                           style={{
                             position: "relative",
@@ -507,14 +553,14 @@ const TouristActivitiesWrapper = () => {
 
                         <h5>
                           {activity.discounts ? (
-                            <del>
+                            <del style={{ color: "var(--main-color)" }}>
+                              {currencySymbol}
                               {(
                                 (
                                   activity.price *
                                   (1 + activity.discounts / 100)
                                 ).toFixed(2) * exchangeRate
                               ).toFixed(2)}{" "}
-                              {currencySymbol}
                             </del>
                           ) : (
                             ""
@@ -529,66 +575,80 @@ const TouristActivitiesWrapper = () => {
                               : ""}
                           </sup>
                         </h2>
-                        {/* Book Now Button */}
-                        {activity.bookingAvailable ? (
-                          <button
-                            onClick={() =>
-                              handleBooking(activity._id, activity.date)
-                            }
-                            className="btn btn_theme btn_sm"
-                          >
-                            Book now
-                          </button>
+                        {activity.discounts ? (
+                          <p style={{ color: "var(--dashboard-title-color)" }}>
+                            *Discount available
+                          </p>
                         ) : (
-                          <>
+                          ""
+                        )}
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "10px",
+                            marginBottom: "10px",
+                          }}
+                        >
+                          <div style={{ display: "flex", flex: 1 }}>
+                            {/* Book Now Button */}
+                            {activity.bookingAvailable ? (
+                              <button
+                                onClick={() =>
+                                  handleBooking(activity._id, activity.date)
+                                }
+                                className="btn btn_theme btn_sm"
+                                style={{ flex: 1, padding: "10px 20px" }}
+                              >
+                                Book now
+                              </button>
+                            ) : (
+                              <>
+                                <button
+                                  disabled
+                                  className="btn btn_theme btn_sm"
+                                  style={{
+                                    cursor: "not-allowed",
+                                    flex: 1,
+                                    padding: "10px 20px",
+                                  }}
+                                >
+                                  Book now
+                                </button>
+                                <button
+                                  onClick={() => handleNotifyMe(activity._id)}
+                                  className={`btn ${
+                                    notificationActive
+                                      ? "btn-success"
+                                      : "btn_theme btn_sm"
+                                  } btn-sm`}
+                                  style={{
+                                    flex: 1,
+                                    marginLeft: "10px",
+                                  }}
+                                >
+                                  Notify Me
+                                </button>
+                              </>
+                            )}
+                          </div>
+
+                          {/* Share Button */}
+                          <div style={{ display: "flex", flex: 1 }}>
                             <button
-                              disabled
-                              className="btn btn_theme btn_sm"
-                              style={{ cursor: "not-allowed" }}
-                            >
-                              Book now
-                            </button>
-                            <button
-                              onClick={() => handleNotifyMe(activity._id)}
-                              className={`btn ${
-                                notificationActive
-                                  ? "btn-success"
-                                  : "btn-warning"
-                              } btn-sm`}
+                              onClick={() => openShareModal(activity)}
+                              className=" btn-secondary "
                               style={{
-                                marginLeft: "10px",
+                                flex: 1,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
                               }}
                             >
-                              Notify Me
+                              <Share style={{ marginRight: "8px" }} />
+                              Share
                             </button>
-                          </>
-                        )}
-                        {activity.discounts ? <p>*Discount available</p> : ""}
-
-                        {/* Share Button */}
-                        <div>
-                          <button
-                            onClick={openShareModal}
-                            className=" btn-secondary "
-                          >
-                            <Share style={{ marginRight: "8px" }} />
-                            Share
-                          </button>
-                          <ShareModal
-                            handleCopy={() => handleCopyLink(activity._id)}
-                            handleShareEmail={() => handleEmailShare(activity)}
-                            isOpen={isModalOpen}
-                            onClose={closeShareModal}
-                          />
-                        </div>
-
-                        <div
-                          data-bs-toggle="collapse"
-                          data-bs-target={`#collapseExample${activity._id}`}
-                          aria-expanded="false"
-                          aria-controls={`collapseExample${activity._id}`}
-                        >
-                          Show more <i className="fas fa-chevron-down"></i>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -670,6 +730,18 @@ const TouristActivitiesWrapper = () => {
             zIndex: 999,
           }}
           onClick={() => setShowPopup(false)}
+        />
+      )}
+      {isModalOpen && (
+        <ShareModal
+          handleCopy={() => {
+            handleCopyLink(currentActivity._id);
+          }}
+          handleShareEmail={() => {
+            handleEmailShare(currentActivity);
+          }}
+          isOpen={isModalOpen}
+          onClose={closeShareModal}
         />
       )}
       {/* Toast Container for notifications */}
