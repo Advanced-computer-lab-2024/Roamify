@@ -1,15 +1,15 @@
+mangoose= require('mongoose');
 const userModel = require('../models/userModel');
 const sellerModel = require('../models/sellerModel');
 const orderModel=require('../models/orderModel');
-mangoose= require('mongoose');
 const productModel=require('../models/productModel');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
-const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
+const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
 const {Types} = require("mongoose");
-const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
-const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
+const storage = multer.memoryStorage();
+const upload = multer({ storage }).single('logo');
 
 const createProfile = async (req, res) => {
   try {

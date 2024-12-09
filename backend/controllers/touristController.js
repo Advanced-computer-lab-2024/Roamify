@@ -1,9 +1,9 @@
+const mongoose = require("mongoose");
 const touristModel = require("../models/touristModel");
 const transportationModel = require("../models/transportationModel");
 const userModel = require("../models/userModel");
 const walletModel = require("../models/walletModel");
 const validator = require("validator");
-const mongoose = require("mongoose");
 const preferenceTagModel = require("../models/preferenceTagModel");
 const receiptModel = require("../models/receiptModel");
 const activityModel = require("../models/activityModel");
@@ -11,12 +11,13 @@ const itineraryModel = require("../models/itineraryModel");
 const activityTicketModel = require("../models/activityTicketModel");
 const itineraryTicketModel = require("../models/itineraryTicketModel");
 const placeTicketModel = require("../models/placeTicketModel");
+const itineraryReviewModel = require("../models/itineraryReviewModel");
+const activityReviewModel = require("../models/activityReviewModel");
 const placeModel = require("../models/placeModel");
 const nodemailer = require('nodemailer')
 const emailTemplates = require('../emailTemplate')
 const Stripe = require('stripe');
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
 
 function isAdult(dateOfBirth) {
   const today = new Date();
@@ -1045,21 +1046,66 @@ const getAllBookedActivities = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
 
-    if (!tourist)
-      throw Error('user does not exist')
+    if (!tourist) throw Error('user does not exist');
+
     let activityTickets = await activityTicketModel
-      .find({ tourist: req.user._id, status: "active" })
-      .populate("activity", "date time name location.name"); // Specify the fields you want to include
-    const filteredActivityTickets = activityTickets.filter(t => t.activity.date < new Date());
-    if (filteredActivityTickets.length === 0)
-      throw Error('no booked activities yet')
-    return res.status(200).json(filteredActivityTickets);
+        .find({ tourist: req.user._id, status: "active" })
+        .populate("activity", "date time name location.name");
+
+    const filteredActivityTickets = await Promise.all(
+        activityTickets.map(async (t) => {
+          const isReviewed = await activityReviewModel.exists({
+            activity: t.activity._id,
+            tourist: req.user._id,
+          });
+          return {
+            ...t.toObject(),
+            isReviewed: !!isReviewed,
+          };
+        })
+    );
+
+    const validTickets = filteredActivityTickets.filter(t => t.activity.date < new Date());
+    if (validTickets.length === 0) throw Error('no booked activities yet');
+
+    return res.status(200).json(validTickets);
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: error.message,
-      });
+    return res.status(500).json({ message: error.message });
+  }
+};
+const getAllBookedItineraries = async (req, res) => {
+  try {
+    const tourist = await touristModel.findOne({ user: req.user._id });
+
+    if (!tourist) throw Error('user does not exist');
+
+    const itineraryTickets = await itineraryTicketModel
+        .find({
+          tourist: req.user._id,
+          status: "active",
+          date: { $lt: new Date() },
+        })
+        .populate("itinerary", "name locations");
+
+    const enhancedItineraryTickets = await Promise.all(
+        itineraryTickets.map(async (t) => {
+          const isReviewed = await itineraryReviewModel.exists({
+            itinerary: t.itinerary._id,
+            tourist: req.user._id,
+          });
+          return {
+            ...t.toObject(),
+            isReviewed: !!isReviewed,
+          };
+        })
+    );
+
+    if (enhancedItineraryTickets.length === 0)
+      throw Error('you have no itineraries that you have booked in the past');
+
+    return res.status(200).json(enhancedItineraryTickets);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };
 const getAllBookedPlaces = async (req, res) => {
@@ -1081,31 +1127,6 @@ const getAllBookedPlaces = async (req, res) => {
       .json({
         message: "couldn't retrieve booked places",
         error: error.message,
-      });
-  }
-};
-const getAllBookedItineraries = async (req, res) => {
-  try {
-    const tourist = await touristModel.findOne({ user: req.user._id });
-
-    if (!tourist)
-      throw Error('user does not exist')
-
-    const itineraryTickets = await itineraryTicketModel
-      .find({
-        tourist: req.user._id,
-        status: "active",
-        date: { $lt: new Date() } // Condition to check if the date is in the past
-      }).populate("itinerary", "name locations"); // Specify the fields you want to include
-    if (itineraryTickets.length === 0)
-      throw Error('you have no itineraries that you have booked in the past')
-    return res.status(200).json(itineraryTickets);
-  } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: error.message
-
       });
   }
 };

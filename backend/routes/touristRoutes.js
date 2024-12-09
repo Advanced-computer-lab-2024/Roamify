@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const touristController = require("../controllers/touristController");
-const activityController = require("../controllers/activityController");
-const itineraryController = require("../controllers/itineraryController");
 const reviewController = require("../controllers/reviewController");
 
 
@@ -30,8 +28,6 @@ router.get('/view-points-level', touristController.viewPointsLevel);
 router.get('/view-total-refunds', touristController.viewTotalRefundedReceipts);
 router.put('/redeem-points', touristController.redeemPoints);
 router.get('/get-upcoming-booked-transportations', touristController.getBookedFutureTransportations);
-router.get('/activity/unrated', activityController.getUnratedCompletedActivities);
-router.get('/itinerary/unrated', itineraryController.getUnratedCompletedItineraries);
 router.get('/tour-guide/unrated', reviewController.getUnratedTourGuidesForCompletedItineraries);
 router.post('/review/rate/tour-guide/:tourGuideId', reviewController.rateTourGuide);
 router.post('/review/comment/tour-guide/:tourGuideId', reviewController.commentOnTourGuide);
