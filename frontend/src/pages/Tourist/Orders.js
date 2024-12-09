@@ -91,8 +91,8 @@ const OrdersArea = () => {
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
+                    justifyContent: "center",
+                    alignItems: "flex-start", // Left-align order summary
                     padding: "20px",
                     backgroundColor: "#f9f9f9",
                     borderRadius: "8px",
@@ -100,8 +100,8 @@ const OrdersArea = () => {
                     marginBottom: "20px",
                   }}
                 >
-                  <div style={{ flex: "1", marginBottom: "15px" }}>
-                    <h3 style={{ marginBottom: "10px" }}>Order Summary</h3>
+                  <h3 style={{ textAlign: "left", marginBottom: "10px" }}>Order Summary</h3>
+                  <div style={{ width: "100%", marginBottom: "15px", textAlign: "left" }}>
                     <p>Status: {order.status}</p>
                     <p>Total Receipt Price: ${order.receipt?.price || "N/A"}</p>
                     <p>Date and Time: {formatDateAndTime(order.createdAt)}</p>
@@ -110,21 +110,33 @@ const OrdersArea = () => {
                       {order.deliveryAddress.city}
                     </p>
                   </div>
-                  <div style={{ flex: "1" }}>
-                    <h4>Products:</h4>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-start",
+                      gap: "10px",
+                      flexWrap: "wrap",
+                      width: "100%",
+                    }}
+                  >
                     {order.products.map((product, productIndex) => (
                       <div
                         key={productIndex}
                         style={{
+                          width: "200px", // Square size
+                          height: "150px", // Square size
                           padding: "10px",
-                          marginBottom: "10px",
                           backgroundColor: "#fff",
                           border: "1px solid #ddd",
                           borderRadius: "5px",
+                          textAlign: "left",
+                          overflow: "hidden", // Hide overflow text
+                          whiteSpace: "nowrap", // Prevent text wrapping
+                          textOverflow: "ellipsis", // Add ellipsis for overflow
                         }}
                       >
-                        <p>Product Name: {product.name}</p>
-                        <p>Price at Purchase: ${product.priceAtPurchase}</p>
+                        <p>Name: {product.name}</p>
+                        <p>Price: ${product.priceAtPurchase}</p>
                         <p>Quantity: {product.quantity}</p>
                       </div>
                     ))}
@@ -138,6 +150,8 @@ const OrdersArea = () => {
                         border: "none",
                         borderRadius: "4px",
                         cursor: "pointer",
+                        alignSelf: "flex-end", // Button on the right
+                        marginTop: "15px",
                       }}
                       onClick={() => handleCancelOrder(order.id)}
                     >

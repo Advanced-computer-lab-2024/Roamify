@@ -76,5 +76,5 @@ const startupRecovery = async () => {
     }
 };
 
-module.exports = {agenda};
+module.exports = { agenda };
 module.exports.startupRecovery = startupRecovery;

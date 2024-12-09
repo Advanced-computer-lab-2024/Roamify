@@ -10,6 +10,7 @@ const EditProductButton = ({
   price,
   quantity,
   description,
+  fetchProducts,
 }) => {
   const handleSubmit = async (formData) => {
     try {
@@ -25,6 +26,8 @@ const EditProductButton = ({
       );
 
       // Handle the successful response
+      handleCloseModal();
+      fetchProducts();
       console.log("Product updated successfully:", response.data);
     } catch (error) {
       // Handle errors

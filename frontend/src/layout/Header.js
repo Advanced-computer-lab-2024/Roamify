@@ -170,7 +170,9 @@ const Header = ({ HeaderData }) => {
                     flex: 1,
                   }}
                 >
-                  <img src={"/logo.svg"} alt="Logo" style={{}} />
+                  <Link to="/">
+                    <img src={"/logo.svg"} alt="Logo" style={{}} />
+                  </Link>
                 </div>
                 <div
                   className="collapse navbar-collapse mean-menu"

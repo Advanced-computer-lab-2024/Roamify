@@ -8,32 +8,32 @@ const tourGuideModel = require("../models/tourGuideModel");
 const notificationModel = require("../models/notificationModel");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
-const nodemailer = require('nodemailer')
-const emailTemplates = require('../emailTemplate');
+const nodemailer = require("nodemailer");
+const emailTemplates = require("../emailTemplate");
 const { default: mongoose } = require("mongoose");
-const { connectedUsers } = require('../config/socket')
+const { connectedUsers } = require("../config/socket");
 
 async function notifyUser(io, userId, type, name) {
-
-  const message = type === 'activity' ? `Your activity "${name}" has been flagged as inappropriate by the admin.` : `Your itinerary "${name}" has been flagged as inappropriate by the admin.`;
+  const message =
+    type === "activity"
+      ? `Your activity "${name}" has been flagged as inappropriate by the admin.`
+      : `Your itinerary "${name}" has been flagged as inappropriate by the admin.`;
   const notification = new notificationModel({
     user: userId,
     type: `flagged-${type}`,
-    message
+    message,
   });
   await notification.save();
 
-
   const socketId = connectedUsers[userId.toString()];
+  console.log(connectedUsers);
+  console.log(socketId);
   if (socketId) {
     io.to(socketId).emit("receiveNotification", message); // Send the message
     console.log(`Notification sent to user ${userId}: ${message}`);
-  }
-  else {
+  } else {
     console.log(`User ${userId} is not connected.`);
   }
-
-
 }
 const addTourismGovernor = async (req, res) => {
   const { username, password } = req.body;
@@ -160,7 +160,6 @@ const deleteUser = async (req, res) => {
 const addAdmin = async (req, res) => {
   const { username, password } = req.body;
   try {
-
     // Check if the admin username already exists
     const userExists = await userModel.findOne({ username });
     if (userExists) {
@@ -285,13 +284,13 @@ const flagItinerary = async (req, res) => {
       { returnDocument: "after" } // Use { new: true } if your Mongoose version is older
     );
 
-    const user = await userModel.findById(updatedItinerary.tourGuide)
+    const user = await userModel.findById(updatedItinerary.tourGuide);
 
-    const email = user.email
+    const email = user.email;
 
-    const username = user.username
+    const username = user.username;
 
-    const itineraryName = updatedItinerary.name
+    const itineraryName = updatedItinerary.name;
 
     // Send the OTP via email
     const transporter = nodemailer.createTransport({
@@ -307,12 +306,12 @@ const flagItinerary = async (req, res) => {
       from: process.env.EMAIL,
       to: email,
       subject: "Notification Regarding Your Itinerary",
-      text
+      text,
     };
 
     await transporter.sendMail(mailOptions);
-    notifyUser(user._id, 'itinerary', itineraryName);
-
+    const io = req.app.get("io"); // Access io from app
+    notifyUser(io, user._id, "itinerary", itineraryName);
 
     return res.status(200).json({
       message: "Itinerary flagged. It is now invisible to tourists and guests.",
@@ -351,20 +350,20 @@ const flagActivity = async (req, res) => {
     const activityId = new mongoose.Types.ObjectId(activityIdString);
 
     const activity = await activityModel.findById(activityId);
-    if (activity.flag) throw Error('activity is already flagged')
+    if (activity.flag) throw Error("activity is already flagged");
     const updatedActivity = await activityModel.findByIdAndUpdate(
       activityId,
       { flag: true },
       { returnDocument: "after" } // Use { new: true } if your Mongoose version is older
     );
 
-    const user = await userModel.findById(updatedActivity.advertiser)
+    const user = await userModel.findById(updatedActivity.advertiser);
 
-    const email = user.email
+    const email = user.email;
 
-    const username = user.username
+    const username = user.username;
 
-    const activityName = updatedActivity.name
+    const activityName = updatedActivity.name;
 
     // Send the OTP via email
     const transporter = nodemailer.createTransport({
@@ -380,19 +379,19 @@ const flagActivity = async (req, res) => {
       from: process.env.EMAIL,
       to: email,
       subject: "Notification Regarding Your Activity",
-      text
+      text,
     };
 
     await transporter.sendMail(mailOptions);
 
     const io = req.app.get("io"); // Access io from app
-    notifyUser(io, user._id, 'activity', activityName);
+    notifyUser(io, user._id, "activity", activityName);
     return res.status(200).json({
       message: "Activity flagged. It is now invisible to tourists and guests.",
     });
   } catch (error) {
     return res.status(400).json({
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -414,12 +413,9 @@ const getPendingUsers = async (req, res) => {
 };
 const getTotalUsers = async (req, res) => {
   try {
-
-
-
     let users = await userModel.find({
-      status: 'active',
-      role: { $ne: 'admin' }
+      status: "active",
+      role: { $ne: "admin" },
     });
 
     const map = new Map();
@@ -429,23 +425,20 @@ const getTotalUsers = async (req, res) => {
       const entry = map.get(month);
       if (!entry) {
         map.set(month, { count: 1 });
-      }
-      else {
-        map.set(month, { count: entry.count + 1 })
+      } else {
+        map.set(month, { count: entry.count + 1 });
       }
     }
     const result = Array.from(map, ([name, data]) => {
       return { month: name, count: data.count }; // Transform into an object
     });
-    if (result === 0) throw new Error('There are no current users');
-    return res.status(200).json(result)
-
+    if (result === 0) throw new Error("There are no current users");
+    return res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: error.message });
   }
-  catch (error) {
-    console.log(error)
-    return res.status(500).json({ message: error.message })
-  }
-}
+};
 
 module.exports = {
   addTourismGovernor,
@@ -457,5 +450,5 @@ module.exports = {
   unflagItinerary,
   getPendingUsers,
   flagActivity,
-  getTotalUsers
+  getTotalUsers,
 };

@@ -16,6 +16,7 @@ const activityReviewModel = require("../models/activityReviewModel");
 const placeModel = require("../models/placeModel");
 const nodemailer = require('nodemailer')
 const emailTemplates = require('../emailTemplate')
+const promoCodeModel = require('../models/promoCodeModel')
 const Stripe = require('stripe');
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -165,6 +166,8 @@ const updateProfile = async (req, res) => {
   }
 };
 const bookActivity = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     // Find the tourist by the user's ID
     const tourist = await touristModel
@@ -214,29 +217,44 @@ const bookActivity = async (req, res) => {
 
     let receipt = null;
 
-    if (method == 'availableCredit') {
-      if (tourist.wallet.availableCredit < activityObject.price) {
-        receipt = new receiptModel({
-          type: "activity",
-          status: "failed",
-          tourist: req.user._id,
-          price: activityObject.price,
-          receiptType: "payment",
-        });
-        await receipt.save();
-        throw Error('Insufficient funds')
+    let finalPrice = activityObject.price;
+    let promoCode = null;
+    if (req.body.promoCode) {
+
+      promoCode = await promoCodeModel.findOne({ code: req.body.promoCode });
+      if (promoCode) {
+        if (promoCode.usesLeft <= 0 || promoCode.expiryDate < new Date() || !promoCode.isActive)
+          return res.status(400).json({ message: 'This promo code is not valid anymore' })
+        else {
+          finalPrice -= (promoCode.discountPercentage * activityObject.price / 100)
+          promoCode.usesLeft -= 1;
+          if (promoCode.usesLeft === 0) promoCode.isActive = false
+
+          await promoCode.save({ session });
+
+        }
       }
+      else
+        return res.status(400).json({ message: 'This promo code is invalid' })
+
+
+    }
+    if (method == 'availableCredit') {
+      if (tourist.wallet.availableCredit < finalPrice) {
+        return res.status(400).json({ message: 'insufficient funds' })
+      }
+
       const availableCredit =
-        tourist.wallet.availableCredit - activityObject.price;
+        tourist.wallet.availableCredit - finalPrice;
       await walletModel.findByIdAndUpdate(tourist.wallet._id, {
         availableCredit,
       });
     }
 
     if (method == 'card') {
-      // Create a PaymentIntent
+
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: activityObject.price * 100, // Amount in cents
+        amount: finalPrice * 100, // Amount in cents
         currency: 'usd', // Set the currency
         payment_method: paymentMethodId, // Pass the payment method ID from the frontend
         confirm: true, // Automatically confirm the payment
@@ -251,26 +269,29 @@ const bookActivity = async (req, res) => {
       type: "activity",
       status: "successful",
       tourist: req.user._id,
-      price: activityObject.price,
+      price: finalPrice,
       receiptType: "payment",
+      promoCode: promoCode.code
     });
-    await receipt.save();
+    await receipt.save({ session });
+
+
 
     //check if ticket was already made but refunded change it active
     if (ticket && ticket.status === "refunded") {
       await activityTicketModel.updateOne(
         {
           tourist: req.user._id,
-          activity: activityId,
+          activity: activityId
         },
         {
           status: "active",
           receipt: receipt._id,
-          date: activityObject.date
-        }
+          date: activityObject.date,
+          originalPrice: activityObject.price
+        }, { session }
       );
     }
-    //create a new ticket of does not exist
     else {
       const activityTicket = new activityTicketModel({
         tourist: req.user._id,
@@ -280,9 +301,10 @@ const bookActivity = async (req, res) => {
         date: activityObject.date,
         name: activityObject.name,
         time: activityObject.time,
-        locationName: activityObject.location.name
+        locationName: activityObject.location.name,
+        originalPrice: activityObject.price
       });
-      await activityTicket.save();
+      await activityTicket.save({ session });
     }
 
     // Send  email
@@ -308,10 +330,16 @@ const bookActivity = async (req, res) => {
 
 
 
-    //checking if tourist has available credit
+    await session.commitTransaction();
+    await session.endSession();
+
     return res.status(200).json({ message: "Activity booked successfully" });
   } catch (error) {
-    console.log(error);
+    console.log(error)
+
+    await session.abortTransaction();
+    await session.endSession();
+
     res
       .status(500)
       .json({ message: error.message });
@@ -344,20 +372,33 @@ const bookPlace = async (req, res) => {
     let cost = placeObject.ticketPrice[ticketType];
     cost *= amount;
 
+    let finalPrice = cost;
+    let promoCode = null;
+    if (req.body.promoCode) {
+
+      promoCode = await promoCodeModel.findOne({ code: req.body.promoCode });
+      if (promoCode) {
+        if (promoCode.usesLeft <= 0 || promoCode.expiryDate < new Date() || !promoCode.isActive)
+          return res.status(400).json({ message: 'This promo code is not valid anymore' })
+        else {
+          finalPrice -= (promoCode.discountPercentage * cost / 100)
+          promoCode.usesLeft -= 1;
+          if (promoCode.usesLeft === 0) promoCode.isActive = false
+
+          await promoCode.save({ session });
+
+        }
+      }
+      else
+        return res.status(400).json({ message: 'This promo code is invalid' })
+
+    }
     if (method == 'availableCredit') {
       //checking if tourist has available credit
-      if (tourist.wallet.availableCredit < cost) {
-        receipt = new receiptModel({
-          type: "place",
-          status: "failed",
-          tourist: req.user._id,
-          price: cost,
-          receiptType: "payment",
-        });
-        await receipt.save();
+      if (tourist.wallet.availableCredit < finalPrice) {
         return res.status(400).json({ message: "insufficient funds" });
       }
-      const availableCredit = tourist.wallet.availableCredit - cost;
+      const availableCredit = tourist.wallet.availableCredit - finalPrice;
       await walletModel.findByIdAndUpdate(tourist.wallet._id, {
         availableCredit,
       });
@@ -366,7 +407,7 @@ const bookPlace = async (req, res) => {
 
     if (method == 'card') {
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: cost * 100, // Amount in cents
+        amount: finalPrice * 100, // Amount in cents
         currency: 'usd', // Set the currency
         payment_method: paymentMethodId, // Pass the payment method ID from the frontend
         confirm: true, // Automatically confirm the payment
@@ -380,8 +421,8 @@ const bookPlace = async (req, res) => {
       type: "place",
       status: "successful",
       tourist: req.user._id,
-      price: cost,
-      receiptType: "payment",
+      price: finalPrice,
+      receiptType: "payment"
     });
     await receipt.save();
 
@@ -393,6 +434,7 @@ const bookPlace = async (req, res) => {
       status: "active",
       receipt: receipt._id,
       amount: amount,
+      cost: cost
     });
     await placeTicket.save();
 
@@ -405,6 +447,8 @@ const bookPlace = async (req, res) => {
   }
 };
 const bookItinerary = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     // Find the tourist by the user's ID
     const tourist = await touristModel
@@ -457,28 +501,41 @@ const bookItinerary = async (req, res) => {
 
     let receipt = null;
 
+    let finalPrice = itineraryObject.price;
+    let promoCode = null;
+    if (req.body.promoCode) {
+
+      promoCode = await promoCodeModel.findOne({ code: req.body.promoCode });
+      if (promoCode) {
+        if (promoCode.usesLeft <= 0 || promoCode.expiryDate < new Date() || !promoCode.isActive)
+          return res.status(400).json({ message: 'This promo code is not valid anymore' })
+        else {
+          finalPrice -= (promoCode.discountPercentage * itineraryObject.price / 100)
+          promoCode.usesLeft -= 1;
+          if (promoCode.usesLeft === 0) promoCode.isActive = false
+
+          await promoCode.save({ session });
+
+        }
+      }
+      else
+        return res.status(400).json({ message: 'This promo code is invalid' })
+
+    }
     if (method == 'availableCredit') {
       //checking if tourist has available credit
-      if (tourist.wallet.availableCredit < itineraryObject.price) {
-        receipt = new receiptModel({
-          type: "itinerary",
-          status: "failed",
-          tourist: req.user._id,
-          price: itineraryObject.price,
-          receiptType: "payment",
-        });
-        await receipt.save();
-        throw Error('Insufficient funds')
+      if (tourist.wallet.availableCredit < finalPrice) {
+        return res.status(400).json({ message: 'insufficient funds' })
       }
       const availableCredit =
-        tourist.wallet.availableCredit - itineraryObject.price;
+        tourist.wallet.availableCredit - finalPrice;
       await walletModel.findByIdAndUpdate(tourist.wallet._id, {
         availableCredit,
       });
     }
     if (method === 'card') {
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: itineraryObject.price * 100, // Amount in cents
+        amount: finalPrice * 100, // Amount in cents
         currency: 'usd', // Set the currency
         payment_method: paymentMethodId, // Pass the payment method ID from the frontend
         confirm: true, // Automatically confirm the payment
@@ -492,10 +549,10 @@ const bookItinerary = async (req, res) => {
       type: "itinerary",
       status: "successful",
       tourist: req.user._id,
-      price: itineraryObject.price,
-      receiptType: "payment",
+      price: finalPrice,
+      receiptType: "payment"
     });
-    await receipt.save();
+    await receipt.save({ session });
 
 
 
@@ -510,12 +567,12 @@ const bookItinerary = async (req, res) => {
           status: "active",
           receipt: receipt._id,
           date: bookingDate,
-        }
+          originalPrice: itineraryObject.price
+        }, { session }
       );
     }
     //create a new ticket of does not exist
     else {
-      console.log(itineraryObject.locations)
       const itineraryTicket = new itineraryTicketModel({
         tourist: req.user._id,
         itinerary: itineraryId,
@@ -523,9 +580,11 @@ const bookItinerary = async (req, res) => {
         receipt: receipt._id,
         date: bookingDate,
         name: itineraryObject.name,
-        locations: itineraryObject.locations
+        locations: itineraryObject.locations,
+        originalPrice: itineraryObject.price
+
       });
-      await itineraryTicket.save();
+      await itineraryTicket.save({ session });
     }
 
     // Send the OTP via email
@@ -548,8 +607,12 @@ const bookItinerary = async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
+    await session.commitTransaction();
+    session.endSession()
     return res.status(200).json({ message: "Itinerary booked successfully" });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession()
     res
       .status(400)
       .json({ message: error.message });
@@ -593,6 +656,7 @@ const cancelActivity = async (req, res) => {
             "Unable to cancel booking as it must be done at least 48 hours in advance.",
         });
     } else {
+
       const receipt = new receiptModel({
         type: "activity",
         status: "successful",
@@ -605,6 +669,7 @@ const cancelActivity = async (req, res) => {
         status: "refunded",
         receipt: receipt._id,
       });
+      console.log(ticket.receipt.price)
       tourist.wallet.availableCredit += ticket.receipt.price;
       await walletModel.findByIdAndUpdate(tourist.wallet._id, {
         availableCredit: tourist.wallet.availableCredit,
@@ -617,6 +682,7 @@ const cancelActivity = async (req, res) => {
 
 
   } catch (error) {
+    console.log(error)
     return res
       .status(400)
       .json({ message: error.message });
@@ -1001,21 +1067,35 @@ const bookTransportation = async (req, res) => {
       throw Error('you have already booked this transportation')
     }
 
+    let finalPrice = transportation.price;
+    let promoCode = null;
+    if (req.body.promoCode) {
+
+      promoCode = await promoCodeModel.findOne({ code: req.body.promoCode });
+      if (promoCode) {
+        if (promoCode.usesLeft <= 0 || promoCode.expiryDate < new Date() || !promoCode.isActive)
+          return res.status(400).json({ message: 'This promo code is not valid anymore' })
+        else {
+          finalPrice -= (promoCode.discountPercentage * transportation.price / 100)
+          promoCode.usesLeft -= 1;
+          if (promoCode.usesLeft === 0) promoCode.isActive = false
+
+          await promoCode.save({ session });
+
+        }
+      }
+      else
+        return res.status(400).json({ message: 'This promo code is invalid' })
+
+    }
+
     if (method == 'availableCredit') {
-      if (tourist.wallet.availableCredit < transportation.price) {
-        const receipt = new receiptModel({
-          type: "transportation",
-          status: "failed",
-          tourist: req.user._id,
-          price: transportation.price,
-          receiptType: "payment",
-        });
-        await receipt.save();
-        throw Error('Insufficient funds')
+      if (tourist.wallet.availableCredit < finalPrice) {
+        return res.status(400).json({ message: 'insufficient funds' })
       }
       const wallet = await walletModel.findById(tourist.wallet._id);
 
-      wallet.availableCredit -= transportation.price;
+      wallet.availableCredit -= finalPrice;
       await tourist.save();
       await wallet.save();
 
@@ -1023,7 +1103,7 @@ const bookTransportation = async (req, res) => {
 
     if (method === 'card') {
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: transportation.price * 100, // Amount in cents
+        amount: finalPrice * 100, // Amount in cents
         currency: 'usd', // Set the currency
         payment_method: paymentMethodId, // Pass the payment method ID from the frontend
         confirm: true, // Automatically confirm the payment

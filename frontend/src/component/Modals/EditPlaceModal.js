@@ -7,6 +7,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
   const [formData, setFormData] = useState({});
   const [imagePreviews, setImagePreviews] = useState([]);
 
+  // Fetch tags when the modal is opened
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -21,6 +22,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     fetchTags();
   }, []);
 
+  // Initialize form data with incoming field values
   useEffect(() => {
     setFormData({
       type: fieldsValues?.type || "",
@@ -46,6 +48,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     );
   }, [fieldsValues]);
 
+  // Handle image selection
   const handleImageChange = (event) => {
     const files = Array.from(event.target.files);
     const filePreviews = files.map((file) => URL.createObjectURL(file));
@@ -56,11 +59,13 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     setImagePreviews((prev) => [...prev, ...filePreviews]);
   };
 
+  // Handle input field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handle location-specific changes
   const handleLocationChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -69,36 +74,19 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     }));
   };
 
-  const handleNativeChange = (e) => {
+  // Handle ticket price changes
+  const handleTicketChange = (category, e) => {
+    const value = e.target.value;
     setFormData((prev) => ({
       ...prev,
       ticketPrice: {
         ...prev.ticketPrice,
-        Native: e.target.value,
+        [category]: value,
       },
     }));
   };
 
-  const handleForeignerChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      ticketPrice: {
-        ...prev.ticketPrice,
-        Foreigner: e.target.value,
-      },
-    }));
-  };
-
-  const handleStudentChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      ticketPrice: {
-        ...prev.ticketPrice,
-        Student: e.target.value,
-      },
-    }));
-  };
-
+  // Handle tag selection/deselection
   const handleTagPlaceChange = (tagId) => {
     setFormData((prev) => {
       const tagPlace = prev.tagPlace.includes(tagId)
@@ -108,6 +96,7 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     });
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     const submissionData = new FormData();
@@ -119,337 +108,145 @@ const EditPlaceModal = ({ isOpen, onClose, fieldsValues, onSubmit }) => {
     submissionData.append("location", JSON.stringify(formData.location)); // Location as JSON string
     submissionData.append("openingHours", formData.openingHours);
     submissionData.append("closingHours", formData.closingHours);
-    submissionData.append("ticketPrice", JSON.stringify(formData.ticketPrice)); // TicketPrice JSON
-
-    // Ensure tagPlace is an array of strings
-    formData.tagPlace.forEach((tagId) =>
-      submissionData.append("tagPlace", tagId)
-    );
+    submissionData.append("ticketPrice", JSON.stringify(formData.ticketPrice)); // Ticket prices as JSON string
+    submissionData.append("tagPlace", JSON.stringify(formData.tagPlace)); // Tags as JSON string
 
     // Append image files
-    formData.placesImages.forEach((file) =>
-      submissionData.append("placesImages", file)
-    );
+    formData.placesImages.forEach((image) => {
+      submissionData.append("placesImages", image);
+    });
 
-    // Log the FormData content
-    for (let pair of submissionData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
-    }
-
+    // Submit the form data
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/tourismgovernor/create-place",
+      await axios.put(
+        `http://localhost:3000/api/place/update/${fieldsValues._id}`,
         submissionData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-          withCredentials: true, // Ensures cookies are sent with the request
+          withCredentials: true,
         }
       );
-      onSubmit(response.data); // Callback with the API response
-      onClose(); // Close modal
+      onSubmit(); // Call the onSubmit callback to refresh the data or handle success
+      onClose(); // Close the modal after successful submission
     } catch (error) {
-      console.error("Error creating place:", error);
+      console.error("Error updating place:", error);
+      alert("Failed to update place.");
     }
   };
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
-    };
-    const handleClickOutside = (e) => {
-      if (modalRef.current && !modalRef.current.contains(e.target)) onClose();
-    };
-
-    if (isOpen) {
-      window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.body.style.overflow = "auto";
-    }
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "auto";
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
   return (
     <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 50,
-      }}
+      className={`modal ${isOpen ? "open" : ""}`}
+      ref={modalRef}
+      onClick={() => onClose()}
     >
       <div
-        ref={modalRef}
-        style={{
-          backgroundColor: "white",
-          padding: "24px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-          width: "90%",
-          maxWidth: "600px",
-          height: "fit-content",
-        }}
+        className="modal-content"
+        onClick={(e) => e.stopPropagation()} // Prevent modal from closing when clicking inside
       >
-        <h2
-          style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "10px" }}
-        >
-          {fieldsValues?.description ? "Edit Place" : "Create Place"}
-        </h2>
-        <form
-          onSubmit={handleSubmit}
-          style={{ height: "80vh", overflowY: "auto" }}
-        >
-          {/* Place Images */}
-          <div style={{ marginBottom: "10px" }}>
-            <label>Place Images</label>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "1vh" }}
-            >
-              {imagePreviews.map((src, index) => (
-                <img
-                  key={index}
-                  src={src}
-                  alt="Preview"
-                  style={{ maxWidth: "100px", marginBottom: "5px" }}
+        <h2>Edit Place</h2>
+        <form onSubmit={handleSubmit}>
+          <label>Type:</label>
+          <input
+            type="text"
+            name="type"
+            value={formData.type}
+            onChange={handleChange}
+          />
+          <label>Name:</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+          />
+          <label>Description:</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+          />
+          <label>Location:</label>
+          <input
+            type="text"
+            name="name"
+            placeholder="Location Name"
+            value={formData.location?.name ?? ""}
+            onChange={handleLocationChange}
+          />
+          <input
+            type="text"
+            name="coordinates"
+            placeholder="Latitude, Longitude"
+            value={formData.location?.coordinates.join(",") ?? ""}
+            onChange={(e) =>
+              handleLocationChange({
+                target: {
+                  name: "coordinates",
+                  value: e.target.value.split(","),
+                },
+              })
+            }
+          />
+          <label>Opening Hours:</label>
+          <input
+            type="text"
+            name="openingHours"
+            value={formData.openingHours ?? ""}
+            onChange={handleChange}
+          />
+          <label>Closing Hours:</label>
+          <input
+            type="text"
+            name="closingHours"
+            value={formData.closingHours ?? ""}
+            onChange={handleChange}
+          />
+          <label>Ticket Prices:</label>
+          <input
+            type="number"
+            name="Native"
+            placeholder="Native Price"
+            value={formData.ticketPrice?.Native ?? ""}
+            onChange={(e) => handleTicketChange("Native", e)}
+          />
+          <input
+            type="number"
+            name="Foreigner"
+            placeholder="Foreigner Price"
+            value={formData.ticketPrice?.Foreigner ?? ""}
+            onChange={(e) => handleTicketChange("Foreigner", e)}
+          />
+          <input
+            type="number"
+            name="Student"
+            placeholder="Student Price"
+            value={formData.ticketPrice?.Student ?? ""}
+            onChange={(e) => handleTicketChange("Student", e)}
+          />
+          <label>Tags:</label>
+          <div>
+            {tags.map((tag) => (
+              <label key={tag._id}>
+                <input
+                  type="checkbox"
+                  checked={formData.tagPlace.includes(tag._id)}
+                  onChange={() => handleTagPlaceChange(tag._id)}
                 />
-              ))}
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageChange}
-              />
-            </div>
+                {tag.name}
+              </label>
+            ))}
           </div>
-
-          <div style={{ marginBottom: "10px" }}>
-            <label>Type</label>
-            <textarea
-              name="type"
-              value={formData.type ?? ""}
-              onChange={handleChange}
-              style={{
-                width: "100%",
-                padding: "4px 8px",
-                border: "1px solid #D2D6DC",
-                borderRadius: "4px",
-              }}
-            />
+          <label>Images:</label>
+          <input type="file" multiple onChange={handleImageChange} />
+          <div>
+            {imagePreviews.map((preview, index) => (
+              <img key={index} src={preview} alt="Image Preview" />
+            ))}
           </div>
-
-          {/* Location Fields */}
-          <div style={{ marginBottom: "10px" }}>
-            <label>Location</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.location.name || ""}
-              placeholder="Location Name"
-              onChange={handleLocationChange}
-              style={{
-                width: "100%",
-                padding: "4px 8px",
-                border: "1px solid #D2D6DC",
-                borderRadius: "4px",
-              }}
-            />
-            <input
-              type="text"
-              name="coordinates"
-              value={formData.location.coordinates.join(", ") || ""}
-              placeholder="Coordinates (e.g., 10, 20)"
-              onChange={(e) =>
-                handleLocationChange({
-                  target: {
-                    name: "coordinates",
-                    value: e.target.value.split(",").map(Number),
-                  },
-                })
-              }
-              style={{
-                width: "100%",
-                padding: "4px 8px",
-                border: "1px solid #D2D6DC",
-                borderRadius: "4px",
-              }}
-            />
-          </div>
-
-          {/* Description */}
-          <div style={{ marginBottom: "10px" }}>
-            <label>Name</label>
-            <textarea
-              name="name"
-              value={formData.name ?? ""}
-              onChange={handleChange}
-              style={{
-                width: "100%",
-                padding: "4px 8px",
-                border: "1px solid #D2D6DC",
-                borderRadius: "4px",
-              }}
-            />
-          </div>
-          <div style={{ marginBottom: "10px" }}>
-            <label>Description</label>
-            <textarea
-              name="description"
-              value={formData.description ?? ""}
-              onChange={handleChange}
-              style={{
-                width: "100%",
-                padding: "4px 8px",
-                border: "1px solid #D2D6DC",
-                borderRadius: "4px",
-              }}
-            />
-          </div>
-
-          <div style={{ marginBottom: "10px" }}>
-            <label>Closing Hours</label>
-            <input
-              type="text"
-              name="closingHours"
-              value={formData.closingHours}
-              onChange={handleChange}
-              style={{
-                width: "100%",
-                padding: "4px 8px",
-                border: "1px solid #D2D6DC",
-                borderRadius: "4px",
-              }}
-            />
-          </div>
-
-          {/* Opening Hours */}
-          <div style={{ marginBottom: "10px" }}>
-            <label>Opening Hours</label>
-            <input
-              type="text"
-              name="openingHours"
-              value={formData.openingHours}
-              onChange={handleChange}
-              style={{
-                width: "100%",
-                padding: "4px 8px",
-                border: "1px solid #D2D6DC",
-                borderRadius: "4px",
-              }}
-            />
-          </div>
-
-          {/* Ticket Prices */}
-          <div style={{ marginBottom: "10px" }}>
-            <label>Ticket Price</label>
-            <div>
-              <label>Native</label>
-              <input
-                type="number"
-                name="Native"
-                value={formData.ticketPrice.Native ?? ""}
-                onChange={handleNativeChange}
-                style={{
-                  width: "100%",
-                  padding: "4px 8px",
-                  border: "1px solid #D2D6DC",
-                  borderRadius: "4px",
-                }}
-              />
-              <label>Foreigner</label>
-              <input
-                type="number"
-                name="Foreigner"
-                value={formData.ticketPrice.Foreigner ?? ""}
-                onChange={handleForeignerChange}
-                style={{
-                  width: "100%",
-                  padding: "4px 8px",
-                  border: "1px solid #D2D6DC",
-                  borderRadius: "4px",
-                }}
-              />
-              <label>Student</label>
-              <input
-                type="number"
-                name="Student"
-                value={formData.ticketPrice.Student ?? ""}
-                onChange={handleStudentChange}
-                style={{
-                  width: "100%",
-                  padding: "4px 8px",
-                  border: "1px solid #D2D6DC",
-                  borderRadius: "4px",
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Tag Places */}
-          <div style={{ marginBottom: "10px" }}>
-            <label>Tag Places</label>
-            <div>
-              {tags.map((tag) => (
-                <div key={tag._id} style={{ marginBottom: "5px" }}>
-                  <input
-                    type="checkbox"
-                    checked={formData.tagPlace.includes(tag._id)}
-                    onChange={() => handleTagPlaceChange(tag._id)}
-                  />
-                  <label style={{ marginLeft: "8px" }}>{tag.name}</label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginTop: "16px",
-            }}
-          >
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                padding: "8px 12px",
-                borderRadius: "4px",
-                marginRight: "16px",
-                backgroundColor: "#E2E8F0",
-                color: "#4A5568",
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              style={{
-                padding: "8px 12px",
-                borderRadius: "4px",
-                backgroundColor: "#2B6CB0",
-                color: "white",
-              }}
-            >
-              Save
-            </button>
-          </div>
+          <button type="submit">Submit</button>
         </form>
       </div>
     </div>

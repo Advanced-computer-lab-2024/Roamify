@@ -40,6 +40,7 @@ const receiptSchema = new mongoose.Schema({
         enum: ['payment', 'refund'],
         required: true
     },
+
     promoCode: {
         type: String,
         default: null

@@ -88,7 +88,8 @@ const DynamicEditModal = ({ isOpen, onClose, fields, onSubmit, img }) => {
           boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
           width: "90%",
           maxWidth: "600px",
-          height: "fit-content",
+          height: "70vh",
+          overflowY: "auto",
         }}
       >
         <h2
@@ -162,7 +163,7 @@ const DynamicEditModal = ({ isOpen, onClose, fields, onSubmit, img }) => {
             style={{
               display: "flex",
               justifyContent: "flex-end",
-              marginTop: "16px",
+              marginTop: "auto",
             }}
           >
             <button

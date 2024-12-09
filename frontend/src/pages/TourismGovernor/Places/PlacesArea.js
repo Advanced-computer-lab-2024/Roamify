@@ -68,19 +68,29 @@ const PlacesArea = ({ myPlaces }) => {
                         </Link>
                         <div className="top_destinations_box_content">
                           <h4>
-                            <Link to="/destinations-details">{place.name}</Link>
+                            <Link
+                              to="/destinations-details"
+                              style={{ color: "var(--main-color)" }}
+                            >
+                              {place.name}
+                            </Link>
                           </h4>
                           <p>
-                            <span className="review_rating">
+                            <span
+                              className="review_rating"
+                              style={{ color: "var(--main-color)" }}
+                            >
                               {place.reviewRating}
                             </span>{" "}
-                            <span className="review_count">
+                            <span
+                              className="review_count"
+                              style={{ color: "var(--main-color)" }}
+                            >
                               {place.reviewCount}
                             </span>
                           </p>
-                          <h3>
-                            {place.price}
-                            <span>Price starts from</span>
+                          <h3 style={{ color: "var(--main-color)" }}>
+                            ${place.ticketPrice.Native}
                           </h3>
                         </div>
                       </div>

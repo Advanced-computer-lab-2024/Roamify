@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import axios from "axios";
 import io from "socket.io-client";
 import { toKebabCase } from "../../functions/toKebabCase.js";
@@ -77,6 +78,8 @@ const LoginArea = () => {
     // Event listener for custom server messages
     socket.on("receiveNotification", (data) => {
       console.log("Message from server:", data);
+      toast.info(data);
+      console.log("hii");
     });
 
     // Event listener for disconnection

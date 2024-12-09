@@ -60,7 +60,11 @@ const AdvertiserActivitiesArea = () => {
   };
 
   return (
-    <section id="explore_area" className="section_padding">
+    <section
+      id="explore_area"
+      className="section_padding"
+      style={{ minHeight: "100vh" }}
+    >
       <div className="container">
         <SectionHeading heading={`${activities.length} activities found`} />
         <div className="row">
