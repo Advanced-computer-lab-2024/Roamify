@@ -1,8 +1,6 @@
 const express = require('express');
 const tourismGovernorController = require('../controllers/tourismGovernorController');
 const historicalTagController = require('../controllers/historicalTagController');
-
-
 const router = express.Router();
 
 router.post('/create-place', tourismGovernorController.upload, tourismGovernorController.createPlace);

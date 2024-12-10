@@ -1,37 +1,37 @@
-mangoose= require('mongoose');
+const mongoose = require('mongoose');
 const userModel = require('../models/userModel');
 const sellerModel = require('../models/sellerModel');
-const orderModel=require('../models/orderModel');
-const productModel=require('../models/productModel');
+const orderModel = require('../models/orderModel');
+const productModel = require('../models/productModel');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
-const {Types} = require("mongoose");
+const { Types } = require("mongoose");
 const storage = multer.memoryStorage();
 const upload = multer({ storage }).single('logo');
 
 const createProfile = async (req, res) => {
   try {
     const userId = req.user._id;
+
     const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+
     if (user.status === "pending")
-      throw Error('pending admin approval');
+      return res.status(403).json({ message: 'Pending admin approval.' });
 
     if (!user.termsAndConditions)
-      throw Error('sorry you must accept our terms and conditions in order to proceed');
+      return res.status(400).json({ message: 'You must accept the terms and conditions to proceed.' });
 
-    if (userId) {
-      const result = await sellerModel.findOne({ user: userId });
-      if ((result) && userId) {
-        return res.status(400).json({ error: 'profile already created' });
-      }
-    } //check for existence of profile for this user
+    const existingProfile = await sellerModel.findOne({ user: userId });
+    if (existingProfile)
+      return res.status(400).json({ message: 'Profile already exists.' });
 
     const { firstName, lastName, description } = req.body;
     await userModel.findByIdAndUpdate(userId, { status: 'active' });
-    const newSeller = new sellerModel({
 
+    const newSeller = new sellerModel({
       firstName,
       lastName,
       description,
@@ -39,165 +39,136 @@ const createProfile = async (req, res) => {
     });
     await newSeller.save();
 
-    res.status(200).json({ message: "Created seller successfully" });
-
+    res.status(201).json({ message: 'Seller profile created successfully.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to create profile.', error: error.message });
   }
-  catch (e) {
-    res.status(404).json({ message: 'failed', error: e.message });
-
-  }
-
 };
 const getProfile = async (req, res) => {
   try {
-    const id = req.user._id;
-    const details = await sellerModel.findOne({ user: id })
-      .select('-_id') // Select fields from sellerModel
-      .populate({
-        path: 'user',
-        select: 'username email -_id' // Select specific fields from the user model
-      });
+    const userId = req.user._id;
 
-    console.log(details)
-    if (details)
-      res.status(200).json({ username: details.user.username, email: details.user.email, firstName: details.firstName, lastName: details.lastName, description: details.description, logo: details.logo.url });
-    else {
-      throw Error("this profile does not exist");
-    }
-  }
-  catch (e) {
-    res.status(401).json({ error: e.message });
+    const details = await sellerModel.findOne({ user: userId })
+        .select('-_id') // Exclude the `_id` field
+        .populate({
+          path: 'user',
+          select: 'username email -_id' // Include username and email from the user model
+        });
 
+    if (!details)
+      return res.status(404).json({ message: 'Profile not found.' });
+
+    const { username, email } = details.user;
+    const { firstName, lastName, description, logo } = details;
+
+    res.status(200).json({
+      username,
+      email,
+      firstName,
+      lastName,
+      description,
+      logo: logo?.url || null // Provide null if no logo
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to retrieve profile.', error: error.message });
   }
-}
+};
 const updateProfile = async (req, res) => {
   try {
     const sellerId = req.user._id;
 
-    const {
-      firstName,
-      lastName,
-      email,
-      description
-    } = req.body;
+    const { firstName, lastName, email, description } = req.body;
 
     const userUpdates = {};
     const sellerUpdates = {};
 
     const seller = await sellerModel.findOne({ user: sellerId }).populate('user');
-
-
-
+    if (!seller) return res.status(404).json({ message: 'Seller profile not found.' });
 
     if (firstName) sellerUpdates.firstName = firstName;
     if (lastName) sellerUpdates.lastName = lastName;
 
-
     if (email) {
+      if (!validator.isEmail(email))
+        return res.status(400).json({ message: 'Invalid email address.' });
+
       const existingUser = await userModel.findOne({ email });
-      if (existingUser && email !== seller.user.email) {
-        return res.status(400).json({ error: "Email already exists" });
-      }
-      if (!validator.isEmail(email)) {
-        throw Error('Email is not valid');
-      }
+      if (existingUser && email !== seller.user.email)
+        return res.status(400).json({ message: 'Email already in use.' });
+
       userUpdates.email = email;
     }
 
-
-
-
-
     if (description) sellerUpdates.description = description;
 
-
-    const updatedUser = await userModel.findByIdAndUpdate(sellerId, userUpdates, { new: true });
+    await userModel.findByIdAndUpdate(seller.user._id, userUpdates, { new: true });
     const updatedSeller = await sellerModel.findByIdAndUpdate(seller._id, sellerUpdates, { new: true });
 
-    if (updatedUser || updatedSeller) {
-      return res.status(200).json({ message: 'updated' });
-    } else {
-      return res.status(404).json({ message: 'No updates made' });
-    }
-  } catch (e) {
-    return res.status(400).json({ message: 'failed', error: e.message });
+    if (updatedSeller)
+      return res.status(200).json({ message: 'Profile updated successfully.' });
+    else
+      return res.status(304).json({ message: 'No changes made to the profile.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update profile.', error: error.message });
   }
 };
 const uploadLogo = async (req, res) => {
   try {
-
-    if (!req.file) {
-      return res.status(400).json({ message: 'Logo is required' });
-    }
+    if (!req.file)
+      return res.status(400).json({ message: 'Logo file is required.' });
 
     const file = req.file;
     let imageUrl;
 
     await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { resource_type: 'image' },
-        (error, result) => {
-          if (error) {
-            reject(new Error('Upload Error'));
-          } else {
-            imageUrl = { url: result.secure_url, publicId: result.public_id };
-            resolve();
+          { resource_type: 'image' },
+          (error, result) => {
+            if (error) reject(new Error('Upload error'));
+            else {
+              imageUrl = { url: result.secure_url, publicId: result.public_id };
+              resolve();
+            }
           }
-        }
       );
-
-      // Upload the file buffer directly to Cloudinary
       uploadStream.end(file.buffer);
     });
 
     await sellerModel.findOneAndUpdate({ user: req.user._id }, { logo: imageUrl });
 
-    res.status(200).json({
-      message: 'Logo uploaded successfully',
-    });
+    res.status(200).json({ message: 'Logo uploaded successfully.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to upload logo.', error: error.message });
   }
-  catch (error) {
-    res.status(500).json({ message: 'Error uploading logo', error: error.message });
-
-
-  }
-}
+};
 const getSalesReport = async (req, res) => {
   try {
     const { filterBy = 'all', month, productId } = req.query;
-    const { sellerId } = req.user; // Seller authentication assumed
+    const sellerId = req.user._id;
 
-    // Fetch all products associated with the seller
     const products = await productModel.find({ seller: sellerId });
-    if (!products.length) {
-      return res.status(404).json({ message: 'No products found for this seller.' });
-    }
+    if (!products.length) return res.status(404).json({ message: 'No products found for this seller.' });
 
     const productIds = products.map(product => product._id.toString());
-    let filter = { 'products.productId': { $in: productIds }, status: { $in: ['Delivered'] } };
+    let filter = { 'products.productId': { $in: productIds }, status: 'Delivered' };
 
-    // Apply filters based on query parameters
     if (filterBy === 'month') {
-      if (!month || isNaN(new Date(`${month}-01`))) {
-        return res.status(400).json({ message: 'Invalid or missing month.' });
-      }
+      if (!month || isNaN(new Date(`${month}-01`)))
+        return res.status(400).json({ message: 'Invalid month format.' });
+
       const startOfMonth = new Date(`${month}-01`);
       const endOfMonth = new Date(startOfMonth.getFullYear(), startOfMonth.getMonth() + 1, 0);
       filter.createdAt = { $gte: startOfMonth, $lte: endOfMonth };
     } else if (filterBy === 'product') {
-      if (!productId || !productIds.includes(productId)) {
+      if (!productId || !productIds.includes(productId))
         return res.status(400).json({ message: 'Invalid or missing product ID.' });
-      }
+
       filter['products.productId'] = productId;
     }
 
-    // Fetch orders matching the filter
     const orders = await orderModel.find(filter);
-    if (!orders.length) {
-      return res.status(404).json({ message: 'No sales found for the specified filter.' });
-    }
+    if (!orders.length) return res.status(404).json({ message: 'No sales found for the specified filter.' });
 
-    // Calculate total revenue and sales breakdown
     let totalRevenue = 0;
     let totalProductsSold = 0;
     const productBreakdown = {};
@@ -228,15 +199,15 @@ const getSalesReport = async (req, res) => {
       message: 'Sales report generated successfully.',
       totalRevenue,
       totalProductsSold,
-      breakdown: Object.values(productBreakdown), // Convert object to array for client-side usage
+      breakdown: Object.values(productBreakdown)
     });
   } catch (error) {
-    console.error('Error generating sales report:', error.message);
     res.status(500).json({ message: 'Failed to generate sales report.', error: error.message });
   }
 };
 
-module.exports = { createProfile,
+module.exports = {
+  createProfile,
   getProfile,
   updateProfile,
   upload,

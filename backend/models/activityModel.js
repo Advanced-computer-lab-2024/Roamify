@@ -83,11 +83,6 @@ const activitySchema = new mongoose.Schema(
     flag: {
       type: Boolean,
       default: false
-    },
-    adminStatus: {
-      type: String,
-      enum: ['accepted', 'pending', 'rejected'],
-      default: 'pending'
     }
   },
   { timestamps: true }

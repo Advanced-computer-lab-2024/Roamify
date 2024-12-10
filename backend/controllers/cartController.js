@@ -7,9 +7,12 @@ const mongoose = require("mongoose");
 
 const getCart = async (req, res) => {
     try {
-        const cart = await cartModel.findOne({ tourist: req.user._id }).populate("products.productId");
+        const cart = await cartModel
+            .findOne({ tourist: req.user._id })
+            .populate("products.productId");
+
         if (!cart || cart.products.length === 0) {
-            return res.status(404).json({ message: "Cart is empty or contains invalid products." });
+            return res.status(404).json({ message: "Your cart is empty." });
         }
 
         const cartDetails = cart.products.map((item) => ({
@@ -20,7 +23,10 @@ const getCart = async (req, res) => {
             price: item.productId.price,
         }));
 
-        res.status(200).json({ message: "Cart retrieved successfully.", cart: cartDetails });
+        res.status(200).json({
+            message: "Cart retrieved successfully.",
+            cart: cartDetails,
+        });
     } catch (error) {
         res.status(500).json({ message: "Failed to retrieve cart.", error: error.message });
     }
@@ -29,8 +35,8 @@ const addProductToCart = async (req, res) => {
     try {
         const { productId, quantity = 1 } = req.body;
 
-        if (!Number.isInteger(quantity) || quantity <= 0) {
-            return res.status(400).json({ message: "Quantity must be a positive integer." });
+        if (!productId || !Number.isInteger(quantity) || quantity <= 0) {
+            return res.status(400).json({ message: "Invalid product ID or quantity." });
         }
 
         const product = await productModel.findById(productId);
@@ -47,8 +53,7 @@ const addProductToCart = async (req, res) => {
 
         const existingProductIndex = cart.products.findIndex((p) => p.productId.equals(productId));
         if (existingProductIndex !== -1) {
-            const existingProduct = cart.products[existingProductIndex];
-            const newTotalQuantity = existingProduct.quantity + quantity;
+            const newTotalQuantity = cart.products[existingProductIndex].quantity + quantity;
             if (newTotalQuantity > product.quantity) {
                 return res.status(400).json({
                     message: `Cannot add more. Only ${product.quantity} units left in stock.`,
@@ -158,7 +163,6 @@ const reviewCart = async (req, res) => {
             throw new Error("Your cart is empty or contains invalid products.");
         }
 
-        // Prepare bulk operations to decrement inventory
         const bulkOps = cart.products.map((item) => ({
             updateOne: {
                 filter: { _id: item.productId._id, quantity: { $gte: item.quantity } },
@@ -167,15 +171,15 @@ const reviewCart = async (req, res) => {
         }));
         const result = await productModel.bulkWrite(bulkOps, { session });
 
-        // Check if all products were successfully updated in the inventory
         if (result.modifiedCount !== cart.products.length) {
             throw new Error("Some products are out of stock.");
         }
 
-        // Calculate the total amount for the order for confirmation or display purposes
-        const totalAmount = cart.products.reduce((sum, item) => sum + item.productId.price * item.quantity, 0);
+        const totalAmount = cart.products.reduce(
+            (sum, item) => sum + item.productId.price * item.quantity,
+            0
+        );
 
-        // Create a new order
         const newOrder = new orderModel({
             tourist: req.user._id,
             products: cart.products.map((item) => ({
@@ -188,23 +192,18 @@ const reviewCart = async (req, res) => {
 
         await newOrder.save({ session });
 
-        // Create a pending receipt associated with this order
         const newReceipt = new receiptModel({
-            type: 'product',
-            status: 'pending',
+            type: "product",
+            status: "pending",
             tourist: req.user._id,
             order: newOrder._id,
             price: totalAmount,
-            receiptType: 'payment'
+            receiptType: "payment",
         });
 
         await newReceipt.save({ session });
 
-        // Link the receipt to the order
         newOrder.receipt = newReceipt._id;
-        await newOrder.save({ session });
-
-        // Schedule the job to expire the order if not processed in time
         const job = await agenda.schedule("in 10 minutes", "expire order", { orderId: newOrder._id.toString() });
         newOrder.expirationJobId = job.attrs._id;
         await newOrder.save({ session });
@@ -213,10 +212,10 @@ const reviewCart = async (req, res) => {
         session.endSession();
 
         res.status(200).json({
-            message: "Cart reviewed and order created.",
+            message: "Cart reviewed and order created successfully.",
             order: newOrder,
-            totalAmount: totalAmount,
-            receiptId: newReceipt._id
+            totalAmount,
+            receiptId: newReceipt._id,
         });
     } catch (error) {
         await session.abortTransaction();
@@ -233,3 +232,4 @@ module.exports = {
     getCart,
     reviewCart,
 };
+

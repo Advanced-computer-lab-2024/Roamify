@@ -9,39 +9,37 @@ const addProductToWishlist = async (req, res) => {
 
         if (!productId) {
             return res.status(400).json({
-                message: 'Please provide a product ID to add to the wishlist.'
+                message: 'Product ID is required to add it to the wishlist.',
             });
         }
 
         const productObjectId = new mongoose.Types.ObjectId(productId);
 
-        // Validate if the product exists and is not archived
         const product = await productModel.findById(productObjectId);
         if (!product) {
-            return res.status(400).json({
-                message: 'The product you selected does not exist.'
+            return res.status(404).json({
+                message: 'The selected product does not exist.',
             });
         }
 
         if (product.isArchived) {
             return res.status(400).json({
-                message: 'The product you selected is archived and cannot be added to the wishlist.'
+                message: 'This product is archived and cannot be added to your wishlist.',
             });
         }
 
-        // Find or create the wishlist
         let wishlist = await wishlistModel.findOne({ tourist: req.user._id });
 
         if (!wishlist) {
             wishlist = new wishlistModel({
                 tourist: req.user._id,
-                products: [{ productId: productObjectId }]
+                products: [{ productId: productObjectId }],
             });
         } else {
             const productExists = wishlist.products.some(item => item.productId.equals(productObjectId));
             if (productExists) {
                 return res.status(400).json({
-                    message: 'The product is already in your wishlist.'
+                    message: 'This product is already in your wishlist.',
                 });
             }
             wishlist.products.push({ productId: productObjectId });
@@ -49,10 +47,13 @@ const addProductToWishlist = async (req, res) => {
 
         await wishlist.save();
 
-        res.status(200).json({ message: 'Product added to wishlist successfully.' });
+        res.status(200).json({
+            message: 'Product has been successfully added to your wishlist.',
+        });
     } catch (error) {
         res.status(500).json({
-            message: 'Failed to add product to wishlist.'
+            message: 'An error occurred while adding the product to your wishlist.',
+            error: error.message,
         });
     }
 };
@@ -62,91 +63,78 @@ const removeProductFromWishlist = async (req, res) => {
 
         if (!productId) {
             return res.status(400).json({
-                message: 'Please provide a product ID to remove from the wishlist.'
+                message: 'Product ID is required to remove it from the wishlist.',
             });
         }
 
         const productObjectId = new mongoose.Types.ObjectId(productId);
 
-        // Validate if the product exists
         const product = await productModel.findById(productObjectId);
         if (!product) {
-            return res.status(400).json({
-                message: 'The product you selected does not exist.'
+            return res.status(404).json({
+                message: 'The selected product does not exist.',
             });
         }
 
-        if (product.isArchived) {
-            return res.status(400).json({
-                message: 'The product you selected is archived and cannot be removed from the wishlist.'
-            });
-        }
-
-        // Find the wishlist for the tourist
         let wishlist = await wishlistModel.findOne({ tourist: req.user._id });
 
         if (!wishlist) {
             return res.status(404).json({
-                message: 'Wishlist not found.'
+                message: 'No wishlist found for the current user.',
             });
         }
 
-        // Check if the product exists in the wishlist
         const productIndex = wishlist.products.findIndex(item => item.productId.equals(productObjectId));
 
         if (productIndex > -1) {
-            // Remove the product from the wishlist
             wishlist.products.splice(productIndex, 1);
             await wishlist.save();
             return res.status(200).json({
-                message: 'Product removed from wishlist successfully.'
+                message: 'The product has been successfully removed from your wishlist.',
             });
         } else {
             return res.status(400).json({
-                message: 'The product does not exist in your wishlist.'
+                message: 'The product is not in your wishlist.',
             });
         }
     } catch (error) {
         res.status(500).json({
-            message: 'Failed to remove product from wishlist.'
+            message: 'An error occurred while removing the product from your wishlist.',
+            error: error.message,
         });
     }
 };
 const getWishlistWithProductDetails = async (req, res) => {
     try {
-        // Find the wishlist for the logged-in tourist
         const wishlist = await wishlistModel
             .findOne({ tourist: req.user._id })
             .populate({
                 path: "products.productId",
-                match: { isArchived: false }, // Exclude archived products
-                select: "_id name picture price sellerId", // Select fields from the product
+                match: { isArchived: false },
+                select: "_id name picture price sellerId",
                 populate: {
-                    path: "sellerId", // Populate seller details
-                    select: "name role", // Select seller's name and role
+                    path: "sellerId",
+                    select: "name role",
                 },
             });
 
         if (!wishlist) {
             return res.status(404).json({
-                message: "Wishlist not found for the current tourist.",
+                message: 'No wishlist found for the current user.',
             });
         }
 
-        // Map wishlist products to include desired details
         const productsWithDetails = wishlist.products
-            .filter((item) => item.productId) // Exclude null or filtered-out products
-            .map((item) => {
+            .filter(item => item.productId)
+            .map(item => {
                 const product = item.productId;
-
-                const sellerName =
-                    product.sellerId && product.sellerId.role === "admin"
-                        ? "Roamify"
-                        : product.sellerId?.name || "Unknown Seller";
+                const sellerName = product.sellerId && product.sellerId.role === "admin"
+                    ? "Roamify"
+                    : product.sellerId?.name || "Unknown Seller";
 
                 return {
-                    productId : product._id,
-                    name : product.name,
+                    productId: product._id,
+                    name: product.name,
                     picture: product.picture,
                     sellerName,
                     price: product.price,
@@ -154,13 +142,13 @@ const getWishlistWithProductDetails = async (req, res) => {
             });
 
         res.status(200).json({
-            message: "Wishlist retrieved successfully.",
+            message: 'Your wishlist has been successfully retrieved.',
             wishlist: productsWithDetails,
         });
     } catch (error) {
         res.status(500).json({
-            message: "Failed to retrieve the wishlist.",
-            error: error.message, // Optional debugging detail
+            message: 'An error occurred while retrieving your wishlist.',
+            error: error.message,
         });
     }
 };
@@ -169,61 +157,55 @@ const addProductFromWishlistToCart = async (req, res) => {
         const { productId } = req.params;
 
         if (!productId) {
-            return res.status(400).json({ message: "Please choose a product to add to the cart." });
+            return res.status(400).json({ message: "Product ID is required to add it to the cart." });
         }
 
         const product = await productModel.findById(productId);
 
-        // Check if the product exists and is not archived
         if (!product || product.isArchived) {
-            return res.status(404).json({ message: "Product not found or unavailable." });
+            return res.status(404).json({ message: "The selected product is unavailable or does not exist." });
         }
 
-        // Find the user's cart
         let cart = await cartModel.findOne({ tourist: req.user._id });
 
         if (!cart) {
-            // Create a new cart if it doesn't exist
             cart = new cartModel({ tourist: req.user._id, products: [] });
         }
 
-        const productInCart = cart.products.find((item) => item.productId.equals(productId));
+        const productInCart = cart.products.find(item => item.productId.equals(productId));
         const currentQuantityInCart = productInCart ? productInCart.quantity : 0;
 
-        // Check stock availability
         if (currentQuantityInCart >= product.quantity) {
             return res.status(400).json({
-                message: `Only ${product.quantity} units available. You already have ${currentQuantityInCart} in your cart.`,
+                message: `Only ${product.quantity} units are available. You already have ${currentQuantityInCart} in your cart.`,
             });
         }
 
-        // Increment quantity if the product already exists in the cart
         if (productInCart) {
-            const totalRequestedQuantity = currentQuantityInCart + 1; // Add 1 from the wishlist
+            const totalRequestedQuantity = currentQuantityInCart + 1;
             if (totalRequestedQuantity > product.quantity) {
-                const maxAllowed = product.quantity - currentQuantityInCart;
                 return res.status(400).json({
-                    message: `Only ${product.quantity} units available. You can add up to ${maxAllowed} more.`,
+                    message: `Only ${product.quantity} units are available. You can add up to ${product.quantity - currentQuantityInCart} more.`,
                 });
             }
             productInCart.quantity = totalRequestedQuantity;
         } else {
-            // Add the product to the cart
             cart.products.push({ productId, quantity: 1 });
         }
 
-        // Save the cart
         await cart.save();
 
-        // Remove the product from the wishlist
         await wishlistModel.updateOne(
-            { userId: req.user._id },
-            { $pull: { products: productId } }
+            { tourist: req.user._id },
+            { $pull: { products: { productId } } }
         );
 
-        res.status(200).json({ message: "Product added to cart from wishlist successfully."});
+        res.status(200).json({ message: "Product successfully added to your cart from the wishlist." });
     } catch (error) {
-        res.status(500).json({ message: "Failed to add product to cart from wishlist.", error: error.message });
+        res.status(500).json({
+            message: "An error occurred while adding the product to the cart from the wishlist.",
+            error: error.message,
+        });
     }
 };
 

@@ -52,12 +52,20 @@ const getFilteredActivities = async (req, res) => {
             .populate("tags", "name description"); // Populate tags if needed
 
         if (!activities.length) {
-            return res.status(404).json({ message: "No activities found matching your criteria" });
+            return res.status(404).json({
+                message: "No activities found matching your criteria"
+            });
         }
 
-        res.status(200).json({ message: "Activities retrieved successfully", activities });
+        res.status(200).json({
+            message: "Activities retrieved successfully",
+            activities
+        });
     } catch (error) {
-        res.status(500).json({ message: "Failed to retrieve activities", error: error.message });
+        res.status(500).json({
+            message: "An unexpected error occurred while retrieving activities. Please try again later.",
+            error: error.message
+        });
     }
 };
 

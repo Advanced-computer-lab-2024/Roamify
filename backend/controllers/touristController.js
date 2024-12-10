@@ -40,7 +40,7 @@ const createProfile = async (req, res) => {
   if (id) {
     const existingProfile = await touristModel.findOne({ user: id });
     if (existingProfile) {
-      return res.status(400).json({ error: "Profile already created" });
+      return res.status(400).json({ message: "Profile already created" });
     }
   }
   await userModel.findByIdAndUpdate(req.user._id, { status: "active" });
@@ -80,9 +80,9 @@ const createProfile = async (req, res) => {
     await tourist.save();
     res.status(201).json({ message: "Created tourist successfully" });
   } catch (e) {
-    res.status(401).json({ error: e.message });
+    res.status(401).json({ message: e.message });
   }
-};
+}
 const getProfile = async (req, res) => {
   try {
     const id = req.user._id;
@@ -121,7 +121,7 @@ const getProfile = async (req, res) => {
       .status(500)
       .json({ message: "Failed to fetch profile", error: err.message });
   }
-};
+}
 const updateProfile = async (req, res) => {
   const id = req.user._id;
   const { firstName, lastName, email, mobileNumber, nationality, occupation } =
@@ -164,7 +164,7 @@ const updateProfile = async (req, res) => {
       .status(400)
       .json({ message: "Failed to update profile", error: e.message });
   }
-};
+}
 const bookActivity = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -344,7 +344,7 @@ const bookActivity = async (req, res) => {
       .status(500)
       .json({ message: error.message });
   }
-};
+}
 const bookPlace = async (req, res) => {
   try {
     // Find the tourist by the user's ID
@@ -445,7 +445,7 @@ const bookPlace = async (req, res) => {
       .status(500)
       .json({ message: error.message });
   }
-};
+}
 const bookItinerary = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -617,7 +617,7 @@ const bookItinerary = async (req, res) => {
       .status(400)
       .json({ message: error.message });
   }
-};
+}
 const cancelActivity = async (req, res) => {
   try {
     const tourist = await touristModel
@@ -687,7 +687,7 @@ const cancelActivity = async (req, res) => {
       .status(400)
       .json({ message: error.message });
   }
-};
+}
 const cancelPlace = async (req, res) => {
   try {
     const tourist = await touristModel
@@ -736,7 +736,7 @@ const cancelPlace = async (req, res) => {
       .status(400)
       .json({ message: "Error in cancelling place", error: error.message });
   }
-};
+}
 const cancelItinerary = async (req, res) => {
   try {
     const tourist = await touristModel
@@ -805,7 +805,7 @@ const cancelItinerary = async (req, res) => {
       .status(400)
       .json({ message: "Error in cancelling activity", error: error.message });
   }
-};
+}
 const selectPreferenceTag = async (req, res) => {
   try {
     const preferences = req.body.preferences;
@@ -839,7 +839,7 @@ const selectPreferenceTag = async (req, res) => {
         error: error.message,
       });
   }
-};
+}
 const cancelTransportationBooking = async (req, res) => {
   try {
     const transportationIdString = req.body.transportationId;
@@ -917,7 +917,7 @@ const cancelTransportationBooking = async (req, res) => {
         error: error.message,
       });
   }
-};
+}
 const getBookedTransportations = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -940,7 +940,7 @@ const getBookedTransportations = async (req, res) => {
         error: error.message,
       });
   }
-};
+}
 const getBookedFutureTransportations = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -970,7 +970,7 @@ const getBookedFutureTransportations = async (req, res) => {
         error: error.message,
       });
   }
-};
+}
 const getFilteredTransportations = async (req, res) => {
   try {
     const {
@@ -1045,7 +1045,7 @@ const getFilteredTransportations = async (req, res) => {
         error: error.message,
       });
   }
-};
+}
 const bookTransportation = async (req, res) => {
   try {
     const tourist = await touristModel
@@ -1131,7 +1131,7 @@ const bookTransportation = async (req, res) => {
       .status(500)
       .json({ message: error.message });
   }
-};
+}
 const getAllBookedActivities = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
@@ -1162,7 +1162,7 @@ const getAllBookedActivities = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-};
+}
 const getAllBookedItineraries = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
@@ -1197,7 +1197,7 @@ const getAllBookedItineraries = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-};
+}
 const getAllBookedPlaces = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
@@ -1249,7 +1249,7 @@ const getAllUpcomingBookedActivities = async (req, res) => {
         message: error.message
       });
   }
-};
+}
 const getAllUpcomingBookedItineraries = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
@@ -1282,7 +1282,7 @@ const getAllUpcomingBookedItineraries = async (req, res) => {
         message: error.message
       });
   }
-};
+}
 const viewPointsLevel = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
@@ -1297,7 +1297,7 @@ const viewPointsLevel = async (req, res) => {
       .status(400)
       .json({ message: "couldn't retrieve points and level" });
   }
-};
+}
 const redeemPoints = async (req, res) => {
   try {
     const tourist = await touristModel.findOne({ user: req.user._id });
@@ -1331,7 +1331,7 @@ const redeemPoints = async (req, res) => {
       .status(400)
       .json({ message: "error in redeeming points", error: error.message });
   }
-};
+}
 const getWallet = async (req, res) => {
   try {
 
@@ -1371,7 +1371,6 @@ const viewTotalRefundedReceipts = async (req, res) => {
     return res.status(500).json({ message: error.message })
   }
 }
-
 const enableNotificationsForActivities = async (req, res) => {
   try {
 
@@ -1430,4 +1429,4 @@ module.exports = {
   getWallet,
   viewTotalRefundedReceipts,
   enableNotificationsForActivities
-};
+}

@@ -9,13 +9,13 @@ const sendOtp = async (req, res) => {
   try {
     const email = req.body.email;
     if (!email) {
-      return res.status(400).json({ error: "Email is required" });
+      return res.status(400).json({ message: "Email is required" });
     }
     const user = await userModel.findOne({ email });
     if (!user) {
       return res
         .status(404)
-        .json({ error: "User with this email does not exist" });
+        .json({ message: "User with this email does not exist" });
     }
 
     if (user.status !== "active")
