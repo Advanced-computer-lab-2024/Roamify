@@ -1,10 +1,14 @@
 import React from "react";
+import EmptyResponseLogo from "../../component/EmptyResponseLogo";
 
 const PendingAcceptance = () => {
   return (
     <div>
-      <h2>Pending Acceptance</h2>
-      <p>Your documents are being reviewed. Please check back later.</p>
+      <EmptyResponseLogo
+        isVisible={true}
+        size="300px"
+        text={"Your documents are being reviewed , come back later!"}
+      />
     </div>
   );
 };

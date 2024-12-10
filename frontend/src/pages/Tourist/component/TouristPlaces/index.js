@@ -4,6 +4,9 @@ import SectionHeading from "../../../../component/Common/SectionHeading";
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import LoadingLogo from "../../../../component/LoadingLogo";
+import { Share } from "@mui/icons-material";
+import ShareModal from "../TouristItinerarySearch/ShareModal";
 
 const TouristPlacesArea = () => {
   const [places, setPlaces] = useState([]);
@@ -214,7 +217,7 @@ const TouristPlacesArea = () => {
           <div className="col-lg-9">
             <div className="row">
               {loading ? (
-                <p>Loading...</p>
+                <LoadingLogo isVisible={true} size="100px" />
               ) : (
                 places.map((data, index) => (
                   <div
@@ -275,24 +278,22 @@ const TouristPlacesArea = () => {
                         <button
                           className="btn btn_theme btn_sm"
                           onClick={() => handleShareToggle(data._id)}
+                          style={{
+                            position: "absolute",
+                            top: "-60px",
+                            right: "5px",
+                          }}
                         >
+                          <Share style={{ marginRight: "8px" }} />
                           Share
                         </button>
                         {showShareOptions[data._id] && (
-                          <div className="share-options">
-                            <button
-                              className="btn btn_theme btn_sm"
-                              onClick={() => handleCopyLink(data._id)}
-                            >
-                              Copy Link
-                            </button>
-                            <button
-                              className="btn btn_theme btn_sm"
-                              onClick={() => handleEmailShare(data)}
-                            >
-                              Share via Email
-                            </button>
-                          </div>
+                          <ShareModal
+                            handleCopy={() => handleCopyLink(data._id)}
+                            handleShareEmail={() => handleEmailShare(data)}
+                            isOpen={true}
+                            onClose={() => handleShareToggle(data._id)}
+                          />
                         )}
                       </div>
                     </div>

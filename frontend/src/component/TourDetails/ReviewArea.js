@@ -4,7 +4,7 @@ import ReviewCard from "../Common/CustomerReview/ReviewCard";
 // Import ReviewData
 import { ReviewData } from "../Common/CustomerReview/ReviewData";
 
-const ReviewArea = ({  reviews }) => {
+const ReviewArea = ({ reviews }) => {
   const [rating, setRating] = useState(0); // Stores the user's selected star rating
   const [comment, setComment] = useState(""); // Stores the user's comment text
 
@@ -13,15 +13,21 @@ const ReviewArea = ({  reviews }) => {
     setRating(selectedRating);
   };
 
- 
-
   return (
     <>
       <div className="container">
         <div className="row">
           <div className="col-lg-8">
-            <div className="write_your_review_wrapper">
-              <h3 className="heading_theme">Write your review</h3>
+            <div
+              className="write_your_review_wrapper"
+              style={{ background: "var(--secondary-color)" }}
+            >
+              <h3
+                className="heading_theme"
+                style={{ color: "var(--text-color)" }}
+              >
+                Write your review
+              </h3>
               <div className="write_review_inner_boxed">
                 <form action="!#" id="news_comment_form">
                   <div className="row">
@@ -30,7 +36,9 @@ const ReviewArea = ({  reviews }) => {
                       {[...Array(5)].map((_, index) => (
                         <i
                           key={index}
-                          className={`fas fa-star ${index < rating ? "selected" : ""}`}
+                          className={`fas fa-star ${
+                            index < rating ? "selected" : ""
+                          }`}
                           onClick={() => handleRatingSelect(index + 1)}
                         />
                       ))}
@@ -43,6 +51,11 @@ const ReviewArea = ({  reviews }) => {
                           className="form-control bg_input"
                           value={comment}
                           onChange={(e) => setComment(e.target.value)}
+                          style={{
+                            background: "var(--background-color)",
+                            border: "1px solid var(--secondary-border-color)",
+                            resize: "none",
+                          }}
                         ></textarea>
                       </div>
                       <div className="comment_form_submit">
@@ -60,12 +73,23 @@ const ReviewArea = ({  reviews }) => {
         <div className="row">
           <div className="col-lg-12">
             <div className="all_review_wrapper">
-              <h3 className="heading_theme">All reviews</h3>
+              <h3
+                className="heading_theme"
+                style={{ color: "var(--text-color)" }}
+              >
+                All reviews
+              </h3>
             </div>
           </div>
-          {ReviewData.slice(0, 3).map((data, index) => (
-            <ReviewCard img={data.img} para={data.review} key={index} />
-          ))}
+          {reviews && reviews.length == 0
+            ? "no reviews for this product"
+            : reviews.map((data, index) => (
+                <ReviewCard
+                  review={data.review}
+                  rating={data.rating}
+                  key={index}
+                />
+              ))}
         </div>
       </div>
     </>

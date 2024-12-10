@@ -5,6 +5,7 @@ import CommonCard from "./ProductCommonCard";
 import productDefault from "./productdefault.png";
 import PriceSlider from "../TouristActivitiesSearch/PriceSlider";
 import LoadingLogo from "../../../../component/LoadingLogo";
+import { ToastContainer } from "react-toastify";
 const TouristProductsArea = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -113,7 +114,7 @@ const TouristProductsArea = () => {
                 </div>
                 <div className="filter_review">
                   <div className="review_star">
-                    {[5, 4, 3, 2, 1,0].map((rating) => (
+                    {[5, 4, 3, 2, 1, 0].map((rating) => (
                       <div className="form-check" key={rating}>
                         <input
                           className="form-check-input"
@@ -174,6 +175,7 @@ const TouristProductsArea = () => {
           </div>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </section>
   );
 };

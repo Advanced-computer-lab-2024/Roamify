@@ -105,20 +105,22 @@ const ViewDocumentsButton = ({ userId }) => {
               </div>
             ) : Object.keys(documents).length > 0 ? (
               <ul>
-                {Object.entries(documents).map(([docType, url], index) => (
-                  <li key={index}>
-                    <strong>
-                      {docType !== "IDs" ? camelToReg(docType) : docType}:
-                    </strong>{" "}
-                    <a
-                      href={url} // Direct link to the document URL
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      View Document
-                    </a>
-                  </li>
-                ))}
+                {Object.entries(documents)
+                  .filter(([key]) => key !== "message")
+                  .map(([docType, url], index) => (
+                    <li key={index}>
+                      <strong>
+                        {docType !== "IDs" ? camelToReg(docType) : docType}:
+                      </strong>{" "}
+                      <a
+                        href={url} // Direct link to the document URL
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View Document
+                      </a>
+                    </li>
+                  ))}
               </ul>
             ) : (
               <p>No documents found.</p>

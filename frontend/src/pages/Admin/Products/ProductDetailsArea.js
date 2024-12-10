@@ -6,7 +6,15 @@ import ReviewArea from "../../../component/TourDetails/ReviewArea";
 import Img from "../../../assets/img/tour/big-img.png";
 import ProductDetailsSideBar from "./ProductDetailsSideBar";
 
-const ProductDetailsArea = ({ name, price, rating, description, reviews }) => {
+const ProductDetailsArea = ({
+  name,
+  price,
+  rating,
+  img,
+  description,
+  quantity,
+  reviews,
+}) => {
   return (
     <>
       <section id="tour_details_main" className="section_padding">
@@ -19,17 +27,31 @@ const ProductDetailsArea = ({ name, price, rating, description, reviews }) => {
                     <h2>{name}</h2>
                   </div>
                   <div className="tour_details_top_heading_right">
-                    <p>{reviews?.length ?? 0 + " reviewes"}</p>
+                    <p style={{ color: "var(--dashboard-title-color)" }}>
+                      {reviews.length || 0 + " reviews"}
+                    </p>
                   </div>
                 </div>
 
                 <div className="tour_details_img_wrapper">
-                  <div className="tour_react_big">
-                    <img src={Img} alt="img" />
+                  <div className="tour_react_big" style={{ display: "flex" }}>
+                    <img
+                      src={img}
+                      alt="img"
+                      style={{ display: "flex", flex: 1, objectFit: "cover" }}
+                    />
                   </div>
                 </div>
-                <div className="tour_details_boxed">
-                  <h3 className="heading_theme">Description</h3>
+                <div
+                  className="tour_details_boxed"
+                  style={{ background: "var(--secondary-color)" }}
+                >
+                  <h3
+                    className="heading_theme"
+                    style={{ color: "var(--text-color)" }}
+                  >
+                    Description
+                  </h3>
                   <div
                     className="tour_details_boxed_inner"
                     style={{ minHeight: "40vh" }}
@@ -40,7 +62,13 @@ const ProductDetailsArea = ({ name, price, rating, description, reviews }) => {
               </div>
             </div>
             <div className="col-lg-4">
-              <ProductDetailsSideBar name={name} price={price} rating={rating} description={description}  />
+              <ProductDetailsSideBar
+                name={name}
+                price={price}
+                rating={rating}
+                description={description}
+                quantity={quantity}
+              />
             </div>
           </div>
         </div>

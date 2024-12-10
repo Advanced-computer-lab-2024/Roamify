@@ -13,6 +13,11 @@ import LoadingLogo from "../../../../component/LoadingLogo";
 import { FaBookmark, FaShare } from "react-icons/fa";
 import { Share } from "@mui/icons-material";
 import ShareModal from "./ShareModal";
+import PaymentModal from "../../../../PaymentModal";
+import DateSelectionModal from "./DateSelectionModal.js";
+import SkeletonLoader from "../../../Advertiser/Activities/SkeletonLoader.js";
+import EmptyResponseLogo from "../../../../component/EmptyResponseLogo.js";
+
 const TouristItineraryWrapper = () => {
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +45,10 @@ const TouristItineraryWrapper = () => {
   const [searchInput, setSearchInput] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItinerary, setCurrentItinerary] = useState(false);
+
+  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
 
   const openShareModal = (itinerary) => {
     setCurrentItinerary(itinerary);
@@ -87,31 +96,8 @@ const TouristItineraryWrapper = () => {
           // searchQuery: searchInput,
         },
       });
-      setItineraries(response.data || []);
+      setItineraries(response.data.itineraries || []);
       // Attempt to fetch bookmarks
-      try {
-        const bookmarkResponse = await axios.get(
-          "http://localhost:3000/api/bookmark/itinerary",
-          { withCredentials: true }
-        );
-
-        // Map bookmarked activities by ID
-        const bookmarks = {};
-        bookmarkResponse.data.forEach((itinerary) => {
-          bookmarks[itinerary._id] = true;
-        });
-        setBookmarkedItineraries(bookmarks);
-      } catch (bookmarkError) {
-        // Log and continue if bookmark fetch fails
-        if (bookmarkError.response && bookmarkError.response.status === 400) {
-          console.warn(
-            "Bookmark fetch failed, but activities will still display."
-          );
-        } else {
-          console.error("Error fetching bookmarks:", bookmarkError);
-        }
-        setBookmarkedItineraries({}); // Reset bookmarks in case of failure
-      }
     } catch (error) {
       setItineraries([]);
       setError(
@@ -125,8 +111,83 @@ const TouristItineraryWrapper = () => {
     }
   };
 
+  const openDateModal = (itinerary) => {
+    setCurrentItinerary(itinerary);
+    setIsDateModalOpen(true);
+  };
+
+  const closeDateModal = () => {
+    setIsDateModalOpen(false);
+    setSelectedDate("");
+  };
+
+  const openPaymentModal = () => {
+    setIsDateModalOpen(false); // Close date modal
+    setIsPaymentModalOpen(true);
+  };
+
+  const closePaymentModal = () => {
+    setIsPaymentModalOpen(false);
+  };
+
+  const handlePaymentSuccess = async ({ method, paymentMethodId }) => {
+    try {
+      if (!selectedDate) {
+        toast.error("Please select a date.");
+        return;
+      }
+
+      // Call the booking API
+      await axios.post(
+        "http://localhost:3000/api/tourist/book-itinerary",
+        {
+          itinerary: currentItinerary._id,
+          date: selectedDate,
+          method,
+          paymentMethodId,
+        },
+        { withCredentials: true }
+      );
+
+      toast.success("Booking successful!");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to book itinerary.";
+      toast.error(errorMessage);
+    } finally {
+      closePaymentModal();
+    }
+  };
+
+  const fetchBookmarked = async () => {
+    try {
+      const bookmarkResponse = await axios.get(
+        "http://localhost:3000/api/bookmark/itinerary",
+        { withCredentials: true }
+      );
+
+      // Map bookmarked activities by ID
+      const bookmarks = {};
+      bookmarkResponse.data.forEach((itinerary) => {
+        bookmarks[itinerary._id] = true;
+      });
+      setBookmarkedItineraries(bookmarks);
+    } catch (bookmarkError) {
+      // Log and continue if bookmark fetch fails
+      if (bookmarkError.response && bookmarkError.response.status === 400) {
+        console.warn(
+          "Bookmark fetch failed, but activities will still display."
+        );
+      } else {
+        console.error("Error fetching bookmarks:", bookmarkError);
+      }
+      setBookmarkedItineraries({}); // Reset bookmarks in case of failure
+    }
+  };
+
   useEffect(() => {
     fetchItineraries();
+    fetchBookmarked();
   }, [
     priceRange,
     date,
@@ -359,9 +420,9 @@ const TouristItineraryWrapper = () => {
             style={{ display: "flex", flexDirection: "column", gap: "20px" }}
           >
             {loading ? (
-              <LoadingLogo isVisible={true} />
+              <SkeletonLoader />
             ) : error ? (
-              <p>{error}</p>
+              <EmptyResponseLogo isVisible={true} text={error} size="200px" />
             ) : (
               itineraries?.map((itinerary, index) => (
                 <div key={itinerary._id}>
@@ -483,12 +544,7 @@ const TouristItineraryWrapper = () => {
                         }}
                       >
                         <button
-                          onClick={() =>
-                            handleBooking(
-                              itinerary._id,
-                              itinerary.availableDates[0]
-                            )
-                          }
+                          onClick={() => openDateModal(itinerary)}
                           className="btn  "
                           disabled={
                             !itinerary.availableDates ||
@@ -644,6 +700,26 @@ const TouristItineraryWrapper = () => {
             handleShareEmail={() => handleEmailShare(currentItinerary)}
             isOpen={isModalOpen}
             onClose={closeShareModal}
+          />
+        )}
+        {isDateModalOpen && (
+          <DateSelectionModal
+            isOpen={isDateModalOpen}
+            availableDates={currentItinerary?.availableDates || []}
+            onClose={closeDateModal}
+            onSelectDate={(date) => {
+              setSelectedDate(date);
+              openPaymentModal();
+            }}
+          />
+        )}
+
+        {/* Payment Modal */}
+        {isPaymentModalOpen && (
+          <PaymentModal
+            isOpen={isPaymentModalOpen}
+            onClose={closePaymentModal}
+            onPaymentSuccess={handlePaymentSuccess}
           />
         )}
       </div>

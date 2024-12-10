@@ -39,7 +39,7 @@ const Bookmarks = () => {
         "http://localhost:3000/api/bookmark/itinerary",
         { withCredentials: true }
       );
-      setItineraries(itineraryResponse.data || []);
+      setItineraries(itineraryResponse.data.bookmarkedItineraries || []);
     } catch (err) {
       if (err.response?.status === 400) {
         setItinerariesError("No bookmarked itineraries.");
@@ -56,12 +56,10 @@ const Bookmarks = () => {
       type === "activity"
         ? "http://localhost:3000/api/bookmark/activity"
         : "http://localhost:3000/api/bookmark/itinerary";
-  
+
     const requestData =
-      type === "activity"
-        ? { activityId: id }
-        : { itineraryId: id };
-  
+      type === "activity" ? { activityId: id } : { itineraryId: id };
+
     try {
       await axios.delete(endpoint, {
         data: requestData, // Correctly send the ID in JSON format
@@ -73,7 +71,7 @@ const Bookmarks = () => {
       toast.error("Error removing from bookmarks.");
     }
   };
-  
+
   useEffect(() => {
     fetchBookmarks();
   }, []);
@@ -125,8 +123,8 @@ const Bookmarks = () => {
                     <FaMapMarkerAlt /> {activity.location.name}
                   </p>
                   <p>
-                    <FaClock /> {new Date(activity.date).toLocaleDateString()}{" "}
-                    | {activity.time}
+                    <FaClock /> {new Date(activity.date).toLocaleDateString()} |{" "}
+                    {activity.time}
                   </p>
                   <p>Price: {activity.price} USD</p>
                 </div>
@@ -155,7 +153,9 @@ const Bookmarks = () => {
                 <div
                   data-tooltip-id={`remove-itinerary-tooltip-${itinerary._id}`}
                   data-tooltip-content="Remove from bookmarks"
-                  onClick={() => handleRemoveBookmark(itinerary._id, "itinerary")}
+                  onClick={() =>
+                    handleRemoveBookmark(itinerary._id, "itinerary")
+                  }
                   style={styles.removeButton}
                 >
                   <FaTimes />
@@ -179,7 +179,9 @@ const Bookmarks = () => {
                   <p>
                     Next Available:{" "}
                     {itinerary.availableDates.length > 0
-                      ? new Date(itinerary.availableDates[0]).toLocaleDateString()
+                      ? new Date(
+                          itinerary.availableDates[0]
+                        ).toLocaleDateString()
                       : "No dates available"}
                   </p>
                 </div>

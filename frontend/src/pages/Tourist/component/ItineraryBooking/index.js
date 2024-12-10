@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaMapMarkerAlt } from "react-icons/fa";
+import LoadingLogo from "../../../../component/LoadingLogo";
+import EmptyResponseLogo from "../../../../component/EmptyResponseLogo";
+
 const BookedItinerariesWrapper = () => {
   const [bookedItineraries, setBookedItineraries] = useState([]);
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
+  const currencySymbol = localStorage.getItem("currencySymbol") || "$";
+  const exchangeRate = parseFloat(localStorage.getItem("value")) || 1;
   const [error, setError] = useState(null);
   const [popupMessage, setPopupMessage] = useState("");
   const [selectedBooking, setSelectedBooking] = useState(null); // To store the booking to cancel
@@ -14,7 +19,8 @@ const BookedItinerariesWrapper = () => {
       setLoading(true);
       setError(null);
 
-      const statusQuery = filter === "All" ? "" : `?status=${filter.toLowerCase()}`;
+      const statusQuery =
+        filter === "All" ? "" : `?status=${filter.toLowerCase()}`;
       const url = `http://localhost:3000/api/tourist/get-all-upcoming-booked-itineraries${statusQuery}`;
 
       try {
@@ -25,9 +31,16 @@ const BookedItinerariesWrapper = () => {
         setBookedItineraries(validItineraries);
       } catch (err) {
         if (err.response && err.response.status === 400) {
-          setError(` ${err.response.data.message || "Something went wrong. Please try again later."}`);
+          setError(
+            ` ${
+              err.response.data.message ||
+              "Something went wrong. Please try again later."
+            }`
+          );
         } else {
-          setError("Failed to fetch booked itineraries. Please try again later.");
+          setError(
+            "Failed to fetch booked itineraries. Please try again later."
+          );
         }
       } finally {
         setLoading(false);
@@ -39,7 +52,11 @@ const BookedItinerariesWrapper = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
+    return `${date.getDate().toString().padStart(2, "0")}/${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, "0")}/${date.getFullYear()}`;
   };
 
   const handleCancelItinerary = async () => {
@@ -53,7 +70,7 @@ const BookedItinerariesWrapper = () => {
         "http://localhost:3000/api/tourist/cancel-itinerary-booking",
         {
           data: { ticketId: selectedBooking },
-          withCredentials: true
+          withCredentials: true,
         }
       );
 
@@ -79,94 +96,157 @@ const BookedItinerariesWrapper = () => {
   };
 
   return (
-    <section id="explore_area" className="section_padding">
+    <section
+      id="explore_area"
+      className="section_padding"
+      style={{ minHeight: "100vh" }}
+    >
+      <div className="section_heading_center">
+        <h2>Upcoming Booked Itineraries</h2>
+      </div>
+
       <div className="container">
-        <div className="row">
+        <div
+          className="row"
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "10px",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <div className="col-lg-9">
             {loading ? (
-              <p>Loading booked itineraries...</p>
+              <LoadingLogo isVisible={true} size="100px" />
             ) : error ? (
-              <p style={{ color: "red" }}>{error}</p>
-            ) : bookedItineraries.length === 0 ? (
-              <p>No booked itineraries found.</p>
+              <EmptyResponseLogo isVisible={true} text={error} size="300px" />
             ) : (
-              <div className="flight_search_result_wrapper" style={{ display: "grid", gap: "20px",
-                backgroundColor: "#f9f9f9",
-                padding: "20px",
-                borderRadius: "8px",
-                boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-                cursor: "pointer",
-                flex: "1 1 30%", // Adjust to ensure flexibility
-                minWidth: "300px",
-                maxWidth: "calc(33% - 20px)",
-                transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                 background: "var(--secondary-color)"
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.05)";
-                e.currentTarget.style.boxShadow = "0 10px 20px rgba(0, 0, 0, 0.2)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-                e.currentTarget.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.1)";
-              }}>
+              <div
+                className="flight_search_result_wrapper"
+                style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}
+              >
                 {bookedItineraries.map((booking) => (
                   <div
-                    className="flight_search_item_wrapper"
                     key={booking._id}
+                    className="flight_search_item_wrapper"
                     style={{
-                      width: "100%",
-                      background: "var(--secondary-color)",
                       display: "flex",
-                      flexDirection: "column",
-                      padding: "20px",
-                      marginBottom: "20px",
-                      borderRadius: "8px",
+                      background: "var(--secondary-color)",
+                      borderRadius: "10px",
                       boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      transition: "transform 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "scale(1.05)";
+                      e.currentTarget.style.boxShadow =
+                        "0 10px 20px rgba(0, 0, 0, 0.2)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "scale(1)";
+                      e.currentTarget.style.boxShadow =
+                        "0 4px 8px rgba(0, 0, 0, 0.1)";
                     }}
                   >
-                    <h3
+                    <div
+                      className="flight_search_left"
                       style={{
-                        marginBottom: "15px",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                        textDecoration: "underline",
+                        flex: "1",
+                        height: "100%",
+                        padding: "30px 20px",
+                        display: "flex",
+                        gap: "20px",
+                        flexDirection: "column",
+                        alignItems: "baseline",
+                        width: "100%",
                       }}
                     >
-                      {booking.name}
-                    </h3>
-
-                    <div style={{ marginBottom: "15px" }}>
-                      {booking.locations.length > 0 && (
-                        <p style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <FaMapMarkerAlt style={{ color: "#8b3eea" }} />
-                          {booking.locations.join(", ")}
-                        </p>
-                      )}
-                      <p>
-                        <strong>Status:</strong> {booking.status}
+                      <h3
+                        style={{ fontSize: "24px", color: "var(--text-color)" }}
+                      >
+                        {booking.name}
+                      </h3>
+                      <p style={{ color: "var(--dashboard-title-color)" }}>
+                        <FaMapMarkerAlt style={{ marginRight: "8px" }} />
+                        {booking.locations.join(", ")}
                       </p>
-                     
-                      <p>
-                        <strong>Date:</strong> {formatDate(booking.date)}
+                      <p style={{ color: "var(--dashboard-title-color)" }}>
+                        <strong>Date: </strong>
+                        {formatDate(booking.date)}
                       </p>
-                      <p>
-                        <strong>Points Redeemed:</strong> {booking.pointsRedeemed ? "Yes" : "No"}
-                      </p>
-                     
                     </div>
-
-                    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "15px" }}>
+                    <div
+                      className="flight_search_right"
+                      style={{
+                        background: "var(--scroll-bar-color)",
+                        // height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        // alignItems: "end",
+                        justifyContent: "end",
+                        position: "relative",
+                        color: "white",
+                        padding: "10px 20px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <h2 style={{}}>
+                          {currencySymbol}
+                          {(booking.originalPrice * exchangeRate).toFixed(
+                            2
+                          )}{" "}
+                        </h2>
+                      </div>
+                      <div
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            fontSize: "18px",
+                          }}
+                        >
+                          <i
+                            className={`fas ${
+                              booking.status === "active"
+                                ? "fa-check"
+                                : "fa-times"
+                            }`}
+                            style={{
+                              color: "var(--text-color)",
+                              marginRight: "8px",
+                            }}
+                          ></i>
+                          <span>
+                            {booking.status === "active"
+                              ? "Active"
+                              : "Inactive"}
+                          </span>
+                        </span>
+                      </div>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           openCancelConfirmation(booking._id);
                         }}
+                        className="btn btn_theme"
                         style={{
                           padding: "10px 20px",
-                          backgroundColor: "#8b3eea", // Purple cancel button
+                          backgroundColor: "var(--main-color)",
                           color: "#fff",
-                          border: "none",
                           borderRadius: "5px",
                           cursor: "pointer",
                         }}
@@ -176,7 +256,6 @@ const BookedItinerariesWrapper = () => {
                     </div>
                   </div>
                 ))}
-
               </div>
             )}
           </div>
@@ -194,7 +273,7 @@ const BookedItinerariesWrapper = () => {
               backgroundColor: "rgba(0, 0, 0, 0.5)",
               display: "flex",
               justifyContent: "center",
-              alignItems: "center"
+              alignItems: "center",
             }}
           >
             <div
@@ -203,7 +282,7 @@ const BookedItinerariesWrapper = () => {
                 padding: "20px",
                 borderRadius: "8px",
                 maxWidth: "500px",
-                textAlign: "center"
+                textAlign: "center",
               }}
             >
               <p>{popupMessage}</p>
@@ -214,7 +293,7 @@ const BookedItinerariesWrapper = () => {
                     style={{
                       marginTop: "10px",
                       padding: "10px 20px",
-                      backgroundColor: "#8b3eea", // Purple Cancel
+                      backgroundColor: "#8b3eea",
                       color: "#fff",
                       border: "none",
                       borderRadius: "5px",
