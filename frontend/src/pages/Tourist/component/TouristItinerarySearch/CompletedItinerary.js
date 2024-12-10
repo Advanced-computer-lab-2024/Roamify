@@ -33,9 +33,7 @@ const CompletedItinerary = () => {
     } catch (error) {
       setItineraries([]);
       setError(
-        error.response && error.response.status === 404
-          ? "No itineraries found"
-          : "An error occurred while fetching itineraries."
+        error.response.data.message
       );
     } finally {
       setLoading(false);

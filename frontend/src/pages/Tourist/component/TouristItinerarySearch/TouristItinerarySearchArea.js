@@ -27,9 +27,9 @@ const TouristItineraryWrapper = () => {
   const [preferences, setPreferences] = useState([]);
   const [preference, setPreference] = useState("");
   const [languages, setLanguages] = useState([
-    { _id: "en", name: "English" },
-    { _id: "de", name: "German" },
-    { _id: "es", name: "Spanish" },
+    { _id: "English", name: "English" },
+    { _id: "German", name: "German" },
+    { _id: "French", name: "French" },
   ]);
   const [language, setLanguage] = useState("");
   const [showShareOptions, setShowShareOptions] = useState({});
@@ -83,8 +83,8 @@ const TouristItineraryWrapper = () => {
           sortBy: sortCriteria.field,
           sortOrder: sortCriteria.order,
           language: language || undefined,
-          searchType: searchType,
-          searchQuery: searchInput,
+          searchType: searchInput,
+          // searchQuery: searchInput,
         },
       });
       setItineraries(response.data || []);
@@ -134,7 +134,7 @@ const TouristItineraryWrapper = () => {
     preference,
     language,
     sortCriteria,
-    searchType,
+    // searchType,
     searchInput,
   ]);
 
@@ -146,7 +146,7 @@ const TouristItineraryWrapper = () => {
 
   const handleLanguageApply = (selectedLanguage) => {
     setLanguage(selectedLanguage);
-    fetchItineraries();
+    // fetchItineraries();
   };
 
   const handleSortChange = (field, order) => {

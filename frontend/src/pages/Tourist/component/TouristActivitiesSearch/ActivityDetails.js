@@ -75,13 +75,13 @@ const ActivityDetails = () => {
                   color: "#fff",
                 }}
               >
-                <h2 style={{ fontSize: "2rem", fontWeight: "600" }}>
+                <h2 style={{ fontSize: "2rem", fontWeight: "600", color:"#000000" }}>
                   {activity.name}
                 </h2>
-                <p style={{ fontSize: "1.1rem", margin: "10px 0" }}>
+                <p style={{ fontSize: "1.1rem", margin: "10px 0" ,color:"#000000"}}>
                   <strong>Category:</strong> {activity.category.name}
                 </p>
-                <p style={{ fontSize: "1.1rem", margin: "10px 0" }}>
+                <p style={{ fontSize: "1.1rem", margin: "10px 0",color:"#000000" }}>
                   <strong>Location:</strong> {activity.location.name}
                 </p>
                 <div
@@ -103,7 +103,7 @@ const ActivityDetails = () => {
                     EGP
                   </h5>
                 )}
-                <p style={{ margin: "20px 0", lineHeight: "1.6" }}>
+                <p style={{ margin: "20px 0", lineHeight: "1.6",color:"#000000" }}>
                   {activity.description}
                 </p>
                 <button
@@ -137,7 +137,7 @@ const ActivityDetails = () => {
                   color: "#fff",
                 }}
               >
-                <h4>Activity Details</h4>
+                <h4 style={{color:"#000000"}}>Activity Details</h4>
                 <div
                   style={{
                     display: "flex",
@@ -148,7 +148,7 @@ const ActivityDetails = () => {
                   <FaMapMarkerAlt
                     style={{ marginRight: "10px", color: "#3498db" }}
                   />
-                  <p>
+                  <p style={{color:"#000000"}}>
                     <strong>Location:</strong> {activity.location.name}
                   </p>
                 </div>
@@ -162,11 +162,11 @@ const ActivityDetails = () => {
                   <FaCalendarAlt
                     style={{ marginRight: "10px", color: "#f39c12" }}
                   />
-                  <p>
+                  <p style={{color:"#000000"}}>
                     <strong>Time:</strong> {activity.time}
                   </p>
                 </div>
-                <p>
+                <p style={{color:"#000000"}}>
                   <strong>Tags:</strong>{" "}
                   {activity.tags.map((tag) => tag.name).join(", ")}
                 </p>

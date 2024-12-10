@@ -38,6 +38,7 @@ const TouristActivitiesWrapper = () => {
   const exchangeRate = parseFloat(localStorage.getItem("value")) || 1;
   const [notificationActive, setNotificationActive] = useState(false);
   const [currentActivity, setCurrentActivity] = useState(null);
+  const [selectedRating, setSelectedRating] = useState(null); // State to track selected rating
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -68,7 +69,7 @@ const TouristActivitiesWrapper = () => {
     minBudget,
     maxBudget,
     date,
-    minRating,
+    selectedRating,
     category,
     tag
   ) => {
@@ -82,7 +83,7 @@ const TouristActivitiesWrapper = () => {
           minBudget,
           maxBudget,
           date: date ? date.toISOString().split("T")[0] : undefined,
-          minRating: minRating || undefined,
+          minRating: selectedRating || undefined,
           category: category || undefined,
           tag: tag || undefined,
           sortBy: sortCriteria.field,
@@ -130,8 +131,8 @@ const TouristActivitiesWrapper = () => {
   };
 
   useEffect(() => {
-    fetchActivities(priceRange[0], priceRange[1], date, minRating, category);
-  }, [priceRange, date, minRating, category, sortCriteria]);
+    fetchActivities(priceRange[0], priceRange[1], date, selectedRating, category);
+  }, [priceRange, date, selectedRating, category, sortCriteria]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -212,7 +213,7 @@ const TouristActivitiesWrapper = () => {
       priceRange[0],
       priceRange[1],
       date,
-      minRating,
+      selectedRating,
       searchParams.category,
       searchParams.tags
     );
@@ -360,6 +361,11 @@ const TouristActivitiesWrapper = () => {
       }
     }
   };
+  const handleRatingChange = (rating) => {
+    setSelectedRating(rating); // Update selected rating
+    setError(""); // Clear any existing error when changing rating
+    setLoading(true); // Set loading state to show fetching in progress
+  };
 
   return (
     <section id="explore_area" className="section_padding">
@@ -422,6 +428,34 @@ const TouristActivitiesWrapper = () => {
                 </button>
               </div>
             </div>
+            <div className="left_side_search_boxed">
+                <div className="left_side_search_heading">
+                  <h5>Filter by Minimum Rating</h5>
+                </div>
+                <div className="filter_review">
+                  <div className="review_star">
+                    {[5, 4, 3, 2, 1,0].map((rating) => (
+                      <div className="form-check" key={rating}>
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="rating"
+                          checked={selectedRating === rating}
+                          onChange={() => handleRatingChange(rating)}
+                        />
+                        <label className="form-check-label">
+                          {[...Array(rating)].map((_, i) => (
+                            <i key={i} className="fas fa-star color_theme"></i>
+                          ))}
+                          {[...Array(5 - rating)].map((_, i) => (
+                            <i key={i} className="fas fa-star color_asse"></i>
+                          ))}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             <SideBar
               priceRange={priceRange}
               setPriceRange={setPriceRange}
@@ -430,7 +464,7 @@ const TouristActivitiesWrapper = () => {
                 setCategory(selectedCategory)
               }
               onSortChange={(field, order) => setSortCriteria({ field, order })}
-              onRatingApply={handleRatingApply}
+              // onRatingApply={handleRatingApply}
             />
           </div>
           <div className="col-lg-9">

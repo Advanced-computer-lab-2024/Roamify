@@ -21,13 +21,11 @@ const CompletedActivity = () => {
       const response = await axios.get("http://localhost:3000/api/tourist/get-all-booked-activities", {
         withCredentials: true,
       });
-      setItineraries(response.data.activities || []);
+      setItineraries(response.data.activity || []);
     } catch (error) {
       setItineraries([]);
       setError(
-        error.response && error.response.status === 404
-          ? "No activities found"
-          : "An error occurred while fetching activities."
+        error.response.data.message
       );
     } finally {
       setLoading(false);
@@ -54,29 +52,82 @@ const CompletedActivity = () => {
             ) : (
               <div className="flight_search_result_wrapper">
                 {itineraries.length > 0 ? (
-                  itineraries.map((itinerary) => (
-                    <div className="flight_search_item_wrapper" key={itinerary.activityId}>
-                      <div className="flight_search_items">
-                        <h3 className="itinerary-name">{itinerary.activityName}</h3>
-                        <div className="itinerary-section">
-                          <p>
-                            <strong>Name:</strong> {itinerary.activityName}
-                          </p>
-                        </div>
-                        <div className="booking-section">
-                          <button
-                            onClick={() => navigate(`/activity-details/${itinerary.activityId}`)}
-                            className="btn btn_theme btn_sm"
+                    itineraries?.map((itinerary, index) => (
+                      <div key={itinerary._id}>
+                        <div
+                          className="flight_search_items"
+                          style={{
+                            background: "var(--secondary-color)",
+                            height: "20vh",
+                          }}
+                        >
+                          <div
+                            className="left-side"
+                            style={{
+                              height: "100%",
+                              padding: "30px 30px",
+                              display: "flex",
+                              gap: "20px",
+                              flexDirection: "column",
+                              alignItems: "baseline",
+                              width: "100%",
+                            }}
                           >
-                            Review
-                          </button>
+                            <p style={{ fontSize: "28px" }}>
+                              {itinerary.itinerary.name}
+                            </p>
+                            <div style={{ display: "flex", alignItems: "center" }}>
+                              <FaMapMarkerAlt style={{ marginRight: "10px" }} />
+                              <p style={{ fontSize: "20px" }}>
+                                {itinerary.itinerary.locations.join(', ')}
+                              </p>
+                            </div>
+
+                            <div
+                              className="activity-tags"
+                              style={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: "10px",
+                                justifyContent: "flex-start",
+                              }}
+                            ></div>
+                          </div>
+                          <div
+                            className="flight_search_right"
+                            style={{
+                              background: "var(--main-color)",
+                              height: "100%",
+                              width: "40%",
+                              display: "flex",
+                              gap: "20px",
+                              flexDirection: "column",
+                              justifyContent: "space-evenly",
+                            }}
+                          >
+                            <h3>Price: {itinerary.price}</h3>
+
+                            {itinerary.isReviewed ? (
+                              <p>Already Reviewed</p>
+                            ) : (
+                              <button
+                                onClick={() =>
+                                  navigate(
+                                    `/tourist/activity-details/${itinerary.itinerary._id}`
+                                  )
+                                }
+                                className="btn btn_theme btn_sm"
+                              >
+                                Review
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <p>No activities available.</p>
-                )}
+                    ))
+                  ) : (
+                    <p>No Activity available.</p>
+                  )}
               </div>
             )}
           </div>

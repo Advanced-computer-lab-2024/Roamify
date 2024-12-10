@@ -152,36 +152,37 @@ const SideBar = ({
       </div>
 
       {/* Filter by Review Section */}
-      <div className="left_side_search_boxed">
+      {/* <div className="left_side_search_boxed">
         <div className="left_side_search_heading">
           <h5>Filter by Rating</h5>
         </div>
-        <div className="filter_review">
-            <form className="review_star">
-              {selectedStars.map((isChecked, index) => (
-                <div className="form-check" key={index}>
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => handleRatingChange(index)}
-                  />
-                  <label className="form-check-label">
-                    {[...Array(index + 1)].map((_, i) => (
-                      <i key={i} className="fas fa-star color_theme"></i>
+        <div className="review_star">
+                    {[5, 4, 3, 2, 1,0].map((rating) => (
+                      <div className="form-check" key={rating}>
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="rating"
+                          checked={selectedRating === rating}
+                          onChange={() => handleRatingChange(rating)}
+                        />
+                        <label className="form-check-label">
+                          {[...Array(rating)].map((_, i) => (
+                            <i key={i} className="fas fa-star color_theme"></i>
+                          ))}
+                          {[...Array(5 - rating)].map((_, i) => (
+                            <i key={i} className="fas fa-star color_asse"></i>
+                          ))}
+                        </label>
+                      </div>
                     ))}
-                    {[...Array(5 - (index + 1))].map((_, i) => (
-                      <i key={i} className="fas fa-star color_asse"></i>
-                    ))}
-                  </label>
-                </div>
-              ))}
-            </form>
+                  
             <button onClick={handleApplyFilters} className="apply" type="button">
               Apply Rating Filter
             </button>
-          </div>
-      </div>
+          </div> */}
+          
+      {/* </div> */}
     </div>
   );
 };
