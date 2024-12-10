@@ -79,6 +79,7 @@ Default CSS
   --bg-color: #f3f6fd;
   --transition: 0.4s all ease-in-out;
   --chart-blue: #57c3ff;
+  overflow-x: hidden;
 }
 
 select {
