@@ -22,12 +22,6 @@ const upload = multer({ storage }).fields([
   { name: "additionalDocument", maxCount: 1 }, // Field for Certificate
 ]);
 
-
-
-
-
-
-
 const createToken = (_id, role) => {
   return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: "3d" });
 };
@@ -45,7 +39,7 @@ const createUser = async (req, res) => {
 
     // Validate role to ensure it's not "admin" or "tourismGovernor"
     if (role === "admin" || role === "tourismGovernor") {
-      return res.status(403).json({ error: "Invalid role selection" });
+      return res.status(403).json({ message: "Invalid role selection" });
     }
 
     // Creating the user
@@ -64,7 +58,7 @@ const createUser = async (req, res) => {
       role: user.role,
     });
   } catch (error) {
-    res.status(401).json({ error: error.message });
+    res.status(401).json({ message: error.message });
     console.log(error);
   }
 };

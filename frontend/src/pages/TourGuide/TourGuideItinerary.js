@@ -6,8 +6,8 @@ import CommonBanner from "../../component/Common/CommonBanner";
 const TourGuideItinerary = () => {
   return (
     <>
-      <TourGuideItineraryForm />
-      {/* <TourGuideItineraryWrapper/> */}
+      {/* <TourGuideItineraryForm /> */}
+      <TourGuideItineraryWrapper />
     </>
   );
 };

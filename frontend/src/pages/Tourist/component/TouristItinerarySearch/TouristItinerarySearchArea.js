@@ -10,7 +10,9 @@ import { renderStars } from "../../../../functions/renderStars";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFlag, faFlagCheckered } from "@fortawesome/free-solid-svg-icons";
 import LoadingLogo from "../../../../component/LoadingLogo";
-import { FaBookmark } from "react-icons/fa";
+import { FaBookmark, FaShare } from "react-icons/fa";
+import { Share } from "@mui/icons-material";
+import ShareModal from "./ShareModal";
 const TouristItineraryWrapper = () => {
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,9 +27,9 @@ const TouristItineraryWrapper = () => {
   const [preferences, setPreferences] = useState([]);
   const [preference, setPreference] = useState("");
   const [languages, setLanguages] = useState([
-    { _id: "en", name: "English" },
-    { _id: "de", name: "German" },
-    { _id: "es", name: "Spanish" },
+    { _id: "English", name: "English" },
+    { _id: "German", name: "German" },
+    { _id: "French", name: "French" },
   ]);
   const [language, setLanguage] = useState("");
   const [showShareOptions, setShowShareOptions] = useState({});
@@ -36,6 +38,18 @@ const TouristItineraryWrapper = () => {
   const [bookmarkedItineraries, setBookmarkedItineraries] = useState({});
   const [searchType, setSearchType] = useState("name");
   const [searchInput, setSearchInput] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentItinerary, setCurrentItinerary] = useState(false);
+
+  const openShareModal = (itinerary) => {
+    setCurrentItinerary(itinerary);
+    setIsModalOpen(true);
+  };
+
+  // Function to close the modal
+  const closeShareModal = () => {
+    setIsModalOpen(false);
+  };
 
   const currencySymbol = localStorage.getItem("currencySymbol") || "$";
   const exchangeRate = parseFloat(localStorage.getItem("value")) || 1;
@@ -69,8 +83,8 @@ const TouristItineraryWrapper = () => {
           sortBy: sortCriteria.field,
           sortOrder: sortCriteria.order,
           language: language || undefined,
-          searchType: searchType,
-          searchQuery: searchInput,
+          searchType: searchInput,
+          // searchQuery: searchInput,
         },
       });
       setItineraries(response.data || []);
@@ -90,7 +104,9 @@ const TouristItineraryWrapper = () => {
       } catch (bookmarkError) {
         // Log and continue if bookmark fetch fails
         if (bookmarkError.response && bookmarkError.response.status === 400) {
-          console.warn("Bookmark fetch failed, but activities will still display.");
+          console.warn(
+            "Bookmark fetch failed, but activities will still display."
+          );
         } else {
           console.error("Error fetching bookmarks:", bookmarkError);
         }
@@ -118,7 +134,7 @@ const TouristItineraryWrapper = () => {
     preference,
     language,
     sortCriteria,
-    searchType,
+    // searchType,
     searchInput,
   ]);
 
@@ -130,7 +146,7 @@ const TouristItineraryWrapper = () => {
 
   const handleLanguageApply = (selectedLanguage) => {
     setLanguage(selectedLanguage);
-    fetchItineraries();
+    // fetchItineraries();
   };
 
   const handleSortChange = (field, order) => {
@@ -212,12 +228,15 @@ const TouristItineraryWrapper = () => {
 
   const handleEmailShare = (itinerary) => {
     const subject = `Check out this itinerary: ${itinerary.name}`;
-    const body = `I thought you'd be interested in this itinerary: ${itinerary.name
-      }\n\nLocation: ${itinerary.locations.join(
-        ", "
-      )}\nAvailable Date: ${formatDate(itinerary.availableDates[0])}\nPrice: ${itinerary.price
-      } EGP\n\nCheck it out: ${window.location.origin}/itinerary-details/${itinerary._id
-      }`;
+    const body = `I thought you'd be interested in this itinerary: ${
+      itinerary.name
+    }\n\nLocation: ${itinerary.locations.join(
+      ", "
+    )}\nAvailable Date: ${formatDate(itinerary.availableDates[0])}\nPrice: ${
+      itinerary.price
+    } EGP\n\nCheck it out: ${window.location.origin}/itinerary-details/${
+      itinerary._id
+    }`;
     window.location.href = `mailto:?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
@@ -256,7 +275,6 @@ const TouristItineraryWrapper = () => {
       toast.error("Failed to update bookmark.");
     }
   };
-
 
   return (
     <section id="explore_area" className="section_padding">
@@ -336,9 +354,12 @@ const TouristItineraryWrapper = () => {
               </div>
             </div>
           </div>
-          <div className="col-lg-9">
+          <div
+            className="col-lg-9"
+            style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+          >
             {loading ? (
-             <LoadingLogo isVisible={true} />
+              <LoadingLogo isVisible={true} />
             ) : error ? (
               <p>{error}</p>
             ) : (
@@ -363,38 +384,9 @@ const TouristItineraryWrapper = () => {
                         width: "100%",
                       }}
                     >
-                      <div
-                        style={{
-                         
-                          top: "10%",
-                          right: "90%",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => handleBookmark(itinerary._id)}
-                      >
-                        <FaBookmark
-                          size={24}
-                          color={
-                            bookmarkedItineraries[itinerary._id] ? "#8b3eea" : "#ccc"
-                          }
-                          style={{right:"100px"}}
-                        />
-                      </div>
-                      <p style={{ fontSize: "28px" }}>
-                        {itinerary.name}
-                      </p>
+                      <p style={{ fontSize: "28px" }}>{itinerary.name}</p>
                       <span className="review-rating">
                         {renderStars(itinerary.rating)}
-                      </span>
-                      <span className="review-rating">
-                        Language :{" "}
-                        <span
-                          style={{
-                            color: "var(--dashboard-title-color)",
-                          }}
-                        >
-                          {itinerary.language}
-                        </span>
                       </span>
                       <div
                         className="activity-tags"
@@ -417,31 +409,40 @@ const TouristItineraryWrapper = () => {
                             >
                               {tag.name}
                             </span>
-                            {index <
-                              itinerary.preferenceTags.length - 1 && (
-                                <span
-                                  style={{
-                                    margin: "0px 5px",
-                                    color: "var(--main-color)", // You can replace this with your desired color
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <i
-                                    className="fas fa-circle"
-                                    style={{ fontSize: "7px" }}
-                                  ></i>
-                                </span>
-                              )}
+                            {index < itinerary.preferenceTags.length - 1 && (
+                              <span
+                                style={{
+                                  margin: "0px 5px",
+                                  color: "var(--main-color)", // You can replace this with your desired color
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <i
+                                  className="fas fa-circle"
+                                  style={{ fontSize: "7px" }}
+                                ></i>
+                              </span>
+                            )}
                           </>
                         ))}
                       </div>
+                      <span className="review-rating">
+                        Language :{" "}
+                        <span
+                          style={{
+                            color: "var(--dashboard-title-color)",
+                          }}
+                        >
+                          {itinerary.language}
+                        </span>
+                      </span>
                     </div>
                     <div
                       className="flight_search_right"
                       style={{
-                        background: "var(--main-color)",
+                        background: "var(--scroll-bar-color)",
                         height: "100%",
                         width: "40%",
                         display: "flex",
@@ -449,36 +450,60 @@ const TouristItineraryWrapper = () => {
                         flexDirection: "column",
                         // alignItems: "center",
                         justifyContent: "space-evenly",
-                       
+                        position: "relative",
+                        color: "white",
                       }}
                     >
-                      <h2>${itinerary.price}</h2>
-                      
-
-                      <button
-                        onClick={() =>
-                          handleBooking(itinerary._id, itinerary.availableDates[0])
-                        }
-                        className="btn btn-secondary btn-sm me-2"
-                        disabled={
-                          !itinerary.availableDates || itinerary.availableDates.length === 0
-                        }
+                      <div
+                        style={{
+                          top: "20px",
+                          right: "20px",
+                          position: "absolute",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => handleBookmark(itinerary._id)}
                       >
-                        Book now
-                      </button>
+                        <FaBookmark
+                          size={24}
+                          color={
+                            bookmarkedItineraries[itinerary._id]
+                              ? "#8b3eea"
+                              : "#ccc"
+                          }
+                        />
+                      </div>
+                      <h2>${itinerary.price}</h2>
+
                       {/* Share Button */}
-                      <div>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "10px",
+                        }}
+                      >
                         <button
-                          onClick={() => handleCopyLink(itinerary._id)}
-                          className="btn btn-secondary btn-sm me-2"
+                          onClick={() =>
+                            handleBooking(
+                              itinerary._id,
+                              itinerary.availableDates[0]
+                            )
+                          }
+                          className="btn  "
+                          disabled={
+                            !itinerary.availableDates ||
+                            itinerary.availableDates.length === 0
+                          }
+                          style={{ background: "var(--main-color)" }}
                         >
-                          Copy Link
+                          Book now
                         </button>
                         <button
-                          onClick={() => handleEmailShare(itinerary)}
-                          className="btn btn-secondary btn-sm me-2"
+                          onClick={() => openShareModal(itinerary)}
+                          className=" btn-secondary "
                         >
-                          Share via Email
+                          <Share style={{ marginRight: "8px" }} />
+                          Share
                         </button>
                       </div>
                       <div
@@ -487,8 +512,7 @@ const TouristItineraryWrapper = () => {
                         aria-expanded="false"
                         aria-controls={`collapseExample${index}`}
                       >
-                        Show more{" "}
-                        <i className="fas fa-chevron-down"></i>
+                        Show more <i className="fas fa-chevron-down"></i>
                       </div>
                     </div>
                   </div>
@@ -529,28 +553,18 @@ const TouristItineraryWrapper = () => {
                           </div>
                         </div>
                       </div>
-                      <div
-                        className="flight_refund_policy"
-                        style={{ flex: 2 }}
-                      >
+                      <div className="flight_refund_policy" style={{ flex: 2 }}>
                         <div
                           className="TabPanelInner flex_widht_less"
                           style={{ flex: 1 }}
                         >
                           <h4>Pickup Dates</h4>
                           <div className="flight_info_taable">
-                            {itinerary.availableDates.map(
-                              (date, index) => (
-                                <p className="fz12">
-                                  -{" "}
-                                  {
-                                    new Date(date)
-                                      .toISOString()
-                                      .split("T")[0]
-                                  }
-                                </p>
-                              )
-                            )}
+                            {itinerary.availableDates.map((date, index) => (
+                              <p className="fz12">
+                                - {new Date(date).toISOString().split("T")[0]}
+                              </p>
+                            ))}
                           </div>
                         </div>
                         <div
@@ -559,19 +573,14 @@ const TouristItineraryWrapper = () => {
                         >
                           <h4>Activities</h4>
                           <div className="flight_info_taable">
-                            {itinerary.activities.map(
-                              (activity, index) => (
-                                <p className="fz12">
-                                  {index + 1}. {activity.name}
-                                </p>
-                              )
-                            )}
+                            {itinerary.activities.map((activity, index) => (
+                              <p className="fz12">
+                                {index + 1}. {activity.name}
+                              </p>
+                            ))}
                           </div>
                         </div>
-                        <div
-                          className="TabPanelInner"
-                          style={{ flex: 1 }}
-                        >
+                        <div className="TabPanelInner" style={{ flex: 1 }}>
                           <h4>Locations</h4>
                           <div className="flight_info_taable">
                             {itinerary.locations.map((location) => (
@@ -627,6 +636,14 @@ const TouristItineraryWrapper = () => {
               zIndex: 999,
             }}
             onClick={() => setShowPopup(false)}
+          />
+        )}
+        {isModalOpen && (
+          <ShareModal
+            handleCopy={() => handleCopyLink(currentItinerary._id)}
+            handleShareEmail={() => handleEmailShare(currentItinerary)}
+            isOpen={isModalOpen}
+            onClose={closeShareModal}
           />
         )}
       </div>

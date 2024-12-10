@@ -8,6 +8,10 @@ import { FaBookmark } from "react-icons/fa";
 import LoadingLogo from "../../../../component/LoadingLogo";
 import { renderStars } from "../../../../functions/renderStars";
 import { FaBell } from "react-icons/fa";
+import { Share } from "@mui/icons-material";
+import ShareModal from "../TouristItinerarySearch/ShareModal";
+import PaymentModal from "../../../../PaymentModal";
+
 const TouristActivitiesWrapper = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,12 +37,39 @@ const TouristActivitiesWrapper = () => {
   const currencySymbol = localStorage.getItem("currencySymbol") || "$";
   const exchangeRate = parseFloat(localStorage.getItem("value")) || 1;
   const [notificationActive, setNotificationActive] = useState(false);
+  const [currentActivity, setCurrentActivity] = useState(null);
+  const [selectedRating, setSelectedRating] = useState(null); // State to track selected rating
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  const openPaymentModal = (activity) => {
+    setCurrentActivity(activity);
+    setIsPaymentModalOpen(true);
+  };
+
+  const closePaymentModal = () => {
+    setCurrentActivity(null);
+    setIsPaymentModalOpen(false);
+  };
+
+  const openShareModal = (activity) => {
+    setCurrentActivity(activity);
+    setIsModalOpen(true);
+  };
+
+  // Function to close the modal
+  const closeShareModal = () => {
+    setCurrentActivity(null);
+    setIsModalOpen(false);
+  };
 
   const fetchActivities = async (
     minBudget,
     maxBudget,
     date,
-    minRating,
+    selectedRating,
     category,
     tag
   ) => {
@@ -52,7 +83,7 @@ const TouristActivitiesWrapper = () => {
           minBudget,
           maxBudget,
           date: date ? date.toISOString().split("T")[0] : undefined,
-          minRating: minRating || undefined,
+          minRating: selectedRating || undefined,
           category: category || undefined,
           tag: tag || undefined,
           sortBy: sortCriteria.field,
@@ -77,7 +108,9 @@ const TouristActivitiesWrapper = () => {
       } catch (bookmarkError) {
         // Log and continue if bookmark fetch fails
         if (bookmarkError.response && bookmarkError.response.status === 400) {
-          console.warn("Bookmark fetch failed, but activities will still display.");
+          console.warn(
+            "Bookmark fetch failed, but activities will still display."
+          );
         } else {
           console.error("Error fetching bookmarks:", bookmarkError);
         }
@@ -98,8 +131,8 @@ const TouristActivitiesWrapper = () => {
   };
 
   useEffect(() => {
-    fetchActivities(priceRange[0], priceRange[1], date, minRating, category);
-  }, [priceRange, date, minRating, category, sortCriteria]);
+    fetchActivities(priceRange[0], priceRange[1], date, selectedRating, category);
+  }, [priceRange, date, selectedRating, category, sortCriteria]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -180,7 +213,7 @@ const TouristActivitiesWrapper = () => {
       priceRange[0],
       priceRange[1],
       date,
-      minRating,
+      selectedRating,
       searchParams.category,
       searchParams.tags
     );
@@ -195,18 +228,32 @@ const TouristActivitiesWrapper = () => {
     }
   };
 
-  const handleBooking = async (activityId, activityDate) => {
+  const handleBooking = async ({ method, paymentMethodId, promoCode }) => {
     try {
-      const formattedDate = new Date(activityDate).toISOString().split("T")[0];
+      // Format the activity date to ISO date format
+      const formattedDate = new Date(currentActivity.date)
+        .toISOString()
+        .split("T")[0];
+
+      // Make the POST request to the API
       await axios.post(
         "http://localhost:3000/api/tourist/book-activity",
-        { activity: activityId, date: formattedDate },
-        { withCredentials: true }
+        {
+          activity: currentActivity._id,
+          date: formattedDate,
+          method, // Payment method: "availableCredit" or "card"
+          paymentMethodId, // Payment method ID
+          promoCode, // Optional promo code
+        },
+        { withCredentials: true } // Include credentials for authentication
       );
+
+      // Display success message
       setPopupMessage("Booking successful!");
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
     } catch (error) {
+      // Handle errors and display appropriate message
       const errorMessage =
         error.response && error.response.data && error.response.data.message
           ? error.response.data.message
@@ -220,6 +267,7 @@ const TouristActivitiesWrapper = () => {
 
   // Function to copy activity link
   const handleCopyLink = (activityId) => {
+    console.log(activityId);
     const activityUrl = `${window.location.origin}/activity-details/${activityId}`;
     navigator.clipboard
       .writeText(activityUrl)
@@ -234,12 +282,15 @@ const TouristActivitiesWrapper = () => {
   // Function to send activity details via email
   const handleEmailShare = (activity) => {
     const subject = `Check out this activity: ${activity.name}`;
-    const body = `I thought you'd be interested in this activity: ${activity.name
-      }\n\nLocation: ${activity.location.name}\nDate: ${new Date(
-        activity.date
-      ).toLocaleDateString()}\nPrice: ${activity.price} EGP\n\n${activity.category.description
-      }\n\nCheck it out: ${window.location.origin}/activity-details/${activity._id
-      }`;
+    const body = `I thought you'd be interested in this activity: ${
+      activity.name
+    }\n\nLocation: ${activity.location.name}\nDate: ${new Date(
+      activity.date
+    ).toLocaleDateString()}\nPrice: ${activity.price} EGP\n\n${
+      activity.category.description
+    }\n\nCheck it out: ${window.location.origin}/activity-details/${
+      activity._id
+    }`;
     const mailtoLink = `mailto:?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
@@ -290,7 +341,7 @@ const TouristActivitiesWrapper = () => {
 
   const handleNotifyMe = async (activityId) => {
     try {
-      const response = await axios.post(
+      const response = await axios.put(
         "http://localhost:3000/api/tourist/enable-notifications-on-events",
         { activityId },
         { withCredentials: true }
@@ -298,8 +349,22 @@ const TouristActivitiesWrapper = () => {
       setNotificationActive(true); // Update button state
       toast.success(response.data.message); // Show success toast
     } catch (error) {
-      toast.error("Failed to set notification");
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+      } else {
+        console.error("Unexpected error:", error);
+        toast.error("An unexpected error occurred.");
+      }
     }
+  };
+  const handleRatingChange = (rating) => {
+    setSelectedRating(rating); // Update selected rating
+    setError(""); // Clear any existing error when changing rating
+    setLoading(true); // Set loading state to show fetching in progress
   };
 
   return (
@@ -342,15 +407,15 @@ const TouristActivitiesWrapper = () => {
                     searchType === "tag"
                       ? searchInputTag
                       : searchType === "category"
-                        ? searchInputCategory
-                        : searchInput
+                      ? searchInputCategory
+                      : searchInput
                   }
                   onChange={
                     searchType === "tag"
                       ? handleSearchInputTagChange
                       : searchType === "category"
-                        ? handleSearchInputCategoryChange
-                        : handleSearchInputChange
+                      ? handleSearchInputCategoryChange
+                      : handleSearchInputChange
                   }
                   style={{ marginBottom: "10px" }}
                 />
@@ -363,6 +428,34 @@ const TouristActivitiesWrapper = () => {
                 </button>
               </div>
             </div>
+            <div className="left_side_search_boxed">
+                <div className="left_side_search_heading">
+                  <h5>Filter by Minimum Rating</h5>
+                </div>
+                <div className="filter_review">
+                  <div className="review_star">
+                    {[5, 4, 3, 2, 1,0].map((rating) => (
+                      <div className="form-check" key={rating}>
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="rating"
+                          checked={selectedRating === rating}
+                          onChange={() => handleRatingChange(rating)}
+                        />
+                        <label className="form-check-label">
+                          {[...Array(rating)].map((_, i) => (
+                            <i key={i} className="fas fa-star color_theme"></i>
+                          ))}
+                          {[...Array(5 - rating)].map((_, i) => (
+                            <i key={i} className="fas fa-star color_asse"></i>
+                          ))}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             <SideBar
               priceRange={priceRange}
               setPriceRange={setPriceRange}
@@ -371,7 +464,7 @@ const TouristActivitiesWrapper = () => {
                 setCategory(selectedCategory)
               }
               onSortChange={(field, order) => setSortCriteria({ field, order })}
-              onRatingApply={handleRatingApply}
+              // onRatingApply={handleRatingApply}
             />
           </div>
           <div className="col-lg-9">
@@ -386,46 +479,102 @@ const TouristActivitiesWrapper = () => {
                     className="flight_search_item_wrappper"
                     key={activity._id}
                   >
-                    <div className="flight_search_items" style={{
-                      background: "var(--secondary-color)",
-                      padding: "20px",  // Adding padding to make the shadow effect more visible
-                      borderRadius: "10px",  // Optional: to round the corners of the box
-                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1)",  // Shadow effect
-                      transition: "box-shadow 0.3s ease",  // Smooth transition on hover
-                    }}>
-                      <div className="multi_city_flight_lists">
-                        <div className="flight_multis_area_wrapper">
-                          <div className="flight_search_left" style={{
-                            height: "100%",
-                            padding: "30px 30px",
+                    <div
+                      className=""
+                      style={{
+                        display: "flex",
+                        background: "var(--secondary-color)",
+                        borderRadius: "10px", // Optional: to round the corners of the box
+                        boxShadow:
+                          "0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1)", // Shadow effect
+                        transition: "box-shadow 0.3s ease", // Smooth transition on hover
+                      }}
+                    >
+                      <div
+                        className="flight_search_left"
+                        style={{
+                          flex: "1",
+                          height: "100%",
+                          padding: "30px 0px",
+                          display: "flex",
+                          gap: "20px",
+                          flexDirection: "column",
+                          alignItems: "baseline",
+                          width: "100%",
+                        }}
+                      >
+                        <div
+                          className="flight_search_destination"
+                          style={{
                             display: "flex",
-                            gap: "20px",
                             flexDirection: "column",
-                            alignItems: "baseline",
-                            width: "100%",
-                          }}>
-                            <div className="flight_search_destination">
-                              <h3 style={{ fontSize: "28px" }}>{activity.name}</h3>
-                              <p> <i className="fas fa-map-marker-alt" style={{ marginRight: '8px' }}></i>{activity.location.name}</p>
+                            justifyContent: "left",
+                            gap: "10px",
+                          }}
+                        >
+                          <h3
+                            style={{
+                              fontSize: "28px",
+                              color: "var(--text-color)",
+                              textAlign: "left",
+                            }}
+                          >
+                            {activity.name}
+                          </h3>
+                          <span className="review-rating">
+                            {renderStars(activity.rating)}
+                          </span>
+                          <p style={{ color: "var(--dashboard-title-color)" }}>
+                            {" "}
+                            <i
+                              className="fas fa-map-marker-alt"
+                              style={{
+                                marginRight: "8px",
+                              }}
+                            ></i>
+                            {activity.location.name}
+                          </p>
+                        </div>
 
-                            </div>
+                        <div
+                          className="flight_search_destination"
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "10px",
+                            color: "var(--dashboard-title-color)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "baseline",
+                            }}
+                          >
+                            <p>Date : </p>
+                            <p>
+                              {new Date(activity.date).toLocaleDateString()}
+                            </p>
                           </div>
-                          <div className="flight_search_middel">
 
-                            <div className="flight_search_destination">
-                              <p>Date</p>
-                              <h3>
-                                {new Date(activity.date).toLocaleDateString()}
-                              </h3>
-                              <h6>Time: {activity.time}</h6>
-                            </div>
-                          </div>
+                          <h6>Time : {activity.time}</h6>
                         </div>
                       </div>
-                      <div className="flight_search_right" >
-                        <span className="review-rating">
-                          {renderStars(activity.rating)}
-                        </span>
+
+                      <div
+                        className="flight_search_right"
+                        style={{
+                          background: "var(--scroll-bar-color)",
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
+                          // alignItems: "center",
+                          justifyContent: "space-evenly",
+                          position: "relative",
+                          color: "white",
+                        }}
+                      >
                         <div
                           style={{
                             position: "relative",
@@ -438,21 +587,23 @@ const TouristActivitiesWrapper = () => {
                           <FaBookmark
                             size={24}
                             color={
-                              bookmarkedActivities[activity._id] ? "#8b3eea" : "#ccc"
+                              bookmarkedActivities[activity._id]
+                                ? "#8b3eea"
+                                : "#ccc"
                             }
                           />
                         </div>
 
                         <h5>
                           {activity.discounts ? (
-                            <del>
+                            <del style={{ color: "var(--main-color)" }}>
+                              {currencySymbol}
                               {(
                                 (
                                   activity.price *
                                   (1 + activity.discounts / 100)
                                 ).toFixed(2) * exchangeRate
                               ).toFixed(2)}{" "}
-                              {currencySymbol}
                             </del>
                           ) : (
                             ""
@@ -467,60 +618,78 @@ const TouristActivitiesWrapper = () => {
                               : ""}
                           </sup>
                         </h2>
-                        {/* Book Now Button */}
-                        {activity.bookingAvailable ? (
-                          <button
-                            onClick={() => handleBooking(activity._id, activity.date)}
-                            className="btn btn_theme btn_sm"
-                          >
-                            Book now
-                          </button>
+                        {activity.discounts ? (
+                          <p style={{ color: "var(--dashboard-title-color)" }}>
+                            *Discount available
+                          </p>
                         ) : (
-                          <>
+                          ""
+                        )}
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "10px",
+                            marginBottom: "10px",
+                          }}
+                        >
+                          <div style={{ display: "flex", flex: 1 }}>
+                            {/* Book Now Button */}
+                            {activity.bookingAvailable ? (
+                              <button
+                                onClick={() => openPaymentModal(activity)}
+                                className="btn btn_theme btn_sm"
+                                style={{ flex: 1, padding: "10px 20px" }}
+                              >
+                                Book now
+                              </button>
+                            ) : (
+                              <>
+                                <button
+                                  disabled
+                                  className="btn btn_theme btn_sm"
+                                  style={{
+                                    cursor: "not-allowed",
+                                    flex: 1,
+                                    padding: "10px 20px",
+                                  }}
+                                >
+                                  Book now
+                                </button>
+                                <button
+                                  onClick={() => handleNotifyMe(activity._id)}
+                                  className={`btn ${
+                                    notificationActive
+                                      ? "btn-success"
+                                      : "btn_theme btn_sm"
+                                  } btn-sm`}
+                                  style={{
+                                    flex: 1,
+                                    marginLeft: "10px",
+                                  }}
+                                >
+                                  Notify Me
+                                </button>
+                              </>
+                            )}
+                          </div>
+
+                          {/* Share Button */}
+                          <div style={{ display: "flex", flex: 1 }}>
                             <button
-                              disabled
-                              className="btn btn_theme btn_sm"
-                              style={{ cursor: "not-allowed" }}
-                            >
-                              Book now
-                            </button>
-                            <button
-                              onClick={() => handleNotifyMe(activity._id)}
-                              className={`btn ${notificationActive ? "btn-success" : "btn-warning"} btn-sm`}
+                              onClick={() => openShareModal(activity)}
+                              className=" btn-secondary "
                               style={{
-                                marginLeft: "10px",
+                                flex: 1,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
                               }}
                             >
-                              Notify Me
+                              <Share style={{ marginRight: "8px" }} />
+                              Share
                             </button>
-                          </>
-                        )}
-                        {activity.discounts ? <p>*Discount available</p> : ""}
-
-                        {/* Share Button */}
-                        <div>
-                          <button
-                            onClick={() => handleCopyLink(activity._id)}
-                            className="btn btn-secondary btn-sm me-2"
-                          >
-                            Copy Link
-                          </button>
-                          <button
-                            onClick={() => handleEmailShare(activity)}
-                            className="btn btn-primary btn-sm"
-                          >
-                            Share via Email
-                          </button>
-                        </div>
-
-                        <div
-                          data-bs-toggle="collapse"
-                          data-bs-target={`#collapseExample${activity._id}`}
-                          aria-expanded="false"
-                          aria-controls={`collapseExample${activity._id}`}
-
-                        >
-                          Show more <i className="fas fa-chevron-down"></i>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -602,6 +771,26 @@ const TouristActivitiesWrapper = () => {
             zIndex: 999,
           }}
           onClick={() => setShowPopup(false)}
+        />
+      )}
+      {isModalOpen && (
+        <ShareModal
+          handleCopy={() => {
+            handleCopyLink(currentActivity._id);
+          }}
+          handleShareEmail={() => {
+            handleEmailShare(currentActivity);
+          }}
+          isOpen={isModalOpen}
+          onClose={closeShareModal}
+        />
+      )}
+
+      {isPaymentModalOpen && (
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={closePaymentModal}
+          onPaymentSuccess={handleBooking}
         />
       )}
       {/* Toast Container for notifications */}

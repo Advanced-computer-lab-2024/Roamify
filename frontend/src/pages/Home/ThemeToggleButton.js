@@ -30,7 +30,7 @@ const ThemeToggleButton = () => {
       }}
     >
       {/* Conditional rendering of icon based on the theme */}
-      {isDarkMode ? <FaSun size={15} /> : <FaMoon size={15} />}
+      {isDarkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
     </button>
   );
 };

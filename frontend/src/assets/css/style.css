@@ -95,6 +95,105 @@ Default CSS
   --shimmer-end-color: #1f2a41;
 }
 
+.profile-nav {
+  padding: 15px 20px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: transparent;
+  border-radius: 8px;
+  gap: 20px;
+}
+
+.profile-icon-section {
+  flex: 3;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Creates 3 equal-width columns */
+  gap: 10px; /* Optional: Adds space between grid items */
+}
+
+.profile-icon-section .option-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px;
+  background-color: var(--background-color);
+  border-radius: 8px;
+}
+
+.others-options > div {
+  flex: 1;
+  /* padding: 10px;   */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-nav:hover {
+  background-color: var(--background-color);
+}
+
+.flight_search_result_wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toggle-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* Button styles */
+.toggle-btn {
+  position: relative;
+  display: flex;
+  justify-content: baseline;
+  align-items: center;
+  padding: 0px 5px;
+  width: 50px;
+  height: 30px;
+  background-color: #ccc;
+  border-radius: 50px;
+  border: 1px solid white;
+  /* border: none; */
+  cursor: pointer;
+  /* padding: 0; */
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Dot styles */
+.toggle-btn .dot {
+  /* position: absolute;
+  top: 3px;
+  left: 3px; */
+  width: 19px;
+  height: 19px;
+  background-color: white;
+  border-radius: 50%;
+  transition: left 0.3s ease-in-out;
+}
+
+/* Active state */
+.toggle-btn.active {
+  background-color: var(--main-color); /* Green when active */
+  justify-content: end;
+}
+
+/* .toggle-btn.active .dot {
+  left: 26px; 
+}
+
+
+.toggle-btn .dot {
+  left: 3px; 
+} */
+
 .cancel-button {
   border: 1px solid var(--main-color);
   background: transparent;
@@ -105,12 +204,25 @@ Default CSS
   background: var(--main-color);
 }
 
-input[type="text"]:focus {
+input:focus,
+select:focus,
+textarea:focus {
   border: 1px solid var(--main-color);
   outline: none;
 }
 
-input[type="text"] {
+input[type="checkbox"]:checked {
+  content: "\2713"; /* Unicode checkmark symbol */
+  font-size: 20px;
+  color: var(--main-color); /* Change this to your desired checkmark color */
+  background-color: var(--main-color);
+  line-height: 20px;
+}
+
+input,
+select,
+textarea {
+  padding: 7px;
   background: var(--background-color);
   border: 1px solid var(--secondary-border-color);
   color: var(--text-color);
@@ -128,6 +240,10 @@ html {
 
 nav div {
   transition: background-color 0.3s, transform 0.3s;
+}
+
+.your_info_arae ul li {
+  background-color: var(--secondary-color);
 }
 
 /* nav div:hover {

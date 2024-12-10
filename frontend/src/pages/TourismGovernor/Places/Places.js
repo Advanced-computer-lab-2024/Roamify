@@ -7,7 +7,6 @@ import PlacesArea from "./PlacesArea";
 const Places = () => {
   return (
     <>
-      <CommonBanner heading="Places" pagination="Places" />
       <PlacesArea />
     </>
   );

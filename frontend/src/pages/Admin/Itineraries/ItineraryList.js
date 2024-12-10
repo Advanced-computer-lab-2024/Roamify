@@ -68,7 +68,7 @@ const ItineraryList = () => {
                 <div className="col-lg-12">
                   <div className="flight_search_result_wrapper">
                     {loading ? (
-                      <LoadingLogo isVisible={true} />
+                      <LoadingLogo isVisible={true} size="100px" />
                     ) : (
                       itineraries?.map((itinerary, index) => (
                         <div key={itinerary._id}>

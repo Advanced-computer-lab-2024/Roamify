@@ -1,21 +1,21 @@
-const nodemailer = require('nodemailer')
-const userModel = require('../models/userModel')
-require('dotenv').config();
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const validator = require('validator');
+const nodemailer = require("nodemailer");
+const userModel = require("../models/userModel");
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const validator = require("validator");
 
 const sendOtp = async (req, res) => {
   try {
     const email = req.body.email;
     if (!email) {
-      return res.status(400).json({ error: "Email is required" });
+      return res.status(400).json({ message: "Email is required" });
     }
     const user = await userModel.findOne({ email });
     if (!user) {
       return res
         .status(404)
-        .json({ error: "User with this email does not exist" });
+        .json({ message: "User with this email does not exist" });
     }
 
     if (user.status !== "active")
@@ -26,11 +26,11 @@ const sendOtp = async (req, res) => {
     if (user.otp && user.otpExpires > Date.now())
       throw Error("OTP has been already sent please check your mail");
 
-        //3 steps to create an otp
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        user.otp = otp
-        user.otpExpires = Date.now() + 1 * 60 * 1000; // 10 minutes from now    
-        await user.save()
+    //3 steps to create an otp
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otp = otp;
+    user.otpExpires = Date.now() + 1 * 60 * 1000; // 10 minutes from now
+    await user.save();
 
     // Send the OTP via email
     const transporter = nodemailer.createTransport({
@@ -41,24 +41,23 @@ const sendOtp = async (req, res) => {
       },
     });
 
-        const mailOptions = {
-            from: process.env.EMAIL,
-            to: email,
-            subject: "Your OTP Code",
-            text: `Your OTP code is ${otp}. It is valid for 1 minute.`,
-        };
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Your OTP Code",
+      text: `Your OTP code is ${otp}. It is valid for 1 minute.`,
+    };
 
     await transporter.sendMail(mailOptions);
 
-        return res.status(200).json({ message: 'sent otp successfully', userId: user._id })
-
-    }
-    catch (error) {
-
-        console.log(error)
-        return res.status(500).json({ message: error.message })
-    }
-}
+    return res
+      .status(200)
+      .json({ message: "sent otp successfully", userId: user._id });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 const checkOtp = async (req, res) => {
   try {
@@ -97,10 +96,10 @@ const checkOtp = async (req, res) => {
     } else {
       return res.status(400).json({ message: "Invalid OTP" });
     }
-   } catch (error) {
-        return res.status(500).json({ message: error.message })
-    }
-}
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 const changePassword = async (req, res) => {
   try {

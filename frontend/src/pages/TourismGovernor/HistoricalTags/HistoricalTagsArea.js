@@ -36,20 +36,29 @@ const HistoricalTagsArea = () => {
   };
 
   return (
-    <section className="section_padding">
+    <section
+      className="section_padding"
+      style={{
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
       <div className="container">
-        <Toaster position="top-right" reverseOrder={false} />
-        <h2 className="section-heading">Create a Historical Tag</h2>
+        <Toaster position="bottom-center" reverseOrder={false} />
+        <h2 className="section-heading" style={{ marginBottom: "20vh" }}>
+          Create a Historical Tag
+        </h2>
         <form
           onSubmit={handleSubmit}
-          style={{ maxWidth: "500px", margin: "auto" }}
+          style={{ maxWidth: "500px", margin: "auto", flex: 1 }}
         >
           <div style={{ marginBottom: "15px" }}>
             <label
               htmlFor="name"
               style={{
                 display: "block",
-                color: "#4A5568",
+                color: "var(--text-color)",
                 marginBottom: "5px",
               }}
             >
@@ -63,8 +72,6 @@ const HistoricalTagsArea = () => {
               onChange={handleChange}
               style={{
                 width: "100%",
-                padding: "8px",
-                border: "1px solid #D2D6DC",
                 borderRadius: "4px",
                 outline: "none",
               }}
@@ -76,7 +83,7 @@ const HistoricalTagsArea = () => {
               htmlFor="description"
               style={{
                 display: "block",
-                color: "#4A5568",
+                color: "var(--text-color)",
                 marginBottom: "5px",
               }}
             >
@@ -89,10 +96,10 @@ const HistoricalTagsArea = () => {
               onChange={handleChange}
               style={{
                 width: "100%",
-                padding: "8px",
-                border: "1px solid #D2D6DC",
                 borderRadius: "4px",
                 outline: "none",
+                background: "var(--background-color)",
+                resize: "none",
               }}
             />
           </div>
@@ -101,8 +108,8 @@ const HistoricalTagsArea = () => {
             type="submit"
             style={{
               padding: "10px 20px",
-              backgroundColor: "#4CAF50",
-              color: "#fff",
+              backgroundColor: "var(--main-color)",
+              color: "white",
               borderRadius: "4px",
               border: "none",
               cursor: "pointer",

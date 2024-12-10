@@ -21,7 +21,6 @@ const TouristProductsArea = () => {
     try {
       const response = await axios.get("http://localhost:3000/api/product", {
         params: {
-
           minPrice: minPrice || 0,
           maxPrice: maxPrice || Infinity,
           name: searchName,
@@ -35,7 +34,7 @@ const TouristProductsArea = () => {
         setError("No products found for the selected rating.");
       }
     } catch (error) {
-      setError("Failed to fetch products");
+      setError(error.response.data.message);
     } finally {
       setLoading(false);
     }
@@ -114,7 +113,7 @@ const TouristProductsArea = () => {
                 </div>
                 <div className="filter_review">
                   <div className="review_star">
-                    {[5, 4, 3, 2, 1].map((rating) => (
+                    {[5, 4, 3, 2, 1,0].map((rating) => (
                       <div className="form-check" key={rating}>
                         <input
                           className="form-check-input"
@@ -145,8 +144,12 @@ const TouristProductsArea = () => {
               ) : error ? (
                 <p>{error}</p>
               ) : products.length > 0 ? (
-                products.map((product) => (
-                  <div className="col-md-4" key={product._id}>
+                products.map((product, index) => (
+                  <div
+                    className="col-md-4"
+                    style={{ marginTop: index > 2 ? "25px" : "0px" }}
+                    key={product._id}
+                  >
                     <CommonCard
                       id={product._id}
                       picture={

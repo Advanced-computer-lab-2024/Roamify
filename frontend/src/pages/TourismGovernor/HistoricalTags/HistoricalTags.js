@@ -6,7 +6,6 @@ import HistoricalTagsArea from "./HistoricalTagsArea";
 const HistoricalTags = () => {
   return (
     <>
-      <CommonBanner heading="Places" pagination="Places" />
       <HistoricalTagsArea myPlaces={true} />
     </>
   );

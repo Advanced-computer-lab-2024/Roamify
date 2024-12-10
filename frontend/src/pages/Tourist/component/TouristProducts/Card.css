@@ -1,16 +1,13 @@
 .card-body {
-  text-align: center; /* Center-align the text content inside the card body */
 }
 
 .card-title {
   margin: 10px 0;
   font-weight: bold;
-  text-align: center; /* Center-align the title */
 }
 
 .card-text {
   margin: 5px 0;
-  text-align: center; /* Center-align other details like seller, price, rating */
 }
 
 .btn.custom-btn {

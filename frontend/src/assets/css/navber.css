@@ -26,7 +26,6 @@
   padding-bottom: 10px;
   border-bottom: 1px solid #ffffff3d;
   background-color: transparent;
-
 }
 
 .topbar-list {
@@ -1000,13 +999,6 @@
 }
 
 .main-navbar .navbar .others-options .option-item::before {
-  content: "";
-  position: absolute;
-  top: 5px;
-  right: -15px;
-  width: 1px;
-  height: 15px;
-  background-color: #dbdbdb;
 }
 
 .main-navbar .navbar .others-options .option-item:first-child {
@@ -1302,13 +1294,13 @@
   .option-inner
   .others-options
   .option-item::before {
-  content: "";
+  /* content: "";
   position: absolute;
   top: 5px;
   right: -15px;
   width: 1px;
   height: 15px;
-  background-color: #dbdbdb;
+  background-color: #dbdbdb; */
 }
 
 .others-option-for-responsive

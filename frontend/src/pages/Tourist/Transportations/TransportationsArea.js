@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
+import axios from "axios";
+import StripePaymentWrapper from "../../../StripePaymentWrapper";
+import PaymentModal from "../../../PaymentModal";
 
 const TransportationsArea = () => {
   const [transportations, setTransportations] = useState([]);
   const [filter, setFilter] = useState("all"); // "all" or "booked"
   const [bookedFilter, setBookedFilter] = useState("allBooked"); // "allBooked" or "upcomingBooked"
+  const [selectedTransportation, setSelectedTransportation] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchTransportations = async () => {
     try {
@@ -26,21 +37,141 @@ const TransportationsArea = () => {
     fetchTransportations();
   }, []);
 
-  const handleBookTransportation = async (transportationId) => {
+  const openModal = (transportation) => {
+    setSelectedTransportation(transportation);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedTransportation(null);
+    setIsModalOpen(false);
+  };
+
+  const handlePaymentSuccess = async ({ method, paymentMethodId }) => {
     try {
-      await axios.put(
+      const response = await axios.post(
         "http://localhost:3000/api/tourist/book-transportation",
         {
-          transportationIdString: transportationId,
+          transportationIdString: selectedTransportation._id,
+          method: method,
+          paymentMethodId,
         },
         { withCredentials: true }
       );
-      toast.success("Transportation booked successfully!");
-      fetchTransportations(); // Re-fetch to update state
+      if (response.data.success) {
+        toast.success("Booking successful!");
+        fetchTransportations();
+        closeModal();
+      } else {
+        toast.error("Booking failed.");
+      }
+    } catch (error) {
+      toast.error("Booking failed.");
+    }
+  };
+
+  const handleBookTransportation = async (
+    transportationId,
+    method,
+    paymentMethodId = null
+  ) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/tourist/book-transportation",
+        {
+          transportationIdString: transportationId,
+          method,
+          paymentMethodId,
+        },
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        toast.success("Transportation booked successfully!");
+        fetchTransportations(); // Re-fetch to update state
+        closeModal();
+      } else {
+        toast.error("Error booking transportation.");
+      }
     } catch (error) {
       toast.error("Error booking transportation.");
       console.error("Error booking transportation:", error);
     }
+  };
+
+  const CheckoutForm = () => {
+    const stripe = useStripe();
+    const elements = useElements();
+    const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const handleSubmit = async (event) => {
+      event.preventDefault();
+      setLoading(true);
+
+      if (!stripe || !elements) return;
+
+      const cardElement = elements.getElement(CardElement);
+
+      try {
+        const { paymentMethod, error } = await stripe.createPaymentMethod({
+          type: "card",
+          card: cardElement,
+        });
+
+        if (error) {
+          setErrorMessage(error.message);
+          setLoading(false);
+          return;
+        }
+
+        handleBookTransportation(
+          selectedTransportation._id,
+          "card",
+          paymentMethod.id
+        );
+      } catch (error) {
+        setErrorMessage("An error occurred. Please try again.");
+      }
+
+      setLoading(false);
+    };
+
+    return (
+      <form onSubmit={handleSubmit} style={{ height: "40vh", width: "50vw" }}>
+        <CardElement
+          options={{
+            style: {
+              base: {
+                fontSize: "16px",
+                color: "#424770",
+                "::placeholder": {
+                  color: "#aab7c4",
+                },
+              },
+              invalid: {
+                color: "#9e2146",
+              },
+            },
+          }}
+        />
+        <button
+          type="submit"
+          disabled={!stripe || loading}
+          style={{
+            marginTop: "20px",
+            background: "#5469d4",
+            color: "#ffffff",
+            padding: "10px 15px",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          {loading ? "Processing..." : "Confirm Payment"}
+        </button>
+        {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+      </form>
+    );
   };
 
   const filteredTransportations = transportations.filter((transportation) => {
@@ -82,46 +213,17 @@ const TransportationsArea = () => {
               >
                 Booked Transportations
               </button>
-              {filter === "booked" && (
-                <>
-                  <button
-                    type="button"
-                    className={`btn ${
-                      bookedFilter === "allBooked"
-                        ? "btn-success"
-                        : "btn-outline-success"
-                    }`}
-                    onClick={() => setBookedFilter("allBooked")}
-                  >
-                    All Booked
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn ${
-                      bookedFilter === "upcomingBooked"
-                        ? "btn-success"
-                        : "btn-outline-success"
-                    }`}
-                    onClick={() => setBookedFilter("upcomingBooked")}
-                  >
-                    Upcoming Booked
-                  </button>
-                </>
-              )}
             </div>
 
             {/* Transportation Boxes */}
-            <div
-              className="flight_search_result_wrapper"
-              style={{ display: "block", gap: "20px" }}
-            >
+            <div className="flight_search_result_wrapper">
               {filteredTransportations.map((transportation, index) => (
                 <div
                   className="flight_search_item_wrappper"
                   key={index}
                   style={{
                     width: "100%",
-                    backgroundColor: "#f9f9f9",
+                    backgroundColor: "var(--secondary-color)",
                     display: "flex",
                     flexDirection: "row",
                     justifyContent: "space-between",
@@ -132,43 +234,41 @@ const TransportationsArea = () => {
                     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                   }}
                 >
-                  <div style={{ flex: "1" }}>
-                    <h3 style={{ marginBottom: "10px" }}>
+                  <div
+                    style={{ flex: "1", color: "var(--dashboard-title-color)" }}
+                  >
+                    <h3 style={{ color: "var(--text-color)" }}>
                       {transportation.name}
                     </h3>
-                    <p>Type: {transportation.type}</p>
-                    <p>Pickup Location: {transportation.pickupLocation}</p>
-                    <p>Drop-Off Location: {transportation.dropOffLocation}</p>
-                    <p>
-                      Date: {new Date(transportation.date).toLocaleDateString()}
-                    </p>
-                    <p>Time: {transportation.time}</p>
                     <p>Price: ${transportation.price}</p>
                   </div>
 
-                  {filter === "all" && (
-                    <button
-                      style={{
-                        padding: "10px 15px",
-                        backgroundColor: "#007bff",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                      onClick={() =>
-                        handleBookTransportation(transportation._id)
-                      }
-                    >
-                      Book
-                    </button>
-                  )}
+                  <button
+                    style={{
+                      padding: "10px 15px",
+                      backgroundColor: "var(--main-color)",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => openModal(transportation)}
+                  >
+                    Book
+                  </button>
                 </div>
               ))}
             </div>
           </div>
         </div>
       </div>
+      {isModalOpen && (
+        <PaymentModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
+      )}
       <Toaster position="bottom-center" reverseOrder={false} />
     </section>
   );

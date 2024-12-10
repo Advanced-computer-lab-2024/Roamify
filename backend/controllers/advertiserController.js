@@ -1,75 +1,81 @@
-const validator = require('validator');
-const nodemailer = require('nodemailer')
-const emailTemplate = require('../emailTemplate')
+const validator = require("validator");
+const nodemailer = require("nodemailer");
+const emailTemplate = require("../emailTemplate");
 const advertiserModel = require("../models/advertiserModel");
 const transportationModel = require("../models/transportationModel");
 const userModel = require("../models/userModel");
 const activityModel = require("../models/activityModel");
-const preferenceTagModel = require('../models/preferenceTagModel');
+const preferenceTagModel = require("../models/preferenceTagModel");
 const categoryModel = require("../models/categoryModel");
 const activityTicketModel = require("../models/activityTicketModel");
-const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
-const multer = require('multer');
-const { default: mongoose } = require('mongoose');
-const receiptModel = require('../models/receiptModel');
-const { connectedUsers } = require('../config/socket');
-const touristModel = require('../models/touristModel');
-const notificationModel = require('../models/notificationModel');
+const cloudinary = require("../config/cloudinary"); // Import Cloudinary config
+const multer = require("multer");
+const { default: mongoose } = require("mongoose");
+const receiptModel = require("../models/receiptModel");
+const { connectedUsers } = require("../config/socket");
+const touristModel = require("../models/touristModel");
+const notificationModel = require("../models/notificationModel");
 const storage = multer.memoryStorage(); // Store files in memory before uploading to Cloudinary
-const upload = multer({ storage }).single('logo'); // Accept only 1 file with field name 'profilePicture'
-
+const upload = multer({ storage }).single("logo"); // Accept only 1 file with field name 'profilePicture'
 
 async function notifyUser(io, userId, name) {
-
   const message = `The activity ${name} is now open for bookings! Secure your spot today and don't miss out!`;
   const notification = new notificationModel({
     user: userId,
     type: `booking available-${name}`,
-    message
+    message,
   });
   await notification.save();
-
-  const user = await userModel.findById(userId)
-
-
 
   const socketId = connectedUsers[userId.toString()];
   if (socketId) {
     io.to(socketId).emit("receiveNotification", message);
     console.log(`Notification sent to user ${userId}`);
-  }
-  else {
+  } else {
     console.log(`User ${userId} is not connected.`);
   }
-
-
 }
 const createProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-
     const user = await userModel.findById(userId);
 
-    if (user.status === "pending")
-      throw Error('pending admin approval');
+    if (user.status === "pending") {
+      return res.status(400).json({ message: "Pending admin approval." });
+    }
 
-    if (!user.termsAndConditions)
-      throw Error('sorry you must accept our terms and conditions in order to proceed');
+    if (!user.termsAndConditions) {
+      return res.status(400).json({
+        message: "You must accept the terms and conditions to proceed.",
+      });
+    }
+
     const { companyName, websiteLink, hotline, companyProfile } = req.body;
 
-    if (userId) {
-      const result = await advertiserModel.findOne({ user: userId, companyName });
-      if (result && userId) {
-        return res.status(400).json({ error: "profile already created" });
-      }
-    } //check for existence of profile for this user
+    if (!companyName || !websiteLink || !hotline || !companyProfile) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
 
-    if (!companyName || !websiteLink || !hotline || !companyProfile)
-      throw Error('please fill all fields');
+    const existingProfile = await advertiserModel.findOne({
+      user: userId,
+      companyName,
+    });
 
-    const advertiser = await advertiserModel.findOne({ companyName })
-    if (advertiser) return res.status(400).json({ message: 'this company name already exists please choose another' })
+    if (existingProfile) {
+      return res
+          .status(400)
+          .json({ message: "A profile for this user already exists." });
+    }
+
+    const duplicateCompany = await advertiserModel.findOne({ companyName });
+    if (duplicateCompany) {
+      return res.status(400).json({
+        message: "Company name already exists. Please choose another.",
+      });
+    }
+
     await userModel.findByIdAndUpdate(userId, { status: "active" });
+
     const newAdvertiser = new advertiserModel({
       companyName,
       websiteLink,
@@ -78,72 +84,100 @@ const createProfile = async (req, res) => {
       user: userId,
     });
     await newAdvertiser.save();
-    res.status(201).json({ message: "Created advertiser successfully" });
-  } catch (e) {
-    res.status(404).json({ message: "failed", error: e.message });
-    console.log(e);
+
+    res.status(201).json({ message: "Advertiser profile created successfully." });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to create profile.",
+      error: error.message,
+    });
   }
 };
 const getProfile = async (req, res) => {
   try {
     const id = req.user._id;
-    const details = await advertiserModel.findOne({ user: id }).populate({
-      path: 'user',
-      select: 'username email role password status' // Only return these fields from the user
-    });
-    return res.status(200).json({ username: details.user.username, email: details.user.email, role: details.user.role, companyName: details.companyName, companyProfile: details.companyProfile, websiteLink: details.websiteLink, hotline: details.hotline, logo: details.logo.url });
 
-  } catch (err) {
-    res.status(401).json({ message: "failed", error: err.message });
+    const details = await advertiserModel.findOne({ user: id }).populate({
+      path: "user",
+      select: "username email role password status",
+    });
+
+    if (!details) {
+      return res.status(404).json({ message: "Profile not found." });
+    }
+
+    res.status(200).json({
+      message: "Profile retrieved successfully.",
+      username: details.user.username,
+      email: details.user.email,
+      role: details.user.role,
+      companyName: details.companyName,
+      companyProfile: details.companyProfile,
+      websiteLink: details.websiteLink,
+      hotline: details.hotline,
+      logo: details.logo?.url || null,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to retrieve profile.",
+      error: error.message,
+    });
   }
 };
 const updateProfile = async (req, res) => {
   try {
     const id = req.user._id;
-
-    const { companyName, websiteLink, hotline, companyProfile, email } = req.body;
-
-    const userUpdates = {};
-    const advertiserUpdates = {};
+    const { companyName, websiteLink, hotline, companyProfile, email } =
+        req.body;
 
     const advertiser = await advertiserModel
-      .findOne({ user: id })
-      .populate("user");
+        .findOne({ user: id })
+        .populate("user");
+
     if (!advertiser) {
-      res.status(400).json({ message: "cannot find this profile" });
+      return res.status(404).json({ message: "Profile not found." });
     }
 
+    const advertiserUpdates = {};
     if (companyName) advertiserUpdates.companyName = companyName;
     if (websiteLink) advertiserUpdates.websiteLink = websiteLink;
     if (hotline) advertiserUpdates.hotline = hotline;
     if (companyProfile) advertiserUpdates.companyProfile = companyProfile;
 
+    const userUpdates = {};
     if (email) {
-      const existingUser = await userModel.findOne({ email });
-      if (existingUser && email !== advertiser.user.email) {
-        return res.status(400).json({ error: "Email already exists" });
-      }
       if (!validator.isEmail(email)) {
-        throw Error('Email is not valid');
+        return res.status(400).json({ message: "Invalid email format." });
       }
+
+      const emailExists = await userModel.findOne({ email });
+      if (emailExists && email !== advertiser.user.email) {
+        return res.status(400).json({ message: "Email already in use." });
+      }
+
       userUpdates.email = email;
     }
 
     const updatedAdvertiser = await advertiserModel.findByIdAndUpdate(
-      advertiser._id,
-      advertiserUpdates
+        advertiser._id,
+        advertiserUpdates,
+        { new: true }
     );
-    const updatedUser = await userModel.findByIdAndUpdate(id, userUpdates);
 
-    if (updatedAdvertiser || updatedUser) {
-      return res
-        .status(200)
-        .json({ message: "updated advertiser successfully" });
-    } else {
-      return res.status(404).json({ message: "No updates made" });
-    }
-  } catch (e) {
-    return res.status(400).json({ message: "failed to update advertiser", error: e.message });
+    const updatedUser = await userModel.findByIdAndUpdate(id, userUpdates, {
+      new: true,
+    });
+
+    res.status(200).json({
+      message: "Profile updated successfully.",
+      updatedAdvertiser,
+      updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update profile.",
+      error: error.message,
+    });
   }
 };
 const createActivity = async (req, res) => {
@@ -162,46 +196,63 @@ const createActivity = async (req, res) => {
       bookingAvailable,
     } = req.body;
 
-    // Validate required fields
-    if (!name || !date || !time || !location || !price || !category || !preferenceTags) {
-      throw new Error("Please fill all required fields");
+    if (
+        !name ||
+        !date ||
+        !time ||
+        !location ||
+        !price ||
+        !category ||
+        !preferenceTags
+    ) {
+      return res.status(400).json({ message: "All fields are required." });
     }
 
-    // Check for duplicate activity name
     const existingActivity = await activityModel.findOne({ name });
     if (existingActivity) {
-      return res.status(400).json({ message: "Activity with this name already exists. Please choose a different name." });
+      return res.status(400).json({
+        message: "Activity with this name already exists. Choose a new name.",
+      });
     }
 
-    // Validate and format location coordinates
     if (!location.coordinates || location.coordinates.length !== 2) {
-      return res.status(400).json({ message: "Location coordinates must be in the format [longitude, latitude]" });
+      return res.status(400).json({
+        message: "Location must include [longitude, latitude].",
+      });
     }
+
     const [longitude, latitude] = location.coordinates;
-    if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) {
-      return res.status(400).json({ message: "Invalid coordinates: longitude must be between -180 and 180, latitude between -90 and 90" });
+    if (
+        longitude < -180 ||
+        longitude > 180 ||
+        latitude < -90 ||
+        latitude > 90
+    ) {
+      return res.status(400).json({
+        message: "Coordinates must be valid: longitude (-180 to 180), latitude (-90 to 90).",
+      });
     }
 
-    // Validate date is in the future
     const currentDate = new Date();
-    const activityDate = new Date(date);
-    if (activityDate < currentDate) {
-      return res.status(400).json({ message: "Please enter a future date" });
+    if (new Date(date) < currentDate) {
+      return res.status(400).json({ message: "Date must be in the future." });
     }
 
-    // Retrieve ObjectIds for category and preference tags
     const categoryDoc = await categoryModel.findOne({ _id: category });
-    if (!categoryDoc) return res.status(400).json({ message: "Invalid category selected" });
-
-    const tagDocs = await preferenceTagModel.find({ _id: { $in: preferenceTags } });
-    if (tagDocs.length !== preferenceTags.length) {
-      return res.status(400).json({ message: "Some preference tags are invalid" });
+    if (!categoryDoc) {
+      return res.status(400).json({ message: "Invalid category selected." });
     }
 
-    // Extract ObjectIds for tags
-    const tagIds = tagDocs.map((tag) => tag._id);
+    const tagDocs = await preferenceTagModel.find({
+      _id: { $in: preferenceTags },
+    });
 
-    // Create new activity
+    if (tagDocs.length !== preferenceTags.length) {
+      return res.status(400).json({
+        message: "Some preference tags are invalid.",
+      });
+    }
+
     const newActivity = new activityModel({
       name,
       date,
@@ -213,7 +264,7 @@ const createActivity = async (req, res) => {
       },
       price,
       category: categoryDoc._id,
-      tags: tagIds,
+      tags: tagDocs.map((tag) => tag._id),
       discounts,
       bookingAvailable,
       advertiser: advertiserId,
@@ -221,48 +272,48 @@ const createActivity = async (req, res) => {
 
     await newActivity.save();
 
-    res.status(201).json({ message: "Activity created successfully", activity: newActivity });
+    res.status(201).json({
+      message: "Activity created successfully.",
+      activity: newActivity,
+    });
   } catch (error) {
-    if (error.code === 11000) {  // 11000 is the MongoDB error code for duplicate keys
-      res.status(400).json({ message: "An activity with this name already exists" });
-    } else {
-      console.error("Error creating activity:", error);
-      res.status(400).json({ message: "Failed to create activity" });
-    }
+    res.status(500).json({
+      message: "Failed to create activity.",
+      error: error.message,
+    });
   }
 };
 const updateActivity = async (req, res) => {
-  const session = await mongoose.startSession(); // Start a session
-  session.startTransaction(); // Start a transaction
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const activityId = req.params.activityId;
     const advertiserId = req.user._id;
 
-    // Find the activity and populate the advertiser field
     const activity = await activityModel
-      .findById(activityId)
-      .populate("advertiser");
+        .findById(activityId)
+        .populate("advertiser");
 
-    // Check if the activity exists
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
     }
 
-    // Verify if the current user is authorized to edit the activity
     if (activity.advertiser._id.toString() !== advertiserId) {
-      return res
-        .status(403)
-        .json({ message: "You are not allowed to edit others' activities" });
+      return res.status(403).json({
+        message: "You are not authorized to edit this activity",
+      });
     }
+
     const today = new Date();
     today.setHours(0, 0, 0);
-    const activityDate = activity.date.setHours(0, 0, 0);
+    const activityDate = new Date(activity.date).setHours(0, 0, 0);
 
-    if (today > activityDate) return res.status(400).json({ message: 'this activity is old you are not allowed to edit it' })
+    if (today > activityDate) {
+      return res.status(400).json({
+        message: "This activity is old and cannot be edited",
+      });
+    }
 
-
-
-    // Extract fields from the request body
     const {
       name,
       date,
@@ -275,92 +326,104 @@ const updateActivity = async (req, res) => {
       bookingAvailable,
       rating,
     } = req.body;
+
     const query = {};
     const ticketQuery = {};
 
-    // Update tags if provided
     if (tags) {
       const tagDocs = await preferenceTagModel.find({ _id: { $in: tags } });
       if (tagDocs.length !== tags.length) {
-        throw Error("Some preference tags are invalid");
+        throw new Error("Some preference tags are invalid");
       }
-      query.tags = tags; // Using IDs directly
+      query.tags = tags;
     }
 
-    // Update category if provided
     if (category) {
       const categoryDoc = await categoryModel.findById(category);
       if (!categoryDoc) {
-        throw Error("Invalid category selected");
+        throw new Error("Invalid category selected");
       }
-      query.category = category; // Using ID directly
+      query.category = category;
     }
 
-    // Validate and update date
     if (date) {
       const currentDate = new Date();
       const activityDate = new Date(date);
       if (activityDate < currentDate) {
-        throw Error("Please enter a future date");
+        throw new Error("Date must be in the future");
       }
       query.date = date;
       ticketQuery.date = date;
     }
 
-    // Update remaining fields if provided
     if (name) {
       query.name = name;
       ticketQuery.name = name;
     }
+
     if (location) {
       query.location = location;
-      ticketQuery.locationName = location.name
+      ticketQuery.locationName = location.name;
     }
+
     if (price) query.price = price;
     if (time) {
       query.time = time;
-      ticketQuery.time = time
+      ticketQuery.time = time;
     }
     if (discounts) query.discounts = discounts;
     if (rating) query.rating = rating;
-    if (bookingAvailable !== undefined) query.bookingAvailable = bookingAvailable;
+    if (bookingAvailable !== undefined)
+      query.bookingAvailable = bookingAvailable;
 
-    // Update the activity with the constructed query
-    const activityTickets = await activityTicketModel.find({ activity: activity._id, status: 'active' })
+    const activityTickets = await activityTicketModel.find({
+      activity: activity._id,
+      status: "active",
+    });
 
     if (activityTickets.length > 0) {
-      for (t of activityTickets) {
+      for (const t of activityTickets) {
         const transporter = nodemailer.createTransport({
           service: "Gmail",
           auth: {
             user: process.env.EMAIL,
             pass: process.env.EMAIL_PASSWORD,
-          }
-        })
-        const user = await userModel.findById(t.tourist)
-        const text = emailTemplate.notifyBookedUsersForUpdateInActivity(ticketQuery.name, ticketQuery.date, ticketQuery.locationName, user.username)
+          },
+        });
+        const user = await userModel.findById(t.tourist);
+        const text = emailTemplate.notifyBookedUsersForUpdateInActivity(
+            ticketQuery.name,
+            ticketQuery.date,
+            ticketQuery.locationName,
+            user.username
+        );
         const mailOptions = {
           from: process.env.EMAIL,
           to: user.email,
-          subject: " Update: Your Upcoming Activity has been updated!",
-          text
-        }
-        await transporter.sendMail(mailOptions)
+          subject: "Update: Your Upcoming Activity has been updated!",
+          text,
+        };
+        await transporter.sendMail(mailOptions);
       }
     }
 
     await activityModel.findByIdAndUpdate(activityId, query, { session });
-    await activityTicketModel.updateMany({ activity: activity._id }, ticketQuery, { session })
+    await activityTicketModel.updateMany(
+        { activity: activity._id },
+        ticketQuery,
+        { session }
+    );
 
     await session.commitTransaction();
     session.endSession();
-    res.status(200).json({
-      message: "Activity updated successfully",
-    });
-  } catch (e) {
+    res.status(200).json({ message: "Activity updated successfully" });
+  } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    return res.status(400).json({ message: e.message });
+    res.status(400).json({
+      message: "Failed to update activity",
+      error: error.message,
+    });
   }
 };
 const deleteActivity = async (req, res) => {
@@ -368,66 +431,87 @@ const deleteActivity = async (req, res) => {
     const activityId = req.params.activityid.trim();
     const advertiserId = req.user._id;
 
-    // Find the activity
-    const activity = await activityModel.findById(activityId).populate("advertiser");
+    const activity = await activityModel
+        .findById(activityId)
+        .populate("advertiser");
 
-    // Check if activity exists
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
     }
 
-    // Check if the advertiserId matches the one in the activity
-    if (activity.advertiser && activity.advertiser._id.toString() !== advertiserId) {
-      return res.status(403).json({ message: "You are not authorized to delete this activity" });
+    if (
+        activity.advertiser &&
+        activity.advertiser._id.toString() !== advertiserId
+    ) {
+      return res.status(403).json({
+        message: "You are not authorized to delete this activity",
+      });
     }
-    const activityTickets = await activityTicketModel.find({ activity: activityId, status: 'active' })
+
+    const activityTickets = await activityTicketModel.find({
+      activity: activityId,
+      status: "active",
+    });
 
     const today = new Date();
     today.setHours(0, 0, 0);
-    const activityDate = new Date(activity.date)
-    activityDate.setHours(0, 0, 0)
+    const activityDate = new Date(activity.date);
+    activityDate.setHours(0, 0, 0);
 
-    if (today < activityDate && activityTickets.length > 0) return res.status(400).json({ message: 'this activity is booked from other users you are not allowed to delete it' })
+    if (today < activityDate && activityTickets.length > 0) {
+      return res.status(400).json({
+        message: "Cannot delete activity as it is booked by users",
+      });
+    }
 
-    // Delete the activity if checks pass
     await activityModel.findByIdAndDelete(activityId);
     res.status(200).json({ message: "Activity deleted successfully" });
-
-  } catch (err) {
-    console.error("Error deleting activity:", err);
-    res.status(500).json({ message: "Server error" });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to delete activity",
+      error: error.message,
+    });
   }
 };
 const getMyActivities = async (req, res) => {
   try {
     const advertiserId = req.user._id;
     const activities = await activityModel
-      .find({ advertiser: advertiserId })
-      .populate({
-        path: "category",
-        select: "name description -_id" // Select only the necessary fields and exclude '_id'
-      })
-      .populate({
-        path: "tags",
-        select: "name description -_id" // Select only the necessary fields and exclude '_id'
-      })
-      .select("name date time location price discounts bookingAvailable rating _id") // Include '_id' for the activity
-      .sort({ createdAt: 1 }); // Sort by creation date in ascending order
+        .find({ advertiser: advertiserId })
+        .populate({
+          path: "category",
+          select: "name description -_id",
+        })
+        .populate({
+          path: "tags",
+          select: "name description -_id",
+        })
+        .select(
+            "name date time location price discounts bookingAvailable rating _id"
+        )
+        .sort({ createdAt: 1 });
 
     if (activities.length === 0) {
-      return res.status(404).json({ message: "No activities found for this advertiser" });
-    } else {
-      return res.status(200).json(activities);
+      return res
+          .status(404)
+          .json({ message: "No activities found for this advertiser" });
     }
-  } catch (err) {
-    res.status(500).json({ message: "Failed to get activities", error: err.message });
+
+    res.status(200).json({
+      message: "Activities retrieved successfully",
+      activities,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to retrieve activities",
+      error: error.message,
+    });
   }
 };
 const uploadLogo = async (req, res) => {
   try {
-
     if (!req.file) {
-      return res.status(400).json({ message: 'Logo is required' });
+      return res.status(400).json({ message: "Logo file is required" });
     }
 
     const file = req.file;
@@ -435,45 +519,58 @@ const uploadLogo = async (req, res) => {
 
     await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { resource_type: 'image' },
-        (error, result) => {
-          if (error) {
-            reject(new Error('Upload Error'));
-          } else {
-            imageUrl = { url: result.secure_url, publicId: result.public_id };
-            resolve();
+          { resource_type: "image" },
+          (error, result) => {
+            if (error) {
+              reject(new Error("Failed to upload logo"));
+            } else {
+              imageUrl = { url: result.secure_url, publicId: result.public_id };
+              resolve();
+            }
           }
-        }
       );
-
-      // Upload the file buffer directly to Cloudinary
       uploadStream.end(file.buffer);
     });
 
-    await advertiserModel.findOneAndUpdate({ user: req.user._id }, { logo: imageUrl });
+    await advertiserModel.findOneAndUpdate(
+        { user: req.user._id },
+        { logo: imageUrl }
+    );
 
     res.status(200).json({
-      message: 'Logo uploaded successfully',
+      message: "Logo uploaded successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to upload logo",
+      error: error.message,
     });
   }
-  catch (error) {
-    res.status(500).json({ message: 'Error uploading logo', error: error.message });
-
-
-  }
-}
+};
 const createTransportation = async (req, res) => {
   try {
-    const { name, time, date, type, pickupLocation, dropOffLocation, price } = req.body;
+    const { name, time, date, type, pickupLocation, dropOffLocation, price } =
+        req.body;
 
-    // Validate required fields
-    if (!name || !time || !date || !type || !pickupLocation || !dropOffLocation || !price) {
+    if (
+        !name ||
+        !time ||
+        !date ||
+        !type ||
+        !pickupLocation ||
+        !dropOffLocation ||
+        !price
+    ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const exists = await transportationModel.findOne({ name });
-    if (exists) return res.status(400).json({ message: 'this name already exists' })
-    // Create a new transportation entry
+    if (exists) {
+      return res.status(400).json({
+        message: "Transportation with this name already exists",
+      });
+    }
+
     const newTransportation = new transportationModel({
       advertiser: req.user._id,
       name,
@@ -481,93 +578,116 @@ const createTransportation = async (req, res) => {
       date,
       type,
       price,
-      pickupLocation: pickupLocation,
-      dropOffLocation: dropOffLocation
+      pickupLocation,
+      dropOffLocation,
     });
 
-    // Save to the database
     await newTransportation.save();
 
     res.status(201).json({
-      message: "Transportation created successfully"
+      message: "Transportation created successfully",
     });
   } catch (error) {
-    res.status(400).json({
+    res.status(500).json({
       message: "Failed to create transportation",
-      error: error.message
+      error: error.message,
     });
   }
 };
 const getAllTransportation = async (req, res) => {
   try {
-    const transportations = await transportationModel.find().populate('advertiser', 'username');
-    if (!transportations || transportations.length == 0)
-      return res.status(400).json({ message: 'no transportation created yet' });
+    const transportations = await transportationModel
+        .find()
+        .populate("advertiser", "username");
 
-
-    return res.status(200).json({ message: 'transportations retrieved successfully', transportations })
-
-  }
-  catch (error) {
-    return res.status(400).json({ message: 'can\'t retrieve transportation', error: error.message })
-  }
-}
-const deleteTransportation = async (req, res) => {
-  try {
-    const transportationIdString = req.body.transportationId;
-
-    if (!transportationIdString) {
-      return res.status(400).json({ message: 'Please choose a transportation to delete' });
+    if (!transportations || transportations.length === 0) {
+      return res
+          .status(404)
+          .json({ message: "No transportation records found." });
     }
 
-    const transportationId = new mongoose.Types.ObjectId(transportationIdString);
+    return res.status(200).json({
+      message: "Transportations retrieved successfully.",
+      transportations,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to retrieve transportations.",
+      error: error.message,
+    });
+  }
+};
+const deleteTransportation = async (req, res) => {
+  try {
+    const { transportationId } = req.body;
+
+    if (!transportationId) {
+      return res
+          .status(400)
+          .json({ message: "Please specify a transportation to delete." });
+    }
 
     const transportation = await transportationModel.findById(transportationId);
 
     if (!transportation) {
-      return res.status(404).json({ message: 'Transportation not found' });
+      return res.status(404).json({ message: "Transportation not found." });
     }
 
-    if (req.user._id.toString() !== transportation.advertiser.toString()) return res.status(403).json({ message: 'sorry you dont have the authority to delete this transportation' })
-    if (transportation.touristsBooked.length > 0) return res.status(400).json({ message: 'transportation is booked by tourists can\'t delete it' })
-    await transportationModel.findByIdAndDelete(transportationId);
-    return res.status(200).json({ message: 'Deleted transportation successfully' });
+    if (req.user._id.toString() !== transportation.advertiser.toString()) {
+      return res.status(403).json({
+        message: "You are not authorized to delete this transportation.",
+      });
+    }
 
+    if (transportation.touristsBooked.length > 0) {
+      return res.status(400).json({
+        message: "Transportation is booked by tourists and cannot be deleted.",
+      });
+    }
+
+    await transportationModel.findByIdAndDelete(transportationId);
+
+    return res.status(200).json({
+      message: "Transportation deleted successfully.",
+    });
   } catch (error) {
-    return res.status(500).json({ message: 'Error deleting transportation', error: error.message });
+    return res.status(500).json({
+      message: "Failed to delete transportation.",
+      error: error.message,
+    });
   }
 };
 const editTransportation = async (req, res) => {
   try {
-    const transportationIdString = req.body.transportationId;
+    const { transportationId } = req.body;
 
-    if (!transportationIdString) {
-      return res.status(400).json({ message: 'Please choose a transportation to edit' });
+    if (!transportationId) {
+      return res
+          .status(400)
+          .json({ message: "Please specify a transportation to edit." });
     }
 
-    const transportationId = new mongoose.Types.ObjectId(transportationIdString);
-
-    // Find the transportation by ID
     const transportation = await transportationModel.findById(transportationId);
 
     if (!transportation) {
-      return res.status(404).json({ message: 'Transportation not found' });
+      return res.status(404).json({ message: "Transportation not found." });
     }
 
-    // Check if the user is the advertiser
     if (req.user._id.toString() !== transportation.advertiser.toString()) {
-      return res.status(403).json({ message: 'Sorry, you do not have the authority to edit this transportation' });
+      return res.status(403).json({
+        message: "You are not authorized to edit this transportation.",
+      });
     }
 
-    // Check if the transportation is booked by tourists
     if (transportation.touristsBooked.length > 0) {
-      return res.status(400).json({ message: 'Transportation is booked by tourists and cannot be edited' });
+      return res.status(400).json({
+        message: "Transportation is booked by tourists and cannot be edited.",
+      });
     }
 
-    // Define the fields that can be updated
-    const { name, dropOffLocation, pickupLocation, time, type, cost } = req.body;
+    const { name, dropOffLocation, pickupLocation, time, type, cost } =
+        req.body;
 
-    // Update only the allowed fields if they are provided
     if (name) transportation.name = name;
     if (dropOffLocation) transportation.dropOffLocation = dropOffLocation;
     if (pickupLocation) transportation.pickupLocation = pickupLocation;
@@ -575,265 +695,297 @@ const editTransportation = async (req, res) => {
     if (type) transportation.type = type;
     if (cost) transportation.cost = cost;
 
-    // Save the updated transportation document
     await transportation.save();
 
-    return res.status(200).json({ message: 'Transportation updated successfully' });
-
+    return res.status(200).json({
+      message: "Transportation updated successfully.",
+    });
   } catch (error) {
-    return res.status(500).json({ message: 'Error updating transportation', error: error.message });
+    return res.status(500).json({
+      message: "Failed to update transportation.",
+      error: error.message,
+    });
   }
 };
 const getMyTransportations = async (req, res) => {
   try {
-    // Find all transportation records where the user is the advertiser
-    const transportations = await transportationModel.find({ advertiser: req.user._id });
+    const transportations = await transportationModel.find({
+      advertiser: req.user._id,
+    });
 
-    // Check if the user has any transportations
-    if (transportations.length === 0) {
-      return res.status(404).json({ message: 'No transportations found for this user.' });
+    if (!transportations || transportations.length === 0) {
+      return res
+          .status(404)
+          .json({ message: "No transportations found for this user." });
     }
 
-    return res.status(200).json({ transportations });
+    return res.status(200).json({
+      message: "Transportations retrieved successfully.",
+      transportations,
+    });
   } catch (error) {
-    return res.status(500).json({ message: 'Error fetching transportations', error: error.message });
+    return res.status(500).json({
+      message: "Failed to retrieve transportations.",
+      error: error.message,
+    });
   }
 };
-
-
 const viewRevenue = async (req, res) => {
   try {
-    //get all tickets
-    const tickets = await activityTicketModel.find({ status: 'active' });
-    if (tickets.length === 0) throw Error('You have no revenues yet');
+    const tickets = await activityTicketModel.find({ status: "active" });
 
-    let date = req.query.date;
-
-    if (date) {
-      date = new Date(date);
-
-      // Ensure the date is valid
-      if (isNaN(date.getTime()))
-        throw Error('Invalid date format');
+    if (!tickets || tickets.length === 0) {
+      return res.status(404).json({ message: "No revenue data found." });
     }
-    //get my tickets
-    let myTickets = await Promise.all(
-      tickets.map(async t => {
-        const activity = await activityModel.findById(t.activity);
-        if (activity.advertiser.toString() === req.user._id.toString()) {
-          return t;
-        }
-        return null;
-      })
-    );
 
-    //remove null 
-    myTickets = myTickets.filter(t => t !== null);
+    const { date } = req.query;
+    let targetDate = date ? new Date(date) : null;
 
+    if (targetDate && isNaN(targetDate.getTime())) {
+      return res.status(400).json({ message: "Invalid date format." });
+    }
+
+    const myTickets = await Promise.all(
+        tickets.map(async (t) => {
+          const activity = await activityModel.findById(t.activity);
+          if (activity && activity.advertiser.toString() === req.user._id.toString()) {
+            return t;
+          }
+          return null;
+        })
+    ).then((tickets) => tickets.filter(Boolean));
+
+    let report = [];
     let totalRevenue = 0;
 
-    let report = []
-
-    //get receipt of each ticket and get its price
     for (const ticket of myTickets) {
       const receipt = await receiptModel.findById(ticket.receipt);
-      if (receipt && receipt.status === 'successful') {
-
-        const activity = await activityModel.findById(ticket.activity)
+      if (receipt && receipt.status === "successful") {
+        const activity = await activityModel.findById(ticket.activity);
         report.push({
           name: activity.name,
+          date: activity.date,
           price: receipt.price,
-          date: activity.date
-        })
+        });
       }
     }
 
-    const map = new Map();
-
-    for (row of report) {
-      if (!map.has(row.name)) map.set(row.name, { date: row.date, count: 1, price: row.price, })
-
-      else {
-        const entry = map.get(row.name)
-
-        map.set(row.name, { date: row.date, count: entry.count + 1, price: entry.price })
+    const revenueMap = report.reduce((map, row) => {
+      if (!map[row.name]) {
+        map[row.name] = { date: row.date, count: 1, price: row.price };
+      } else {
+        map[row.name].count++;
       }
+      return map;
+    }, {});
 
-    }
-
-    console.log(date)
-
-    const result = Array.from(map, ([name, data]) => ({
+    const results = Object.entries(revenueMap).map(([name, data]) => ({
       name,
       count: data.count,
       date: data.date,
       price: data.price,
     }));
 
-    // Apply filter only if `date` exists
-    const filteredResults = date
-      ? result.filter(e => new Date(e.date).toISOString() === new Date(date).toISOString())
-      : result;
+    const filteredResults = targetDate
+        ? results.filter(
+            (r) =>
+                new Date(r.date).toISOString() === targetDate.toISOString()
+        )
+        : results;
 
-    filteredResults.forEach(e => totalRevenue += (e.price * e.count))
+    filteredResults.forEach((r) => {
+      totalRevenue += r.price * r.count;
+    });
 
-
-
-
-
-    return res.status(200).json({ filteredResults, totalRevenue });
+    return res.status(200).json({
+      message: "Revenue data retrieved successfully.",
+      filteredResults,
+      totalRevenue,
+    });
   } catch (error) {
-    console.log(error)
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      message: "Failed to retrieve revenue data.",
+      error: error.message,
+    });
   }
 };
-
 const viewTotalTourists = async (req, res) => {
   try {
-    //get all active tickets
-    const tickets = await activityTicketModel.find({ status: 'active' })
+    const tickets = await activityTicketModel.find({ status: "active" });
 
-    //get my tickets
-    let myTickets = await Promise.all(
-      tickets.map(async t => {
-        const activity = await activityModel.findById(t.activity)
-        if (activity.advertiser.toString() === req.user._id.toString() &&
-          new Date(activity.date) < new Date().setHours(0, 0, 0, 0)) {
-          return t;
-        }
-        return null;
-      })
-    )
-    myTickets = myTickets.filter(t => t !== null)
+    const myTickets = await Promise.all(
+        tickets.map(async (t) => {
+          const activity = await activityModel.findById(t.activity);
+          if (
+              activity &&
+              activity.advertiser.toString() === req.user._id.toString() &&
+              new Date(activity.date) < new Date().setHours(0, 0, 0, 0)
+          ) {
+            return t;
+          }
+          return null;
+        })
+    ).then((tickets) => tickets.filter((t) => t !== null));
 
-    if (myTickets.length === 0) throw Error('No tourists came to your activity yet')
-
-    let report = []
-
-
-    // console.log(myTickets)
-
-
-    for (const t of myTickets) {
-      const activity = await activityModel.findById(t.activity);
-      // console.log(activity.name)
-      report.push({
-        name: activity.name,
-        date: activity.date
+    if (myTickets.length === 0) {
+      return res.status(404).json({
+        message: "No tourists have attended your activities yet.",
       });
     }
 
-    const map = new Map()
+    const report = myTickets.map((t) => {
+      const activity = activityModel.findById(t.activity);
+      return {
+        name: activity.name,
+        date: activity.date,
+      };
+    });
 
-    for (row of report) {
-      if (!map.has(row.name))
-        map.set(row.name, { date: row.date, count: 1 });
-      else {
-        const entry = map.get(row.name)
-
-        map.set(row.name, { date: row.date, count: entry.count + 1 })
-
+    const map = report.reduce((acc, row) => {
+      if (!acc[row.name]) {
+        acc[row.name] = { date: row.date, count: 1 };
+      } else {
+        acc[row.name].count++;
       }
-    }
-    const result = Array.from(map, ([name, data]) => ({
+      return acc;
+    }, {});
+
+    const result = Object.entries(map).map(([name, data]) => ({
       name,
       date: data.date,
-      totalTourists: data.count
+      totalTourists: data.count,
+    }));
 
-    }))
-    function getMonthIndex(month) {
+    if (req.query.month) {
       const months = [
-        "january", "february", "march", "april", "may", "june",
-        "july", "august", "september", "october", "november", "december"
+        "january",
+        "february",
+        "march",
+        "april",
+        "may",
+        "june",
+        "july",
+        "august",
+        "september",
+        "october",
+        "november",
+        "december",
       ];
-
-      // Convert the input to lowercase and find the index
-      const monthIndex = months.indexOf(month.toLowerCase());
+      const monthIndex = months.indexOf(req.query.month.toLowerCase());
 
       if (monthIndex === -1) {
-        throw new Error("Invalid month name");
+        return res.status(400).json({ message: "Invalid month name." });
       }
 
-      return monthIndex; // Index is 0-based (January = 0, February = 1, etc.)
+      const filteredResults = result.filter(
+          (t) => new Date(t.date).getMonth() === monthIndex
+      );
+
+      if (filteredResults.length === 0) {
+        return res
+            .status(404)
+            .json({ message: "No data matches your search criteria." });
+      }
+
+      return res.status(200).json(filteredResults);
     }
 
-    const month = req.query.month
-    let index = -1
-
-    if (month)
-      index = getMonthIndex(month)
-
-    const filteredResults = index > -1 ? result.filter(t => new Date(t.date).getMonth() === index) : result
-    if (filteredResults.length === 0) throw Error('nothing meets your search criteria')
-    return res.status(200).json(filteredResults)
-
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Failed to retrieve tourist data.",
+      error: error.message,
+    });
   }
-  catch (error) {
-
-    console.log(error)
-    return res.status(500).json({ message: error.message })
-  }
-}
-
+};
 const disableActivityBooking = async (req, res) => {
   try {
+    const { activityId } = req.body;
 
-    if (!req.body.activityId) return res.status(400).json({ message: 'choose an activity to disable' })
+    if (!activityId) {
+      return res.status(400).json({ message: "Please specify an activity to disable." });
+    }
 
-    const activityId = new mongoose.Types.ObjectId(req.body.activityId)
+    const activity = await activityModel.findById(activityId);
 
-    const activity = await activityModel.findById(activityId)
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found." });
+    }
 
+    if (activity.advertiser.toString() !== req.user._id.toString()) {
+      return res
+          .status(403)
+          .json({ message: "You are not authorized to edit this activity." });
+    }
 
-    if (activity.advertiser.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'you are unauthorized to edit this activity' })
+    if (!activity.bookingAvailable) {
+      return res.status(400).json({ message: "Activity booking is already disabled." });
+    }
 
-    if (!activity.bookingAvailable) return res.status(400).json({ message: 'activity already disabled' })
-
-    activity.bookingAvailable = !activity.bookingAvailable;
+    activity.bookingAvailable = false;
     await activity.save();
-    return res.status(200).json({ message: 'disabled activity' });
+
+    return res.status(200).json({ message: "Activity booking disabled successfully." });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Failed to disable activity booking.",
+      error: error.message,
+    });
   }
-  catch (error) {
-    return res.status(500).json({ message: error.message })
-  }
-}
+};
 const enableActivityBooking = async (req, res) => {
   try {
+    const { activityId } = req.body;
 
-    if (!req.body.activityId) return res.status(400).json({ message: 'choose an activity to disable' })
+    if (!activityId) {
+      return res.status(400).json({ message: "Please specify an activity to enable." });
+    }
 
-    const activityId = new mongoose.Types.ObjectId(req.body.activityId)
+    const activity = await activityModel.findById(activityId);
 
-    const activity = await activityModel.findById(activityId)
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found." });
+    }
 
-    if (activity.advertiser.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'you are unauthorized to edit this activity' })
+    if (activity.advertiser.toString() !== req.user._id.toString()) {
+      return res
+          .status(403)
+          .json({ message: "You are not authorized to edit this activity." });
+    }
 
-    if (activity.bookingAvailable) return res.status(400).json({ message: 'activity already enabled' })
+    if (activity.bookingAvailable) {
+      return res.status(400).json({ message: "Activity booking is already enabled." });
+    }
 
-    activity.bookingAvailable = !activity.bookingAvailable;
+    activity.bookingAvailable = true;
     await activity.save();
 
     const tourists = await touristModel.find({
-      interestedEvents: activityId
+      interestedEvents: activityId,
     });
 
-    console.log(tourists.length)
     if (tourists.length > 0) {
       const io = req.app.get("io");
-      for (t of tourists) {
-        notifyUser(io, t.user, activity.name)
-        t.interestedEvents = t.interestedEvents.filter(e => e.toString() !== activityId.toString())
-
+      for (const t of tourists) {
+        notifyUser(io, t.user, "activity", activity.name);
+        t.interestedEvents = t.interestedEvents.filter(
+            (e) => e.toString() !== activityId.toString()
+        );
         await t.save();
-
       }
     }
-    return res.status(200).json({ message: 'enabled activity' });
+
+    return res.status(200).json({ message: "Activity booking enabled successfully." });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Failed to enable activity booking.",
+      error: error.message,
+    });
   }
-  catch (error) {
-    return res.status(500).json({ message: error.message })
-  }
-}
+};
 
 module.exports = {
   createProfile,
@@ -853,5 +1005,5 @@ module.exports = {
   viewRevenue,
   viewTotalTourists,
   disableActivityBooking,
-  enableActivityBooking
+  enableActivityBooking,
 };

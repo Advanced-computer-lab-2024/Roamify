@@ -2,7 +2,17 @@ import React, { useState } from "react";
 import Modal from "react-modal";
 import ProfileIcon from "../Icons/ProfileIcon";
 import { useNavigate } from "react-router-dom";
-import { FaWallet, FaBookmark, FaCog, FaSignOutAlt } from "react-icons/fa";
+import {
+  FaWallet,
+  FaBookmark,
+  FaCog,
+  FaSignOutAlt,
+  FaBox,
+  FaHeart,
+  FaClipboardList,
+  FaCommentDots,
+} from "react-icons/fa";
+import ThemeToggleButton from "../../pages/Home/ThemeToggleButton";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 
@@ -21,7 +31,7 @@ function ProfileButton() {
           background: "none",
         }}
       >
-        <ProfileIcon height="40px" width="40px" />
+        <ProfileIcon height="30px" width="30px" />
       </button>
 
       <Modal
@@ -34,82 +44,129 @@ function ProfileButton() {
           },
           content: {
             position: "absolute",
-            top: "16vh",
+            top: "12vh",
             left: "81vw",
-            width: "220px",
-            height: "120px",
+            width: "215px",
+            height: "fit-content",
             padding: "10px",
             borderRadius: "8px",
+            border: "none",
             boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
+            backgroundColor: "var(--secondary-color)",
           },
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "10px",
-            width: "100%",
-          }}
-        >
-          {/* Wallet Icon with Tooltip */}
+        {/* Wallet Icon with Tooltip */}
+        {role === "tourist" && (
           <div
+            className="profile-nav"
             data-tooltip-id="wallet-tooltip"
             data-tooltip-content="Wallet"
             style={{ cursor: "pointer" }}
             onClick={() => navigate("/tourist/wallet")}
           >
-            <FaWallet size={24} color="purple" />
+            <FaWallet size={15} color="var(--text-color)" />
+            Wallet
           </div>
-
-          {/* Bookmark Icon with Tooltip */}
+        )}
+        {role === "tourist" && (
           <div
+            className="profile-nav"
+            data-tooltip-id="wallet-tooltip"
+            data-tooltip-content="Wallet"
+            style={{ cursor: "pointer" }}
+            onClick={() => navigate("/tourist/wishlist")}
+          >
+            <FaHeart size={15} color="var(--text-color)" />
+            Wishlist
+          </div>
+        )}
+        {role === "tourist" && (
+          <div
+            className="profile-nav"
+            data-tooltip-id="wallet-tooltip"
+            data-tooltip-content="Wallet"
+            style={{ cursor: "pointer" }}
+            onClick={() => navigate("/tourist/orders")}
+          >
+            <FaClipboardList size={15} color="var(--text-color)" />
+            Orders
+          </div>
+        )}
+
+        {role === "tourist" && (
+          <div
+            className="profile-nav"
+            data-tooltip-id="wallet-tooltip"
+            data-tooltip-content="Wallet"
+            style={{ cursor: "pointer" }}
+            onClick={() => navigate("/tourist/tourist-view")}
+          >
+            <FaCommentDots size={15} color="var(--text-color)" />
+            Complaints
+          </div>
+        )}
+
+        {/* Bookmark Icon with Tooltip */}
+        {role === "tourist" && (
+          <div
+            className="profile-nav"
             data-tooltip-id="bookmark-tooltip"
             data-tooltip-content="Bookmarks"
             style={{ cursor: "pointer" }}
             onClick={() => navigate("/tourist/bookmarks")}
           >
-            <FaBookmark size={24} color="purple" />
+            <FaBookmark size={15} color="var(--text-color)" />
+            Bookmarks
           </div>
-
-          {/* Settings Icon with Tooltip */}
+        )}
+        {role === "tourist" && (
           <div
+            className="profile-nav"
             data-tooltip-id="settings-tooltip"
             data-tooltip-content="Settings"
             style={{ cursor: "pointer" }}
             onClick={() => {
               setModalIsOpen(false);
-              navigate("/settings");
+              navigate("/tourist/point");
             }}
           >
-            <FaCog size={24} color="purple" />
+            <i class="fas fa-star"></i>
+            Points
           </div>
+        )}
 
-          {/* Logout Icon with Tooltip */}
-          <div
-            data-tooltip-id="logout-tooltip"
-            data-tooltip-content="Logout"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setModalIsOpen(false);
-              navigate("/logout"); // Replace with your logout functionality
-            }}
-          >
-            <FaSignOutAlt size={24} color="purple" />
-          </div>
+        {/* Settings Icon with Tooltip */}
+        <div
+          className="profile-nav"
+          data-tooltip-id="settings-tooltip"
+          data-tooltip-content="Settings"
+          style={{ cursor: "pointer" }}
+          onClick={() => {
+            setModalIsOpen(false);
+            navigate("/settings");
+          }}
+        >
+          <FaCog size={15} color="var(--text-color)" />
+          Settings
         </div>
 
-        {/* Tooltip instances */}
-        <Tooltip id="wallet-tooltip" />
-        <Tooltip id="bookmark-tooltip" />
-        <Tooltip id="settings-tooltip" />
-        <Tooltip id="logout-tooltip" />
+        {/* Logout Icon with Tooltip */}
+        <div
+          className="profile-nav"
+          data-tooltip-id="logout-tooltip"
+          data-tooltip-content="Logout"
+          style={{ cursor: "pointer" }}
+          onClick={() => {
+            setModalIsOpen(false);
+            navigate("/"); // Replace with your logout functionality
+          }}
+        >
+          <FaSignOutAlt size={15} color="var(--text-color)" />
+          Logout
+        </div>
       </Modal>
     </div>
   );
