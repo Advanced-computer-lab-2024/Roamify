@@ -270,7 +270,7 @@ const bookActivity = async (req, res) => {
       tourist: req.user._id,
       price: finalPrice,
       receiptType: "payment",
-      promoCode: promoCode.code
+      promoCode: promoCode !== null ? promoCode.code : null
     });
     await receipt.save({ session });
 
@@ -421,7 +421,9 @@ const bookPlace = async (req, res) => {
       status: "successful",
       tourist: req.user._id,
       price: finalPrice,
-      receiptType: "payment"
+      receiptType: "payment",
+      promoCode: promoCode !== null ? promoCode.code : null
+
     });
     await receipt.save();
 
@@ -549,7 +551,9 @@ const bookItinerary = async (req, res) => {
       status: "successful",
       tourist: req.user._id,
       price: finalPrice,
-      receiptType: "payment"
+      receiptType: "payment",
+      promoCode: promoCode !== null ? promoCode.code : null
+
     });
     await receipt.save({ session });
 
@@ -1118,6 +1122,8 @@ const bookTransportation = async (req, res) => {
       tourist: req.user._id,
       price: transportation.price,
       receiptType: "payment",
+      promoCode: promoCode !== null ? promoCode.code : null
+
     });
     await receipt.save();
 
