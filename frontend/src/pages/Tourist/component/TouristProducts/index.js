@@ -35,7 +35,7 @@ const TouristProductsArea = () => {
         setError("No products found for the selected rating.");
       }
     } catch (error) {
-      setError("Failed to fetch products");
+      setError(error.response.data.message);
     } finally {
       setLoading(false);
     }
@@ -114,7 +114,7 @@ const TouristProductsArea = () => {
                 </div>
                 <div className="filter_review">
                   <div className="review_star">
-                    {[5, 4, 3, 2, 1].map((rating) => (
+                    {[5, 4, 3, 2, 1,0].map((rating) => (
                       <div className="form-check" key={rating}>
                         <input
                           className="form-check-input"

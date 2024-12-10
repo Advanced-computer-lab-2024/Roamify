@@ -78,6 +78,11 @@ export const HeaderData = [
     submenu: false,
   },
   {
+    menu: "Hotels",
+    link: "hotels",
+    submenu: false,
+  },
+  {
     menu: "Complain",
     submenu: true,
     subMenuitem: [
