@@ -5,7 +5,7 @@ import TransportationsArea from "./TransportationsArea";
 const Transportations = () => {
   return (
     <>
-      <CommonBanner heading="Transportations" pagination="Transportations" />
+      {/* <CommonBanner heading="Transportations" pagination="Transportations" /> */}
       <TransportationsArea />
     </>
   );

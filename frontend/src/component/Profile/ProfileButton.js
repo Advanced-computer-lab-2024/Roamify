@@ -10,6 +10,7 @@ import {
   FaBox,
   FaHeart,
   FaClipboardList,
+  FaCommentDots,
 } from "react-icons/fa";
 import ThemeToggleButton from "../../pages/Home/ThemeToggleButton";
 import { Tooltip } from "react-tooltip";
@@ -78,12 +79,7 @@ function ProfileButton() {
             style={{ cursor: "pointer" }}
             onClick={() => navigate("/tourist/wishlist")}
           >
-            <FaHeart
-              style={{
-                fontSize: "20px", // Adjust the icon size
-                color: "var(--text-color)", // Set the color for the icon
-              }}
-            />
+            <FaHeart size={15} color="var(--text-color)" />
             Wishlist
           </div>
         )}
@@ -97,6 +93,19 @@ function ProfileButton() {
           >
             <FaClipboardList size={15} color="var(--text-color)" />
             Orders
+          </div>
+        )}
+
+        {role === "tourist" && (
+          <div
+            className="profile-nav"
+            data-tooltip-id="wallet-tooltip"
+            data-tooltip-content="Wallet"
+            style={{ cursor: "pointer" }}
+            onClick={() => navigate("/tourist/tourist-view")}
+          >
+            <FaCommentDots size={15} color="var(--text-color)" />
+            Complaints
           </div>
         )}
 

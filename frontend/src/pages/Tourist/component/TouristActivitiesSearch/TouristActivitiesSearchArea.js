@@ -10,6 +10,7 @@ import { renderStars } from "../../../../functions/renderStars";
 import { FaBell } from "react-icons/fa";
 import { Share } from "@mui/icons-material";
 import ShareModal from "../TouristItinerarySearch/ShareModal";
+import PaymentModal from "../../../../PaymentModal";
 
 const TouristActivitiesWrapper = () => {
   const [activities, setActivities] = useState([]);
@@ -39,6 +40,18 @@ const TouristActivitiesWrapper = () => {
   const [currentActivity, setCurrentActivity] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  const openPaymentModal = (activity) => {
+    setCurrentActivity(activity);
+    setIsPaymentModalOpen(true);
+  };
+
+  const closePaymentModal = () => {
+    setCurrentActivity(null);
+    setIsPaymentModalOpen(false);
+  };
 
   const openShareModal = (activity) => {
     setCurrentActivity(activity);
@@ -214,22 +227,18 @@ const TouristActivitiesWrapper = () => {
     }
   };
 
-  const handleBooking = async (
-    activityId,
-    activityDate,
-    method,
-    paymentMethodId,
-    promoCode
-  ) => {
+  const handleBooking = async ({ method, paymentMethodId, promoCode }) => {
     try {
       // Format the activity date to ISO date format
-      const formattedDate = new Date(activityDate).toISOString().split("T")[0];
+      const formattedDate = new Date(currentActivity.date)
+        .toISOString()
+        .split("T")[0];
 
       // Make the POST request to the API
       await axios.post(
         "http://localhost:3000/api/tourist/book-activity",
         {
-          activity: activityId,
+          activity: currentActivity._id,
           date: formattedDate,
           method, // Payment method: "availableCredit" or "card"
           paymentMethodId, // Payment method ID
@@ -594,9 +603,7 @@ const TouristActivitiesWrapper = () => {
                             {/* Book Now Button */}
                             {activity.bookingAvailable ? (
                               <button
-                                onClick={() =>
-                                  handleBooking(activity._id, activity.date)
-                                }
+                                onClick={() => openPaymentModal(activity)}
                                 className="btn btn_theme btn_sm"
                                 style={{ flex: 1, padding: "10px 20px" }}
                               >
@@ -742,6 +749,14 @@ const TouristActivitiesWrapper = () => {
           }}
           isOpen={isModalOpen}
           onClose={closeShareModal}
+        />
+      )}
+
+      {isPaymentModalOpen && (
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={closePaymentModal}
+          onPaymentSuccess={handleBooking}
         />
       )}
       {/* Toast Container for notifications */}

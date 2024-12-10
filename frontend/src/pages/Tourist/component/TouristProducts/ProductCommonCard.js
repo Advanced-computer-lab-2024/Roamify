@@ -16,7 +16,6 @@ const CommonCard = ({
 }) => {
   // State to track whether the item is in the wishlist
   const [isInWishlist, setIsInWishlist] = useState(false);
-  
 
   // Get currency symbol and exchange rate from localStorage
   const currencySymbol = localStorage.getItem("currencySymbol") || "$";
@@ -86,7 +85,7 @@ const CommonCard = ({
       const response = await axios.post(
         `http://localhost:3000/api/cart/product`,
         {
-           productId:id
+          productId: id,
         },
         { withCredentials: true } // Ensure credentials are sent for authentication
       );
@@ -118,7 +117,8 @@ const CommonCard = ({
     <div
       className="card"
       style={{
-        borderColor: "var(--secondary-color)",
+        borderRadius: "15px",
+        border: "none",
         boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Initial shadow
         transition: "transform 0.3s ease, box-shadow 0.3s ease", // Smooth transition
       }}
@@ -170,11 +170,26 @@ const CommonCard = ({
         <p className="card-text">
           <strong>Rating:</strong> {rating} ({reviews} reviews)
         </p>
-        <div className="button-group" style={{ display: "flex", gap: "8px" }}>
-          <a href={`/product-details/${id}`} className="btn custom-btn mr-2">
+        <div
+          className="button-group"
+          style={{ display: "flex", gap: "8px", marginTop: "10px" }}
+        >
+          <a
+            href={`/product-details/${id}`}
+            className="btn custom-btn "
+            style={{
+              flex: 1,
+              background: "transparent",
+              border: "1px solid var(--main-color)",
+            }}
+          >
             View Details
           </a>
-          <button className="btn custom-btn" onClick={handleAddToCart}>
+          <button
+            className="btn custom-btn"
+            onClick={handleAddToCart}
+            style={{ flex: 1 }}
+          >
             Add to Cart
           </button>
         </div>

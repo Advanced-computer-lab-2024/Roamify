@@ -44,7 +44,7 @@ const Tourist = () => {
         <Route path="/tourist-itinerary" element={<TouristItinerary />} />
         <Route path="/tour-details/:id" element={<TourDetails />} />
         <Route path="/tourist-places" element={<TouristPlaces />} />
-        <Route path="/tourist-flights" element={<TouristFlights />} />
+        <Route path="/flights" element={<TouristFlights />} />
         <Route path="/tourist-activities" element={<TouristActivities />} />
         <Route path="/tourist-complain" element={<TouristComplain />} />
         <Route path="/tourist-view" element={<TouristView />} />
@@ -57,14 +57,14 @@ const Tourist = () => {
         <Route path="/tour-guides" element={<ReviewTourGuide />} />
         <Route path="/completed-activity" element={<CompletedActivity />} />
         <Route path="/wallet" element={<Wallet />} />
-        <Route path="/wishlist" element={<Wishlist />}/>
-        <Route path="/cart" element={<Cart />}/>
-        <Route path="/address" element={<Address />}/>
-        <Route path="/billing" element={<Billing />}/>
-        <Route path="/orders" element={<Orders />}/>
-        <Route path="/bookmarks" element={<Bookmarks />}/>
-        <Route path="/activity-details/:id" element={<ActivityDetails />}/>
-        <Route path="/itinerary-details/:id" element={<ItineraryDetails />}/>
+        <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/address" element={<Address />} />
+        <Route path="/billing" element={<Billing />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/bookmarks" element={<Bookmarks />} />
+        <Route path="/activity-details/:id" element={<ActivityDetails />} />
+        <Route path="/itinerary-details/:id" element={<ItineraryDetails />} />
       </Routes>
       <CopyRight />
     </>

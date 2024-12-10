@@ -21,7 +21,6 @@ const TouristProductsArea = () => {
     try {
       const response = await axios.get("http://localhost:3000/api/product", {
         params: {
-
           minPrice: minPrice || 0,
           maxPrice: maxPrice || Infinity,
           name: searchName,
@@ -145,8 +144,12 @@ const TouristProductsArea = () => {
               ) : error ? (
                 <p>{error}</p>
               ) : products.length > 0 ? (
-                products.map((product) => (
-                  <div className="col-md-4" key={product._id}>
+                products.map((product, index) => (
+                  <div
+                    className="col-md-4"
+                    style={{ marginTop: index > 2 ? "25px" : "0px" }}
+                    key={product._id}
+                  >
                     <CommonCard
                       id={product._id}
                       picture={

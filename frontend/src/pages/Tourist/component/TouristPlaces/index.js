@@ -228,23 +228,17 @@ const TouristPlacesArea = () => {
                         color: "purple",
                         border: "1px solid #ddd",
                         borderRadius: "8px",
-                        padding: "10px",
+                        height: "40vh",
                         marginBottom: "20px",
                       }}
                     >
-                      <div className="heart_destinations">
-                        <i className="fas fa-heart"></i>
-                      </div>
                       <Link to={`/destinations-details/${data._id}`}>
                         <img
                           src={data.pictures?.[0]?.url || "default-image.jpg"}
                           alt={data.name}
                           style={{
-                            width: "100%",
-                            height: "200px",
                             objectFit: "cover",
                             borderRadius: "8px",
-                            marginBottom: "10px",
                           }}
                         />
                       </Link>
