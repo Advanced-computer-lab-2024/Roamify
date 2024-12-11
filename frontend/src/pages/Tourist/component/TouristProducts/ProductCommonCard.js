@@ -176,7 +176,6 @@ const CommonCard = ({
             className="btn custom-btn "
             style={{
               flex: 1,
-              background: "transparent",
               border: "1px solid var(--main-color)",
             }}
           >
