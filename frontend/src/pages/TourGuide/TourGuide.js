@@ -10,6 +10,7 @@ import { HeaderData } from "./TourGuideHeaderData.js";
 import TourGuideProfile from "./TourGuideProfile.js";
 import TourGuideItinerary from "./TourGuideItinerary.js";
 import Dashboard from "./Dashboard/Dashboard.js";
+import Settings from "../Profile/Settings.js";
 const TourGuide = () => {
   return (
     <>
@@ -17,6 +18,7 @@ const TourGuide = () => {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/itineraries" element={<TourGuideItinerary />} />
+        <Route path="/settings/*" element={<Settings />} />
       </Routes>
       <CopyRight />
     </>

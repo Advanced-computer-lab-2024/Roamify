@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
-const ReviewArea = ({ tourGuideId, closeModal }) => {
+const ReviewArea = ({ fetchTourGuides, tourGuideId, closeModal }) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
@@ -30,7 +31,6 @@ const ReviewArea = ({ tourGuideId, closeModal }) => {
           { rating },
           { withCredentials: true }
         );
-        setFeedbackMessage((prev) => prev + "Rating submitted successfully. ");
       }
 
       if (comment) {
@@ -50,6 +50,8 @@ const ReviewArea = ({ tourGuideId, closeModal }) => {
     }
 
     // Reset form fields after submission
+    fetchTourGuides();
+    toast.success("Review submitted successfully!");
     closeModal(null);
     setRating(0);
     setComment("");
@@ -191,18 +193,6 @@ const ReviewArea = ({ tourGuideId, closeModal }) => {
               >
                 Post Review
               </button>
-              {feedbackMessage && (
-                <p
-                  className="feedback-message"
-                  style={{
-                    marginTop: "10px",
-                    color: "#28a745",
-                    fontSize: "14px",
-                  }}
-                >
-                  {feedbackMessage}
-                </p>
-              )}
             </div>
           </form>
         </div>

@@ -24,6 +24,7 @@ import PendingUsers from "./Users/PendingUsers.js";
 import Itineraries from "./Itineraries/Itineraries.js";
 import Dashboard from "./Dashboard/Dashboard.js";
 import CreatePromoCodeButton from "./createPromoCodeButton.js";
+import Settings from "../Profile/Settings.js";
 
 const Admin = () => {
   return (
@@ -65,6 +66,7 @@ const Admin = () => {
         {/* <Route path="/tourist-activities" element={<TouristActivities />} /> */}
         {/* <Route path="/booking-confirmation" element={<BookingConfirmation />} /> */}
         <Route path="/complaints" element={<Complaints />} />
+        <Route path="/settings/*" element={<Settings />} />
       </Routes>
       <CreatePromoCodeButton />
 

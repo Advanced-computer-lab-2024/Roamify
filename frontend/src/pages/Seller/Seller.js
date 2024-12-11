@@ -8,6 +8,7 @@ import CopyRight from "../../layout/CopyRight";
 import { HeaderData } from "./SellerHeaderData.js";
 import Products from "../Admin/Products/Products.js";
 import MyProducts from "./MyProducts.js";
+import Settings from "../Profile/Settings.js";
 
 const Seller = () => {
   return (
@@ -18,6 +19,7 @@ const Seller = () => {
         <Route path="/" element={<Products isAdmin={false} />} />
         <Route path="/my-products" element={<MyProducts />} />
         <Route path="/profile/:id" element={<Profile />} />
+        <Route path="/settings/*" element={<Settings />} />
       </Routes>
       <CopyRight />
     </>

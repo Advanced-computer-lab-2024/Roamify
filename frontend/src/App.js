@@ -45,7 +45,6 @@ const App = () => {
         <Route path="/tour-guide/*" element={<TourGuide />} />
         <Route path="/seller/*" element={<Seller />} />
         <Route path="/product-details/:id" element={<ProductDetails />} />
-        <Route path="/settings/*" element={<Settings />} />
         <Route path="/upload-documents" element={<UploadDocuments />} />
         <Route path="/pending-acceptance" element={<PendingAcceptance />} />
         <Route path="/accept-conditions" element={<AcceptConditions />} />

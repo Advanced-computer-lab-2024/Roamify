@@ -9,6 +9,7 @@ import TouristActivities from "../Tourist/TouristActivities.js";
 import CopyRight from "../../layout/CopyRight.js";
 import AdvertiserActivities from "./Activities/AdvertiserActivities.js";
 import Dashboard from "./Dashboard/Dashboard.js";
+import Settings from "../Profile/Settings.js";
 
 const Advertiser = () => {
   return (
@@ -17,6 +18,7 @@ const Advertiser = () => {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/activities" element={<AdvertiserActivities />} />
+        <Route path="/settings/*" element={<Settings />} />
       </Routes>
       <CopyRight />
     </>

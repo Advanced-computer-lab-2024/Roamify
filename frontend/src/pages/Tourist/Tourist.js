@@ -35,6 +35,7 @@ import ItineraryDetails from "./component/TouristItinerarySearch/ItineraryDetail
 import TouristFlights from "./TouristFlights.js";
 import TouristHotels from "./TouristHotels.js";
 import ProductDetails from "../Admin/Products/ProductDetails.js";
+import Settings from "../Profile/Settings.js";
 const Tourist = () => {
   return (
     <>
@@ -69,6 +70,7 @@ const Tourist = () => {
         <Route path="/itinerary-details/:id" element={<ItineraryDetails />} />
         <Route path="/hotels" element={<TouristHotels />} />
         <Route path="/product-details/:id" element={<ProductDetails />} />
+        <Route path="/settings/*" element={<Settings />} />
       </Routes>
       <CopyRight />
     </>

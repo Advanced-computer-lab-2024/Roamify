@@ -22,7 +22,7 @@ const EmptyResponseLogo = ({ isVisible, size = "50px", text }) => {
           height: size,
         }}
       />
-      <p style={{ fontSize: "50px" }}>{text}</p>
+      <p style={{ fontSize: "50px", lineHeight: "60px" }}>{text}</p>
     </div>
   );
 };

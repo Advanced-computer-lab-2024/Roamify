@@ -4,8 +4,8 @@ import RedeemPointsForm from "./component/RedeemPts";
 const TouristLevel = () => {
   return (
     <>
-      <CommonBanner heading="Point" pagination="Level" />
-      <RedeemPointsForm/>
+      {/* <CommonBanner heading="Point" pagination="Level" /> */}
+      <RedeemPointsForm />
     </>
   );
 };

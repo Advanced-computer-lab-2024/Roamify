@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CommonBanner from "../../component/Common/CommonBanner";
+import { color } from "chart.js/helpers";
+import WalletLogo from "../../component/WalletLogo";
 const Wallet = () => {
   const [walletData, setWalletData] = useState(null);
   const [refundsData, setRefundsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const currencySymbol = localStorage.getItem("currencySymbol") || "$";
+  const exchangeRate = parseFloat(localStorage.getItem("value")) || 1;
 
   useEffect(() => {
     const fetchWalletData = async () => {
@@ -47,15 +52,17 @@ const Wallet = () => {
         <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
           Wallet Overview
         </h2>
+        <WalletLogo size="300px" />
         <div style={styles.infoContainer}>
           <div style={styles.infoRow}>
             <h3 style={styles.header}>Available Credit</h3>
             <p style={styles.value}>
-              ${walletData.availableCredit.toLocaleString()}
+              {currencySymbol + " "}
+              {walletData.availableCredit * exchangeRate}
             </p>
           </div>
 
-          {/* Display Wallet Cards if the cards array is not empty */}
+          {/* Display Wallet Cards if the cards array is not empty
           {walletData.cards && walletData.cards.length > 0 ? (
             <div style={styles.cardsContainer}>
               <h3 style={styles.header}>Your Cards</h3>
@@ -72,7 +79,7 @@ const Wallet = () => {
             </div>
           ) : (
             <p>No cards available.</p>
-          )}
+          )} */}
 
           <div style={styles.infoRow}>
             <h3 style={styles.header}>Refunded Activities Amount</h3>
@@ -105,13 +112,15 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
+    minHeight: "100vh",
   },
   infoContainer: {
     width: "100%",
     maxWidth: "800px", // Restrict width for larger screens
-    backgroundColor: "#fff",
+    backgroundColor: "var(--secondary-color)",
     padding: "20px",
     borderRadius: "8px",
+    border: "1px solid var(--secondary-border-color)",
     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
   },
   infoRow: {
@@ -120,14 +129,15 @@ const styles = {
     width: "100%",
     marginBottom: "12px", // Reduced margin to minimize empty space
     alignItems: "center",
+    color: "var(--text-color)",
   },
   header: {
     fontSize: "1.1rem", // Smaller header font size to fit more content
     fontWeight: "bold",
-    textDecoration: "underline", // Underlined headers
     margin: 0,
     flex: 1,
     textAlign: "left", // Align the header to the left
+    color: "var(--text-color)",
   },
   value: {
     fontSize: "1.3rem", // Slightly smaller value text
@@ -135,6 +145,7 @@ const styles = {
     margin: 0,
     flex: 1,
     textAlign: "right", // Align the value to the right
+    color: "var(--main-color)",
   },
   cardsContainer: {
     marginTop: "15px", // Added margin for spacing

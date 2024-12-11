@@ -65,7 +65,10 @@ function ProfileButton() {
             data-tooltip-id="wallet-tooltip"
             data-tooltip-content="Wallet"
             style={{ cursor: "pointer" }}
-            onClick={() => navigate("/tourist/wallet")}
+            onClick={() => {
+              setModalIsOpen(false);
+              navigate("/tourist/wallet");
+            }}
           >
             <FaWallet size={15} color="var(--text-color)" />
             Wallet
@@ -77,7 +80,10 @@ function ProfileButton() {
             data-tooltip-id="wallet-tooltip"
             data-tooltip-content="Wallet"
             style={{ cursor: "pointer" }}
-            onClick={() => navigate("/tourist/wishlist")}
+            onClick={() => {
+              setModalIsOpen(false);
+              navigate("/tourist/wishlist");
+            }}
           >
             <FaHeart size={15} color="var(--text-color)" />
             Wishlist
@@ -89,7 +95,10 @@ function ProfileButton() {
             data-tooltip-id="wallet-tooltip"
             data-tooltip-content="Wallet"
             style={{ cursor: "pointer" }}
-            onClick={() => navigate("/tourist/orders")}
+            onClick={() => {
+              setModalIsOpen(false);
+              navigate("/tourist/orders");
+            }}
           >
             <FaClipboardList size={15} color="var(--text-color)" />
             Orders
@@ -102,7 +111,10 @@ function ProfileButton() {
             data-tooltip-id="wallet-tooltip"
             data-tooltip-content="Wallet"
             style={{ cursor: "pointer" }}
-            onClick={() => navigate("/tourist/tourist-view")}
+            onClick={() => {
+              setModalIsOpen(false);
+              navigate("/tourist/tourist-view");
+            }}
           >
             <FaCommentDots size={15} color="var(--text-color)" />
             Complaints
@@ -116,7 +128,10 @@ function ProfileButton() {
             data-tooltip-id="bookmark-tooltip"
             data-tooltip-content="Bookmarks"
             style={{ cursor: "pointer" }}
-            onClick={() => navigate("/tourist/bookmarks")}
+            onClick={() => {
+              setModalIsOpen(false);
+              navigate("/tourist/bookmarks");
+            }}
           >
             <FaBookmark size={15} color="var(--text-color)" />
             Bookmarks
@@ -146,7 +161,7 @@ function ProfileButton() {
           style={{ cursor: "pointer" }}
           onClick={() => {
             setModalIsOpen(false);
-            navigate("/settings");
+            navigate("settings");
           }}
         >
           <FaCog size={15} color="var(--text-color)" />

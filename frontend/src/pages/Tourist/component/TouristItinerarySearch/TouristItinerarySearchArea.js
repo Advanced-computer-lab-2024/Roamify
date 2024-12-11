@@ -283,7 +283,9 @@ const TouristItineraryWrapper = () => {
     const itineraryUrl = `${window.location.origin}/itinerary-details/${itineraryId}`;
     navigator.clipboard
       .writeText(itineraryUrl)
-      .then(() => alert("Link copied to clipboard!"))
+      .then(() => {
+        alert("Link copied to clipboard!"), closeShareModal();
+      })
       .catch((err) => console.error("Failed to copy: ", err));
   };
 
@@ -301,6 +303,8 @@ const TouristItineraryWrapper = () => {
     window.location.href = `mailto:?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
+
+    closeShareModal();
   };
 
   const handleBookmark = async (itineraryId) => {

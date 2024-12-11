@@ -9,6 +9,7 @@ import { useFlexLayout } from "react-table";
 import { color } from "chart.js/helpers";
 import { FaHeart, FaBell } from "react-icons/fa";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import NotiButton from "./NotiButton";
 
 const Header = ({ HeaderData }) => {
   const role = localStorage.getItem("role");
@@ -303,12 +304,7 @@ const Header = ({ HeaderData }) => {
                   )}
 
                   <div className="option-item" style={{ marginRight: "0px" }}>
-                    <FaBell
-                      style={{
-                        fontSize: "20px", // Adjust the icon size
-                        color: "var(--text-color)", // Set the color for the icon
-                      }}
-                    />
+                    <NotiButton />
                   </div>
 
                   <div className="option-item">
