@@ -134,7 +134,7 @@ const CommonCard = ({
         className="card-img-top"
         style={{
           height: "30vh",
-          objectFit: "cover",
+          objectFit: "contain",
         }}
       />
 
