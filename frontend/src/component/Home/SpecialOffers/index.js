@@ -22,10 +22,10 @@ const SpecialOffer = () => {
                 <div className="offer_area_content">
                   <h2>Special Offers</h2>
                   <p>
-                    Invidunt ut labore et dolore magna aliquyam erat, sed diam
-                    voluptua. At vero eos et accusam et justo duo dolores et ea
-                    rebum. Stet clita kasd dolor sit amet. Lorem ipsum dolor sit
-                    amet.
+                  "Explore and perfectly designed itineraries for enjoyment and recreation. 
+                  Discover incredible places and unique experiences, filled with joy and relaxation. 
+                  Choose and book with ease, complete confidence, and simplicity. 
+                  Live in moments full of joy and everlasting memories."
                   </p>
                   <Link to="#!" className="btn btn_theme btn_md">
                     Holiday deals
@@ -39,8 +39,8 @@ const SpecialOffer = () => {
                 <div className="offer_area_content">
                   <h2>News letter</h2>
                   <p>
-                    Invidunt ut labore et dolore magna aliquyam erat, sed diam
-                    voluptua. At vero eos et.
+                  "Engage in work and significant discomfort was upon them, yet immense delight prevailed. 
+                  Indeed, they are."
                   </p>
                   <Link to="#!" className="btn btn_theme btn_md">
                     Subscribe now
@@ -54,8 +54,8 @@ const SpecialOffer = () => {
                 <div className="offer_area_content">
                   <h2>Travel tips</h2>
                   <p>
-                    Invidunt ut labore et dolore magna aliquyam erat, sed diam
-                    voluptua. At vero eos et.
+                  "Embark on journeys where labor turns into delight and grand adventures await, yet true satisfaction unfolds. 
+                   Indeed, they and their experiences."
                   </p>
                   <Link to="#!" className="btn btn_theme btn_md">
                     Get tips
