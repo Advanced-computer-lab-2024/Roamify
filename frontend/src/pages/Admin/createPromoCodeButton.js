@@ -54,12 +54,9 @@ const CreatePromoCodeButton = ({ onCreated }) => {
           backgroundColor: "transparent", // Original color
           cursor: "pointer",
           transition: "background-color 0.3s ease", // Smooth transition
-          position: "fixed",
-          right: "20px",
-          bottom: "10px",
         }}
       >
-        <Promo size="100px" />
+        <Promo size="20px" />
       </button>
 
       {/* Dynamic modal for creating promo code */}

@@ -154,19 +154,21 @@ function ProfileButton() {
         )}
 
         {/* Settings Icon with Tooltip */}
-        <div
-          className="profile-nav"
-          data-tooltip-id="settings-tooltip"
-          data-tooltip-content="Settings"
-          style={{ cursor: "pointer" }}
-          onClick={() => {
-            setModalIsOpen(false);
-            navigate("settings");
-          }}
-        >
-          <FaCog size={15} color="var(--text-color)" />
-          Settings
-        </div>
+        {role !== "admin" && (
+          <div
+            className="profile-nav"
+            data-tooltip-id="settings-tooltip"
+            data-tooltip-content="Settings"
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              setModalIsOpen(false);
+              navigate("settings");
+            }}
+          >
+            <FaCog size={15} color="var(--text-color)" />
+            Settings
+          </div>
+        )}
 
         {/* Logout Icon with Tooltip */}
         <div

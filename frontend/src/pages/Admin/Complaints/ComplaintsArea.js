@@ -209,6 +209,7 @@ const ComplaintsArea = () => {
                       style={{
                         marginBottom: "10px",
                         color: "var(--text-color)",
+                        textAlign: "left",
                       }}
                     >
                       {complaint.title}

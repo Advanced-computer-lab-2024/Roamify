@@ -10,6 +10,7 @@ import { color } from "chart.js/helpers";
 import { FaHeart, FaBell } from "react-icons/fa";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import NotiButton from "./NotiButton";
+import CreatePromoCodeButton from "../pages/Admin/createPromoCodeButton";
 
 const Header = ({ HeaderData }) => {
   const role = localStorage.getItem("role");
@@ -302,6 +303,8 @@ const Header = ({ HeaderData }) => {
                       </Link>
                     </div>
                   )}
+
+                  {role === "admin" && <CreatePromoCodeButton />}
 
                   <div className="option-item" style={{ marginRight: "0px" }}>
                     <NotiButton />

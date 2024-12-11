@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaBell } from "react-icons/fa";
 import axios from "axios";
 import LoadingLogo from "../component/LoadingLogo";
+import EmptyResponseLogo from "../component/EmptyResponseLogo";
 
 const NotiButton = () => {
   const [notifications, setNotifications] = useState([]);
@@ -123,7 +124,16 @@ const NotiButton = () => {
                 {loading ? (
                   <LoadingLogo isVisible={true} size="50px" />
                 ) : error ? (
-                  ""
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "30px",
+                    }}
+                  >
+                    No new notifications
+                  </div>
                 ) : notifications.length > 0 ? (
                   notifications.map((notification, index) => (
                     <div

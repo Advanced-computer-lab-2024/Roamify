@@ -15,7 +15,7 @@ const ItineraryList = () => {
       const response = await axios.get("http://localhost:3000/api/itinerary", {
         withCredentials: true,
       });
-      setItineraries(response.data);
+      setItineraries(response.data.itineraries);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching itineraries:", error);
@@ -152,7 +152,7 @@ const ItineraryList = () => {
                             <div
                               className="flight_search_right"
                               style={{
-                                background: "var(--main-color)",
+                                background: "var(--secondary-border-color)",
                                 height: "100%",
                                 width: "20%",
                                 display: "flex",
@@ -172,11 +172,12 @@ const ItineraryList = () => {
                                   )
                                 }
                                 style={{
-                                  border: "1px solid white",
+                                  border: "1px solid var(--main-color)",
                                   display: "flex",
                                   justifyContent: "center",
                                   alignItems: "center",
                                   gap: "10px",
+                                  height: "7vh",
                                 }}
                               >
                                 {itinerary.flag ? (

@@ -109,7 +109,7 @@ const ComplaintModal = ({
           &times;
         </button>
 
-        <h3>Complaint Description</h3>
+        <h3 style={{ color: "var(--text-color)" }}>Complaint Description</h3>
 
         <div
           style={{

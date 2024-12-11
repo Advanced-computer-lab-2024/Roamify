@@ -68,7 +68,6 @@ const Admin = () => {
         <Route path="/complaints" element={<Complaints />} />
         <Route path="/settings/*" element={<Settings />} />
       </Routes>
-      <CreatePromoCodeButton />
 
       <CopyRight />
     </>

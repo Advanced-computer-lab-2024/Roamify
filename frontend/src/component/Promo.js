@@ -1,11 +1,12 @@
-const Promo = ({ size = "50px" }) => {
+import React from "react";
+import { FaTag } from "react-icons/fa"; // Import the Font Awesome tag icon
+
+const Promo = ({ size = "50px", color = "var(--text-color)" }) => {
   return (
-    <img
-      src="/promo.svg" // Path to your loading GIF
-      alt={"img"}
+    <FaTag
       style={{
-        width: size, // Set the size of the GIF (default is 50px)
-        height: size,
+        fontSize: size, // Set the size of the icon
+        color: color, // Set the color of the icon
       }}
     />
   );
