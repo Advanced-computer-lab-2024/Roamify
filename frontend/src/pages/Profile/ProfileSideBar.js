@@ -57,7 +57,7 @@ const ProfileSidebar = ({ profilePicture }) => {
   return (
     <div
       style={{
-        width: "250px",
+        width: "200px",
         padding: "20px",
         backgroundColor: "#f8f8f8",
         borderRadius: "8px",
@@ -81,7 +81,7 @@ const ProfileSidebar = ({ profilePicture }) => {
             width: "100px",
             height: "100px",
             borderRadius: "50%",
-            objectFit: "cover",
+            objectFit: "contain",
           }}
         />
 
@@ -92,7 +92,7 @@ const ProfileSidebar = ({ profilePicture }) => {
             position: "absolute",
             top: "5px",
             right: "5px",
-            backgroundColor: "#007bff",
+            backgroundColor: "#8b3eea",
             border: "none",
             borderRadius: "50%",
             color: "#fff",
@@ -111,11 +111,11 @@ const ProfileSidebar = ({ profilePicture }) => {
             to=""
             style={{
               textDecoration: "none",
-              color: "#007bff",
+              color: "#8b3eea",
               fontWeight: "bold",
             }}
           >
-            Account Preferences
+           My Account
           </Link>
         </li>
         <li>
@@ -123,11 +123,11 @@ const ProfileSidebar = ({ profilePicture }) => {
             to="sign-in-security"
             style={{
               textDecoration: "none",
-              color: "#007bff",
+              color: "#8b3eea",
               fontWeight: "bold",
             }}
           >
-            Sign In and Security
+             Security
           </Link>
         </li>
         {role === "tourist" && (
@@ -136,11 +136,11 @@ const ProfileSidebar = ({ profilePicture }) => {
               to="select-preference"
               style={{
                 textDecoration: "none",
-                color: "#007bff",
+                color: "#8b3eea",
                 fontWeight: "bold",
               }}
             >
-              Select Preference
+             My Preferences
             </Link>
           </li>
         )}

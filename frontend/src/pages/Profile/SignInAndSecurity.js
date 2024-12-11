@@ -133,7 +133,7 @@ const SignInAndSecurity = () => {
               display: "block",
               width: "100%",
               padding: "10px 0",
-              backgroundColor: "#007bff",
+              backgroundColor: "#8b3eea",
               color: "#fff",
               border: "none",
               borderRadius: "4px",

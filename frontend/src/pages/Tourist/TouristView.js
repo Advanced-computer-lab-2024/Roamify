@@ -4,7 +4,7 @@ import ComplaintSearchWrapper from "./component/TouristComplain";
 const TouristComplain = () => {
   return (
     <>
-      <CommonBanner heading="Complains" pagination="Complains" />
+    
       <ComplaintSearchWrapper/>
     </>
   );

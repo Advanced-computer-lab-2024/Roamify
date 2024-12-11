@@ -150,10 +150,10 @@ function Cart() {
                   src={item.image}
                   alt={item.name}
                   style={{
-                    width: "60px",
-                    height: "60px",
-                    objectFit: "cover",
-                    borderRadius: "5px",
+                    width: "80px",
+                    height: "80px",
+                    objectFit: "contain",
+                    borderRadius: "0px",
                     marginRight: "10px",
                   }}
                 />
