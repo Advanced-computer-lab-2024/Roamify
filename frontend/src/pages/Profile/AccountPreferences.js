@@ -63,6 +63,7 @@ const AccountPreferences = ({ fields }) => {
             backgroundColor: "#fff",
             borderRadius: "8px",
             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            marginLeft:"30px",
           }}
         >
           <h3 style={{ marginBottom: "20px", color: "#333" }}>
@@ -208,7 +209,7 @@ const AccountPreferences = ({ fields }) => {
               display: "block",
               width: "100%",
               padding: "10px 0",
-              backgroundColor: "#007bff",
+              backgroundColor: "#8b3eea",
               color: "#fff",
               border: "none",
               borderRadius: "4px",
@@ -227,7 +228,7 @@ const AccountPreferences = ({ fields }) => {
               display: "block",
               width: "100%",
               padding: "10px 0",
-              backgroundColor: "#dc3545",
+              backgroundColor: "#8b3eea",
               color: "#fff",
               border: "none",
               borderRadius: "4px",
