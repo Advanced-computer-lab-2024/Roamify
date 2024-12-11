@@ -85,7 +85,16 @@ const HotelsArea = () => {
       <ToastContainer />
       <div className="container">
         {/* Search Bar Section */}
-        <div className="row" style={{ marginBottom: "30px" }}>
+        <div
+          className="row"
+          style={{
+            marginBottom: "30px",
+
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           {/* Left side: Search bar for Cities */}
           <div className="col-md-10 col-sm-12">
             <div

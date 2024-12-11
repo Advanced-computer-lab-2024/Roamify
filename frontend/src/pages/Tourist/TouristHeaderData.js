@@ -46,12 +46,12 @@ export const HeaderData = [
       },
 
       {
-        subItem: " My Booked Itineraries",
+        subItem: " Booked Itineraries",
         linkL: "/tourist/itinerary-booking",
         subMenuActive: false,
       },
       {
-        subItem: " My Completed Itineraries",
+        subItem: " Completed Itineraries",
         linkL: "/tourist/completed-itinerary",
         subMenuActive: false,
       },
@@ -64,14 +64,8 @@ export const HeaderData = [
   },
   {
     menu: "Products",
-    submenu: true,
-    subMenuitem: [
-      {
-        subItem: "View All",
-        linkL: "products",
-        subMenuActive: false,
-      },
-    ],
+    submenu: false,
+    link: "products",
   },
   {
     menu: "Places",

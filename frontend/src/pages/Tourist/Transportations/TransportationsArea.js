@@ -69,6 +69,7 @@ const TransportationsArea = () => {
         }
       );
       toast.success("Booking canceled successfully!");
+      fetchTransportations();
     } catch (error) {
       toast.error(error.response.data.message);
     }
@@ -89,7 +90,11 @@ const TransportationsArea = () => {
   });
 
   return (
-    <section id="explore_area" className="section_padding">
+    <section
+      id="explore_area"
+      className="section_padding"
+      style={{ minHeight: "100vh" }}
+    >
       <div className="container">
         <div className="row">
           <div className="col-lg-9">

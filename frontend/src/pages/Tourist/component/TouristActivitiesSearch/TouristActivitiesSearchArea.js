@@ -584,6 +584,7 @@ const TouristActivitiesWrapper = ({ filter }) => {
                           height: "100%",
                           display: "flex",
                           flexDirection: "column",
+                          width: "25%",
                           // alignItems: "center",
                           justifyContent: "space-evenly",
                           position: "relative",

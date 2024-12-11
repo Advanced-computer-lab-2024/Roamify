@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import LoadingLogo from "../../component/LoadingLogo";
 import toast, { Toaster } from "react-hot-toast";
+import EmptyResponseLogo from "../../component/EmptyResponseLogo";
 
 const TouristFlights = () => {
   // State for form data
@@ -166,7 +167,7 @@ const TouristFlights = () => {
       {loading ? (
         <LoadingLogo isVisible={true} />
       ) : error ? (
-        <p style={{ color: "red" }}>{error}</p>
+        <EmptyResponseLogo isVisible={true} text={error} size="200px" />
       ) : (
         <section id="flight_results">
           {flightData.map((flight, index) => (
