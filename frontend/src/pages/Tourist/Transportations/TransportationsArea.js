@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { loadStripe } from "@stripe/stripe-js";
-import {
-  Elements,
-  CardElement,
-  useStripe,
-  useElements,
-} from "@stripe/react-stripe-js";
 import axios from "axios";
-import StripePaymentWrapper from "../../../StripePaymentWrapper";
 import PaymentModal from "../../../PaymentModal";
 
 const TransportationsArea = () => {
@@ -58,120 +50,28 @@ const TransportationsArea = () => {
         },
         { withCredentials: true }
       );
-      if (response.data.success) {
-        toast.success("Booking successful!");
-        fetchTransportations();
-        closeModal();
-      } else {
-        toast.error("Booking failed.");
-      }
+
+      toast.success("Booking successful!");
+      fetchTransportations();
+      closeModal();
     } catch (error) {
-      toast.error("Booking failed.");
+      toast.error(error.response.data.message);
     }
   };
 
-  const handleBookTransportation = async (
-    transportationId,
-    method,
-    paymentMethodId = null
-  ) => {
+  const handleCancelBooking = async (transportationId) => {
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/tourist/book-transportation",
+      const response = await axios.delete(
+        "http://localhost:3000/api/tourist/cancel-transportation-booking",
         {
-          transportationIdString: transportationId,
-          method,
-          paymentMethodId,
-        },
-        { withCredentials: true }
-      );
-      if (response.data.success) {
-        toast.success("Transportation booked successfully!");
-        fetchTransportations(); // Re-fetch to update state
-        closeModal();
-      } else {
-        toast.error("Error booking transportation.");
-      }
-    } catch (error) {
-      toast.error("Error booking transportation.");
-      console.error("Error booking transportation:", error);
-    }
-  };
-
-  const CheckoutForm = () => {
-    const stripe = useStripe();
-    const elements = useElements();
-    const [loading, setLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
-
-    const handleSubmit = async (event) => {
-      event.preventDefault();
-      setLoading(true);
-
-      if (!stripe || !elements) return;
-
-      const cardElement = elements.getElement(CardElement);
-
-      try {
-        const { paymentMethod, error } = await stripe.createPaymentMethod({
-          type: "card",
-          card: cardElement,
-        });
-
-        if (error) {
-          setErrorMessage(error.message);
-          setLoading(false);
-          return;
+          data: { transportationId },
+          withCredentials: true,
         }
-
-        handleBookTransportation(
-          selectedTransportation._id,
-          "card",
-          paymentMethod.id
-        );
-      } catch (error) {
-        setErrorMessage("An error occurred. Please try again.");
-      }
-
-      setLoading(false);
-    };
-
-    return (
-      <form onSubmit={handleSubmit} style={{ height: "40vh", width: "50vw" }}>
-        <CardElement
-          options={{
-            style: {
-              base: {
-                fontSize: "16px",
-                color: "#424770",
-                "::placeholder": {
-                  color: "#aab7c4",
-                },
-              },
-              invalid: {
-                color: "#9e2146",
-              },
-            },
-          }}
-        />
-        <button
-          type="submit"
-          disabled={!stripe || loading}
-          style={{
-            marginTop: "20px",
-            background: "#5469d4",
-            color: "#ffffff",
-            padding: "10px 15px",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          {loading ? "Processing..." : "Confirm Payment"}
-        </button>
-        {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
-      </form>
-    );
+      );
+      toast.success("Booking canceled successfully!");
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
   };
 
   const filteredTransportations = transportations.filter((transportation) => {
@@ -237,25 +137,45 @@ const TransportationsArea = () => {
                   <div
                     style={{ flex: "1", color: "var(--dashboard-title-color)" }}
                   >
-                    <h3 style={{ color: "var(--text-color)" }}>
+                    <h3
+                      style={{ color: "var(--text-color)", textAlign: "left" }}
+                    >
                       {transportation.name}
                     </h3>
                     <p>Price: ${transportation.price}</p>
                   </div>
 
-                  <button
-                    style={{
-                      padding: "10px 15px",
-                      backgroundColor: "var(--main-color)",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => openModal(transportation)}
-                  >
-                    Book
-                  </button>
+                  {filter === "all" && (
+                    <button
+                      style={{
+                        padding: "10px 15px",
+                        backgroundColor: "var(--main-color)",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => openModal(transportation)}
+                    >
+                      Book
+                    </button>
+                  )}
+
+                  {filter === "booked" && (
+                    <button
+                      style={{
+                        padding: "10px 15px",
+                        backgroundColor: "#d9534f", // Red cancel button
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleCancelBooking(transportation._id)}
+                    >
+                      Cancel Booking
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

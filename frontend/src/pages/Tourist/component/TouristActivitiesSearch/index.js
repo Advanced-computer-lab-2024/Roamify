@@ -3,11 +3,11 @@ import React from "react";
 // import FlightSearchWrapper
 import TouristActivitiesWrapper from "./TouristActivitiesSearchArea";
 
-const TouristActivitiesArea = () => {
+const TouristActivitiesArea = ({ filter }) => {
   return (
     <>
       {/* <TouristActivitiesForm /> */}
-      <TouristActivitiesWrapper />
+      <TouristActivitiesWrapper filter={filter} />
     </>
   );
 };

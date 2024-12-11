@@ -6,7 +6,7 @@ import ReviewArea from "../../../../component/TourDetails/ReviewArea";
 import ProductDetailsSideBar from "../../../Admin/Products/ProductDetailsSideBar";
 import CommonBanner from "../../../../component/Common/CommonBanner";
 import Header from "../../../../layout/Header.js";
-import { HeaderData } from "../../TouristHeaderData.js"
+import { HeaderData } from "../../TouristHeaderData.js";
 const PlaceDetails = () => {
   const { id } = useParams();
   const [place, setPlace] = useState(null);
@@ -16,8 +16,12 @@ const PlaceDetails = () => {
   useEffect(() => {
     const fetchPlaceDetails = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/places", { withCredentials: true });
-        const foundPlace = response.data.places.find((place) => place._id === id);
+        const response = await axios.get("http://localhost:3000/api/places", {
+          withCredentials: true,
+        });
+        const foundPlace = response.data.places.find(
+          (place) => place._id === id
+        );
         setPlace(foundPlace);
       } catch (error) {
         console.error("Error fetching place:", error);
@@ -48,9 +52,12 @@ const PlaceDetails = () => {
 
   return (
     <>
-    <Header HeaderData={HeaderData} />
-      <CommonBanner heading={place.name} pagination="Place Details" />
-      <section id="place_details_main" className="section_padding">
+      <Header HeaderData={HeaderData} />
+      <section
+        id="place_details_main"
+        className="section_padding"
+        style={{ minHeight: "100vh" }}
+      >
         <div className="container">
           <div className="row">
             <div className="col-lg-8">
@@ -67,9 +74,25 @@ const PlaceDetails = () => {
 
                 <div className="place_details_img_wrapper">
                   {place.images?.length ? (
-                    <img src={place.images[0]} alt={place.name} style={{ width: "100%", height: "400px", objectFit: "cover" }} />
+                    <img
+                      src={place.images[0]}
+                      alt={place.name}
+                      style={{
+                        width: "100%",
+                        height: "400px",
+                        objectFit: "cover",
+                      }}
+                    />
                   ) : (
-                    <img src="default-image.jpg" alt="default" style={{ width: "100%", height: "400px", objectFit: "cover" }} />
+                    <img
+                      src="default-image.jpg"
+                      alt="default"
+                      style={{
+                        width: "100%",
+                        height: "400px",
+                        objectFit: "cover",
+                      }}
+                    />
                   )}
                 </div>
 
@@ -85,14 +108,16 @@ const PlaceDetails = () => {
             </div>
 
             <div className="col-lg-4">
-              <ProductDetailsSideBar name={place.name} ticketPrice={place.ticketPrice} rating={place.rating} />
+              <ProductDetailsSideBar
+                name={place.name}
+                ticketPrice={place.ticketPrice}
+                rating={place.rating}
+              />
             </div>
           </div>
         </div>
-        <ReviewArea reviews={place.reviews} />
+        {/* <ReviewArea reviews={place?.reviews} /> */}
       </section>
-
-      
     </>
   );
 };

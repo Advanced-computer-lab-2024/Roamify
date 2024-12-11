@@ -1,18 +1,15 @@
-import React from 'react'
+import React from "react";
 // import CommonBanner
-import CommonBanner from '../component/Common/CommonBanner'
+import CommonBanner from "../component/Common/CommonBanner";
 // import LoginArea
-import LoginArea from '../component/Login'
-
+import LoginArea from "../component/Login";
 
 const Login = () => {
   return (
     <>
-    <CommonBanner heading="Login" pagination="Login"/>
-    <LoginArea/>
- 
+      <LoginArea />
     </>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

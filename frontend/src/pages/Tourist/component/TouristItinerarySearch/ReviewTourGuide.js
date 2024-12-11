@@ -84,6 +84,9 @@ const styles = {
     top: '10px'
   }
 };
+import LoadingLogo from "../../../../component/LoadingLogo";
+import EmptyResponseLogo from "../../../../component/EmptyResponseLogo";
+import ProfileIcon from "../../../../component/Icons/ProfileIcon";
 
 const ReviewTourGuide = () => {
   const [itineraries, setItineraries] = useState([]);
@@ -116,45 +119,62 @@ const ReviewTourGuide = () => {
 
   return (
     <>
-      <section id="explore_area" style={styles.exploreArea}>
-        <div style={styles.container}>
+      
+      <CommonBanner heading="Rate Tour Guide" pagination="tourguide" />
+      <section id="explore_area" className="section_padding">
+        <div className="container">
           <SectionHeading
-            heading={`${itineraries?.length || 0} itineraries found`}
+            heading={`${itineraries?.length || 0} tour guides found`}
           />
-          <div className="row">
+          <div
+            className="row"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <div className="col-lg-9">
               {loading ? (
-                <p>Loading tourguides...</p>
+                <LoadingLogo isVisible={true} size="100px" />
               ) : error ? (
                 <p>{error}</p>
               ) : (
-                <div style={styles.flightSearchResultWrapper}>
+                <div className="flight_search_result_wrapper">
                   {itineraries.length > 0 ? (
-                    itineraries.map((itinerary) => (
+                    itineraries.map((itinerary, index) => (
                       <div
-                        style={styles.flightSearchItemWrapper}
+                        className="flight_search_item_wrapper"
                         key={itinerary.tourGuideId}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <h3 style={styles.itineraryName}>
+                        <div className="flight_search_items">
+                          <h3 className="itinerary-name">
                             {itinerary.tourGuideName}
                           </h3>
-                          <p style={styles.text}>
-                            <strong>Name:</strong> {itinerary.tourGuideName}
-                          </p>
+                          <div className="itinerary-section">
+                            <p>
+                              <strong>Name:</strong> {itinerary.tourGuideName}
+                            </p>
+                          </div>
+                          <div className="booking-section">
+                            <button
+                              onClick={() =>
+                                setSelectedTourGuideId(itinerary.tourGuideId)
+                              } // Set the selected tour guide ID
+                              className="btn btn_theme btn_sm"
+                            >
+                              Review
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={() =>
-                            setSelectedTourGuideId(itinerary.tourGuideId)
-                          }
-                          style={styles.btnTheme}
-                        >
-                          Review
-                        </button>
                       </div>
                     ))
                   ) : (
-                    <p>No tour guides available.</p>
+                    <EmptyResponseLogo
+                      isVisible={true}
+                      size="300px"
+                      text={error}
+                    />
                   )}
                 </div>
               )}
@@ -164,14 +184,15 @@ const ReviewTourGuide = () => {
       </section>
 
       {selectedTourGuideId && (
-        <div style={styles.popupContainer}>
-          <div style={styles.popupContent}>
+        <div className="popup-container">
+          <div className="popup-content">
             <button
               onClick={() => setSelectedTourGuideId(null)}
-              style={styles.closeButton}
+              className="close-button"
             >
               &times;
             </button>
+            <ReviewArea tourGuideId={selectedTourGuideId} />
           </div>
         </div>
       )}

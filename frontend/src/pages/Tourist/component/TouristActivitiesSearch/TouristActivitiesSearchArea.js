@@ -11,8 +11,10 @@ import { FaBell } from "react-icons/fa";
 import { Share } from "@mui/icons-material";
 import ShareModal from "../TouristItinerarySearch/ShareModal";
 import PaymentModal from "../../../../PaymentModal";
+import SkeletonLoader from "../../../Advertiser/Activities/SkeletonLoader";
+import EmptyResponseLogo from "../../../../component/EmptyResponseLogo";
 
-const TouristActivitiesWrapper = () => {
+const TouristActivitiesWrapper = ({ filter }) => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState([0, 1000]);
@@ -84,7 +86,7 @@ const TouristActivitiesWrapper = () => {
           maxBudget,
           date: date ? date.toISOString().split("T")[0] : undefined,
           minRating: selectedRating || undefined,
-          category: category || undefined,
+          category: filter || category || undefined,
           tag: tag || undefined,
           sortBy: sortCriteria.field,
           sortOrder: sortCriteria.order,
@@ -120,7 +122,6 @@ const TouristActivitiesWrapper = () => {
       if (error.response && error.response.status === 404) {
         setActivities([]);
         setError("No activities found");
-        toast.info("No data found");
       } else {
         console.error("Error fetching activities:", error);
         setError("An error occurred while fetching activities.");
@@ -131,8 +132,14 @@ const TouristActivitiesWrapper = () => {
   };
 
   useEffect(() => {
-    fetchActivities(priceRange[0], priceRange[1], date, selectedRating, category);
-  }, [priceRange, date, selectedRating, category, sortCriteria]);
+    fetchActivities(
+      priceRange[0],
+      priceRange[1],
+      date,
+      selectedRating,
+      category
+    );
+  }, [priceRange, date, selectedRating, category, sortCriteria, filter]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -368,7 +375,11 @@ const TouristActivitiesWrapper = () => {
   };
 
   return (
-    <section id="explore_area" className="section_padding">
+    <section
+      id="explore_area"
+      className="section_padding"
+      style={{ paddingTop: "30px" }}
+    >
       <div className="container">
         <SectionHeading heading={`${activities.length} activities found`} />
         <div className="row">
@@ -397,7 +408,7 @@ const TouristActivitiesWrapper = () => {
                 >
                   <option value="name">Name</option>
                   <option value="tag">Tag</option>
-                  <option value="category">Category</option>
+                  {!filter && <option value="category">Category</option>}
                 </select>
                 <input
                   className="form-control"
@@ -429,49 +440,53 @@ const TouristActivitiesWrapper = () => {
               </div>
             </div>
             <div className="left_side_search_boxed">
-                <div className="left_side_search_heading">
-                  <h5>Filter by Minimum Rating</h5>
-                </div>
-                <div className="filter_review">
-                  <div className="review_star">
-                    {[5, 4, 3, 2, 1,0].map((rating) => (
-                      <div className="form-check" key={rating}>
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="rating"
-                          checked={selectedRating === rating}
-                          onChange={() => handleRatingChange(rating)}
-                        />
-                        <label className="form-check-label">
-                          {[...Array(rating)].map((_, i) => (
-                            <i key={i} className="fas fa-star color_theme"></i>
-                          ))}
-                          {[...Array(5 - rating)].map((_, i) => (
-                            <i key={i} className="fas fa-star color_asse"></i>
-                          ))}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
+              <div className="left_side_search_heading">
+                <h5>Filter by Minimum Rating</h5>
+              </div>
+              <div className="filter_review">
+                <div className="review_star">
+                  {[5, 4, 3, 2, 1, 0].map((rating) => (
+                    <div className="form-check" key={rating}>
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="rating"
+                        checked={selectedRating === rating}
+                        onChange={() => handleRatingChange(rating)}
+                      />
+                      <label className="form-check-label">
+                        {[...Array(rating)].map((_, i) => (
+                          <i key={i} className="fas fa-star color_theme"></i>
+                        ))}
+                        {[...Array(5 - rating)].map((_, i) => (
+                          <i key={i} className="fas fa-star color_asse"></i>
+                        ))}
+                      </label>
+                    </div>
+                  ))}
                 </div>
               </div>
-            <SideBar
-              priceRange={priceRange}
-              setPriceRange={setPriceRange}
-              onApplyFilters={fetchActivities}
-              onCategoryApply={(selectedCategory) =>
-                setCategory(selectedCategory)
-              }
-              onSortChange={(field, order) => setSortCriteria({ field, order })}
-              // onRatingApply={handleRatingApply}
-            />
+            </div>
+            {!filter && (
+              <SideBar
+                priceRange={priceRange}
+                setPriceRange={setPriceRange}
+                onApplyFilters={fetchActivities}
+                onCategoryApply={(selectedCategory) =>
+                  setCategory(selectedCategory)
+                }
+                onSortChange={(field, order) =>
+                  setSortCriteria({ field, order })
+                }
+                // onRatingApply={handleRatingApply}
+              />
+            )}
           </div>
           <div className="col-lg-9">
             {loading ? (
-              <LoadingLogo isVisible={true} />
+              <SkeletonLoader />
             ) : error ? (
-              <p>{error}</p>
+              <EmptyResponseLogo isVisible={true} text={error} size="200px" />
             ) : (
               <div className="flight_search_result_wrapper">
                 {activities.map((activity) => (

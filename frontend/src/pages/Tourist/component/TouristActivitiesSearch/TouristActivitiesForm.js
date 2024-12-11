@@ -26,73 +26,85 @@ const TouristActivitiesForm = () => {
     fetchCategories();
   }, []);
 
+  console.log(activeTab);
+
   return (
     <section id="theme_search_form_tour">
       <div className="container">
         <div className="row">
-          <div className="col-lg-12">
-            <div className="theme_search_form_area">
-              <div className="theme_search_form_tabbtn">
-                <ul className="nav nav-tabs" role="tablist">
-                  <li className="nav-item" role="presentation">
-                    <button
-                      className={`nav-link ${
-                        activeTab === "view" ? "active" : ""
-                      }`}
-                      id="view-tab"
-                      data-bs-toggle="tab"
-                      data-bs-target="#view"
-                      type="button"
-                      role="tab"
-                      aria-controls="view"
-                      aria-selected={activeTab === "view"}
-                      onClick={() => setActiveTab("view")}
-                    >
-                      <i className="fas fa-globe"></i>View Activities
-                    </button>
-                  </li>
-                  {categories.map((category) => (
-                    <li
-                      className="nav-item"
-                      role="presentation"
-                      key={category._id}
-                    >
-                      <button
-                        className={`nav-link ${
-                          activeTab === category._id ? "active" : ""
-                        }`}
-                        id={`${category.name}-tab`}
-                        data-bs-toggle="tab"
-                        data-bs-target={`#${category.name}`}
-                        type="button"
-                        role="tab"
-                        aria-controls={category.name}
-                        aria-selected={activeTab === category._id}
-                        onClick={() => setActiveTab(category._id)} // Set the active tab on click
-                      >
-                        <i className="fas fa-globe"></i>
-                        {category.name.charAt(0).toUpperCase() +
-                          category.name.slice(1)}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+          <div
+            className="col-lg-12"
+            style={{ display: "flex", padding: "0px 30px" }}
+          >
+            <ul
+              className="nav nav-tabs"
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "end",
+                marginTop: "20px",
+                borderBottom: "1px solid var(--main-color)",
+              }}
+              role="tablist"
+            >
+              <li className="nav-item" role="presentation">
+                <button
+                  className={`act-nav-link ${
+                    activeTab === "view" ? "active" : ""
+                  }`}
+                  id="view-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#view"
+                  type="button"
+                  role="tab"
+                  aria-controls="view"
+                  aria-selected={activeTab === "view"}
+                  onClick={() => setActiveTab("view")}
+                >
+                  View Activities
+                </button>
+              </li>
+              {categories.map((category) => (
+                <li className="nav-item" role="presentation" key={category._id}>
+                  <button
+                    className={`act-nav-link ${
+                      activeTab === category._id ? "active" : ""
+                    }`}
+                    id={`${category.name}-tab`}
+                    data-bs-toggle="tab"
+                    data-bs-target={`#${category.name}`}
+                    type="button"
+                    role="tab"
+                    aria-controls={category.name}
+                    aria-selected={activeTab === category._id}
+                    onClick={() => setActiveTab(category._id)} // Set the active tab on click
+                  >
+                    {category.name.charAt(0).toUpperCase() +
+                      category.name.slice(1)}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
         <div className="row">
           <div className="col-lg-12">
-            {activeTab === "view" && (
+            {activeTab === "view" ? (
               <div className="row">
                 <div className="col-lg-12">
                   <TouristActivitiesArea />
                 </div>
               </div>
+            ) : (
+              <div className="row">
+                <div className="col-lg-12">
+                  <TouristActivitiesArea filter={activeTab} />
+                </div>
+              </div>
             )}
             {/* Dynamically render activity content based on active category */}
-            {activeTab && (
+            {/* {activeTab && (
               <div className="tab-content">
                 {categories.map((category) => (
                   <div
@@ -108,7 +120,7 @@ const TouristActivitiesForm = () => {
                   </div>
                 ))}
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>

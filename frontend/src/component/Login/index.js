@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+
 import axios from "axios";
 import io from "socket.io-client";
 import { toKebabCase } from "../../functions/toKebabCase.js";
@@ -48,7 +49,11 @@ const LoginArea = () => {
       }
     } catch (err) {
       console.error("Error logging in:", err);
-      setError("Invalid username or password. Please try again.");
+      if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
     }
   };
 
@@ -92,44 +97,123 @@ const LoginArea = () => {
 
   return (
     <>
-      <section id="common_author_area" className="section_padding">
+      <section
+        id="common_author_area"
+        className="section_padding"
+        style={{
+          background: "var(--background-color)",
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <div className="container">
           <div className="row">
-            <div className="col-lg-8 offset-lg-2">
-              <div className="common_author_boxed">
-                <div className="common_author_heading">
-                  <h3>Login your account</h3>
-                  <h2>Logged in to stay in touch</h2>
-                </div>
-                <div className="common_author_form">
+            <div
+              className="col-lg-8 offset-lg-2"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginLeft: "0px",
+                width: "100%",
+              }}
+            >
+              <div
+                className=""
+                style={{
+                  background: "var(--secondary-color)",
+                  borderRadius: "15px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "30px",
+                }}
+              >
+                <h3 style={{ color: "var(--text-color)", fontWeight: "bold" }}>
+                  LOGIN
+                </h3>
+
+                <div
+                  className="common_author_form"
+                  style={{ padding: "0px", marginTop: "10px" }}
+                >
                   <form onSubmit={handleLogin} id="main_author_form">
                     <div className="form-group">
+                      <label
+                        style={{
+                          textAlign: "left",
+                          width: "100%",
+                          margin: "10px 0px",
+                        }}
+                      >
+                        Username
+                      </label>
                       <input
                         type="text"
                         className="form-control"
                         placeholder="Enter user name"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        style={{
+                          backgroundColor: "var(--background-color)",
+                          border: "1px solid var(--secondary-border-color)",
+                          padding: "0px 10px",
+                        }}
                       />
                     </div>
                     <div className="form-group">
+                      <label
+                        style={{
+                          textAlign: "left",
+                          width: "100%",
+                          margin: "10px 0px",
+                        }}
+                      >
+                        Password
+                      </label>
                       <input
                         type="password"
                         className="form-control"
                         placeholder="Enter password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        style={{
+                          backgroundColor: "var(--background-color)",
+                          border: "1px solid var(--secondary-border-color)",
+                          padding: "0px 10px",
+                        }}
                       />
-                      <Link to="/forget-password">Forgot password?</Link>
+                      <Link
+                        to="/forget-password"
+                        style={{
+                          fontSize: "14px",
+                          color: "var(--dashboard-title-color)",
+                        }}
+                      >
+                        Forgot password?
+                      </Link>
                     </div>
-                    {error && <p className="error-message">{error}</p>}
-                    <div className="common_form_submit">
-                      <button type="submit" className="btn btn_theme btn_md">
+                    <div
+                      className="common_form_submit"
+                      style={{ marginTop: "0px", paddingTop: "0px" }}
+                    >
+                      <button
+                        type="submit"
+                        className="btn btn_theme btn_md"
+                        style={{ width: "100%" }}
+                      >
                         Log in
                       </button>
                     </div>
                     <div className="have_acount_area">
-                      <p>
+                      <p
+                        style={{
+                          fontSize: "14px",
+                          color: "var(--dashboard-title-color)",
+                        }}
+                      >
                         Don’t have an account?{" "}
                         <Link to="/register">Register now</Link>
                       </p>
@@ -141,6 +225,11 @@ const LoginArea = () => {
           </div>
         </div>
       </section>
+      <ToastContainer
+        toastClassName="custom-toast"
+        position="bottom-center"
+        autoClose={3000}
+      />
     </>
   );
 };

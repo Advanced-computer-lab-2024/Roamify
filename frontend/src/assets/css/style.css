@@ -79,6 +79,11 @@ Default CSS
   --bg-color: #f3f6fd;
   --transition: 0.4s all ease-in-out;
   --chart-blue: #57c3ff;
+  overflow-x: hidden;
+}
+
+select {
+  background-color: var(--background-color);
 }
 
 .dark-mode {
@@ -93,6 +98,11 @@ Default CSS
   --shimmer-start-color: #1f2a41;
   --shimmer-middle-color: #2a3c56;
   --shimmer-end-color: #1f2a41;
+}
+
+.custom-toast {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
 }
 
 .profile-nav {
@@ -827,6 +837,19 @@ section {
   color: var(--white-color);
   background-color: var(--main-color);
   border-color: none;
+}
+
+.nav-tabs .act-nav-link {
+  color: var(--dashboard-title-color);
+  background-color: transparent;
+  border-radius: 0px;
+}
+.nav-tabs .act-nav-link:hover {
+  background-color: var(--secondary-color);
+}
+
+.nav-tabs .act-nav-link.active {
+  border-bottom: 3px solid var(--main-color);
 }
 
 .theme_search_form_tabbtn .nav-tabs .nav-link {
@@ -3650,8 +3673,15 @@ section {
   background: var(--secondary-color);
   border: 1px solid #00000030;
   border-radius: 6px;
-  padding: 20px 15px;
+  padding: 20px 20px;
   margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.left_side_search_boxed button {
+  margin-top: 10px;
 }
 
 .left_side_search_boxed input {
@@ -4328,7 +4358,7 @@ html:not([dir="rtl"]) .noUi-horizontal .noUi-handle {
 
 .form-control {
   height: 55px;
-  border: 2px solid #dddddd75;
+  /* border: 2px solid #dddddd75; */
   padding: 10px 22px;
   font-size: 16px;
 }

@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify"; // Import both toast and ToastContainer
 import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
 import "./Card.css";
+import { Link } from "react-router-dom";
 
 const CommonCard = ({
   id,
@@ -91,13 +92,9 @@ const CommonCard = ({
       );
 
       // Check the response JSON
-      if (response.data.success) {
-        toast.success(
-          response.data.message || "Item added to cart successfully!"
-        );
-      } else {
-        toast.warning(response.data.message || "Could not add item to cart.");
-      }
+      toast.success(
+        response.data.message || "Item added to cart successfully!"
+      );
     } catch (error) {
       // Extract and display API error message
       if (
@@ -148,7 +145,7 @@ const CommonCard = ({
           title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
           style={{
             fontSize: "1.5rem",
-            color: isInWishlist ? "purple" : "black",
+            color: isInWishlist ? "var(--main-color)" : "var(--gray-color)",
             transition: "color 0.3s ease",
           }}
         ></i>
@@ -174,8 +171,8 @@ const CommonCard = ({
           className="button-group"
           style={{ display: "flex", gap: "8px", marginTop: "10px" }}
         >
-          <a
-            href={`/product-details/${id}`}
+          <Link
+            to={`/tourist/product-details/${id}`}
             className="btn custom-btn "
             style={{
               flex: 1,
@@ -183,7 +180,7 @@ const CommonCard = ({
             }}
           >
             View Details
-          </a>
+          </Link>
           <button
             className="btn custom-btn"
             onClick={handleAddToCart}
@@ -195,7 +192,6 @@ const CommonCard = ({
       </div>
 
       {/* Toast Container for notifications */}
-      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

@@ -34,6 +34,7 @@ import ActivityDetails from "./component/TouristActivitiesSearch/ActivityDetails
 import ItineraryDetails from "./component/TouristItinerarySearch/ItineraryDetails.js";
 import TouristFlights from "./TouristFlights.js";
 import TouristHotels from "./TouristHotels.js";
+import ProductDetails from "../Admin/Products/ProductDetails.js";
 const Tourist = () => {
   return (
     <>
@@ -67,6 +68,7 @@ const Tourist = () => {
         <Route path="/activity-details/:id" element={<ActivityDetails />} />
         <Route path="/itinerary-details/:id" element={<ItineraryDetails />} />
         <Route path="/hotels" element={<TouristHotels />} />
+        <Route path="/product-details/:id" element={<ProductDetails />} />
       </Routes>
       <CopyRight />
     </>

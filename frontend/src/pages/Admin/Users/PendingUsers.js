@@ -21,7 +21,7 @@ const PendingUsers = () => {
       setUsers(pendingUsers);
       setHasNoPendingUsers(pendingUsers.length === 0); // Check if no pending users
     } catch (error) {
-      if (error.response && error.response.status === 400) {
+      if (error.response && error.response.status === 404) {
         setUsers([]); // Clear the users array if status code is 400
         setHasNoPendingUsers(true); // No pending users if there's an error
       } else {
