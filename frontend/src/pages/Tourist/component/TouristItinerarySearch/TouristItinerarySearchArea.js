@@ -253,28 +253,39 @@ const TouristItineraryWrapper = () => {
 
   const handleBooking = async (itineraryId, itineraryDate) => {
     if (!itineraryId || !itineraryDate) {
-      setPopupMessage("Booking failed: Itinerary ID and date are required.");
-      setShowPopup(true);
-      return;
+        setPopupMessage("Booking failed: Itinerary ID and date are required.");
+        setShowPopup(true);
+        return;
     }
 
+    // Presuming method and paymentMethodId are chosen by the user in some part of your UI
+    const paymentMethod = "availableCredit"; // Example, could be 'card' as well
+    const paymentMethodId = "pm_1QQeMZP3sEYylgGCkIKD1nH3"; // Example Payment Method ID
+    const promoCode = "SAVE20"; // Example promo code, can be dynamic or static based on user input or business logic
+
     try {
-      const formattedDate = new Date(itineraryDate).toISOString().split("T")[0];
-      const response = await axios.post(
-        "http://localhost:3000/api/tourist/book-itinerary",
-        { itinerary: itineraryId, date: formattedDate },
-        { withCredentials: true }
-      );
-      setPopupMessage(response.data.message || "Booked successfully");
+        const formattedDate = new Date(itineraryDate).toISOString();
+        const response = await axios.post(
+            "http://localhost:3000/api/tourist/book-itinerary",
+            {
+                itinerary: itineraryId,
+                date: formattedDate,
+                method: paymentMethod,
+                paymentMethodId: paymentMethodId,
+                promoCode: promoCode
+            },
+            { withCredentials: true }
+        );
+        setPopupMessage(response.data.message || "Booked successfully");
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to book itinerary.";
-      setPopupMessage(errorMessage);
+        const errorMessage = error.response?.data?.message || "Failed to book itinerary.";
+        setPopupMessage(errorMessage);
     } finally {
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 3000);
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 3000);
     }
-  };
+};
+
 
   const handleShareToggle = (itineraryId) => {
     setShowShareOptions((prevState) => ({
