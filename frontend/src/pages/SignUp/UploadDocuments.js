@@ -10,7 +10,7 @@ const UploadDocuments = () => {
   const navigate = useNavigate();
 
   const documentRequirements = {
-    tourGuide: ["ID", "additionalDocument"],
+    tourGuide: ["ID", "certificate"],
     advertiser: ["ID", "taxationCard"],
     seller: ["ID", "taxationCard"],
   };
