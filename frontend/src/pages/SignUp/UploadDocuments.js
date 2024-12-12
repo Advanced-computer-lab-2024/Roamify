@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import LoadingLogo from "../../component/LoadingLogo";
-import { TtyRounded } from "@mui/icons-material";
 import { camelToReg } from "../../functions/camelToReg";
 
 const UploadDocuments = () => {
@@ -12,8 +11,8 @@ const UploadDocuments = () => {
 
   const documentRequirements = {
     tourGuide: ["ID", "additionalDocument"],
-    advertiser: ["ID", "additionalDocument"],
-    seller: ["ID", "additionalDocument"],
+    advertiser: ["ID", "taxationCard"],
+    seller: ["ID", "taxationCard"],
   };
 
   const [files, setFiles] = useState({});
