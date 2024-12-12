@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import DeleteIcon from "../../component/Icons/DeleteIcon";
+import LoadingLogo from "../../component/LoadingLogo";
+import EmptyResponseLogo from "../../component/EmptyResponseLogo";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -26,7 +29,7 @@ function Cart() {
   };
 
   const showToast = (message, type = "success") => {
-    toast[type](message, { position: "top-center", autoClose: 3000 });
+    toast[type](message, { position: "top-right", autoClose: 3000 });
   };
 
   const handleApiError = (err, action) => {
@@ -87,7 +90,11 @@ function Cart() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:3000/api/cart/checkout", {}, { withCredentials: true });
+      const response = await axios.post(
+        "http://localhost:3000/api/cart/checkout",
+        {},
+        { withCredentials: true }
+      );
       console.log("Checkout response:", response.data);
 
       if (response.data.order && response.data.order._id) {
@@ -109,153 +116,182 @@ function Cart() {
     fetchCartData();
   }, []);
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return <p>Error: {error}</p>;
-  }
-
   return (
-    <div style={{ display: "flex", justifyContent: "center", padding: "20px" }}>
-      <div
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: "10px",
-          padding: "20px",
-          maxWidth: "600px",
-          backgroundColor: "#f9f9f9",
-          boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        <h2 style={{ textAlign: "center", marginBottom: "20px", fontSize: "24px" }}>Shopping Cart</h2>
-        <form onSubmit={handleSubmit}>
-          {cartItems.map((item) => (
-            <div
-              key={item.productId}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "15px",
-                padding: "10px",
-                border: "1px solid #e0e0e0",
-                borderRadius: "8px",
-                backgroundColor: "#fff",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", flex: "1" }}>
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  style={{
-                    width: "80px",
-                    height: "80px",
-                    objectFit: "contain",
-                    borderRadius: "0px",
-                    marginRight: "10px",
-                  }}
-                />
-                <div>
-                  <strong>{item.name}</strong>
-                </div>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                  flex: "0 0 auto",
-                }}
-              >
-                <button
-                  type="button"
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    backgroundColor: "#8b3eea",
-                    border: "none",
-                    borderRadius: "5px",
-                    fontSize: "22px",
-                    color: "#fff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleDecrement(item.productId)}
-                >
-                  -
-                </button>
-                <span
-                  style={{
-                    minWidth: "40px",
-                    height: "40px",
-                    lineHeight: "40px",
-                    textAlign: "center",
-                    fontSize: "16px",
-                  }}
-                >
-                  {item.quantity}
-                </span>
-                <button
-                  type="button"
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    backgroundColor: "#8b3eea",
-                    border: "none",
-                    borderRadius: "5px",
-                    fontSize: "22px",
-                    color: "#fff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleIncrement(item.productId)}
-                >
-                  +
-                </button>
-              </div>
-              <button
-                type="button"
-                style={{
-                  backgroundColor: "transparent",
-                  border: "none",
-                  color: "#f44336",
-                  cursor: "pointer",
-                  fontSize: "20px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-                onClick={() => handleDelete(item.productId)}
-              >
-                🗑️
-              </button>
-            </div>
-          ))}
-          <button
-            type="submit"
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "20px",
+        minHeight: "100vh",
+      }}
+    >
+      {loading ? (
+        <LoadingLogo isVisible={true} size="100px" />
+      ) : error ? (
+        <EmptyResponseLogo isVisible={true} text={error} size="200px" />
+      ) : (
+        <>
+          {" "}
+          <div
+            className="section_heading_center"
             style={{
-              display: "block",
-              margin: "20px auto",
-              padding: "10px 20px",
-              backgroundColor: "#8b3eea",
-              color: "#fff",
-              border: "none",
-              borderRadius: "5px",
-              fontSize: "16px",
-              cursor: "pointer",
+              textAlign: "center",
+              marginBottom: "20px",
             }}
           >
-            Checkout
-          </button>
-        </form>
-      </div>
+            <h2>Shopping Cart</h2>
+          </div>
+          <form
+            onSubmit={handleSubmit}
+            style={{ display: "flex", flexDirection: "column", width: "70%" }}
+          >
+            {cartItems.map((item) => (
+              <div
+                key={item.productId}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: "15px",
+                  height: "35vh",
+                  padding: "30px",
+                  border: "1px solid var(--secondary-border-color)",
+                  borderRadius: "8px",
+                  backgroundColor: "var(--secondary-color)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    height: "80%",
+                    padding: "30px 0px",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    style={{
+                      flex: 1,
+                      objectFit: "cover",
+                      borderRadius: "0px",
+                      marginRight: "10px",
+                    }}
+                  />
+                </div>
+                <div>
+                  <strong style={{ fontSize: "25px" }}>{item.name}</strong>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "10px",
+                    flex: "0 0 auto",
+                  }}
+                >
+                  <button
+                    type="button"
+                    style={{
+                      width: "60px",
+                      height: "40px",
+                      backgroundColor: "#8b3eea",
+                      border: "none",
+                      borderRadius: "5px",
+                      fontSize: "25px",
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      handleDecrement(item.productId);
+                    }}
+                  >
+                    {item.quantity == 1 ? (
+                      <DeleteIcon fill="white" height="20px" width="20px" />
+                    ) : (
+                      "-"
+                    )}
+                  </button>
+                  <span
+                    style={{
+                      minWidth: "40px",
+                      height: "40px",
+                      lineHeight: "40px",
+                      textAlign: "center",
+                      fontSize: "20px",
+                    }}
+                  >
+                    {item.quantity}
+                  </span>
+                  <button
+                    type="button"
+                    style={{
+                      width: "60px",
+                      height: "40px",
+                      backgroundColor: "#8b3eea",
+                      border: "none",
+                      borderRadius: "5px",
+                      fontSize: "22px",
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleIncrement(item.productId)}
+                  >
+                    +
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  style={{
+                    backgroundColor: "transparent",
+                    border: "none",
+                    color: "#f44336",
+                    cursor: "pointer",
+                    fontSize: "20px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  onClick={() => handleDelete(item.productId)}
+                >
+                  <DeleteIcon
+                    fill="var(--text-color)"
+                    height="20px"
+                    width="20px"
+                  />
+                </button>
+              </div>
+            ))}
+            <button
+              type="submit"
+              style={{
+                display: "block",
+                margin: "20px auto",
+                padding: "10px 20px",
+                backgroundColor: "#8b3eea",
+                color: "#fff",
+                border: "none",
+                borderRadius: "5px",
+                fontSize: "16px",
+                cursor: "pointer",
+              }}
+            >
+              Checkout
+            </button>
+          </form>
+        </>
+      )}
+
       <ToastContainer />
     </div>
   );

@@ -105,7 +105,6 @@ const TouristItineraryWrapper = () => {
           ? "No itineraries found"
           : "An error occurred while fetching itineraries."
       );
-      toast.info("No itineraries found");
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import PaymentModal from "../../../PaymentModal";
+import EmptyResponseLogo from "../../../component/EmptyResponseLogo";
 
 const TransportationsArea = () => {
   const [transportations, setTransportations] = useState([]);
@@ -9,6 +10,7 @@ const TransportationsArea = () => {
   const [bookedFilter, setBookedFilter] = useState("allBooked"); // "allBooked" or "upcomingBooked"
   const [selectedTransportation, setSelectedTransportation] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState("");
 
   const fetchTransportations = async () => {
     try {
@@ -21,7 +23,7 @@ const TransportationsArea = () => {
       setTransportations(response.data.transportations || []);
     } catch (error) {
       console.error("Error fetching transportations:", error);
-      toast.error("Failed to fetch transportations.");
+      setError(error.response.data.message);
     }
   };
 
@@ -93,10 +95,10 @@ const TransportationsArea = () => {
     <section
       id="explore_area"
       className="section_padding"
-      style={{ minHeight: "100vh" }}
+      style={{ minHeight: "100vh", width: "100%" }}
     >
       <div className="container">
-        <div className="row">
+        <div className="row" style={{ justifyContent: "center" }}>
           <div className="col-lg-9">
             {/* Filter Buttons */}
             <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
@@ -121,69 +123,79 @@ const TransportationsArea = () => {
             </div>
 
             {/* Transportation Boxes */}
-            <div className="flight_search_result_wrapper">
-              {filteredTransportations.map((transportation, index) => (
-                <div
-                  className="flight_search_item_wrappper"
-                  key={index}
-                  style={{
-                    width: "100%",
-                    backgroundColor: "var(--secondary-color)",
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "20px",
-                    marginBottom: "20px",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                  }}
-                >
+            {error ? (
+              <EmptyResponseLogo isVisible={true} text={error} size="200px" />
+            ) : (
+              <div className="flight_search_result_wrapper">
+                {filteredTransportations.map((transportation, index) => (
                   <div
-                    style={{ flex: "1", color: "var(--dashboard-title-color)" }}
+                    className="flight_search_item_wrappper"
+                    key={index}
+                    style={{
+                      width: "100%",
+                      backgroundColor: "var(--secondary-color)",
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "20px",
+                      marginBottom: "20px",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                    }}
                   >
-                    <h3
-                      style={{ color: "var(--text-color)", textAlign: "left" }}
+                    <div
+                      style={{
+                        flex: "1",
+                        color: "var(--dashboard-title-color)",
+                      }}
                     >
-                      {transportation.name}
-                    </h3>
-                    <p>Price: ${transportation.price}</p>
+                      <h3
+                        style={{
+                          color: "var(--text-color)",
+                          textAlign: "left",
+                        }}
+                      >
+                        {transportation.name}
+                      </h3>
+                      <p>Price: ${transportation.price}</p>
+                    </div>
+
+                    {filter === "all" && (
+                      <button
+                        style={{
+                          padding: "10px 15px",
+                          backgroundColor: "var(--main-color)",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => openModal(transportation)}
+                      >
+                        Book
+                      </button>
+                    )}
+
+                    {filter === "booked" && (
+                      <button
+                        style={{
+                          padding: "10px 15px",
+                          backgroundColor: "#d9534f", // Red cancel button
+                          color: "white",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => handleCancelBooking(transportation._id)}
+                      >
+                        Cancel Booking
+                      </button>
+                    )}
                   </div>
-
-                  {filter === "all" && (
-                    <button
-                      style={{
-                        padding: "10px 15px",
-                        backgroundColor: "var(--main-color)",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => openModal(transportation)}
-                    >
-                      Book
-                    </button>
-                  )}
-
-                  {filter === "booked" && (
-                    <button
-                      style={{
-                        padding: "10px 15px",
-                        backgroundColor: "#d9534f", // Red cancel button
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => handleCancelBooking(transportation._id)}
-                    >
-                      Cancel Booking
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

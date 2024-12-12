@@ -49,16 +49,22 @@ const Wallet = () => {
   return (
     <>
       <div style={styles.pageContainer}>
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-          Wallet Overview
-        </h2>
+        <div
+          className="section_heading_center"
+          style={{
+            textAlign: "center",
+            marginBottom: "20px",
+          }}
+        >
+          <h2>Your Wallet</h2>
+        </div>
         <WalletLogo size="300px" />
         <div style={styles.infoContainer}>
           <div style={styles.infoRow}>
             <h3 style={styles.header}>Available Credit</h3>
             <p style={styles.value}>
               {currencySymbol + " "}
-              {walletData.availableCredit * exchangeRate}
+              {walletData?.availableCredit || 0 * exchangeRate}
             </p>
           </div>
 

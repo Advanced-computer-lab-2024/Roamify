@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import LoadingLogo from "../../../../component/LoadingLogo";
 import { Share } from "@mui/icons-material";
 import ShareModal from "../TouristItinerarySearch/ShareModal";
+import EmptyResponseLogo from "../../../../component/EmptyResponseLogo";
 
 const TouristPlacesArea = () => {
   const [places, setPlaces] = useState([]);
@@ -17,6 +18,7 @@ const TouristPlacesArea = () => {
   const [tags, setTags] = useState([]);
   const [selectedTag, setSelectedTag] = useState("");
   const [showShareOptions, setShowShareOptions] = useState({});
+  const [error, setError] = useState("");
 
   const fetchPlaces = async (searchParams = {}) => {
     setLoading(true);
@@ -34,22 +36,12 @@ const TouristPlacesArea = () => {
       console.log("API Response:", response.data); // Added for debugging
 
       if (response.data.message === "No places found matching your criteria") {
-        toast.info("No data found");
         setPlaces([]); // Set places to empty array
       } else {
         setPlaces(response.data.places || []); // Populate places with data from API
       }
     } catch (error) {
-      console.error(
-        "Error fetching places:",
-        error.response || error.message || error
-      );
-      if (error.response && error.response.status === 404) {
-        toast.error("No data found");
-        setPlaces([]);
-      } else {
-        toast.error("An error occurred while fetching places.");
-      }
+      setError(error.response.data.message);
     }
     setLoading(false);
   };
@@ -218,6 +210,8 @@ const TouristPlacesArea = () => {
             <div className="row">
               {loading ? (
                 <LoadingLogo isVisible={true} size="100px" />
+              ) : error ? (
+                <EmptyResponseLogo isVisible={true} text={error} size="200px" />
               ) : (
                 places.map((data, index) => (
                   <div

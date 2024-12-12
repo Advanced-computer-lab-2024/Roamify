@@ -1,7 +1,7 @@
 export const HeaderData = [
   {
     menu: "Flights",
-    link: "flights",
+    link: "",
     submenu: false,
   },
   {

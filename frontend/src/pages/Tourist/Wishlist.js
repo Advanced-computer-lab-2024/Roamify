@@ -14,6 +14,9 @@ const Wishlist = () => {
   const [showModal, setShowModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
+  const currencySymbol = localStorage.getItem("currencySymbol") || "$";
+  const exchangeRate = parseFloat(localStorage.getItem("value")) || 1;
+
   // Fetch wishlist data from the server
   const fetchWishlistData = async () => {
     try {
@@ -101,9 +104,15 @@ const Wishlist = () => {
   return (
     <>
       <div style={styles.pageContainer}>
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-          Your Wishlist
-        </h2>
+        <div
+          className="section_heading_center"
+          style={{
+            textAlign: "center",
+            marginBottom: "20px",
+          }}
+        >
+          <h2>Your Wishlist</h2>
+        </div>
 
         {wishlistData?.wishlist?.length > 0 ? (
           <div style={styles.cardsContainer}>
@@ -112,8 +121,11 @@ const Wishlist = () => {
                 className="flight_search_item_wrappper"
                 key={index}
                 style={{
+                  padding: "20px",
+                  background: "var(--secondary-color)",
                   boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Initial shadow
-                  transition: "transform 0.3s ease, box-shadow 0.3s ease", // Smooth transition
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  borderRadius: "15px", // Smooth transition
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "scale(1.05)"; // Enlarge
@@ -127,11 +139,8 @@ const Wishlist = () => {
                 }}
               >
                 <div
-                  className="flight_search_items"
+                  className=""
                   style={{
-                    background: "#ffffff",
-                    border: "1px solid #dddddd",
-                    borderRadius: "12px",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
@@ -140,39 +149,60 @@ const Wishlist = () => {
                 >
                   <div>
                     <div className="flight_multis_area_wrapper">
-                      <div className="flight_search_left">
-                        <div
-                          className="flight_logo"
-                          style={{ width: "250px", height: "250px" }}
-                        >
+                      <div
+                        className="flight_search_left"
+                        style={{
+                          alignItems: "baseline",
+                          flexDirection: "column",
+                          gap: "10px",
+                        }}
+                      >
+                        <div className="flight_logo" style={{ flex: 1 }}>
                           <img src={item.picture[0].url} alt={item.name} />
                         </div>
-                        <div>
-                          <h2>{item.name}</h2>
-                          <h5>by {item.sellerName}</h5>
-                          <h5>Price ${item.price}</h5>
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", alignItems: "end" }}>
-                        <button
-                          onClick={() => handleAddToCart(item.productId)}
+                        <div
                           style={{
-                            background: "#007bff",
-                            border: "none",
-                            cursor: "pointer",
                             display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            padding: "12px",
-                            margin: "5px",
-                            marginBottom: "1px",
+                            flexDirection: "column",
+                            flex: 1,
+                            gap: "10px",
                           }}
                         >
-                          <FaShoppingCart size={20} />
+                          <h2>{item.name}</h2>
+                          <h5>by {item.sellerName}</h5>
+                          <h5>
+                            {currencySymbol}
+                            {item.price * exchangeRate}
+                          </h5>
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: " end",
+                          justifyContent: "center",
+                          gap: "10px",
+                        }}
+                      >
+                        <button
+                          onClick={() => handleAddToCart(item.productId)}
+                          // style={{
+                          //   background: "#007bff",
+                          //   border: "none",
+                          //   cursor: "pointer",
+                          //   display: "flex",
+                          //   alignItems: "center",
+                          //   justifyContent: "center",
+                          //   padding: "12px",
+                          //   margin: "5px",
+                          //   marginBottom: "1px",
+                          // }}
+                        >
+                          + <FaShoppingCart size={20} />
                         </button>
                         <button
                           onClick={() => handleDelete(item.productId)}
-                          style={{ margin: "2px" }}
+                          // style={{ margin: "2px" }}
                         >
                           <FaTrashAlt size={20} />
                         </button>
@@ -293,7 +323,8 @@ const styles = {
     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
   },
   cardsContainer: {
-    width: "100%",
+    width: "70%",
+    borderRadius: "15px",
   },
   modalOverlay: {
     position: "fixed",

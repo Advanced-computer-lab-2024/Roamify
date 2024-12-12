@@ -42,12 +42,12 @@ const Tourist = () => {
       <Header HeaderData={HeaderData} />
       <Routes>
         <Route path="/tourist-profile" element={<TouristProfile />} />
-        <Route path="/" element={<Hotels />} />
+        <Route path="/hotels" element={<TouristHotels />} />
         <Route path="/products" element={<TouristProducts />} />
         <Route path="/tourist-itinerary" element={<TouristItinerary />} />
         <Route path="/tour-details/:id" element={<TourDetails />} />
         <Route path="/tourist-places" element={<TouristPlaces />} />
-        <Route path="/flights" element={<TouristFlights />} />
+        <Route path="/" element={<TouristFlights />} />
         <Route path="/tourist-activities" element={<TouristActivities />} />
         <Route path="/tourist-complain" element={<TouristComplain />} />
         <Route path="/tourist-view" element={<TouristView />} />
