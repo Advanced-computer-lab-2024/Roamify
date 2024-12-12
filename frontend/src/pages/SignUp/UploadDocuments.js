@@ -10,9 +10,9 @@ const UploadDocuments = () => {
   const navigate = useNavigate();
 
   const documentRequirements = {
-    tourGuide: ["ID", "certificate"],
-    advertiser: ["ID", "taxationCard"],
-    seller: ["ID", "taxationCard"],
+    tourGuide: ["ID", "additionalDocument"],
+    advertiser: ["ID", "additionalDocument"],
+    seller: ["ID", "additionalDocument"],
   };
 
   const [files, setFiles] = useState({});
