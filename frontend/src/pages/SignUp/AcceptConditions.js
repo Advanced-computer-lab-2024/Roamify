@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AcceptConditions = () => {
   const navigate = useNavigate();
@@ -13,20 +15,20 @@ const AcceptConditions = () => {
         { accepted: true },
         { withCredentials: true }
       );
-      alert("You have accepted the terms and conditions.");
+      toast.success("You have accepted the terms and conditions.");
       navigate("/profile-details");
     } catch (error) {
       console.error("Error accepting terms and conditions:", error);
-      alert("Failed to accept terms and conditions. Please try again.");
+      toast.error("Failed to accept terms and conditions. Please try again.");
     }
   };
 
   const boxStyle = {
     border: '1px solid #ccc',
     padding: '20px',
-    maxWidth: '600px',  // Increased to improve readability
+    maxWidth: '600px',
     margin: '20px auto',
-    textAlign: 'left',  // Changed to left for better readability of the list
+    textAlign: 'left',
     backgroundColor: '#f8f8f8',
     borderRadius: '8px',
     marginTop: '40px'
@@ -34,7 +36,7 @@ const AcceptConditions = () => {
 
   return (
     <div style={boxStyle}>
-      <h2 style={{ textAlign: 'center' , fontSize:'24px' , marginBottom:'10px' }}>Terms and Conditions</h2>
+      <h2 style={{ textAlign: 'center', fontSize:'24px', marginBottom:'10px' }}>Terms and Conditions</h2>
       <div style={{ fontSize: '18px', marginBottom: '10px' }}>Please read and accept our terms and conditions:</div>
       <div style={{ marginBottom: '10px' }}>
         <strong>1. Introduction</strong>
@@ -81,6 +83,7 @@ const AcceptConditions = () => {
           Accept Terms and Conditions
         </button>
       </form>
+      <ToastContainer position="top-center" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
     </div>
   );
 };
