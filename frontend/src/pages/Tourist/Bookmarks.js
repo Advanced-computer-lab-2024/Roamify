@@ -29,7 +29,6 @@ const Bookmarks = () => {
       if (err.response?.status === 400) {
         setActivitiesError("No bookmarked activities.");
       } else {
-        toast.error("Error fetching activities.");
       }
     }
 
@@ -44,7 +43,6 @@ const Bookmarks = () => {
       if (err.response?.status === 400) {
         setItinerariesError("No bookmarked itineraries.");
       } else {
-        toast.error("Error fetching itineraries.");
       }
     }
 
@@ -88,7 +86,9 @@ const Bookmarks = () => {
 
       {/* Activities Section */}
       <div style={styles.section}>
-        <h3>Bookmarked Activities</h3>
+        <h3 style={{ color: "var(--dashboard-title-color)" }}>
+          Bookmarked Activities
+        </h3>
         {activitiesError ? (
           <p>{activitiesError}</p>
         ) : activities.length > 0 ? (
@@ -138,7 +138,9 @@ const Bookmarks = () => {
 
       {/* Itineraries Section */}
       <div style={styles.section}>
-        <h3>Bookmarked Itineraries</h3>
+        <h3 style={{ color: "var(--dashboard-title-color)" }}>
+          Bookmarked Itineraries
+        </h3>
         {itinerariesError ? (
           <p>{itinerariesError}</p>
         ) : itineraries.length > 0 ? (
@@ -219,7 +221,7 @@ const styles = {
     flexDirection: "column",
     alignItems: "center",
     minHeight: "100vh",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--background-color)",
   },
   section: {
     marginBottom: "30px",

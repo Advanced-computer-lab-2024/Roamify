@@ -86,7 +86,7 @@ const BookedActivitiesWrapper = () => {
       setPopupMessage("Cancelled successfully");
       setSelectedBooking(null); // Reset selected booking
     } catch (err) {
-      setPopupMessage("Failed to cancel the booking.");
+      setPopupMessage(err.response.data.message);
     }
   };
 

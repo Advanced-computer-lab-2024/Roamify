@@ -17,7 +17,9 @@ const TopDestinations = () => {
           <div className="row">
             <div className="col-lg-6 col-md-12 col-sm-12 col-12">
               <div className="destinations_content_box img_animation">
-                <img src={BigImg} alt="img" />
+                <Link to="tourist/tourist-places">
+                  <img src={BigImg} alt="img" />
+                </Link>
                 <div className="destinations_content_inner">
                   <h2>Up to</h2>
                   <div className="destinations_big_offer">
@@ -27,7 +29,7 @@ const TopDestinations = () => {
                     </h6>
                   </div>
                   <h2>Holiday packages</h2>
-                  <Link to="#!" className="btn btn_theme btn_md">
+                  <Link to="tourist" className="btn btn_theme btn_md">
                     Book now
                   </Link>
                 </div>
@@ -41,12 +43,14 @@ const TopDestinations = () => {
                       className="destinations_content_box img_animation"
                       key={data.id}
                     >
-                      <Link to="#!">
+                      <Link to="tourist/tourist-places">
                         <img src={data.img} alt="img" />
                       </Link>
                       <div className="destinations_content_inner">
                         <h3>
-                          <Link href="#!">{data.heading}</Link>
+                          <Link to="tourist/tourist-places">
+                            {data.heading}
+                          </Link>
                         </h3>
                       </div>
                     </div>
@@ -58,12 +62,14 @@ const TopDestinations = () => {
                       className="destinations_content_box img_animation"
                       key={data1.id}
                     >
-                      <Link to="#!">
+                      <Link to="tourist/tourist-places">
                         <img src={data1.img} alt="img" />
                       </Link>
                       <div className="destinations_content_inner">
                         <h3>
-                          <Link to="#!">{data1.heading}</Link>
+                          <Link to="tourist/tourist-places">
+                            {data1.heading}
+                          </Link>
                         </h3>
                       </div>
                     </div>
@@ -75,12 +81,12 @@ const TopDestinations = () => {
                       className="destinations_content_box img_animation"
                       key={data2.id}
                     >
-                      <Link href="top-destinations.html">
+                      <Link to="tourist/tourist-places">
                         <img src={data2.img} alt="img" />
                       </Link>
                       <div className="destinations_content_inner">
                         <h3>
-                          <Link href="top-destinations.html">
+                          <Link to="tourist/tourist-places">
                             {data2.heading}
                           </Link>
                         </h3>
@@ -90,7 +96,7 @@ const TopDestinations = () => {
 
                   <div className="destinations_content_box">
                     <Link
-                      href="top-destinations.html"
+                      to="tourist/tourist-places"
                       className="btn btn_theme btn_md w-100"
                     >
                       View all

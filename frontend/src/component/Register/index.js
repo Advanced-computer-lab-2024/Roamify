@@ -109,12 +109,21 @@ const RegisterArea = () => {
   };
 
   return (
-    <section id="common_author_area">
+    <section
+      id="common_author_area"
+      style={{ background: "var(--background-color)" }}
+    >
       <Toaster position="top-right" reverseOrder={false} />
       <div className="container">
         <div className="row">
           <div className="col-lg-8 offset-lg-2">
-            <div className="common_author_boxed">
+            <div
+              className="common_author_boxed"
+              style={{
+                background: "var(--secondary-color)",
+                borderRadius: "15px",
+              }}
+            >
               {/* Title */}
               <div className="common_author_heading">
                 <h2>Register your account</h2>
@@ -148,7 +157,14 @@ const RegisterArea = () => {
               <div className="common_author_form">
                 <form onSubmit={handleRegister} id="main_author_form">
                   {selectedTab === "tourist" && (
-                    <div className="form_content">
+                    <div
+                      className="form_content"
+                      style={{
+                        background: "var(--secondary-color)",
+                        borderRadius: "15px",
+                        border: "1px solid var(--secondary-border-color)",
+                      }}
+                    >
                       {/* Tourist Registration Form */}
                       <div className="form-group">
                         <input
@@ -252,7 +268,14 @@ const RegisterArea = () => {
                   )}
 
                   {selectedTab === "business" && (
-                    <div className="form_content">
+                    <div
+                      className="form_content"
+                      style={{
+                        background: "var(--secondary-color)",
+                        borderRadius: "15px",
+                        border: "1px solid var(--secondary-border-color)",
+                      }}
+                    >
                       {/* Business User Registration Form */}
                       <div className="form-group">
                         <input

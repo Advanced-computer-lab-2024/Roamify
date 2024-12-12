@@ -12,7 +12,9 @@ const DestinationsArea = () => {
       <section
         id="destinations_area"
         className="section_padding_top"
-        style={{ backgroundColor: "var(--background-color)" }}
+        style={{
+          backgroundColor: "var(--background-color)",
+        }}
       >
         <div className="container">
           <SectionHeading heading="Destinations for you" />

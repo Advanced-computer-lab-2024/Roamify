@@ -41,7 +41,11 @@ const TransportationsArea = () => {
     setIsModalOpen(false);
   };
 
-  const handlePaymentSuccess = async ({ method, paymentMethodId }) => {
+  const handlePaymentSuccess = async ({
+    method,
+    promoCode,
+    paymentMethodId,
+  }) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/tourist/book-transportation",
@@ -49,6 +53,7 @@ const TransportationsArea = () => {
           transportationIdString: selectedTransportation._id,
           method: method,
           paymentMethodId,
+          promoCode: promoCode,
         },
         { withCredentials: true }
       );

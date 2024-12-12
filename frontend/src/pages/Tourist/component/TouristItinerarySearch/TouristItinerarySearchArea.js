@@ -129,7 +129,11 @@ const TouristItineraryWrapper = () => {
     setIsPaymentModalOpen(false);
   };
 
-  const handlePaymentSuccess = async ({ method, paymentMethodId }) => {
+  const handlePaymentSuccess = async ({
+    method,
+    paymentMethodId,
+    promoCode,
+  }) => {
     try {
       if (!selectedDate) {
         toast.error("Please select a date.");
@@ -144,6 +148,7 @@ const TouristItineraryWrapper = () => {
           date: selectedDate,
           method,
           paymentMethodId,
+          promoCode: promoCode,
         },
         { withCredentials: true }
       );

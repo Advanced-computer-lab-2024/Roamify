@@ -5,9 +5,9 @@ const DiscoverCard = (props) => {
     <>
       <div className="col-lg-3 col-md-6 col-sm-6 col-12">
         <div className="imagination_boxed">
-          <a href="top-destinations.html">
+          <Link to="tourist">
             <img src={props.data.img} alt="img" />
-          </a>
+          </Link>
           <h3>
             <Link to="#!">
               {props.data.heading}

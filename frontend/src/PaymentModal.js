@@ -9,11 +9,10 @@ import {
 
 import StripePaymentWrapper from "./StripePaymentWrapper";
 
-// Initialize Stripe
-
 const PaymentModal = ({ isOpen, onClose, onPaymentSuccess }) => {
   const [selectedMethod, setSelectedMethod] = useState(null);
-  // const elements = useElements();
+  const [promoCode, setPromoCode] = useState("");
+  const [promoApplied, setPromoApplied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -38,23 +37,57 @@ const PaymentModal = ({ isOpen, onClose, onPaymentSuccess }) => {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: "white",
+          background: "var(--secondary-color)",
           padding: "20px",
           borderRadius: "8px",
           maxWidth: "500px",
           width: "100%",
         }}
       >
-        <h2>Select Payment Method</h2>
+        <h2 style={{ color: "var(--text-color)" }}>Select Payment Method</h2>
+
+        {/* Promo Code Section */}
+        <div style={{ marginTop: "20px" }}>
+          <label
+            htmlFor="promo-code"
+            style={{
+              color: "var(--text-color)",
+              display: "block",
+              marginBottom: "8px",
+            }}
+          >
+            Enter Promo Code
+          </label>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <input
+              id="promo-code"
+              type="text"
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value)}
+              placeholder="Enter your promo code"
+              style={{
+                flex: 1,
+                padding: "10px",
+                borderRadius: "4px",
+                border: "1px solid var(--secondary-border-color)",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Payment Method Section */}
         <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
           <button
             onClick={() => setSelectedMethod("wallet")}
             style={{
               flex: 1,
               padding: "10px",
-              background: selectedMethod === "wallet" ? "#5469d4" : "#ccc",
+              background:
+                selectedMethod === "wallet"
+                  ? "var(--main-color)"
+                  : "transparent",
               color: "white",
-              border: "none",
+              border: "1px solid var(--main-color)",
               borderRadius: "4px",
               cursor: "pointer",
             }}
@@ -66,9 +99,10 @@ const PaymentModal = ({ isOpen, onClose, onPaymentSuccess }) => {
             style={{
               flex: 1,
               padding: "10px",
-              background: selectedMethod === "card" ? "#5469d4" : "#ccc",
+              background:
+                selectedMethod === "card" ? "var(--main-color)" : "transparent",
               color: "white",
-              border: "none",
+              border: "1px solid var(--main-color)",
               borderRadius: "4px",
               cursor: "pointer",
             }}
@@ -81,12 +115,15 @@ const PaymentModal = ({ isOpen, onClose, onPaymentSuccess }) => {
           <div style={{ marginTop: "20px", textAlign: "center" }}>
             <button
               onClick={() => {
-                onPaymentSuccess({ method: "availableCredit" });
+                onPaymentSuccess({
+                  method: "availableCredit",
+                  promoCode: promoCode,
+                });
                 onClose();
               }}
               style={{
                 padding: "10px 15px",
-                background: "#5469d4",
+                background: "var(--main-color)",
                 color: "white",
                 border: "none",
                 borderRadius: "4px",
@@ -101,16 +138,18 @@ const PaymentModal = ({ isOpen, onClose, onPaymentSuccess }) => {
         {selectedMethod === "card" && (
           <StripePaymentWrapper
             onSuccess={onPaymentSuccess}
+            promoCode={promoCode}
             onCancel={onClose}
           />
         )}
+
         <button
           onClick={onClose}
           style={{
             marginTop: "20px",
             background: "transparent",
             border: "none",
-            color: "#5469d4",
+            color: "var(--main-color)",
             cursor: "pointer",
           }}
         >

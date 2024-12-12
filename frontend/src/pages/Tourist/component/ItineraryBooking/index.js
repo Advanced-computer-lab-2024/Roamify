@@ -81,7 +81,7 @@ const BookedItinerariesWrapper = () => {
       setPopupMessage("Cancelled successfully");
       setSelectedBooking(null); // Reset selected booking
     } catch (err) {
-      setPopupMessage("Failed to cancel the booking.");
+      setPopupMessage(err.response.data.message);
     }
   };
 
@@ -278,9 +278,10 @@ const BookedItinerariesWrapper = () => {
           >
             <div
               style={{
-                backgroundColor: "#fff",
+                backgroundColor: "var(--secondary-color)",
                 padding: "20px",
                 borderRadius: "8px",
+                border: "1px solid var(--secondary-border-color)",
                 maxWidth: "500px",
                 textAlign: "center",
               }}
@@ -293,8 +294,8 @@ const BookedItinerariesWrapper = () => {
                     style={{
                       marginTop: "10px",
                       padding: "10px 20px",
-                      backgroundColor: "#8b3eea",
-                      color: "#fff",
+                      backgroundColor: "var(--main-color)",
+                      color: "white",
                       border: "none",
                       borderRadius: "5px",
                       cursor: "pointer",
@@ -307,9 +308,9 @@ const BookedItinerariesWrapper = () => {
                     style={{
                       marginTop: "10px",
                       padding: "10px 20px",
-                      backgroundColor: "#333",
-                      color: "#fff",
-                      border: "none",
+                      backgroundColor: "transparent",
+                      color: "var(--text-color)",
+                      border: "1px solid var(--main-color)",
                       borderRadius: "5px",
                       cursor: "pointer",
                       marginLeft: "10px",

@@ -52,7 +52,16 @@ const DateSelectionModal = ({
       </div>
       <div className="modal-body">
         {availableDates.length > 0 ? (
-          <ul className="date-list">
+          <ul
+            className="date-list"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "20px",
+            }}
+          >
             {availableDates.map((date, index) => (
               <li key={index}>
                 <button

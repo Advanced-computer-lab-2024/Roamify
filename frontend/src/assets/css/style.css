@@ -130,7 +130,12 @@ select {
   --shimmer-end-color: #1f2a41;
 }
 #go_beyond_area {
-  background: linear-gradient(to bottom, #000000 0%, #04080f 50%, #080f25 100%);
+  background: linear-gradient(
+    to bottom,
+    #000000 0%,
+    #04080f 50%,
+    var(--background-color) 100%
+  );
 }
 
 .custom-toast {

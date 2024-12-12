@@ -109,7 +109,7 @@ const ProfileSidebar = ({ profilePicture }) => {
         ) : (
           <>
             <ProfileIcon height="100px" width="100px" />
-            {role === "tourist" || role === "admin" || role === "tourGuide" ? (
+            {role === "seller" || role === "admin" || role === "tourGuide" ? (
               <button
                 onClick={handleEdit}
                 style={{

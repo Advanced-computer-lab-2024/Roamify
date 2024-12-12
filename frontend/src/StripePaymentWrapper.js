@@ -12,7 +12,7 @@ const stripePromise = loadStripe(
   "pk_test_51QQY4ZP3sEYylgGCN5LrQ0J8U9LHDMcZtZlH3QXbcJxlJJi7vDgHaqeuDdm25HjV51YR3u010gD1HAKsKcIuiL3a00tONTwi1N"
 );
 
-const StripePayment = ({ onSuccess, onCancel }) => {
+const StripePayment = ({ onSuccess, onCancel, promoCode }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -39,7 +39,12 @@ const StripePayment = ({ onSuccess, onCancel }) => {
       }
 
       // Return paymentMethod.id to the parent
-      onSuccess({ method: "card", paymentMethodId: paymentMethod.id });
+      onSuccess({
+        method: "card",
+        promoCode: promoCode,
+        paymentMethodId: paymentMethod.id,
+      });
+      onCancel();
     } catch (error) {
       setErrorMessage("An error occurred. Please try again.");
     }
@@ -54,10 +59,8 @@ const StripePayment = ({ onSuccess, onCancel }) => {
         display: "flex",
         flexDirection: "column",
         gap: "15px",
-        width: "100%",
-        width: "50vw",
         height: "50vh",
-        margin: "auto",
+        marginTop: "20px",
       }}
     >
       <CardElement
@@ -75,13 +78,20 @@ const StripePayment = ({ onSuccess, onCancel }) => {
             },
           },
         }}
+        style={{
+          width: "200px", // Ensure it fits the container width
+          height: "44px", // Consistent height for input fields
+          boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)", // Subtle shadow for better visibility
+          borderRadius: "4px", // Rounded edges
+          border: "1px solid #ddd", // Light border for clarity
+        }}
       />
       <button
         type="submit"
         disabled={!stripe || loading}
         style={{
           marginTop: "20px",
-          background: "#5469d4",
+          background: "var(--main-color)",
           color: "#ffffff",
           padding: "10px 15px",
           border: "none",
@@ -98,7 +108,7 @@ const StripePayment = ({ onSuccess, onCancel }) => {
         style={{
           marginTop: "10px",
           background: "transparent",
-          border: "1px solid #ccc",
+          border: "1px solid var(--main-color)",
           padding: "10px 15px",
           borderRadius: "4px",
           cursor: "pointer",
@@ -110,10 +120,14 @@ const StripePayment = ({ onSuccess, onCancel }) => {
   );
 };
 
-const StripePaymentWrapper = ({ onSuccess, onCancel }) => {
+const StripePaymentWrapper = ({ onSuccess, onCancel, promoCode }) => {
   return (
     <Elements stripe={stripePromise}>
-      <StripePayment onSuccess={onSuccess} onCancel={onCancel} />
+      <StripePayment
+        onSuccess={onSuccess}
+        promoCode={promoCode}
+        onCancel={onCancel}
+      />
     </Elements>
   );
 };

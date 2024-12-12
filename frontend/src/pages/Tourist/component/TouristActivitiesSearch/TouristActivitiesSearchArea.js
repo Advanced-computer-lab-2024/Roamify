@@ -250,7 +250,7 @@ const TouristActivitiesWrapper = ({ filter }) => {
           date: formattedDate,
           method, // Payment method: "availableCredit" or "card"
           paymentMethodId, // Payment method ID
-          promoCode, // Optional promo code
+          promoCode: promoCode, // Optional promo code
         },
         { withCredentials: true } // Include credentials for authentication
       );
