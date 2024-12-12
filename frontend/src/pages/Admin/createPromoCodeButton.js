@@ -30,18 +30,25 @@ const CreatePromoCodeButton = ({ onCreated }) => {
 
   const handleSubmit = (data) => {
     axios.post("http://localhost:3000/api/promocode/", data, {
-        withCredentials: true,
-      })
-      .then((response) => {
+      withCredentials: true,
+    })
+    .then((response) => {
+      try {
         toast.success(`Promo code created: ${response.data.code}`);
         handleCloseModal();
         onCreated();
-      })
-      .catch((error) => {
-        const errorMessage = error.response?.data?.message || "Failed to create promo code";
-        toast.error(errorMessage);
-      });
+      } catch (error) {
+        console.error("Error after API success response:", error);
+        // Log the error to console or handle it appropriately
+        toast.error("An error occurred after creating the promo code.");
+      }
+    })
+    .catch((error) => {
+      const errorMessage = error.response?.data?.message || "Failed to create promo code";
+      toast.error(errorMessage);
+    });
   };
+  
 
   return (
     <>
