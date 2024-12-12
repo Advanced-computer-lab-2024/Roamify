@@ -63,7 +63,6 @@ const ResetPasswordArea = () => {
             <div className="col-lg-8 offset-lg-2">
               <div className="common_author_boxed">
                 <div className="common_author_heading">
-                  <h3>Reset password</h3>
                   <h2>Reset your password</h2>
                 </div>
                 <div className="common_author_form">
