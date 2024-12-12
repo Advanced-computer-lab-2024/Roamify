@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"
 
 const ResetPasswordArea = () => {
   // State for managing form data and error messages
@@ -7,6 +8,7 @@ const ResetPasswordArea = () => {
   const [confirmedPassword, setConfirmedPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate(); 
 
   // Handle form submission
   const handleSubmit = async (event) => {
@@ -43,6 +45,7 @@ const ResetPasswordArea = () => {
       // Handle response
       if (response.data.success) {
         alert("Password has been reset successfully!");
+        navigate("/login");
         // Redirect or show success message
       } else {
         setError(response.data.message || "Something went wrong.");
