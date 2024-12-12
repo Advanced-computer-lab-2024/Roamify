@@ -63,7 +63,11 @@ const Settings = () => {
   return (
     <section
       id="tour_booking_submission"
-      style={{ padding: "40px 0", backgroundColor: "#f9f9f9" }}
+      style={{
+        padding: "40px 0",
+        backgroundColor: "var(--background-color)",
+        minHeight: "120vh",
+      }}
     >
       <div style={{ display: "flex", width: "80%", margin: "0 auto" }}>
         {/* Sidebar */}

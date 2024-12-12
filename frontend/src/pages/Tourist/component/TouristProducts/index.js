@@ -6,6 +6,7 @@ import productDefault from "./productdefault.png";
 import PriceSlider from "../TouristActivitiesSearch/PriceSlider";
 import LoadingLogo from "../../../../component/LoadingLogo";
 import { ToastContainer } from "react-toastify";
+import EmptyResponseLogo from "../../../../component/EmptyResponseLogo";
 const TouristProductsArea = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -143,7 +144,7 @@ const TouristProductsArea = () => {
               {loading ? (
                 <LoadingLogo isVisible={true} />
               ) : error ? (
-                <p>{error}</p>
+                <EmptyResponseLogo isVisible={true} text={error} size="200px" />
               ) : products.length > 0 ? (
                 products.map((product, index) => (
                   <div
@@ -162,7 +163,7 @@ const TouristProductsArea = () => {
                       sellerId={product.sellerId}
                       price={product.price}
                       rating={product.rating}
-                      reviewCount={product.reviews.length}
+                      reviews={product.reviews}
                       description={product.description}
                       grid={true}
                     />

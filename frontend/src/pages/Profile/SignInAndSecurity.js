@@ -57,18 +57,22 @@ const SignInAndSecurity = () => {
         <div
           style={{
             padding: "20px",
-            backgroundColor: "#fff",
+            backgroundColor: "var(--secondary-color)",
             borderRadius: "8px",
             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
           }}
         >
-          <h3 style={{ marginBottom: "20px", color: "#333" }}>
+          <h3 style={{ marginBottom: "20px", color: "var(--text-color)" }}>
             Sign-In and Security
           </h3>
 
           <div style={{ marginBottom: "15px" }}>
             <label
-              style={{ display: "block", fontWeight: "bold", color: "#333" }}
+              style={{
+                display: "block",
+                fontWeight: "bold",
+                color: "var(--text-color)",
+              }}
             >
               Current Password
             </label>
@@ -79,7 +83,6 @@ const SignInAndSecurity = () => {
               style={{
                 width: "100%",
                 padding: "8px",
-                border: "1px solid #ddd",
                 borderRadius: "4px",
                 marginTop: "5px",
               }}
@@ -88,7 +91,11 @@ const SignInAndSecurity = () => {
 
           <div style={{ marginBottom: "15px" }}>
             <label
-              style={{ display: "block", fontWeight: "bold", color: "#333" }}
+              style={{
+                display: "block",
+                fontWeight: "bold",
+                color: "var(--text-color)",
+              }}
             >
               New Password
             </label>
@@ -99,7 +106,6 @@ const SignInAndSecurity = () => {
               style={{
                 width: "100%",
                 padding: "8px",
-                border: "1px solid #ddd",
                 borderRadius: "4px",
                 marginTop: "5px",
               }}
@@ -108,7 +114,11 @@ const SignInAndSecurity = () => {
 
           <div style={{ marginBottom: "15px" }}>
             <label
-              style={{ display: "block", fontWeight: "bold", color: "#333" }}
+              style={{
+                display: "block",
+                fontWeight: "bold",
+                color: "var(--text-color)",
+              }}
             >
               Confirm New Password
             </label>
@@ -119,7 +129,6 @@ const SignInAndSecurity = () => {
               style={{
                 width: "100%",
                 padding: "8px",
-                border: "1px solid #ddd",
                 borderRadius: "4px",
                 marginTop: "5px",
               }}

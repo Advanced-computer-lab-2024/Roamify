@@ -22,7 +22,7 @@ function Cart() {
       setCartItems(response.data.cart || []);
     } catch (err) {
       console.error("Error fetching cart data:", err.message);
-      setError(err.message);
+      setError(err.response.data.message);
     } finally {
       setLoading(false);
     }

@@ -14,9 +14,9 @@ const CopyRight = () => {
               </div>
             </div>
             <div className="co-lg-6 col-md-6 col-sm-12 col-12">
-              <div className="copyright_right">
+              {/* <div className="copyright_right">
                 <img src={Cards} alt="img" />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

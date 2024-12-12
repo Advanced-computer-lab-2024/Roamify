@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"; // Assuming you're using React Router f
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+import ProfileIcon from "../../component/Icons/ProfileIcon";
 
 const ProfileSidebar = ({ profilePicture }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,10 +60,10 @@ const ProfileSidebar = ({ profilePicture }) => {
       style={{
         width: "200px",
         padding: "20px",
-        backgroundColor: "#f8f8f8",
+        backgroundColor: "var(--secondary-color)",
         borderRadius: "8px",
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-        height: "80vh",
+        height: "100vh",
         textAlign: "center",
       }}
     >
@@ -74,35 +75,40 @@ const ProfileSidebar = ({ profilePicture }) => {
         }}
       >
         {/* Profile Image */}
-        <img
-          src={profilePicture}
-          alt="Profile"
-          style={{
-            width: "100px",
-            height: "100px",
-            borderRadius: "50%",
-            objectFit: "contain",
-          }}
-        />
+        {role === "tourGuide" ||
+          role === "advertiser" ||
+          (role === "seller" && (
+            <>
+              <img
+                src={profilePicture}
+                alt="Profile"
+                style={{
+                  width: "100px",
+                  height: "100px",
+                  borderRadius: "50%",
+                  objectFit: "contain",
+                }}
+              />
 
-        {/* Edit Button */}
-        <button
-          onClick={handleEdit}
-          style={{
-            position: "absolute",
-            top: "5px",
-            right: "5px",
-            backgroundColor: "#8b3eea",
-            border: "none",
-            borderRadius: "50%",
-            color: "#fff",
-            padding: "5px",
-            cursor: "pointer",
-          }}
-          aria-label="Edit Profile Picture"
-        >
-          <FontAwesomeIcon icon={faEdit} />
-        </button>
+              <button
+                onClick={handleEdit}
+                style={{
+                  position: "absolute",
+                  top: "5px",
+                  right: "5px",
+                  backgroundColor: "#8b3eea",
+                  border: "none",
+                  borderRadius: "50%",
+                  color: "#fff",
+                  padding: "5px",
+                  cursor: "pointer",
+                }}
+                aria-label="Edit Profile Picture"
+              >
+                <FontAwesomeIcon icon={faEdit} />
+              </button>
+            </>
+          ))}
       </div>
 
       <ul style={{ listStyle: "none", padding: "0" }}>
@@ -115,7 +121,7 @@ const ProfileSidebar = ({ profilePicture }) => {
               fontWeight: "bold",
             }}
           >
-           My Account
+            My Account
           </Link>
         </li>
         <li>
@@ -127,7 +133,7 @@ const ProfileSidebar = ({ profilePicture }) => {
               fontWeight: "bold",
             }}
           >
-             Security
+            Security
           </Link>
         </li>
         {role === "tourist" && (
@@ -140,11 +146,10 @@ const ProfileSidebar = ({ profilePicture }) => {
                 fontWeight: "bold",
               }}
             >
-             My Preferences
+              My Preferences
             </Link>
           </li>
         )}
-        
       </ul>
 
       {/* Modal for Uploading Profile Picture */}

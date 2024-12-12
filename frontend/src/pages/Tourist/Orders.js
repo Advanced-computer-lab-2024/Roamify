@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import EmptyResponseLogo from "../../component/EmptyResponseLogo";
 
 const OrdersArea = () => {
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("current"); // "current", "past", or "cancelled"
+  const [error, setError] = useState("");
 
   const fetchOrders = async () => {
     try {
@@ -15,7 +17,8 @@ const OrdersArea = () => {
       setOrders(response.data.orders || []);
     } catch (error) {
       console.error("Error fetching orders:", error);
-      toast.error("Failed to fetch orders.");
+      setOrders([]);
+      setError(error.response.data.message);
     }
   };
 
@@ -26,9 +29,13 @@ const OrdersArea = () => {
   const handleCancelOrder = async (orderId) => {
     const url = `http://localhost:3000/api/order/${orderId}/cancel`;
     try {
-      const response = await fetch(url, { method: "PATCH", credentials: "include" });
+      const response = await fetch(url, {
+        method: "PATCH",
+        credentials: "include",
+      });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to cancel order");
+      if (!response.ok)
+        throw new Error(data.message || "Failed to cancel order");
       toast.success("Order cancelled successfully!");
       fetchOrders(); // Re-fetch to update state
     } catch (error) {
@@ -56,34 +63,49 @@ const OrdersArea = () => {
   };
 
   return (
-    <section id="order_area" className="section_padding">
+    <section
+      id="order_area"
+      className="section_padding"
+      style={{ minHeight: "100vh" }}
+    >
       <div className="container">
-        <div className="row">
-          <div className="col-lg-9">
+        <div
+          className="row"
+          style={{ alignItems: "center", justifyContent: "center" }}
+        >
+          <div className="col-lg-9" style={{ width: "100%" }}>
             <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
               <button
                 type="button"
-                className={`btn ${filter === "current" ? "btn-primary" : "btn-outline-primary"}`}
+                className={`btn ${
+                  filter === "current" ? "btn-primary" : "btn-outline-primary"
+                }`}
                 onClick={() => handleFilterChange("current")}
               >
                 Current Orders
               </button>
               <button
                 type="button"
-                className={`btn ${filter === "past" ? "btn-primary" : "btn-outline-primary"}`}
+                className={`btn ${
+                  filter === "past" ? "btn-primary" : "btn-outline-primary"
+                }`}
                 onClick={() => handleFilterChange("past")}
               >
                 Past Orders
               </button>
               <button
                 type="button"
-                className={`btn ${filter === "cancelled" ? "btn-primary" : "btn-outline-primary"}`}
+                className={`btn ${
+                  filter === "cancelled" ? "btn-primary" : "btn-outline-primary"
+                }`}
                 onClick={() => handleFilterChange("cancelled")}
               >
                 Cancelled Orders
               </button>
             </div>
-            {filteredOrders.length > 0 ? (
+            {error ? (
+              <EmptyResponseLogo isVisible={true} size="200px" text={error} />
+            ) : (
               filteredOrders.map((order, index) => (
                 <div
                   className="order_item_wrappper"
@@ -100,8 +122,16 @@ const OrdersArea = () => {
                     marginBottom: "20px",
                   }}
                 >
-                  <h3 style={{ textAlign: "left", marginBottom: "10px" }}>Order Summary</h3>
-                  <div style={{ width: "100%", marginBottom: "15px", textAlign: "left" }}>
+                  <h3 style={{ textAlign: "left", marginBottom: "10px" }}>
+                    Order Summary
+                  </h3>
+                  <div
+                    style={{
+                      width: "100%",
+                      marginBottom: "15px",
+                      textAlign: "left",
+                    }}
+                  >
                     <p>Status: {order.status}</p>
                     <p>Total Receipt Price: ${order.receipt?.price || "N/A"}</p>
                     <p>Date and Time: {formatDateAndTime(order.createdAt)}</p>
@@ -160,8 +190,6 @@ const OrdersArea = () => {
                   )}
                 </div>
               ))
-            ) : (
-              <p>No orders to display</p>
             )}
           </div>
         </div>

@@ -165,7 +165,7 @@ const CommonCard = ({
           {convertedPrice.toFixed(2)}
         </p>
         <p className="card-text">
-          <strong>Rating:</strong> {rating} ({reviews} reviews)
+          <strong>Rating:</strong> {rating} ({reviews.length} reviews)
         </p>
         <div
           className="button-group"

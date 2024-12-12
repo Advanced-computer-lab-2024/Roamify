@@ -55,18 +55,26 @@ const AccountPreferences = ({ fields }) => {
   };
 
   return (
-    <div style={{ display: "flex", flex: 1, margin: "0 auto", height: "80vh" }}>
+    <div
+      style={{
+        display: "flex",
+        flex: 1,
+        margin: "0 auto",
+        height: "100vh",
+      }}
+    >
       <div style={{ flex: 1 }}>
         <div
           style={{
             padding: "20px",
-            backgroundColor: "#fff",
+            background: "var(--secondary-color)",
             borderRadius: "8px",
             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-            marginLeft:"30px",
+            marginLeft: "30px",
+            height: "100%",
           }}
         >
-          <h3 style={{ marginBottom: "20px", color: "#333" }}>
+          <h3 style={{ marginBottom: "20px", color: "var(--text-color)" }}>
             Your Information
           </h3>
           <ul style={{ listStyle: "none", padding: "0" }}>
@@ -95,7 +103,7 @@ const AccountPreferences = ({ fields }) => {
                   <span
                     style={{
                       fontWeight: "bold",
-                      color: "#333",
+                      color: "var(--text-color)",
                       textTransform: "capitalize",
                       flex: 1,
                       textAlign: "left",
@@ -134,7 +142,7 @@ const AccountPreferences = ({ fields }) => {
                   ) : (
                     <span
                       style={{
-                        color: "#555",
+                        color: "var(--dashboard-title-color)",
                         flex: 1,
                         textAlign: "center",
                       }}
@@ -149,12 +157,16 @@ const AccountPreferences = ({ fields }) => {
                       style={{
                         backgroundColor: "transparent",
                         border: "none",
-                        color: "#007bff",
+                        color: "var(--dashboard-title-color)",
                         cursor: "pointer",
                         marginLeft: "10px",
                       }}
                     >
-                      {isEditing[key] ? "✔️" : <EditIcon />}
+                      {isEditing[key] ? (
+                        "✔️"
+                      ) : (
+                        <EditIcon fill="var(--text-color)" />
+                      )}
                     </button>
                   )}
                 </li>
@@ -162,83 +174,45 @@ const AccountPreferences = ({ fields }) => {
             })}
           </ul>
 
-          {role === "tourist" && (
-            <div>
-              <h3 style={{ marginTop: "30px", color: "#333" }}>
-                Wallet Details
-              </h3>
-              <ul style={{ listStyle: "none", padding: "0" }}>
-                <li
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <span style={{ fontWeight: "bold", color: "#333" }}>
-                    Card Number:
-                  </span>
-                  <span style={{ color: "#555", textAlign: "center", flex: 1 }}>
-                    {editFields.cardNumber}
-                  </span>
-                </li>
-                <li
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <span style={{ fontWeight: "bold", color: "#333" }}>
-                    Card Valid Until:
-                  </span>
-                  <span style={{ color: "#555", textAlign: "center", flex: 1 }}>
-                    {editFields.cardValidUntil}
-                  </span>
-                </li>
-              </ul>
-            </div>
-          )}
+          <div style={{ marginTop: "17vh" }}>
+            <button
+              type="button"
+              onClick={handleUpdateProfile}
+              style={{
+                display: "block",
+                width: "100%",
+                padding: "10px 0",
+                backgroundColor: "#8b3eea",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                marginTop: "auto",
+              }}
+            >
+              Confirm
+            </button>
 
-          <button
-            type="button"
-            onClick={handleUpdateProfile}
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "10px 0",
-              backgroundColor: "#8b3eea",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              marginTop: "20px",
-            }}
-          >
-            Confirm
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsModalOpen(true)} // Open the modal
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "10px 0",
-              backgroundColor: "#8b3eea",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              marginTop: "20px",
-            }}
-          >
-            Delete Account
-          </button>
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)} // Open the modal
+              style={{
+                display: "block",
+                width: "100%",
+                padding: "10px 0",
+                backgroundColor: "#8b3eea",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                marginTop: "20px",
+              }}
+            >
+              Delete Account
+            </button>
+          </div>
         </div>
       </div>
 

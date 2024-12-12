@@ -41,39 +41,42 @@ const Tourist = () => {
   return (
     <>
       <Header HeaderData={HeaderData} />
-      <Routes>
-        <Route path="/login" element={<Login />} /> 
-        <Route path="/tourist-profile" element={<TouristProfile />} />
-        <Route path="/hotels" element={<TouristHotels />} />
-        <Route path="/products" element={<TouristProducts />} />
-        <Route path="/tourist-itinerary" element={<TouristItinerary />} />
-        <Route path="/tour-details/:id" element={<TourDetails />} />
-        <Route path="/tourist-places" element={<TouristPlaces />} />
-        <Route path="/" element={<TouristFlights />} />
-        <Route path="/tourist-activities" element={<TouristActivities />} />
-        <Route path="/tourist-complain" element={<TouristComplain />} />
-        <Route path="/tourist-view" element={<TouristView />} />
-        <Route path="/activity-booking" element={<ActivityBooking />} />
-        <Route path="/itinerary-booking" element={<ItineraryBooking />} />
-        <Route path="/transportations" element={<Transportations />} />
-        <Route path="/point" element={<Point />} />
-        <Route path="/redeem" element={<Redeem />} />
-        <Route path="/completed-itinerary" element={<CompletedItinerary />} />
-        <Route path="/tour-guides" element={<ReviewTourGuide />} />
-        <Route path="/completed-activity" element={<CompletedActivity />} />
-        <Route path="/wallet" element={<Wallet />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/address" element={<Address />} />
-        <Route path="/billing" element={<Billing />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/bookmarks" element={<Bookmarks />} />
-        <Route path="/activity-details/:id" element={<ActivityDetails />} />
-        <Route path="/itinerary-details/:id" element={<ItineraryDetails />} />
-        <Route path="/hotels" element={<TouristHotels />} />
-        <Route path="/product-details/:id" element={<ProductDetails />} />
-        <Route path="/settings/*" element={<Settings />} />
-      </Routes>
+      <div style={{ minHeight: "100vh" }}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/tourist-profile" element={<TouristProfile />} />
+          <Route path="/hotels" element={<TouristHotels />} />
+          <Route path="/products" element={<TouristProducts />} />
+          <Route path="/tourist-itinerary" element={<TouristItinerary />} />
+          <Route path="/tour-details/:id" element={<TourDetails />} />
+          <Route path="/tourist-places" element={<TouristPlaces />} />
+          <Route path="/" element={<TouristFlights />} />
+          <Route path="/tourist-activities" element={<TouristActivities />} />
+          <Route path="/tourist-complain" element={<TouristComplain />} />
+          <Route path="/tourist-view" element={<TouristView />} />
+          <Route path="/activity-booking" element={<ActivityBooking />} />
+          <Route path="/itinerary-booking" element={<ItineraryBooking />} />
+          <Route path="/transportations" element={<Transportations />} />
+          <Route path="/point" element={<Point />} />
+          <Route path="/redeem" element={<Redeem />} />
+          <Route path="/completed-itinerary" element={<CompletedItinerary />} />
+          <Route path="/tour-guides" element={<ReviewTourGuide />} />
+          <Route path="/completed-activity" element={<CompletedActivity />} />
+          <Route path="/wallet" element={<Wallet />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/address" element={<Address />} />
+          <Route path="/billing" element={<Billing />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
+          <Route path="/activity-details/:id" element={<ActivityDetails />} />
+          <Route path="/itinerary-details/:id" element={<ItineraryDetails />} />
+          <Route path="/hotels" element={<TouristHotels />} />
+          <Route path="/product-details/:id" element={<ProductDetails />} />
+          <Route path="/settings/*" element={<Settings />} />
+        </Routes>
+      </div>
+
       <CopyRight />
     </>
   );
