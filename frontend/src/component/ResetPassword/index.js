@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from 'react-router-dom';
 
 const ResetPasswordArea = () => {
+  const navigate = useNavigate(); 
   // State for managing form data and error messages
   const [password, setPassword] = useState("");
   const [confirmedPassword, setConfirmedPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate(); 
 
   // Handle form submission
   const handleSubmit = async (event) => {
@@ -18,13 +18,6 @@ const ResetPasswordArea = () => {
       setError("Passwords do not match.");
       return;
     }
-
-    // const resetToken = document.cookies.get("resetToken"); // Get the reset token from cookies
-
-    // if (!resetToken) {
-    //   setError("Reset token is missing.");
-    //   return;
-    // }
 
     try {
       setIsSubmitting(true);
@@ -43,19 +36,17 @@ const ResetPasswordArea = () => {
       );
 
       // Handle response
-      if (response.data.success) {
+      if (response.ok) {
         alert("Password has been reset successfully!");
-        navigate("/login");
-        // Redirect or show success message
-      } else {
+        navigate('/login');
+      } 
+      else {
         setError(response.data.message || "Something went wrong.");
       }
     } catch (error) {
       console.error("Error resetting password", error);
       setError("Error resetting password. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    } 
   };
 
   return (
@@ -69,7 +60,7 @@ const ResetPasswordArea = () => {
                   <h2>Reset your password</h2>
                 </div>
                 <div className="common_author_form">
-                  <form onSubmit={handleSubmit} id="main_author_form">
+                  <form id="main_author_form">
                     {error && (
                       <div style={{ color: "red", marginBottom: "15px" }}>
                         {error}
@@ -99,9 +90,9 @@ const ResetPasswordArea = () => {
                       <button
                         type="submit"
                         className="btn btn_theme btn_md"
-                        disabled={isSubmitting}
+                        onClick={handleSubmit}
                       >
-                        {isSubmitting ? "Submitting..." : "Reset password"}
+                         Reset password
                       </button>
                     </div>
                   </form>
