@@ -281,6 +281,37 @@ const unarchiveProduct = async (req, res) => {
     res.status(500).json({ message: "Couldn't unarchive product" });
   }
 };
+const addReview = async (req, res) => {
+  const { productId, reviewText, rating } = req.body;
+  const userId = req.user._id;  // Assuming user ID is available from request user object
+
+  try {
+    // Fetch the product by ID
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Optionally, ensure that the user hasn't already reviewed this product
+    const alreadyReviewed = product.reviews.some(r => r.userId.toString() === userId.toString());
+    if (alreadyReviewed) {
+      return res.status(400).json({ message: "Product already reviewed by user" });
+    }
+
+    // Adding the review
+    product.reviews.push({
+      userId,
+      review: reviewText,
+      rating
+    });
+
+    await product.save();
+    res.status(201).json({ message: "Review added successfully" });
+  } catch (error) {
+    console.error("Error adding review:", error);
+    res.status(500).json({ message: "Error adding review" });
+  }
+};
 
 module.exports = {
   addProduct,
@@ -289,5 +320,6 @@ module.exports = {
   getMyProducts,
   unarchiveProduct,
   archiveProduct,
+  addReview,
   upload
 };

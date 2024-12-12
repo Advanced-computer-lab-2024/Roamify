@@ -21,7 +21,7 @@ const sendOtp = async (req, res) => {
     if (user.status !== "active")
       return res
         .status(403)
-        .json({ message: "you are unauthorized to do tis action" });
+        .json({ message: "Your Account is not active. Please contact admin." });
 
     if (user.otp && user.otpExpires > Date.now())
       throw Error("OTP has been already sent please check your mail");
@@ -134,7 +134,7 @@ const changePassword = async (req, res) => {
       secure: process.env.NODE_ENV === "production", // Ensure secure in production
       sameSite: "Strict", // Match the sameSite setting if used
     });
-    return res.status(200).json({ message: "changed password successfully" });
+    return res.status(200).json({ message: "Password Changed Successfully!" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: error.message });

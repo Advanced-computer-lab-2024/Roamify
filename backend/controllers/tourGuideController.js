@@ -191,7 +191,7 @@ const getProfile = async (req, res) => {
         mobileNumber: profile.mobileNumber,
         yearsOfExperience: profile.yearsOfExperience,
         previousWork: profile.previousWork,
-        profilePicture: profile.picture.url,
+        profilePicture: profile.picture.url || null,
       },
     });
   } catch (error) {

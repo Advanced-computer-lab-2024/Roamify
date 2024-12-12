@@ -28,29 +28,31 @@ const CreatePromoCodeButton = ({ onCreated }) => {
     });
   };
 
-  const handleSubmit = (data) => {
-    axios.post("http://localhost:3000/api/promocode/", data, {
-      withCredentials: true,
-    })
-    .then((response) => {
-      try {
-        toast.success(`Promo code created: ${response.data.code}`);
-        handleCloseModal();
-        onCreated();
-      } catch (error) {
-        console.error("Error after API success response:", error);
-        // Log the error to console or handle it appropriately
-        toast.error("An error occurred after creating the promo code.");
-      }
-    })
-    .catch((error) => {
-      const errorMessage = error.response?.data?.message || "Failed to create promo code";
-      toast.error(errorMessage);
-    });
-  };
-  
+    const handleSubmit = (data) => {
+        axios
+            .post("http://localhost:3000/api/promocode/", data, {
+                withCredentials: true,
+            })
+            .then((response) => {
+                console.log("API response:", response);
+                try {
+                    const promoCode = response.data.promoCode?.code || "Unknown";
+                    toast.success(`Promo code created: ${promoCode}`);
+                    handleCloseModal(); // Ensure this function is correctly implemented
+                    onCreated(); // Ensure this is correctly updating the UI
+                } catch (error) {
 
-  return (
+                }
+            })
+            .catch((error) => {
+                const errorMessage = error.response?.data?.message || "Failed to create promo code";
+                toast.error(errorMessage);
+            });
+    };
+
+
+
+    return (
     <>
       <button
         onClick={handleAddClick}

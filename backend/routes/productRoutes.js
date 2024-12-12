@@ -10,4 +10,5 @@ router.get("/",authenticate(["admin","seller","tourist"]), productController.get
 router.get("/fetch-my-products",authenticate(["seller"]),productController.getMyProducts);
 router.post("/archive/:id",authenticate(["admin","seller"]),productController.archiveProduct);
 router.post("/unarchive/:id",authenticate(["admin","seller"]),productController.unarchiveProduct);
+router.post('/review',authenticate(["tourist"]),productController.addReview);
 module.exports = router;
