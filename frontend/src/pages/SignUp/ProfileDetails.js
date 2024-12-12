@@ -24,11 +24,20 @@ const ProfileDetails = () => {
     ) || {}
   );
 
+  const formatLabel = (label) => {
+    return label
+      .replace(/([A-Z])/g, " $1") // Insert space before any uppercase letter
+      .trim() // Remove leading and trailing whitespace
+      .split(" ") // Split into words
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+      .join(" "); // Join words back into a single string
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: value.toUpperCase(), // Convert input value to uppercase before updating the state
     }));
   };
 
@@ -76,18 +85,18 @@ const ProfileDetails = () => {
   return (
     <div style={containerStyle}>
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
-      <h2 style={{ marginBottom: '20px' , fontSize:'24px'}}>Update your profile:</h2>
+      <h2 style={{ marginBottom: '20px', fontSize:'24px'}}>Update your profile:</h2>
       <form onSubmit={handleSubmit} style={formStyle}>
         {profileRequirements[role]?.map((field, index) => (
           <div key={index}>
-            <label style={{ marginBottom: '5px' }}>{field.replace(/([A-Z])/g, " $1")}</label>
+            <label style={{ marginBottom: '5px' }}>{formatLabel(field)}</label>
             <input
               type="text"
               name={field}
               value={formData[field]}
               onChange={handleInputChange}
               style={inputStyle}
-              placeholder={`Enter your ${field.replace(/([A-Z])/g, " $1")}`}
+              placeholder={`Enter your ${formatLabel(field)}`}
             />
           </div>
         ))}
