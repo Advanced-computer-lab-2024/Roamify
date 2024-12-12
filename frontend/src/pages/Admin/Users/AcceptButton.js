@@ -12,7 +12,7 @@ const AcceptButton = ({ onAccept }) => {
           padding: "10px",
           color: "var(--secondary-hover-color)", // Default icon color
           borderRadius: "50%",
-          backgroundColor: "transparent",
+          backgroundColor: "var(--main-color)",
           transition: "background-color 0.3s, border-color 0.3s", // Transition on background and border
           cursor: "pointer",
           border: "2px solid var(--secondary-hover-color)",
