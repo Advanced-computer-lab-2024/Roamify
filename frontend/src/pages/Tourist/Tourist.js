@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Home from "../../page/Home";
 import About from "../../page/About";
+import Login from "../../page/Login";
 import Header from "../../layout/Header";
 import TouristProducts from "./TouristProducts.js";
 import TourDetails from "../../page/TourDetails";
@@ -41,6 +42,7 @@ const Tourist = () => {
     <>
       <Header HeaderData={HeaderData} />
       <Routes>
+        <Route path="/login" element={<Login />} /> 
         <Route path="/tourist-profile" element={<TouristProfile />} />
         <Route path="/hotels" element={<TouristHotels />} />
         <Route path="/products" element={<TouristProducts />} />
