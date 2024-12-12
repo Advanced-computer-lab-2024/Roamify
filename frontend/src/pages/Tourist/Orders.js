@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import EmptyResponseLogo from "../../component/EmptyResponseLogo";
+import { useNavigate } from "react-router-dom";  // Import useNavigate
 
 const OrdersArea = () => {
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("current"); // "current", "past", or "cancelled"
   const [error, setError] = useState("");
+  const navigate = useNavigate();  // Instantiate useNavigate for redirection
 
   const fetchOrders = async () => {
     try {
@@ -49,30 +51,36 @@ const OrdersArea = () => {
     setFilter(newFilter);
   };
 
+  const handleSubmitReview = async (productId) => {
+    try {
+      await axios.post("http://localhost:3000/products/review", {
+        productId,
+        reviewText: "Great product, loved the quality!",
+        rating: 5,
+      });
+      toast.success("Review submitted successfully!");
+      navigate("/product-details");  // Navigate to product details page
+    } catch (error) {
+      toast.error(`Error submitting review: ${error.message}`);
+      console.error("Error submitting review:", error);
+    }
+  };
+  const formatDateAndTime = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
+  };
+
   const filteredOrders = orders.filter((order) => {
-    console.log(`Filtering for ${filter}:`, order);
     if (filter === "current") return order.status === "Processing";
     if (filter === "past") return order.status === "Delivered";
     if (filter === "cancelled") return order.status === "Cancelled";
     return false;
   });
 
-  const formatDateAndTime = (dateString) => {
-    const date = new Date(dateString);
-    return `${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
-  };
-
   return (
-    <section
-      id="order_area"
-      className="section_padding"
-      style={{ minHeight: "100vh" }}
-    >
+    <section id="order_area" className="section_padding" style={{ minHeight: "100vh" }}>
       <div className="container">
-        <div
-          className="row"
-          style={{ alignItems: "center", justifyContent: "center" }}
-        >
+        <div className="row" style={{ alignItems: "center", justifyContent: "center" }}>
           <div className="col-lg-9" style={{ width: "100%" }}>
             <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
               <button
@@ -114,7 +122,7 @@ const OrdersArea = () => {
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
-                    alignItems: "flex-start", // Left-align order summary
+                    alignItems: "flex-start",
                     padding: "20px",
                     backgroundColor: "var(--secondary-color)",
                     borderRadius: "8px",
@@ -162,12 +170,12 @@ const OrdersArea = () => {
                         style={{
                           padding: "10px",
                           backgroundColor: "var(--background-color)",
-                          border: "1px solid var(--secondary-border-color)",
+                          border: "1px solid var(--secondary-border_color)",
                           borderRadius: "5px",
                           textAlign: "left",
-                          overflow: "hidden", // Hide overflow text
-                          whiteSpace: "nowrap", // Prevent text wrapping
-                          textOverflow: "ellipsis", // Add ellipsis for overflow
+                          overflow: "hidden",
+                          whiteSpace: "nowrap",
+                          textOverflow: "ellipsis",
                         }}
                       >
                         <p>Name: {product.name}</p>
@@ -185,12 +193,29 @@ const OrdersArea = () => {
                         border: "none",
                         borderRadius: "4px",
                         cursor: "pointer",
-                        alignSelf: "flex-end", // Button on the right
+                        alignSelf: "flex-end",
                         marginTop: "15px",
                       }}
                       onClick={() => handleCancelOrder(order.id)}
                     >
                       Cancel Order
+                    </button>
+                  )}
+                  {order.status === "Delivered" && (
+                    <button
+                      style={{
+                        padding: "10px 15px",
+                        backgroundColor: "#8b3eea",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        alignSelf: "flex-end",
+                        marginTop: "15px",
+                      }}
+                      onClick={() => handleSubmitReview(order.products[0].productId)}
+                    >
+                      Review Product
                     </button>
                   )}
                 </div>
