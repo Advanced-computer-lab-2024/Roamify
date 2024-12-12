@@ -182,13 +182,13 @@ const TouristFlights = () => {
                     <div className="flight_search_left">
                       <div className="flight_search_destination">
                         <p>From</p>
-                        <h3>{searchOrigin}</h3>
+                        <h3 style={{ color: 'white' }}>{searchOrigin}</h3>
                       </div>
                     </div>
                     <div className="flight_search_middel">
                       <div className="flight_search_destination">
                         <p>To</p>
-                        <h3>{searchDestination}</h3>
+                        <h3 style={{ color: 'white' }}>{searchDestination}</h3>
                       </div>
                     </div>
                   </div>
