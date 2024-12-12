@@ -10,6 +10,7 @@ const UsersTableRow = ({
   id,
   name,
   email,
+  role,
   status,
   isPending,
   fetchPendingUsers,
@@ -105,6 +106,17 @@ const UsersTableRow = ({
         }}
       >
         {email}
+      </td>
+      <td
+        style={{
+          paddingTop: "1rem",
+          paddingBottom: "1rem",
+          paddingLeft: "1.5rem",
+          paddingRight: "1.5rem",
+          padding: "10px 2vw",
+        }}
+      >
+        {role}
       </td>
       <td
         style={{

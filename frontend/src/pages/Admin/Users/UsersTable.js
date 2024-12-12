@@ -80,7 +80,7 @@ const UsersTable = ({ users, isPending, fetchPendingUsers }) => {
         </thead>
         <tbody
           style={{
-            color: "var(--dashboard-title-color)", // Tailwind gray-800, use dashboard title color variable
+            color: "var(--text-color)", // Tailwind gray-800, use dashboard title color variable
             fontSize: "0.875rem",
             fontWeight: "300", // font-light
           }}
@@ -91,6 +91,7 @@ const UsersTable = ({ users, isPending, fetchPendingUsers }) => {
               id={user._id}
               name={user.username}
               email={user.email}
+              role={user.role}
               status={user.status}
               isPending={isPending}
               fetchPendingUsers={fetchPendingUsers}
