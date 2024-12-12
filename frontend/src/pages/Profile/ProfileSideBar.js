@@ -75,21 +75,41 @@ const ProfileSidebar = ({ profilePicture }) => {
         }}
       >
         {/* Profile Image */}
-        {role === "tourGuide" ||
-          role === "advertiser" ||
-          (role === "seller" && (
-            <>
-              <img
-                src={profilePicture}
-                alt="Profile"
-                style={{
-                  width: "100px",
-                  height: "100px",
-                  borderRadius: "50%",
-                  objectFit: "contain",
-                }}
-              />
+        {profilePicture ? (
+          <>
+            <img
+              src={profilePicture}
+              alt="Profile"
+              style={{
+                width: "100px",
+                height: "100px",
+                borderRadius: "50%",
+                objectFit: "contain",
+              }}
+            />
 
+            <button
+              onClick={handleEdit}
+              style={{
+                position: "absolute",
+                top: "5px",
+                right: "5px",
+                backgroundColor: "#8b3eea",
+                border: "none",
+                borderRadius: "50%",
+                color: "#fff",
+                padding: "5px",
+                cursor: "pointer",
+              }}
+              aria-label="Edit Profile Picture"
+            >
+              <FontAwesomeIcon icon={faEdit} />
+            </button>
+          </>
+        ) : (
+          <>
+            <ProfileIcon height="100px" width="100px" />
+            {role === "tourist" || role === "admin" || role === "tourGuide" ? (
               <button
                 onClick={handleEdit}
                 style={{
@@ -107,8 +127,11 @@ const ProfileSidebar = ({ profilePicture }) => {
               >
                 <FontAwesomeIcon icon={faEdit} />
               </button>
-            </>
-          ))}
+            ) : (
+              ""
+            )}
+          </>
+        )}
       </div>
 
       <ul style={{ listStyle: "none", padding: "0" }}>

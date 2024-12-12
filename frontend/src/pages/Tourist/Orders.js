@@ -116,13 +116,20 @@ const OrdersArea = () => {
                     justifyContent: "center",
                     alignItems: "flex-start", // Left-align order summary
                     padding: "20px",
-                    backgroundColor: "#f9f9f9",
+                    backgroundColor: "var(--secondary-color)",
                     borderRadius: "8px",
+                    border: "1px solid var(--secondary-border-color)",
                     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                     marginBottom: "20px",
                   }}
                 >
-                  <h3 style={{ textAlign: "left", marginBottom: "10px" }}>
+                  <h3
+                    style={{
+                      textAlign: "left",
+                      marginBottom: "10px",
+                      color: "var(--text-color)",
+                    }}
+                  >
                     Order Summary
                   </h3>
                   <div
@@ -153,11 +160,9 @@ const OrdersArea = () => {
                       <div
                         key={productIndex}
                         style={{
-                          width: "200px", // Square size
-                          height: "150px", // Square size
                           padding: "10px",
-                          backgroundColor: "#fff",
-                          border: "1px solid #ddd",
+                          backgroundColor: "var(--background-color)",
+                          border: "1px solid var(--secondary-border-color)",
                           borderRadius: "5px",
                           textAlign: "left",
                           overflow: "hidden", // Hide overflow text
