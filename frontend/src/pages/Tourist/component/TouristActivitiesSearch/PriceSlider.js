@@ -17,7 +17,7 @@ const PriceSlider = ({ onApply }) => {
   return (
     <div>
       <p>
-        {priceRange[0]} EGP - {priceRange[1]} EGP
+        {priceRange[0]}  - {priceRange[1]} 
       </p>
       <Slider
         range

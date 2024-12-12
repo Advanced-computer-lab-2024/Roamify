@@ -8,13 +8,8 @@ const ProfileDetails = () => {
   const role = localStorage.getItem("role")?.toLowerCase().replace(/-/g, ""); // Normalize role
   const navigate = useNavigate();
 
-  // Set up the fields based on the role requirements
   const profileRequirements = {
-    tourguide: [
-      "mobileNumber",
-      "yearsOfExperience",
-      "previousWork", // Camel case for form submission
-    ],
+    tourguide: ["mobileNumber", "yearsOfExperience", "previousWork"],
     advertiser: ["companyName", "websiteLink", "hotline", "companyProfile"],
     seller: ["firstName", "lastName", "description"],
   };
@@ -53,25 +48,50 @@ const ProfileDetails = () => {
     }
   };
 
+  // Inline styles
+  const containerStyle = {
+    display: 'flex',
+    flexDirection: 'column', // Stack items vertically
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+  };
+
+  const formStyle = {
+    width: '300px',
+    padding: '20px',
+    boxShadow: '0px 0px 10px rgba(0,0,0,0.1)',
+    borderRadius: '5px', // Optional rounded corners
+  };
+
+  const inputStyle = {
+    width: '100%',
+    padding: '10px',
+    marginBottom: '10px',
+    borderColor: '#8b3eea', // Your specified color
+    borderWidth: '2px',
+    borderRadius: '3px', // Optional rounded corners for inputs
+  };
+
   return (
-    <div>
+    <div style={containerStyle}>
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
-      <h2>Profile Details</h2>
-      <p>Update your profile information:</p>
-      <form onSubmit={handleSubmit}>
+      <h2 style={{ marginBottom: '20px' , fontSize:'24px'}}>Update your profile:</h2>
+      <form onSubmit={handleSubmit} style={formStyle}>
         {profileRequirements[role]?.map((field, index) => (
-          <div key={index} style={{ marginBottom: "1rem" }}>
-            <label>{field.replace(/([A-Z])/g, " $1")}</label>
+          <div key={index}>
+            <label style={{ marginBottom: '5px' }}>{field.replace(/([A-Z])/g, " $1")}</label>
             <input
               type="text"
               name={field}
               value={formData[field]}
               onChange={handleInputChange}
+              style={inputStyle}
               placeholder={`Enter your ${field.replace(/([A-Z])/g, " $1")}`}
             />
           </div>
         ))}
-        <button type="submit">Save Profile</button>
+        <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#8b3eea', color: 'white', border: 'none', borderRadius: '3px' }}>Save Profile</button>
       </form>
     </div>
   );

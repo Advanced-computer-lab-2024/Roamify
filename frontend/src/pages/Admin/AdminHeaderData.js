@@ -9,7 +9,6 @@ export const HeaderData = [
   },
   {
     menu: "Users",
-    link: "/users",
     submenu: true,
     subMenuitem: [
       {
