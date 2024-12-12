@@ -40,7 +40,7 @@ const CreateActivityButton = ({ reFetch }) => {
           width: "100%",
           marginTop: "20px",
           padding: "10px",
-          backgroundColor: "#4CAF50",
+          backgroundColor: "var(--main-color)",
           color: "#fff",
           borderRadius: "5px",
           border: "none",
