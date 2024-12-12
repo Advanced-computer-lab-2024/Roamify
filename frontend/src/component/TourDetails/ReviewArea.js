@@ -17,58 +17,7 @@ const ReviewArea = ({ reviews }) => {
     <>
       <div className="container">
         <div className="row">
-          <div className="col-lg-8">
-            <div
-              className="write_your_review_wrapper"
-              style={{ background: "var(--secondary-color)" }}
-            >
-              <h3
-                className="heading_theme"
-                style={{ color: "var(--text-color)" }}
-              >
-                Write your review
-              </h3>
-              <div className="write_review_inner_boxed">
-                <form action="!#" id="news_comment_form">
-                  <div className="row">
-                    {/* Star Rating Selector */}
-                    <div className="star_rating_input">
-                      {[...Array(5)].map((_, index) => (
-                        <i
-                          key={index}
-                          className={`fas fa-star ${
-                            index < rating ? "selected" : ""
-                          }`}
-                          onClick={() => handleRatingSelect(index + 1)}
-                        />
-                      ))}
-                    </div>
-                    <div className="col-lg-12">
-                      <div className="form-froup">
-                        <textarea
-                          rows="6"
-                          placeholder="Write your comments"
-                          className="form-control bg_input"
-                          value={comment}
-                          onChange={(e) => setComment(e.target.value)}
-                          style={{
-                            background: "var(--background-color)",
-                            border: "1px solid var(--secondary-border-color)",
-                            resize: "none",
-                          }}
-                        ></textarea>
-                      </div>
-                      <div className="comment_form_submit">
-                        <button className="btn btn_theme btn_md">
-                          Post comment
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
+          <div className="col-lg-8"></div>
         </div>
         <div className="row">
           <div className="col-lg-12">

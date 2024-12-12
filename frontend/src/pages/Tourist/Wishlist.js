@@ -44,7 +44,7 @@ const Wishlist = () => {
   }
 
   if (error) {
-    return <p> {error}</p>;
+    return <EmptyResponseLogo isVisible={true} text={error} size="200px" />;
   }
 
   // Function to handle deleting a product from the wishlist
