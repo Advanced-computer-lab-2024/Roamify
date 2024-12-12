@@ -292,7 +292,7 @@ const CreateActivityModal = ({
                 onClick={handleAddTag}
                 style={{
                   padding: "4px 8px",
-                  backgroundColor: "#4CAF50",
+                  backgroundColor: "var(--main-color)",
                   color: "#fff",
                   borderRadius: "4px",
                   border: "none",
@@ -398,7 +398,7 @@ const CreateActivityModal = ({
               style={{
                 padding: "8px 12px",
                 borderRadius: "4px",
-                backgroundColor: "#2B6CB0",
+                backgroundColor: "var(--main-color)",
                 color: "white",
               }}
             >

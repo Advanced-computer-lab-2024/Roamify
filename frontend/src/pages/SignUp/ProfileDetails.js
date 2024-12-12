@@ -37,9 +37,10 @@ const ProfileDetails = () => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value.toUpperCase(), // Convert input value to uppercase before updating the state
+      [name]: value // Keep the original case of the input
     }));
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
