@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import DynamicEditModal from "../../component/Modals/DynamicEditModal"; // Make sure this component exists
 import Promo from "../../component/Promo";
 
@@ -12,12 +14,10 @@ const CreatePromoCodeButton = ({ onCreated }) => {
     usesLeft: "",
   });
 
-  // Open the modal
   const handleAddClick = () => {
     setIsModalOpen(true);
   };
 
-  // Close the modal and reset form data
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setFormData({
@@ -28,21 +28,18 @@ const CreatePromoCodeButton = ({ onCreated }) => {
     });
   };
 
-  // Handle form submission
   const handleSubmit = (data) => {
-    axios
-      .post("http://localhost:3000/api/promocode/", data, {
+    axios.post("http://localhost:3000/api/promocode/", data, {
         withCredentials: true,
       })
       .then((response) => {
-        console.log("Promo code created:", response.data);
-        handleCloseModal(); // Close the modal on success
-        onCreated(); // Call onCreated callback to update UI or state
+        toast.success(`Promo code created: ${response.data.code}`);
+        handleCloseModal();
+        onCreated();
       })
       .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message || "Failed to create promo code";
-        alert(errorMessage);
+        const errorMessage = error.response?.data?.message || "Failed to create promo code";
+        toast.error(errorMessage);
       });
   };
 
@@ -51,15 +48,14 @@ const CreatePromoCodeButton = ({ onCreated }) => {
       <button
         onClick={handleAddClick}
         style={{
-          backgroundColor: "transparent", // Original color
+          backgroundColor: "transparent",
           cursor: "pointer",
-          transition: "background-color 0.3s ease", // Smooth transition
+          transition: "background-color 0.3s ease",
         }}
       >
         <Promo size="20px" />
       </button>
 
-      {/* Dynamic modal for creating promo code */}
       <DynamicEditModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
@@ -89,8 +85,11 @@ const CreatePromoCodeButton = ({ onCreated }) => {
             label: "Uses Left",
           },
         ]}
-        onSubmit={(data) => handleSubmit(data)} // Pass the form data to handleSubmit
+        onSubmit={handleSubmit}
       />
+
+      {/* Toast Container */}
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick pauseOnFocusLoss draggable pauseOnHover />
     </>
   );
 };
