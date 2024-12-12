@@ -68,7 +68,7 @@ const HomeBanner = () => {
                   cursor: "default", // Optional: Add a default cursor for better UX
                 }}
               >
-                Explore the world together
+                Roam the world with us
               </h1>
               <h3
                 style={{

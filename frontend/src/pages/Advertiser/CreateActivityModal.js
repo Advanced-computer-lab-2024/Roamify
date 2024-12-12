@@ -180,7 +180,7 @@ const CreateActivityModal = ({
       <div
         ref={modalRef}
         style={{
-          backgroundColor: "white",
+          backgroundColor: "var(--secondary-color)",
           padding: "24px",
           borderRadius: "8px",
           boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
@@ -211,7 +211,7 @@ const CreateActivityModal = ({
             <div key={index} style={{ marginBottom: "10px" }}>
               <label
                 htmlFor={field.name}
-                style={{ display: "block", color: "#4A5568" }}
+                style={{ display: "block", color: "var(--text-color)" }}
               >
                 {field.label}
               </label>
@@ -224,7 +224,6 @@ const CreateActivityModal = ({
                 style={{
                   width: "100%",
                   padding: "4px 8px",
-                  border: "1px solid #D2D6DC",
                   borderRadius: "4px",
                   outline: "none",
                 }}
@@ -236,7 +235,7 @@ const CreateActivityModal = ({
           <div style={{ marginBottom: "10px" }}>
             <label
               htmlFor="categoryName"
-              style={{ display: "block", color: "#4A5568" }}
+              style={{ display: "block", color: "var(--text-color)" }}
             >
               Category
             </label>
@@ -247,7 +246,6 @@ const CreateActivityModal = ({
               style={{
                 width: "100%",
                 padding: "4px 8px",
-                border: "1px solid #D2D6DC",
                 borderRadius: "4px",
                 outline: "none",
               }}
@@ -267,7 +265,9 @@ const CreateActivityModal = ({
 
           {/* Tags Selection */}
           <div style={{ marginBottom: "10px" }}>
-            <label style={{ display: "block", color: "#4A5568" }}>Tags</label>
+            <label style={{ display: "block", color: "var(--text-color)" }}>
+              Tags
+            </label>
             <div style={{ display: "flex", gap: "10px" }}>
               <select
                 value={selectedTag}
@@ -275,7 +275,6 @@ const CreateActivityModal = ({
                 style={{
                   width: "100%",
                   padding: "4px 8px",
-                  border: "1px solid #D2D6DC",
                   borderRadius: "4px",
                   outline: "none",
                 }}
@@ -340,7 +339,7 @@ const CreateActivityModal = ({
           <div style={{ marginBottom: "10px" }}>
             <label
               htmlFor="discounts"
-              style={{ display: "block", color: "#4A5568" }}
+              style={{ display: "block", color: "var(--text-color)" }}
             >
               Discounts (%)
             </label>
@@ -353,7 +352,6 @@ const CreateActivityModal = ({
               style={{
                 width: "100%",
                 padding: "4px 8px",
-                border: "1px solid #D2D6DC",
                 borderRadius: "4px",
                 outline: "none",
               }}

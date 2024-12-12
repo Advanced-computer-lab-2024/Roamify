@@ -28,7 +28,7 @@ const AdvertiserActivitiesArea = () => {
           withCredentials: true,
         }
       );
-      setActivities(response.data);
+      setActivities(response.data.activities);
     } catch (error) {
       if (error.response && error.response.status === 404) {
         setActivities([]);

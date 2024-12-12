@@ -169,7 +169,7 @@ const Header = ({ HeaderData }) => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "flex-start",
-                    flex: 1,
+                    flex: 2,
                   }}
                 >
                   <Link to="/">
@@ -177,64 +177,76 @@ const Header = ({ HeaderData }) => {
                   </Link>
                 </div>
                 <div
-                  className="collapse navbar-collapse mean-menu"
-                  id="navbarSupportedContent"
                   style={{
-                    borderRadius: "50px",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    padding: "0px 1vw",
-                    backgroundColor: "var(--secondary-color)",
-                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                    flex: 6,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  <ul className="navbar-nav">
-                    {HeaderData.map((data, index) => (
-                      <li
-                        className="nav-item"
-                        key={index}
-                        style={{
-                          padding: "2vh 1vw",
-                        }}
-                      >
-                        <Link to={data.link} className="nav-link active">
-                          <p style={{ color: "var(--text-color)" }}>
-                            {data.menu}
-                          </p>
-                        </Link>
-                        {data.submenu && (
-                          <ul className="dropdown-menu">
-                            {data.subMenuitem.map((item, index1) => (
-                              <li className="nav-item" key={index1}>
-                                <Link to={item.linkL} className="nav-link">
-                                  {item.subItem}
-                                </Link>
-                                {item.subItems && (
-                                  <ul className="dropdown-menu">
-                                    {item.subItems.map((item1, index2) => (
-                                      <li className="nav-item" key={index2}>
-                                        <Link
-                                          to={item1.link}
-                                          className="nav-link"
-                                        >
-                                          {item1.item}
-                                        </Link>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                  <div
+                    className="collapse navbar-collapse mean-menu"
+                    id="navbarSupportedContent"
+                    style={{
+                      borderRadius: "50px",
+                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      padding: "0px 1vw",
+                      backgroundColor: "var(--secondary-color)",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      width: "fit-content",
+                    }}
+                  >
+                    <ul className="navbar-nav">
+                      {HeaderData.map((data, index) => (
+                        <li
+                          className="nav-item"
+                          key={index}
+                          style={{
+                            padding: "2vh 1vw",
+                            textWrap: "nowrap",
+                          }}
+                        >
+                          <Link to={data.link} className="nav-link active">
+                            <p style={{ color: "var(--text-color)" }}>
+                              {data.menu}
+                            </p>
+                          </Link>
+                          {data.submenu && (
+                            <ul className="dropdown-menu">
+                              {data.subMenuitem.map((item, index1) => (
+                                <li className="nav-item" key={index1}>
+                                  <Link to={item.linkL} className="nav-link">
+                                    {item.subItem}
+                                  </Link>
+                                  {item.subItems && (
+                                    <ul className="dropdown-menu">
+                                      {item.subItems.map((item1, index2) => (
+                                        <li className="nav-item" key={index2}>
+                                          <Link
+                                            to={item1.link}
+                                            className="nav-link"
+                                          >
+                                            {item1.item}
+                                          </Link>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
                 <div
                   className="others-options d-flex align-items-center"
                   style={{
-                    flex: 1,
+                    flex: 2,
                     display: "flex",
+                    gap: "10px",
                     justifyContent: "end",
                     marginLeft: "2vw",
                   }}

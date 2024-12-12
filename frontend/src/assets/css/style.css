@@ -129,6 +129,9 @@ select {
   --shimmer-middle-color: #2a3c56;
   --shimmer-end-color: #1f2a41;
 }
+#go_beyond_area {
+  background: linear-gradient(to bottom, #000000 0%, #04080f 50%, #080f25 100%);
+}
 
 .custom-toast {
   background-color: var(--secondary-color);

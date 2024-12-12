@@ -10,7 +10,11 @@ const Discover = () => {
       <section
         id="go_beyond_area"
         className="section_padding_top"
-        style={{ backgroundColor: "var(--background-color)" }}
+        style={
+          {
+            // backgroundColor: "linear-gradient(to bottom, #000000, #080f25)",
+          }
+        }
       >
         <div className="container">
           <div className="row align-items-center">
