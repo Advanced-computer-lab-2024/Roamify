@@ -112,7 +112,6 @@ ul {
   width: 70%; /* Adjusted to match button */
   height: 40px;
   padding: 8px;
-  border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 1rem;
 }
@@ -138,7 +137,7 @@ ul {
 /* Confirm Payment Button */
 .billing-button {
   width: 100%;
-  margin-top: 15px;
+  /* margin-top: 15px; */
   padding: 10px;
   background-color: #8b3eea;
   color: white;

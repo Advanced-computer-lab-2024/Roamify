@@ -178,6 +178,8 @@ function Cart() {
                       objectFit: "cover",
                       borderRadius: "0px",
                       marginRight: "10px",
+                      height: "200px",
+                      width: "200px",
                     }}
                   />
                 </div>

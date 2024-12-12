@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import EmptyResponseLogo from "../../component/EmptyResponseLogo";
+import { SettingsRemoteOutlined } from "@mui/icons-material";
 
 const AddressComponent = () => {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ const AddressComponent = () => {
       });
 
       setAddresses(response.data.addresses);
+      setError(null);
     } catch (error) {
       setError(error.response.data.message);
     }
@@ -65,8 +67,8 @@ const AddressComponent = () => {
           },
         }
       );
-      toast.success("Order address updated successfully");
       console.log("Order Address Data:", response.data);
+      setError(null);
     } catch (error) {
       console.error("Error updating order address:", error);
       if (error.response) {

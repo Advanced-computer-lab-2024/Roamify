@@ -1,212 +1,299 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMoneyBillWave, faWallet } from '@fortawesome/free-solid-svg-icons';
-import { faStripeS } from '@fortawesome/free-brands-svg-icons';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import './Billing.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMoneyBillWave, faWallet } from "@fortawesome/free-solid-svg-icons";
+import { faStripeS } from "@fortawesome/free-brands-svg-icons";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./Billing.css";
 
 const Billing = () => {
-    const [orderId, setOrderId] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('');
-    const [promoCode, setPromoCode] = useState('');
-    const [checkoutSummary, setCheckoutSummary] = useState(null);
-    const navigate = useNavigate(); // Initialize the useNavigate hook
+  const [orderId, setOrderId] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [promoCode, setPromoCode] = useState("");
+  const [checkoutSummary, setCheckoutSummary] = useState(null);
+  const navigate = useNavigate(); // Initialize the useNavigate hook
 
-    useEffect(() => {
-        const fetchedOrderId = localStorage.getItem('orderId');
-        if (fetchedOrderId) {
-            setOrderId(fetchedOrderId);
-            fetchCheckoutSummary(fetchedOrderId);
-        }
-    }, []);
+  useEffect(() => {
+    const fetchedOrderId = localStorage.getItem("orderId");
+    if (fetchedOrderId) {
+      setOrderId(fetchedOrderId);
+      fetchCheckoutSummary(fetchedOrderId);
+    }
+  }, []);
 
-    const fetchCheckoutSummary = async (id) => {
-        const url = `http://localhost:3000/api/order/${id}`;
-        try {
-            const response = await fetch(url, {
-                method: 'GET',
-                credentials: 'include',
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setCheckoutSummary(data.checkoutSummary);
-                toast.success('Checkout summary retrieved successfully!');
-            } else {
-                throw new Error(data.message || 'Failed to fetch checkout summary.');
-            }
-        } catch (error) {
-            toast.error(error.message || 'Error fetching checkout summary.');
-        }
-    };
+  const fetchCheckoutSummary = async (id) => {
+    const url = `http://localhost:3000/api/order/${id}`;
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setCheckoutSummary(data.checkoutSummary);
+        toast.success("Checkout summary retrieved successfully!");
+      } else {
+        throw new Error(data.message || "Failed to fetch checkout summary.");
+      }
+    } catch (error) {
+      toast.error(error.message || "Error fetching checkout summary.");
+    }
+  };
 
-    const applyPromoCode = async () => {
-        if (!promoCode) {
-            toast.error('Please enter a promo code.');
-            return;
-        }
+  const applyPromoCode = async () => {
+    if (!promoCode) {
+      toast.error("Please enter a promo code.");
+      return;
+    }
 
-        if (!orderId) {
-            toast.error('Order ID not found. Please ensure an order is selected.');
-            return;
-        }
+    if (!orderId) {
+      toast.error("Order ID not found. Please ensure an order is selected.");
+      return;
+    }
 
-        const url = `http://localhost:3000/api/order/${orderId}/promo-code/${promoCode}`;
-        try {
-            const response = await fetch(url, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setCheckoutSummary((prevSummary) => ({
-                    ...prevSummary,
-                    discountApplied: data.discountApplied || 0,
-                    finalAmount: data.finalAmount || prevSummary.totalProductCost,
-                }));
-                toast.success(data.message || 'Promo code applied successfully!');
-                await fetchCheckoutSummary(orderId);
-            } else {
-                throw new Error(data.message || 'Failed to apply promo code.');
-            }
-        } catch (error) {
-            toast.error(error.message || 'An error occurred. Please try again.');
-        }
-    };
+    const url = `http://localhost:3000/api/order/${orderId}/promo-code/${promoCode}`;
+    try {
+      const response = await fetch(url, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setCheckoutSummary((prevSummary) => ({
+          ...prevSummary,
+          discountApplied: data.discountApplied || 0,
+          finalAmount: data.finalAmount || prevSummary.totalProductCost,
+        }));
+        toast.success(data.message || "Promo code applied successfully!");
+        await fetchCheckoutSummary(orderId);
+      } else {
+        throw new Error(data.message || "Failed to apply promo code.");
+      }
+    } catch (error) {
+      toast.error(error.message || "An error occurred. Please try again.");
+    }
+  };
 
-    const handlePayment = async () => {
-        if (!orderId || !paymentMethod) {
-            toast.error('Please complete all required fields.');
-            return;
-        }
+  const handlePayment = async () => {
+    if (!orderId || !paymentMethod) {
+      toast.error("Please complete all required fields.");
+      return;
+    }
 
-        const url = `http://localhost:3000/api/order/${orderId}/payment`;
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ paymentMethod }),
-                credentials: 'include',
-            });
-            const data = await response.json();
-            if (response.ok) {
-                toast.success(data.message || 'Payment successful!');
-                navigate('/tourist/orders'); // Navigate to Orders page
-            } else {
-                throw new Error(data.message || 'Payment failed. Please try again.');
-            }
-        } catch (error) {
-            toast.error(error.message || 'An error occurred. Please try again.');
-        }
-    };
+    const url = `http://localhost:3000/api/order/${orderId}/payment`;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ paymentMethod }),
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.message || "Payment successful!");
+        navigate("/tourist/orders"); // Navigate to Orders page
+      } else {
+        throw new Error(data.message || "Payment failed. Please try again.");
+      }
+    } catch (error) {
+      toast.error(error.message || "An error occurred. Please try again.");
+    }
+  };
 
-    return (
-        <div className="billing-container">
-            <ToastContainer />
-            <div className="billing-flex">
-                {/* Order Summary */}
-                <div className="billing-card summary-card">
-                    <h3>Order Summary</h3>
-                    {checkoutSummary ? (
-                        <>
-                            <p><strong>Created At:</strong> {new Date(checkoutSummary.createdAt).toLocaleString()}</p>
-                            <ul>
-                                {checkoutSummary.products.map((product) => (
-                                    <li key={product.productId}>
-                                        <div>
-                                            <p><strong>Product Name:</strong> {product.name}</p>
-                                            <p>
-                                                <strong>Quantity:</strong>{product.quantity} x ${product.priceAtPurchase}
-                                            </p>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                            <p><strong>Delivery Address:</strong> {checkoutSummary.deliveryAddress.street}, {checkoutSummary.deliveryAddress.city}, {checkoutSummary.deliveryAddress.postalCode}</p>
-                            
-                            {/* Horizontal line */}
-                            <hr style={{ margin: '20px 0', borderColor: '#ddd' }} />
-
-                            <p><strong>Total Price:</strong> ${checkoutSummary.totalProductCost.toFixed(2)}</p>
-                            <p><strong>Discount:</strong> ${checkoutSummary.discountApplied.toFixed(2)}</p>
-                            <p><strong>Subtotal:</strong> ${checkoutSummary.finalAmount.toFixed(2)}</p>
-                        </>
-                    ) : (
-                        <p>Loading Summary...</p>
-                    )}
-                </div>
-
-                {/* Payment Method */}
-                <div className="billing-card payment-card">
-                    <h3>Select Payment Method</h3>
-                    <form onSubmit={(e) => e.preventDefault()}>
-                        <label>
-                            <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="COD"
-                                checked={paymentMethod === 'COD'}
-                                onChange={(e) => setPaymentMethod(e.target.value)}
-                            />
-                            <span>Cash On Delivery</span>
-                            <FontAwesomeIcon icon={faMoneyBillWave} className="icon" />
-                        </label>
-                        <label>
-                            <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="Stripe"
-                                checked={paymentMethod === 'Stripe'}
-                                onChange={(e) => setPaymentMethod(e.target.value)}
-                            />
-                            <span>Stripe</span>
-                            <FontAwesomeIcon icon={faStripeS} className="icon" />
-                        </label>
-                        <label>
-                            <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="Wallet"
-                                checked={paymentMethod === 'Wallet'}
-                                onChange={(e) => setPaymentMethod(e.target.value)}
-                            />
-                            <span>Wallet</span>
-                            <FontAwesomeIcon icon={faWallet} className="icon" />
-                        </label>
-                        <div className="promo-code-container">
-                            <input
-                                type="text"
-                                placeholder="Apply a promo code"
-                                value={promoCode}
-                                onChange={(e) => setPromoCode(e.target.value)}
-                                className="promo-code-input"
-                            />
-                            <button
-                                type="button"
-                                className="billing-button apply-button"
-                                onClick={applyPromoCode}
-                            >
-                                Apply
-                            </button>
-                        </div>
-                        <button
-                            type="button"
-                            className="billing-button"
-                            onClick={handlePayment}
+  return (
+    <div
+      className="billing-container"
+      style={{ background: "var(--background-color)" }}
+    >
+      <ToastContainer />
+      <div className="billing-flex">
+        {/* Order Summary */}
+        <div
+          className="billing-card summary-card"
+          style={{
+            border: "1px solid var(--secondary-border-color)",
+            background: "var(--secondary-color)",
+          }}
+        >
+          <h3 style={{ color: "var(--text-color)" }}>Order Summary</h3>
+          {checkoutSummary ? (
+            <>
+              <p style={{ color: "var(--text-color)" }}>
+                <strong style={{ color: "var(--dashboard-title-color)" }}>
+                  Created At:
+                </strong>{" "}
+                {new Date(checkoutSummary.createdAt).toLocaleString()}
+              </p>
+              <ul>
+                {checkoutSummary.products.map((product) => (
+                  <li key={product.productId}>
+                    <div>
+                      <p style={{ color: "var(--text-color)" }}>
+                        <strong
+                          style={{ color: "var(--dashboard-title-color)" }}
                         >
-                            Confirm Payment
-                        </button>
-                    </form>
-                </div>
-            </div>
+                          Product Name:
+                        </strong>{" "}
+                        {product.name}
+                      </p>
+                      <p style={{ color: "var(--text-color)" }}>
+                        <strong
+                          style={{ color: "var(--dashboard-title-color)" }}
+                        >
+                          Quantity:
+                        </strong>
+                        {product.quantity} x ${product.priceAtPurchase}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <p style={{ color: "var(--text-color)" }}>
+                <strong style={{ color: "var(--dashboard-title-color)" }}>
+                  Delivery Address:
+                </strong>{" "}
+                {checkoutSummary.deliveryAddress.street},{" "}
+                {checkoutSummary.deliveryAddress.city},{" "}
+                {checkoutSummary.deliveryAddress.postalCode}
+              </p>
+
+              {/* Horizontal line */}
+              <hr style={{ margin: "20px 0", borderColor: "#ddd" }} />
+
+              <p style={{ color: "var(--text-color)" }}>
+                <strong style={{ color: "var(--dashboard-title-color)" }}>
+                  Total Price:
+                </strong>{" "}
+                ${checkoutSummary.totalProductCost.toFixed(2)}
+              </p>
+              <p style={{ color: "var(--text-color)" }}>
+                <strong style={{ color: "var(--dashboard-title-color)" }}>
+                  Discount:
+                </strong>{" "}
+                ${checkoutSummary.discountApplied.toFixed(2)}
+              </p>
+              <p style={{ color: "var(--text-color)" }}>
+                <strong style={{ color: "var(--dashboard-title-color)" }}>
+                  Subtotal:
+                </strong>{" "}
+                ${checkoutSummary.finalAmount.toFixed(2)}
+              </p>
+            </>
+          ) : (
+            <p>Loading Summary...</p>
+          )}
         </div>
-    );
+
+        {/* Payment Method */}
+        <div
+          className="billing-card payment-card"
+          style={{
+            border: "1px solid var(--secondary-border-color)",
+            background: "var(--secondary-color)",
+          }}
+        >
+          <h3 style={{ color: "var(--text-color)", marginBottom: "20px" }}>
+            Select Payment Method
+          </h3>
+          <form onSubmit={(e) => e.preventDefault()}>
+            <label
+              style={{
+                background: "var(--secondary-color)",
+                border: "1px solid var(--secondary-border-color)",
+              }}
+            >
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="COD"
+                checked={paymentMethod === "COD"}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              />
+              <span style={{ color: "var(--text-color)" }}>
+                Cash On Delivery
+              </span>
+              <FontAwesomeIcon icon={faMoneyBillWave} className="icon" />
+            </label>
+            <label
+              style={{
+                background: "var(--secondary-color)",
+                border: "1px solid var(--secondary-border-color)",
+              }}
+            >
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="Stripe"
+                checked={paymentMethod === "Stripe"}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              />
+              <span style={{ color: "var(--text-color)" }}>Stripe</span>
+              <FontAwesomeIcon icon={faStripeS} className="icon" />
+            </label>
+            <label
+              style={{
+                background: "var(--secondary-color)",
+                border: "1px solid var(--secondary-border-color)",
+              }}
+            >
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="Wallet"
+                checked={paymentMethod === "Wallet"}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              />
+              <span style={{ color: "var(--text-color)" }}>Wallet</span>
+              <FontAwesomeIcon icon={faWallet} className="icon" />
+            </label>
+            <div
+              className="promo-code-container"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: "10px",
+                gap: "10px",
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Apply a promo code"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                className="promo-code-input"
+              />
+              <button
+                type="button"
+                className="billing-button apply-button"
+                onClick={applyPromoCode}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                Apply
+              </button>
+            </div>
+            <button
+              type="button"
+              className="billing-button"
+              onClick={handlePayment}
+            >
+              Confirm Payment
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Billing;

@@ -158,7 +158,15 @@ const Wishlist = () => {
                         }}
                       >
                         <div className="flight_logo" style={{ flex: 1 }}>
-                          <img src={item.picture[0].url} alt={item.name} />
+                          <img
+                            src={item.picture[0].url}
+                            alt={item.name}
+                            style={{
+                              objectFit: "cover",
+                              height: "150px",
+                              width: "150px",
+                            }}
+                          />
                         </div>
                         <div
                           style={{
