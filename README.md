@@ -88,25 +88,25 @@ This structured approach to coding and architecture ensures that Roamify's codeb
 ## Screenshots
 
 ### Screenshot 1
-![Screenshot 1](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/SC%201.png)
+![Screenshot 1](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%201.png)
 
 ### Screenshot 2
-![Screenshot 2](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/SC%202.png)
+![Screenshot 2](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%202.png)
 
 ### Screenshot 3
-![Screenshot 3](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/SC%203.png)
+![Screenshot 3](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%203.png)
 
 ### Screenshot 4
-![Screenshot 4](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/SC%204.png)
+![Screenshot 4](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%204.png)
 
 ### Screenshot 5
-![Screenshot 5](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/SC%205.png)
+![Screenshot 5](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%205.png)
 
 ### Screenshot 6
-![Screenshot 6](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/SC%206.png)
+![Screenshot 6](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%206.png)
 
 ### Screenshot 7
-![Screenshot 7](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/SC%207.png)
+![Screenshot 7](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%207.png)
 
 
 ## Tech Stack
