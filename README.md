@@ -108,6 +108,32 @@ This structured approach to coding and architecture ensures that Roamify's codeb
 ### Screenshot 7
 ![Screenshot 7](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%207.png)
 
+### Screenshot 8
+![Screenshot 8](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%208.png)
+
+### Screenshot 9
+![Screenshot 9](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%209.png)
+
+### Screenshot 10
+![Screenshot 10](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%2010.png)
+
+### Screenshot 11
+![Screenshot 11](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%2011.png)
+
+### Screenshot 12
+![Screenshot 12](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%2012.png)
+
+### Screenshot 13
+![Screenshot 13](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%2013.png)
+
+### Screenshot 14
+![Screenshot 14](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%2014.png)
+
+### Screenshot 15
+![Screenshot 15](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%2015.png)
+
+### Screenshot 16
+![Screenshot 16](https://github.com/Advanced-computer-lab-2024/Roamify/blob/main/Screenshots/SC%2016.png)
 
 ## Tech Stack
 
@@ -670,50 +696,93 @@ npm start
 
 ## How to Use
 
-1. **Access the Application**
-    - Clone or download the repository.
-    - Run the server locally and access it at `http://localhost:3000`.
+Roamify provides a seamless experience tailored to various user roles, including Tourists, Tour Guides, Advertisers, Sellers, Admins, and Tourism Governors. Here's how each role can interact with the application:
 
-2. **Authentication**
-    - **Register**:
-        - Create an account by submitting the required information (username, password, and email).
-    - **Login**:
-        - Use your credentials to log in.
+---
 
-3. **Explore Features**
-    - **User Management**:
-        - Update your profile, change passwords, or manage account preferences.
-    - **Bookings and Transactions**:
-        - Browse and book activities, itineraries, or places.
-    - **Cart and Wishlist**:
-        - Add items to your cart or wishlist for later checkout.
-    - **Admin Features**:
-        - Access detailed analytics, manage users, and monitor transactions.
+### 1. Tourist
+Tourists can plan trips, book activities, and manage preferences:
+- **Create and Manage Profile**:
+  - Register as a tourist with your personal details, including email, username, password, and DOB.
+  - Update your profile and wallet details.
+- **Explore and Book**:
+  - Search for museums, historical places, activities, or itineraries using filters like budget, category, or tag.
+  - Book flights, hotels, and transportation through integrated third-party services.
+  - Book activities, itineraries, or events and receive payment receipts via email.
+  - Cancel bookings at least 48 hours before the start date and receive refunds in your wallet.
+- **Feedback and Ratings**:
+  - Rate and comment on itineraries, tour guides, and events you attended.
+- **Notifications**:
+  - Enable notifications for booking openings or reminders for upcoming events via app and email.
+- **Loyalty and Rewards**:
+  - Earn loyalty points for payments, redeem them for wallet cash, and receive promo codes on your birthday.
+- **Shopping**:
+  - Add items to your wishlist or cart, manage orders, and choose payment methods like Stripe, wallet, or COD.
 
-4. **API Usage**
-    - Use Postman to test the API endpoints.
-    - Example:  
-      **Endpoint**: `POST /api/user/login`  
-      **Body**:
-      ```json
-      {
-        "username": "tourguide1",
-        "password": "Password123!"
-      }
-      ```
-      **Response**:
-      ```json
-      {
-        "email": "mohamed.sweidan@student.guc.edu.eg",
-        "username": "tourguide1",
-        "role": "tourGuide",
-        "status": "active"
-      }
-      ```
+---
 
-5. **Tips for Optimal Use**
-    - Use a modern browser (Chrome or Firefox) for the best performance.
-    - Ensure the server is running correctly to avoid connection issues.
+### 2. Tour Guide
+Tour guides can manage itineraries, view tourists, and monitor performance:
+- **Create and Manage Profile**:
+  - Add details such as mobile number, years of experience, and certifications.
+- **Itinerary Management**:
+  - Create, update, delete, or activate/deactivate itineraries with detailed information like activities, timeline, accessibility, and price.
+- **View Reports**:
+  - Track the number of tourists attending your itineraries and revenue from bookings.
+- **Notifications**:
+  - Get notified when itineraries are flagged by admins.
+
+---
+
+### 3. Advertiser
+Advertisers can promote activities and events:
+- **Create and Manage Profile**:
+  - Add company details, website links, and contact information.
+- **Activity Management**:
+  - List activities with details like location, date, time, pricing, tags, and availability.
+- **Performance Insights**:
+  - View reports on tourist engagement and revenue.
+
+---
+
+### 4. Seller
+Sellers can manage the in-app gift shop:
+- **Create and Manage Profile**:
+  - Add shop details such as name and description.
+- **Product Management**:
+  - Add, edit, or archive products with images, pricing, and stock details.
+- **Sales Insights**:
+  - Track sales performance and receive low-stock notifications.
+
+---
+
+### 5. Admin
+Admins oversee platform operations and moderation:
+- **User Management**:
+  - Approve or reject registrations for Tour Guides, Advertisers, and Sellers.
+  - Add Tourism Governors and other admins to the system.
+- **Platform Moderation**:
+  - Flag inappropriate events or itineraries and manage complaints.
+- **Analytics**:
+  - View sales and user engagement reports.
+- **Create Tags and Categories**:
+  - Manage activity categories and preference tags.
+
+---
+
+### 6. Tourism Governor
+Tourism Governors focus on managing historical sites and attractions:
+- **Add and Manage Places**:
+  - Create or update museums and historical places with details like descriptions, pictures, and ticket pricing.
+- **Tag Management**:
+  - Add tags to categorize historical locations.
+
+---
+
+### General Tips for All Users
+- **Stay Updated**: Use notifications to manage bookings and reminders efficiently.
+- **Utilize Search and Filters**: Find activities, itineraries, or products tailored to your preferences.
+- **Access Support**: Contact customer service via the app for any assistance.
 
 ---
 
